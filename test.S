@@ -28,6 +28,17 @@
       la s8, semi                   #s8 word address
       la s7, semi + 4               #s7 instruction address
                                     #s6 code address
+      addi t3, x0, 0x48
+      csrw 0x404, t3
+      addi t3, x0, 0x65
+      csrw 0x404, t3
+      addi t3, x0, 0x6C
+      csrw 0x404, t3
+      csrw 0x404, t3
+      addi t3, x0, 0x6F
+      csrw 0x404, t3
+      addi t3, x0, 0x0D
+      csrw 0x404, t3
       
   colon:
       addi s10, s10, -4
