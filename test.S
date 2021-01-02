@@ -28,23 +28,21 @@
       la s8, semi                   #s8 word address
       la s7, semi + 4               #s7 instruction address
                                     #s6 code address
-      addi t3, x0, 0x48
-      csrw 0x404, t3
-      addi t3, x0, 0x65
-      csrw 0x404, t3
-      addi t3, x0, 0x6C
-      csrw 0x404, t3
-      csrw 0x404, t3
-      addi t3, x0, 0x6F
-      csrw 0x404, t3
-      addi t3, x0, 0x0D
-      csrw 0x404, t3
-      
+      addi s11, s11, -4
+      la t3, intro_msg
+      sw t3, 0(s11)
+      addi s11, s11, -4
+      la t3, len_intro_msg
+      sw t3, 0(s11)
+      la t3, cheat
+      jalr x0, t3, 0
+
   colon:
       addi s10, s10, -4
       sw s7, 0(s10)
-      or s7, x0, s8                
-      j next
+      or s7, x0, s8
+      la t1, next
+      jalr x0, t1, 0
   
   semi:
       .word . + 4
@@ -57,3 +55,32 @@
       lw s6, 0(s8)
       addi s8, s8, 4
       jalr x0, s6, 0
+
+  OUTPUTTEXT:
+      .byte 10
+      .ascii "OUTPUT"
+      .word OUTPUTTEXT
+      .align 3
+      .word + 4
+cheat:
+      la t4, next
+      lw t1, 0(s11)
+      addi s11, s11, 4  #length
+      lw t2, 0(s11)
+      addi s11, s11, 4  #pointer to text
+oloops:     
+      beq x0, t1, oloope
+      lb t3, 0(t2)
+      csrw 0x404, t3
+      addi t2, t2, 1
+      addi t1, t1, -1
+      j oloops
+oloope:
+      jalr x0, t4, 0
+
+
+
+.data
+
+intro_msg: .ascii "Welcome to RISCYFORTH\n"
+.equ len_intro_msg, . - intro_msg
