@@ -82,5 +82,5 @@ oloope:
 
 .data
 
-intro_msg: .ascii "Welcome to RISCYFORTH\n"
+intro_msg: .ascii "Welcome to RISCYFORTH\nCopyright Adrian McMenamin, 2020 - 2021\n"
 .equ len_intro_msg, . - intro_msg
