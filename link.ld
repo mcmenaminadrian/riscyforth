@@ -3,7 +3,7 @@ OUTPUT_ARCH( "riscv" )
  SECTIONS
  {
  /* text: test code section */
- . = 0x6000;
+ . = 0x80000000;
  .text :
  {
  *(.text)

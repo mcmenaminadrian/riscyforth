@@ -6,21 +6,21 @@
 
 .macro pushdata register
         addi s11, s11, -4
-        sw  \register, 0(x11)
+        sw  \register, 0(s11)
 .endm
 
 .macro popdata register
-        lw \register, 0(x11)
+        lw \register, 0(s11)
         addi s11, s11, 4
 .endm
 
 .macro pushcall register
         addi s10, s10, -4
-        sw  \register, 0(x10)
+        sw  \register, 0(s10)
 .endm
 
 .macro popcall register
-        lw \register, 0(x10)
+        lw \register, 0(s10)
         addi s10, s10, 4
 .endm
 
@@ -30,29 +30,31 @@
         pushdata t4
         la t4, \stringlen
         pushdata t2
-loopoutout:
+loopoutput:
         beq x0, t4, endoutput
         lb t2, 0(t3)
         csrw OUTREG, t2
         addi t3, t3, 1
         addi t4, t4, -1
         j loopoutput
-endoutput
+endoutput:
         popdata t2
         popdata t4
         popdata t3
 .endm
 
 .macro codeheader Name, PrevName
+        .align 3
 start_\Name:
         .byte beg_\Name - end_\Name
 beg_\Name:
-        .ascii "\Name\0\0"
+        .ascii "\Name\0"
 end_\Name:
-        .align 3
 next_\Name:
+        .align 3
         .word start_\PrevName
-\Name:  .word + 4
+\Name:  .word . + 4
+
 .endm
 
 .macro DONEXT

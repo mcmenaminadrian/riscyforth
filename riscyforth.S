@@ -8,29 +8,36 @@
 #####################################################################################
 
 
-  .equ          CALLSTACK,    0xA1000
-  .equ          DATASTACK,    0xA0000
-  .equ          DICTIONARY,   0x70000
+  .equ          CALLSTACK,    0x21000
+  .equ          DATASTACK,    0x20000
+  .equ          DICTIONARY,   0x1F000
 
 
 
   .text
   .align 3
-  .global _start
+  .globl main
+  main:
 
-
-  _start:
                 la s10, CALLSTACK
                 la s11, DATASTACK
-                la s9,  DICTIONARY
-                la t0, STARTUP
-                jalr x0, t0, 0
+                la a0, welcome_msg
+                jal puts
+                j fetch_line
+
+  
+
 
    .include "macros.S"
    .include "dictionary.S"
 
 
    .data
-   arith_msg: .ascii "RESULT IS: "
-   .equ len_arith_msg, . - arith_msg
+   input_scanfs: .asciz "%s"
+   input_buffer: .ascii "                                                                                                                                                                                                                                                                                                                "
+   .equ buffer_len, . - input_buffer    #guard against buffer over write
+
+   welcome_msg: .asciz "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
+   line_msg:    .asciz "Whole line is:"
+
 
