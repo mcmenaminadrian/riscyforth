@@ -38,6 +38,8 @@
    .equ buffer_len, . - input_buffer    #guard against buffer over write
 
    welcome_msg: .asciz "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
-   line_msg:    .asciz "Whole line is:"
+   token_is:    .asciz "TOKEN IS: "
+   stdinopen:   .asciz "r"
+   stdoutopen:  .asciz "w"
 
 
