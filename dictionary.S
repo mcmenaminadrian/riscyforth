@@ -15,8 +15,7 @@
                 call fdopen
                 pushdata a0
 #now get a line
-  next_line:    popdata a0
-                mv a1, a0
+  next_line:    popdata a1
                 popdata a0
                 pushdata a0
                 pushdata a1
@@ -29,7 +28,7 @@
                 add a2, a2, a0
                 add a2, a2, -1
                 mv t0, a0
-                or t4, x0, x0 #x4 flags end of line
+                or t4, x0, x0 #t4 flags end of line
                 ori t2, x0, 0x20
                 ori t3, x0, 0x0D
   check_start:
@@ -39,7 +38,7 @@
                 addi t0, t0, 1
                 j check_start
   advance_start:
-                mv t3, t0 #t3 marks start of token
+                mv t6, t0 #t6 marks start of token
   move_along:
                 addi t0, t0, 1
                 beq a2, t0, end_of_line
@@ -49,21 +48,44 @@
                 j move_along
   end_of_line:  ori t4, x0, 1
 
-  tokenize:     addi t0, t0, 1
-                sub t5, t0, t3
+  tokenize:     
+                sub t5, t0, t6
                 la a0, token_is
                 pushdata t5
                 pushdata t3
                 pushdata t4
+                pushdata t6
                 jal printf
+                popdata t6
                 popdata t4
                 popdata t3
                 popdata t5
                 la a0, 1
-                mv a1, t3
+                mv a1, t6
                 mv a2, t5
+                pushdata t4
+                pushdata t0
+                pushdata t3
+                pushdata t2
                 jal write
+                popdata t2
+                popdata t3
+                popdata t0
+                popdata t4
+                popdata a1
+                pushdata a1
+                mv a0, t3
+                pushdata t4
+                pushdata t0
+                pushdata t3
+                pushdata t2
+                jal putc
+                popdata t2
+                popdata t3
+                popdata t0
+                popdata t4
                 bne t4, x0, next_line
+                addi t0, t0, 1
                 j check_start
 
 
