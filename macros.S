@@ -5,13 +5,13 @@
 .equ  NAMELEN, 0x07
 
 .macro pushdata register
-        addi s11, s11, -4
-        sw  \register, 0(s11)
+        addi sp, sp, -8
+        sw  \register, 0(sp)
 .endm
 
 .macro popdata register
-        lw \register, 0(s11)
-        addi s11, s11, 4
+        lw \register, 0(sp)
+        addi sp, sp, 8
 .endm
 
 .macro pushcall register
@@ -62,5 +62,31 @@ next_\Name:
         addi s7, s7, 4
         la t0, RUN
         jalr x0, t0, 0
+.endm
+
+.macro writeCR
+  addi a0, x0, 1
+  addi a1, x0, 0x0D
+  pushdata a1
+  mv a1, sp
+  addi a2, x0, 1
+  jal write
+  popdata x0
+.endm
+
+.macro writeCHAR char
+  addi a1, x0, \char
+  addi a0, x0, 1
+  pushdata a1
+  mv a1, s11
+  addi a2, x0, 1
+  jal write
+  popdata x0
+.endm
+
+.macro writeSTRING stringAddr, length
+  add a1, x0, \stringAddr
+  add a0, x0, \length
+  jal write
 .endm
 

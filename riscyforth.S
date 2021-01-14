@@ -9,7 +9,6 @@
 
 
   .equ          CALLSTACK,    0x21000
-  .equ          DATASTACK,    0x20000
   .equ          DICTIONARY,   0x1F000
 
 
@@ -20,10 +19,9 @@
   main:
 
                 la s10, CALLSTACK
-                la s11, DATASTACK
                 la a0, welcome_msg
                 jal puts
-                j fetch_line
+                j getstdin
 
   
 
@@ -39,6 +37,7 @@
 
    welcome_msg: .asciz "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
    token_is:    .asciz "TOKEN IS: "
+   .equ token_is_len, . - token_is
    stdinopen:   .asciz "r"
    stdoutopen:  .asciz "w"
 
