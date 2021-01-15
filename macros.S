@@ -78,7 +78,7 @@ next_\Name:
   addi a1, x0, \char
   addi a0, x0, 1
   pushdata a1
-  mv a1, s11
+  mv a1, sp
   addi a2, x0, 1
   jal write
   popdata x0

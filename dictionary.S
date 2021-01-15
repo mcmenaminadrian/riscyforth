@@ -11,8 +11,6 @@
                 pushdata a2
                 addi sp, sp, -0x200
                 mv a0, sp
-                pushdata a0
-                popdata a0
                 addi a1, x0, 0x1F0
                 jal fgets #a0 buffer address a2 number of characters
                 add a2, a2, a0
@@ -20,10 +18,13 @@
                 mv t0, a0
                 mv t4, x0 #t4 flag: end of line
                 ori t2, x0, 0x20 #space
-                ori t3, x0, 0x0D #CR
+                ori t3, x0, 0x0A #LF
   check_start:
                 lb t1, 0(t0)
-                beq t1, t3, next_line
+                bne t1, t3, further_check
+                addi sp, sp, 0x200
+                j next_line
+  further_check:                
                 bne t1, t2, advance_start
                 addi t0, t0, 1
                 j check_start
@@ -61,11 +62,11 @@
                 pushdata t2
                 jal write
                 writeCR
+                writeCHAR 0x0A
                 popdata t2
                 popdata t3
                 popdata t0
                 popdata t4
-                popdata a1
                 beq t4, x0, keep_parsing
                 addi sp, sp, 0x200
                 j next_line
