@@ -2,6 +2,22 @@
 ###############################
 
 .align 3
+
+  launchRISCYFORTH:
+              PRINT riscy_forth0
+              PRINT riscy_forth1
+              PRINT riscy_forth2
+              PRINT riscy_forth3
+              PRINT riscy_forth4
+              PRINT riscy_forth5
+              PRINT riscy_forth0
+              PRINT riscy_forth0
+
+#s9 -   Word Address (WA)
+#s10 -  Code Address (CA)
+#s11 -  Return Stack (RS) 
+
+
   getstdin:     mv a0, x0
                 la a1, stdinopen
                 call fdopen

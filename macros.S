@@ -24,25 +24,6 @@
         addi s10, s10, 4
 .endm
 
-.macro output stringaddr, stringlen
-        pushdata t3
-        la t3, \stringaddr
-        pushdata t4
-        la t4, \stringlen
-        pushdata t2
-loopoutput:
-        beq x0, t4, endoutput
-        lb t2, 0(t3)
-        csrw OUTREG, t2
-        addi t3, t3, 1
-        addi t4, t4, -1
-        j loopoutput
-endoutput:
-        popdata t2
-        popdata t4
-        popdata t3
-.endm
-
 .macro codeheader Name, PrevName
         .align 3
 start_\Name:
@@ -88,5 +69,10 @@ next_\Name:
   add a1, x0, \stringAddr
   add a0, x0, \length
   jal write
+.endm
+
+.macro PRINT string
+  la a0, \string
+  jal puts
 .endm
 
