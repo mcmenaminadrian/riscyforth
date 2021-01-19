@@ -52,7 +52,7 @@
                 
 
 DICTIONARY:
-            CODEHEADER OuterLoop, OuterLoop, 0x0
+            CODEHEADER OuterLoop, GetStdIn, 0x0
             .word Prompt
             .word GetStdIn
             .word GetNextLine
