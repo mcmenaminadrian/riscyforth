@@ -33,18 +33,14 @@
 .endm
 
 .macro CODEHEADER Name, PrevName, flags
-        .align 3
         .word  \flags
-start_\Name:
-        .byte beg_\Name - next_\Name
-        .align 3
+length_ASCII_\Name:
+        .word ptr_\Name - beg_\Name
 beg_\Name:
-        .asciz "\Name"
-next_\Name:
-        .align 3
-        .word start_\PrevName
+        .ascii "\Name"
+ptr_\Name:
+        .word \PrevName
 \Name:  .word . + 4
-        .align 3
 .endm
 
 .macro DONEXT
@@ -55,20 +51,16 @@ next_\Name:
 .endm
 
 
-.macro CODEEND Name, PrevName, flags
-        .align 3
+.macro CODEEND Name, flags
         .word  \flags
-start_\Name:
-        .byte beg_\Name - next_\Name
-        .align 3
+length_ASCII_\Name:
+        .word ptr_\Name - beg_\Name
 beg_\Name:
-        .asciz "\Name"
-next_\Name:
-        .align 3
+        .ascii "\Name"
+ptr_\Name:
         .word 0x0
 \Name:  .word . + 4
-        .align 3
-
+.endm
 
 
 .macro WRITECR
@@ -102,7 +94,7 @@ next_\Name:
   call puts
 .endm
 
-.macro GETSTDIN
+.macro GETIN
     mv a0, x0
     la a1, stdinopen
     call fdopen

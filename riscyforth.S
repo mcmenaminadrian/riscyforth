@@ -51,8 +51,7 @@
    riscy_forth5:  .asciz "See https://github.com/mcmenaminadrian/riscyforth.git"
    Ok_msg:        .asciz "OK"
    NotOk_msg:     .ascii "Input fails with token: "
-   .equ NOK_LEN,  .word . -  NotOk_msg
+   .equ NOK_LEN,  . -  NotOk_msg
    stdinopen:     .asciz "r"
    stdoutopen:    .asciz "w"
-
 
