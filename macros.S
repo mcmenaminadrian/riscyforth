@@ -33,14 +33,18 @@
 .endm
 
 .macro CODEHEADER Name, PrevName, flags
-        .word  \flags
+        nop
+TIL_\Name:
+        .4byte  \flags
+        .4byte  \Name
 length_ASCII_\Name:
-        .word ptr_\Name - beg_\Name
+        .4byte ptr_\PrevName - beg_\Name
 beg_\Name:
         .ascii "\Name"
-ptr_\Name:
-        .word \PrevName
-\Name:  .word . + 4
+ptr_\PrevName:
+        .4byte TIL_\PrevName
+        .balign 8
+\Name: 
 .endm
 
 .macro DONEXT
@@ -52,14 +56,18 @@ ptr_\Name:
 
 
 .macro CODEEND Name, flags
-        .word  \flags
+        nop
+TIL_\Name:
+        .4byte  \flags
+        .4byte  \Name
 length_ASCII_\Name:
-        .word ptr_\Name - beg_\Name
+        .4byte ptr_NULL - beg_\Name
 beg_\Name:
         .ascii "\Name"
-ptr_\Name:
-        .word 0x0
-\Name:  .word . + 4
+ptr_NULL:
+        .4byte 0x0
+        .balign 8 
+\Name:
 .endm
 
 
