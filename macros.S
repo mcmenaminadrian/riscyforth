@@ -37,12 +37,13 @@
 TIL_\Name:
         .4byte  \flags
         .4byte  \Name
-length_ASCII_\Name:
-        .4byte ptr_\PrevName - beg_\Name
-beg_\Name:
-        .ascii "\Name"
 ptr_\PrevName:
         .4byte TIL_\PrevName
+length_ASCII_\Name:
+        .4byte end_\Name - beg_\Name
+beg_\Name:
+        .ascii "\Name"
+end_\Name:
         .balign 8
 \Name: 
 .endm
@@ -60,12 +61,13 @@ ptr_\PrevName:
 TIL_\Name:
         .4byte  \flags
         .4byte  \Name
-length_ASCII_\Name:
-        .4byte ptr_NULL - beg_\Name
-beg_\Name:
-        .ascii "\Name"
 ptr_NULL:
         .4byte 0x0
+length_ASCII_\Name:
+        .4byte end_\Name - beg_\Name
+beg_\Name:
+        .ascii "\Name"
+end_\Name:
         .balign 8 
 \Name:
 .endm

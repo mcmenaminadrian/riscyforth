@@ -2,7 +2,7 @@
 
 		.align 3
 
-  dictionary:
+  dictionary_top:
 		            CODEEND GETSTDIN, 0x01
     		        GETIN
         		    PUSH a0
@@ -78,46 +78,62 @@
                 # etc                             #
                 ###################################
                 POP a0
-                beq a0, x0, all_done                #no tokens left
+                beq a0, x0, exhausted_line          #no tokens left
   search_token:
                 POP t2                              #t2 has end of token
                 POP t1                              #t1 has start of token
-                sub t0, a2, a1
+
+                sub t0, t2, t1
                 addi t0, t0, 1                      #t0 has length of token on stack
+                PUSH t1                             #save start
+                PUSH t0                             #save length
                 la t3, dictionary                   #t3 points to start of dictionary
-                                                    #ignoring flag word for now
+                PUSH t3                             #save search point
   dict_next:
-                lb t4, 4(t3)                        #t4 stored word length
-                bne t4, t0, next_word               #current dictionary entry not the same length
-                add t2, t3, 8                       #t2 bow points to start of name in dictionary
-                mv t6, x0                           #use t6 as index
+                lb t4, 12(t3)                       #t4 stored word length
+                bne t4, t0, tokens_not_matched      #current dictionary entry not the same length
+                add t2, t3, 16                      #t2 now points to start of name in dictionary
+
   token_match_loop:
-                add t0, t1, t6                      #t0 now points into stacked token
-                add t2, t2, t6
-                PUSH t6
-                lb t5, 0(t0)
+                addi t1, t1, 1                      #t0 now points into stacked token
+                addi t2, t2, 1
+                lb t5, 0(t1)
                 lb t6, 0(t2)                        #t5 and t6 hold characters
                 bne t5, t6, tokens_not_matched
-                POP t6
-                addi t6, t6, 1                      #increment t6
-                blt t4, t6, tokens_matched          #t6 now bigger than length so tokens match
+                addi t0, t0, -1
+                beq t0, x0, tokens_matched
                 j token_match_loop
+
   tokens_not_matched:
-                POP t6
-  next_word:
-                nop
+                POP t3
+                POP t0
+                POP t1
+                lw t3, 8(t3)                        #read the pointer to the next TIL command
+                beq t3, x0, all_done
+                j dict_next                         #keep going
+                
   tokens_matched:
-                nop
-
-                
-
-                
-  
-  
-  
+                POP t3                              #we need this but not next two
+                POP x0
+                POP x0
+                lw t3, 4(t3)
+                PUSH t3                             #code address on the stack
+                tail NEXT
   
   all_done:
-                PUSH x0
+                li t0, 0xFFFFFFFF
+                PUSH t0                             #nothing
                 tail NEXT
 
+  exhausted_line:
+                
 
+                CODEHEADER EXECUTEIMM, SEARCH, 0x01
+                POP a0                              #what have got
+
+                li t0, 0xFFFFFFFF
+
+
+#Update this to point to the last (first) entry
+  .equ           dictionary, TIL_EXECUTEIMM
+          
