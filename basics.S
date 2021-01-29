@@ -18,7 +18,7 @@
       		      POP a2
           		  WINDSTACK
 		            mv a0, sp
-    		        addi a1, x0, STACKWINDUP - 0x08
+    		        addi a1, zero, STACKWINDUP - 0x08
         		    call fgets
 		            PUSH a2                             #length of input
     		        PUSH a0                             #address (on stack) of input
@@ -35,11 +35,11 @@
                 add a1, a1, a0                      
                 add a1, a1, -1                      #a1 points to the end of the input
                 mv t0, a0
-                mv t4, x0                           #t4 flags end of line
-                mv t5, x0                           #t5 counts tokens found
+                mv t4, zero                           #t4 flags end of line
+                mv t5, zero                           #t5 counts tokens found
                 ori t2, t0, 0x20                    #t2 space
                 ori t3, t0, 0x0A                    #t3 CR
-                mv a2, x0                           #a2 flag we have found anything
+                mv a2, zero                           #a2 flag we have found anything
   check_start:
                 lb t1, 0(t0)
                 beq t1, t3, end_of_line
@@ -57,14 +57,14 @@
                 beq t1, t2, end_of_token            #reached a space
                 j move_along
   end_of_line:
-                ori t4, x0, 1                       #set flag for end of line
+                ori t4, zero, 1                       #set flag for end of line
   end_of_token:
                 addi t5, t5, 1
-                beq a2, x0, done
+                beq a2, zero, done
                 PUSH t6                             #start of token on to stack
                 addi t6, t0, -1
                 PUSH t6                             #end of token on to stack
-                beq t4, x0, check_start
+                beq t4, zero, check_start
   done:         PUSH t5
                 tail NEXT
 
@@ -78,7 +78,7 @@
                 # etc                             #
                 ###################################
                 POP a0
-                beq a0, x0, exhausted_line          #no tokens left
+                beq a0, zero, exhausted_line          #no tokens left
   search_token:
                 POP t2                              #t2 has end of token
                 POP t1                              #t1 has start of token
@@ -101,7 +101,7 @@
                 lb t6, 0(t2)                        #t5 and t6 hold characters
                 bne t5, t6, tokens_not_matched
                 addi t0, t0, -1
-                beq t0, x0, tokens_matched
+                beq t0, zero, tokens_matched
                 j token_match_loop
 
   tokens_not_matched:
@@ -109,13 +109,13 @@
                 POP t0
                 POP t1
                 lw t3, 8(t3)                        #read the pointer to the next TIL command
-                beq t3, x0, all_done
+                beq t3, zero, all_done
                 j dict_next                         #keep going
                 
   tokens_matched:
                 POP t3                              #we need this but not next two
-                POP x0
-                POP x0
+                POP zero
+                POP zero
                 lw t3, 4(t3)
                 PUSH t3                             #code address on the stack
                 tail NEXT
@@ -126,12 +126,22 @@
                 tail NEXT
 
   exhausted_line:
-                
+                PUSH zero
+                tail NEXT                           #line all used up
 
                 CODEHEADER EXECUTEIMM, SEARCH, 0x01
                 POP a0                              #what have got
-
+                bne zero, a0, test_exhausted          #if something here go to next test
+                addi a0, a0, 1
+                PUSH a0                             #nothing to do, return 1
+                tail NEXT
+  test_exhausted:
                 li t0, 0xFFFFFFFF
+                bne a0, t0, do_it                   #have something to do
+                PUSH t0                             #bad token return -1
+  do_it:
+                jalr ra, a0, 0
+                tail NEXT
 
 
 #Update this to point to the last (first) entry
