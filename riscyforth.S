@@ -11,6 +11,7 @@
   .equ          CALLSTACK,    0x70000000
   .equ          STACKBASE,    0x80000000
   .equ          SYSTEMAREA,   0x100          #for variables
+  .equ          BUFFERLEN,    0x200
 
 
 
@@ -40,6 +41,9 @@
     .include "dictionary.S"
     .include "basics.S"
 
+   .bss
+   .common INPUT_BUFFER, BUFFERLEN, 8
+   .common SCRATCH_PAD, SYSTEMAREA, 8
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"

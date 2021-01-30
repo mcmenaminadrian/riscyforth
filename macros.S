@@ -117,3 +117,9 @@ end_\Name:
 .macro UNWINSTACK
     addi sp, sp, STACKWINDUP
 .endm
+
+.macro MARKINPUTBUFFER, ADDRESS
+    la t0, \ADDRESS
+    addi t1, zero, 0x0A
+    sw t1, 0(t0)
+.endm

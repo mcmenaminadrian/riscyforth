@@ -16,9 +16,9 @@
 
   		          CODEHEADER GETNEXTLINE, TYPE, 0x01
       		      POP a2
-          		  WINDSTACK
-		            mv a0, sp
-    		        addi a1, zero, STACKWINDUP - 0x08
+                la a0, INPUT_BUFFER
+                MARKINPUTBUFFER INPUT_BUFFER        #ensure buffer starts 'empty'
+                addi a1, zero, BUFFERLEN
         		    call fgets
 		            PUSH a2                             #length of input
     		        PUSH a0                             #address (on stack) of input
@@ -35,11 +35,11 @@
                 add a1, a1, a0                      
                 add a1, a1, -1                      #a1 points to the end of the input
                 mv t0, a0
-                mv t4, zero                           #t4 flags end of line
-                mv t5, zero                           #t5 counts tokens found
+                mv t4, zero                         #t4 flags end of line
+                mv t5, zero                         #t5 counts tokens found
                 ori t2, t0, 0x20                    #t2 space
                 ori t3, t0, 0x0A                    #t3 CR
-                mv a2, zero                           #a2 flag we have found anything
+                mv a2, zero                         #a2 flag we have found anything
   check_start:
                 lb t1, 0(t0)
                 beq t1, t3, end_of_line
@@ -69,16 +69,16 @@
                 tail NEXT
 
 		            CODEHEADER SEARCH, TOKENIZE, 0x01
-                ###################################
-                # Expect to find tokens on stack  #
-                # COUNTOFTOKENS                  #
-                # ENDOFTOKEN                      #
-                # STARTOFTOKEN                    #
-                # ENDOFTOKEN                      #
-                # etc                             #
-                ###################################
+                ###########################################
+                # Expect to find tokens details on stack  #
+                # COUNTOFTOKENS                           #
+                # ENDOFTOKEN                              #
+                # STARTOFTOKEN                            #
+                # ENDOFTOKEN                              #
+                # etc                                     #
+                ###########################################
                 POP a0
-                beq a0, zero, exhausted_line          #no tokens left
+                beq a0, zero, exhausted_line        #no tokens left
   search_token:
                 POP t2                              #t2 has end of token
                 POP t1                              #t1 has start of token
@@ -141,6 +141,17 @@
                 PUSH t0                             #bad token return -1
   do_it:
                 jalr ra, a0, 0
+                tail NEXT
+
+                CODEHEADER CLEARSTACK, EXECUTEIMM, 0x01
+                POP a0
+  check_token_count:
+                beq a0, zero, cleared_out           #no tokens details to clear
+                POP zero
+                POP zero
+                addi a0, a0, -1
+                j check_token_count
+  cleared_out:
                 tail NEXT
 
 
