@@ -18,6 +18,10 @@
                 WRITECHAR 0x0A
                 WRITECR
                 WRITECHAR 0x0A
+                sw zero, TOKEN_START, t0
+                sw zero, TOKEN_END, t0
+                addi t1, zero, 10                   #decimal as start-up base
+                sw t1, CURRENT_BASE, t0
                 tail GETSTDIN
 
 #s8 -   Instruction register (I)

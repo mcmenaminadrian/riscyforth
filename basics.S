@@ -21,113 +21,135 @@
                 addi a1, zero, BUFFERLEN
         		    call fgets
 		            PUSH a2                             #length of input
-    		        PUSH a0                             #address (on stack) of input
+    		        PUSH a0                             #address of input
         		    tail NEXT
 
                 CODEHEADER OK, GETNEXTLINE, 0x01
                 la a0, Ok_msg
                 call puts
+                POP a0
+                POP a1
+                bne a1, zero, nothing_entered
+                PUSH a0
+                j ok_over
+  nothing_entered:
+                PUSH zero
+  ok_over:
                 tail NEXT
 
                 CODEHEADER TOKENIZE, OK, 0x01
                 POP a0                              #start of buffer
-                POP a1                              #length of buffer
-                add a1, a1, a0                      
-                add a1, a1, -1                      #a1 points to the end of the input
-                mv t0, a0
-                mv t4, zero                         #t4 flags end of line
-                mv t5, zero                         #t5 counts tokens found
+                bne a0, zero, tokenize_have_data    #nothing here so leave
+                tail NEXT
+  tokenize_have_data:
+                la a1, INPUT_BUFFER
+                addi a1, a1, BUFFERLEN              #a1 points beyond the buffer end
+                blt a0, a1, tokenize_inside_range
+                PUSH zero
+                tail NEXT                           #we started our search after the buffer end
+  tokenize_inside_range:
+                mv t0, a0                           #t0 tracks start of token, t1 the end
+                mv t1, zero
                 ori t2, t0, 0x20                    #t2 space
                 ori t3, t0, 0x0A                    #t3 CR
-                mv a2, zero                         #a2 flag we have found anything
-  check_start:
-                lb t1, 0(t0)
-                beq t1, t3, end_of_line
-                bne t1, t2, advance_start
-                add t0, t0, 1
-                j check_start
-  advance_start:
-                addi a2, a2, 1
-                mv t6, t0                           #t6 marks start of token
-  move_along:
-                addi t0, t0, 1
-                beq a1, t0, end_of_line             #reached end of input
-                lb t1, 0(t0)
-                beq t1, t3, end_of_line             #reached a CR
-                beq t1, t2, end_of_token            #reached a space
-                j move_along
-  end_of_line:
-                ori t4, zero, 1                       #set flag for end of line
-  end_of_token:
-                addi t5, t5, 1
-                beq a2, zero, done
-                PUSH t6                             #start of token on to stack
-                addi t6, t0, -1
-                PUSH t6                             #end of token on to stack
-                beq t4, zero, check_start
-  done:         PUSH t5
+  tokenize_look_for_start:
+                lw t4, 0(t0)
+                beq t4, t2, tokenize_keep_going
+                bne t4, t3, tokenize_found_start
+                PUSH zero                           #got nothing
                 tail NEXT
+  tokenize_keep_going:
+                addi t0, t0, 1
+                bltu t0, a1, tokenize_look_for_start
+                push zero
+                tail NEXT                           #got nothing
+  tokenize_found_start:
+                mv t1, t0
+  tokenize_advance_search:
+                addi t1, t1, 1
+                bltu t1, a1, tokenize_end_token
+                lw t4, 0(t1)
+                beq t4, t2, tokenize_end_token
+                beq t4, t3, tokenize_end_token
+                j tokenize_advance_search
+  tokenize_end_token:
+                mv t2, t0
+                addi t5, zero, 0x61                 #lowercase a
+                addi t6, zero, 0x7A                 #lowercase z
+  tokenize_sanity_test:
+                lb t4, 0(t2)
+                blt t4, t5, tokenize_next_sane
+                blt t4, t6, tokenize_sanitize
+                j tokenize_next_sane
+  tokenize_sanitize:
+                addi t3, zero, 0x20
+                xor t4, t4, t3
+                sb t4, 0(t2)
+  tokenize_next_sane:
+                addi t2, t2, 1
+                beq t2, t1, tokenize_finished_sanitization
+                j tokenize_sanity_test
+  tokenize_finished_sanitization:
+                addi t1, t1, -1
+                sw t0, TOKEN_START, t2
+                sw t1, TOKEN_END, t2
+                addi t2, zero, 1
+                PUSH t2                           #indicate TOKEN_ values are valid
+                tail NEXT
+
 
 		            CODEHEADER SEARCH, TOKENIZE, 0x01
-                ###########################################
-                # Expect to find tokens details on stack  #
-                # COUNTOFTOKENS                           #
-                # ENDOFTOKEN                              #
-                # STARTOFTOKEN                            #
-                # ENDOFTOKEN                              #
-                # etc                                     #
-                ###########################################
                 POP a0
-                beq a0, zero, exhausted_line        #no tokens left
-  search_token:
-                POP t2                              #t2 has end of token
-                POP t1                              #t1 has start of token
-
-                sub t0, t2, t1
-                addi t0, t0, 1                      #t0 has length of token on stack
-                PUSH t1                             #save start
-                PUSH t0                             #save length
-                la t3, dictionary                   #t3 points to start of dictionary
-                PUSH t3                             #save search point
-  dict_next:
-                lb t4, 12(t3)                       #t4 stored word length
-                bne t4, t0, tokens_not_matched      #current dictionary entry not the same length
-                add t2, t3, 16                      #t2 now points to start of name in dictionary
-
-  token_match_loop:
-                addi t1, t1, 1                      #t0 now points into stacked token
-                addi t2, t2, 1
-                lb t5, 0(t1)
-                lb t6, 0(t2)                        #t5 and t6 hold characters
-                bne t5, t6, tokens_not_matched
-                addi t0, t0, -1
-                beq t0, zero, tokens_matched
-                j token_match_loop
-
-  tokens_not_matched:
-                POP t3
-                POP t0
-                POP t1
-                lw t3, 8(t3)                        #read the pointer to the next TIL command
-                beq t3, zero, all_done
-                j dict_next                         #keep going
-                
-  tokens_matched:
-                POP t3                              #we need this but not next two
-                POP zero
-                POP zero
-                lw t3, 4(t3)
-                PUSH t3                             #code address on the stack
-                tail NEXT
-  
-  all_done:
-                li t0, 0xFFFFFFFF
-                PUSH t0                             #nothing
-                tail NEXT
-
-  exhausted_line:
+                beq a0, zero, search_no_token     
+                addi t0, zero, 1
+                bne a0, t0, search_bad_pop
+                sw t0, TOKEN_START, t1            #token values are valid
+                sw t1, TOKEN_END, t2
+                j search_continue
+  search_no_token:
                 PUSH zero
-                tail NEXT                           #line all used up
+                tail NEXT
+  search_bad_pop:
+                li t0, 0xFFFFFFFF
+                PUSH a0                           #restore bad POP
+                PUSH t0
+                tail NEXT
+  search_continue:
+                sub t2, t1, t0
+                addi t2, t2, 1                    #t2 has length of token
+                la t3, dictionary
+  search_next_in_dictionary:
+                lb t4, 12(t3)
+                bne t4, t2, search_tokens_do_not_match
+                add a0, t3, 16                    #a0 now points into the name in the dictionary
+                mv a1, t0                         #a1 points to the name in the buffer
+                mv a2, t2                         #a2 checks how far we've gone 
+
+  search_loop_through_token:
+                lb t5, 0(a0)
+                lb t6, 0(a1)
+                bne t5, t6, search_tokens_do_not_match
+                add a2, a2, -1
+                beq a2, zero, search_tokens_matched
+                addi a0, a0, 1
+                addi a1, a1, 1
+                j search_loop_through_token
+                
+  search_tokens_do_not_match:
+                lw t3, 8(t3)                      #read the pointer to the next TIL command
+                beq t3, zero, search_exhausted    #at the end of the dictionary
+                j search_next_in_dictionary
+
+  search_tokens_matched:
+                lw t3, 4(t3)
+                PUSH t3                           #store word address on the stack
+                tail NEXT
+
+  search_exhausted:
+                PUSH zero
+                tail NEXT
+
+
 
                 CODEHEADER EXECUTEIMM, SEARCH, 0x01
                 POP a0                              #what have got
@@ -147,7 +169,7 @@
                 POP a0
   check_token_count:
                 beq a0, zero, cleared_out           #no tokens details to clear
-                POP zero
+                POP zero                            #clear token details
                 POP zero
                 addi a0, a0, -1
                 j check_token_count
@@ -156,5 +178,5 @@
 
 
 #Update this to point to the last (first) entry
-  .equ           dictionary, TIL_EXECUTEIMM
+  .equ           dictionary, TIL_CLEARSTACK
           

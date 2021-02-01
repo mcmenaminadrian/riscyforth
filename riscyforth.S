@@ -44,6 +44,9 @@
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8
    .common SCRATCH_PAD, SYSTEMAREA, 8
+   .common TOKEN_START, 0x04, 0x04
+   .common TOKEN_END, 0x04, 0x04
+   .common CURRENT_BASE, 0x04, 0x04
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
