@@ -61,4 +61,11 @@
    .equ NOK_LEN,  . -  NotOk_msg
    stdinopen:     .asciz "r"
    stdoutopen:    .asciz "w"
+   .8byte         
+   decimalout:    .asciz "%u"
+   .8byte         
+   hexout:        .asciz "%#X"
+   .8byte
+   octalout:      .asciz "%uo"
+
 

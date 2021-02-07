@@ -165,18 +165,61 @@
                 jalr ra, a0, 0
                 tail NEXT
 
-                CODEHEADER CLEARSTACK, EXECUTEIMM, 0x01
-                POP a0
-  check_token_count:
-                beq a0, zero, cleared_out           #no tokens details to clear
-                POP zero                            #clear token details
-                POP zero
-                addi a0, a0, -1
-                j check_token_count
-  cleared_out:
+
+                CODEHEADER DECIMAL, EXECUTEIMM
+                addi t1, zero, 10
+                sw t1, CURRENT_BASE, t0
+                tail NEXT
+
+                CODEHEADER HEX, DECIMAL
+                addi t1, zero, 16
+                sw t1, CURRENT_BASE, t0
+                tail NEXT
+
+                CODEHEADER OCTAL, HEX
+                addi t1, zero, 8
+                sw t1, CURRENT_BASE, t0
+                tail NEXT
+
+                CODEHEADER BINARY, OCTAL
+                addi t1, zero, 2
+                sw t1, CURRENT_BASE, t0
+                tail NEXT
+
+                CODEHEADER DOT, BINARY
+                lw t0, CURRENT_BASE
+                POP a2                            #get item on stack
+                la a0, SCRATCH_PAD
+                beq t0, t1, ps_format_hex
+                addi t1, zero, 8
+                beq t0, t1, ps_format_octal
+                addi t1, zero, 2
+                beq t0, t1, ps_format_binary
+                la a1, hexout
+                j dot_output
+  ps_format_hex:
+                la a1, hexout
+                j dot_output
+  ps_format_octal:
+                la a1, octalout
+                j dot_output
+  ps_format_binary:
+                la a1, hexout                   #no binary for now
+  dot_output:
+                addi a3, zero, 3
+                call sprintf
+                la t0, SCRATCH_PAD
+                mv t1, a0
+                WRITESTRING t0, t1
+                tail NEXT
+
+                CODEHEADER 1, DOT
+                addi t0, zero, 1
+                PUSH t0
                 tail NEXT
 
 
+
 #Update this to point to the last (first) entry
-  .equ           dictionary, TIL_CLEARSTACK
+  .equ           dictionary, TIL_1
           

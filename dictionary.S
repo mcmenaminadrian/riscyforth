@@ -18,6 +18,10 @@
                 WRITECHAR 0x0A
                 WRITECR
                 WRITECHAR 0x0A
+                addi a0, zero, 907
+                PUSH a0
+                j DOT
+
                 sw zero, TOKEN_START, t0
                 sw zero, TOKEN_END, t0
                 addi t1, zero, 10                   #decimal as start-up base

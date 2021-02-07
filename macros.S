@@ -93,9 +93,10 @@ end_\Name:
   POP x0
 .endm
 
-.macro writeSTRING stringAddr, length
-  add a1, x0, \stringAddr
-  add a0, x0, \length
+.macro WRITESTRING stringAddr, length
+  addi a0, zero, 1
+  add a1, zero, \stringAddr
+  add a2, zero, \length
   call write
 .endm
 
