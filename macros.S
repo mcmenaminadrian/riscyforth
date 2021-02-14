@@ -44,7 +44,6 @@ length_ASCII_\Name:
 beg_\Name:
         .ascii "\Name"
 end_\Name:
-        .balign 8
 \Name: 
 .endm
 
@@ -93,10 +92,11 @@ end_\Name:
   POP x0
 .endm
 
-.macro WRITESTRING stringAddr, length
-  addi a0, zero, 1
-  add a1, zero, \stringAddr
-  add a2, zero, \length
+.macro WRITESTRINGR stringReg, lenReg
+  nop
+  li a0, 1
+  mv a1, \stringReg
+  mv a2, \lenReg
   call write
 .endm
 

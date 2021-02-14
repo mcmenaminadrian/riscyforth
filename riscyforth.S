@@ -8,8 +8,8 @@
 #####################################################################################
 
 
-  .equ          CALLSTACK,    0x70000000
-  .equ          STACKBASE,    0x80000000
+  .equ          CALLSTACK,    0x60000000
+  .equ          STACKBASE,    0x60010000
   .equ          SYSTEMAREA,   0x100          #for variables
   .equ          BUFFERLEN,    0x200
 
@@ -20,8 +20,10 @@
   .align 3
   .globl main
   main:
-                addi sp, sp, -SYSTEMAREA
+                nop
+                nop
                 la s10, CALLSTACK
+                la s9, STACKBASE
                 la a0, riscy_forth0
                 call puts
                 la a0, riscy_forth0
@@ -38,8 +40,9 @@
 
 
     .include "macros.S"
-    .include "dictionary.S"
+    .include "core.S"
     .include "basics.S"
+    .include "outerloop.S"
 
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8
@@ -47,6 +50,8 @@
    .common TOKEN_START, 0x04, 0x04
    .common TOKEN_END, 0x04, 0x04
    .common CURRENT_BASE, 0x04, 0x04
+   .common INPUT_START, 0x04, 0x04
+   .common INPUT_END, 0x04, 0x04
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
@@ -58,14 +63,15 @@
    riscy_forth5:  .asciz "See https://github.com/mcmenaminadrian/riscyforth.git"
    Ok_msg:        .asciz "OK"
    NotOk_msg:     .ascii "Input fails with token: "
-   .equ NOK_LEN,  . -  NotOk_msg
+   .equ NOK_LEN,  24
+   Error_msg:     .asciz "INTERPRETER FAILURE! System may be unstable."
    stdinopen:     .asciz "r"
    stdoutopen:    .asciz "w"
-   .8byte         
+   #.8byte         
    decimalout:    .asciz "%u"
-   .8byte         
+   #.8byte         
    hexout:        .asciz "%#X"
-   .8byte
+   #.8byte
    octalout:      .asciz "%uo"
 
 
