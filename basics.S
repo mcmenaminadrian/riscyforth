@@ -17,6 +17,7 @@
                 #Fetch a line for immediate execution
                 #Leaves length (top) and address on stack
       		      POP a2
+                PUSH a2
                 la a0, INPUT_BUFFER
                 MARKINPUTBUFFER INPUT_BUFFER        #ensure buffer starts 'empty'
                 addi a1, zero, BUFFERLEN
@@ -25,30 +26,30 @@
                 add a1, a0, a2                      #a2 has the end of input
                 sw a1, INPUT_END, t0
                 la t0, TOKENIZE_IMM
-                sw s9, 0(t0)
-                addi s9, s9, -4
+                sw t0, 0(s9)
+                addi s9, s9, -8
         		    tail NEXT
 
                 CODEHEADER OK, GETNEXTLINE_IMM, 0x01
                 la a0, Ok_msg
                 call puts
                 la t0, TYPE
-                sw s9, 0(t0)
-                addi s9, s9, -4
+                sw t0, 0(s9)
+                addi s9, s9, -8
                 la t0, GETNEXTLINE_IMM
-                sw s9, 0(t0)
-                addi s9, s9, -4
+                sw t0, 0(s9)
+                addi s9, s9, -8
                 tail NEXT
 
                 CODEHEADER NOTOK, OK, 0x01
                 la a0, Error_msg
                 call puts
                 la t0, TYPE
-                sw s9, 0(t0)
-                addi s9, s9, -4
+                sw t0, 0(s9)
+                addi s9, s9, -8
                 la t0, GETNEXTLINE_IMM
-                sw s9, 0(t0)
-                addi s9, s9, -4
+                sw t0, 0(s9)
+                addi s9, s9, -8
                 tail NEXT
 
 
@@ -60,7 +61,7 @@
                 bltu a0, a1, tokenize_have_data     #buffer has data
   tokenize_all_over:
                 la t0, OK                           #we are done
-                sw s9, 0(t0)
+                sw t0, 0(s9)
                 tail NEXT
   tokenize_have_data:
                 mv t0, a0                           #t0 tracks start of token, t1 the end
@@ -108,8 +109,8 @@
                 sw t0, TOKEN_START, t2
                 sw t1, TOKEN_END, t2
                 la t0, SEARCH
-                sw s9, 0(t0)                      #search as next command
-                addi s9, s9, -4
+                sw t0, 0(s9)                      #search as next command
+                addi s9, s9, -8
                 li t2, 1
                 PUSH t2                           #indicate TOKEN_ values are valid
                 tail NEXT
@@ -124,13 +125,13 @@
                 j search_continue
   search_no_token:
                 la t0, NOTOK                      #should never get here - so warn if we do
-                sw s9, 0(t0)
-                addi s9, s9, -4
+                sw t0, 0(s9)
+                addi s9, s9, -8
                 tail NEXT
   search_bad_pop:
                 la t0, NOTOK
-                sw s9, 0(t0)
-                addi s9, s9, -4
+                sw t0, 0(s9)
+                addi s9, s9, -8
                 PUSH a0                           #restore bad POP
                 PUSH t0
                 tail NEXT
@@ -162,7 +163,7 @@
 
   search_tokens_matched:
                 lw t3, 4(t3)
-                sw s9, 0(t3)                      #store word address on the call stack
+                sw t3, 0(s9)                      #store word address on the call stack
                 tail NEXT
 
   search_exhausted:
@@ -255,7 +256,7 @@
   search_hex_push_it:
                 PUSH a4                         #save number on stack
                 la t0, TOKENIZE_IMM             #keep tokenizing
-                sw s9, 0(t0)
+                sw t0, 0(s9)
                 tail NEXT
                 nop
   search_literal:
@@ -345,7 +346,7 @@
                 tail NEXT
 
                 CODEHEADER 1, DOT
-                addi t0, zero, 1
+                li t0, 1
                 PUSH t0
                 tail NEXT
 

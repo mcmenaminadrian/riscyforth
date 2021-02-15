@@ -33,7 +33,6 @@
 .endm
 
 .macro CODEHEADER Name, PrevName, flags
-        nop
 TIL_\Name:
         .4byte  \flags
         .4byte  \Name

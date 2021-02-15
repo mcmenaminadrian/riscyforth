@@ -8,8 +8,6 @@
 #####################################################################################
 
 
-  .equ          CALLSTACK,    0x60000000
-  .equ          STACKBASE,    0x60010000
   .equ          SYSTEMAREA,   0x100          #for variables
   .equ          BUFFERLEN,    0x200
 
@@ -40,8 +38,11 @@
 
 
     .include "macros.S"
+    .balign 8
     .include "core.S"
+    .balign 8
     .include "basics.S"
+    .balign 8
     .include "outerloop.S"
 
    .bss
@@ -52,6 +53,8 @@
    .common CURRENT_BASE, 0x04, 0x04
    .common INPUT_START, 0x04, 0x04
    .common INPUT_END, 0x04, 0x04
+   .common CALLSTACK, 0x80000, 0x08
+   .common STACKBASE, 0x80000, 0x08
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
@@ -67,11 +70,8 @@
    Error_msg:     .asciz "INTERPRETER FAILURE! System may be unstable."
    stdinopen:     .asciz "r"
    stdoutopen:    .asciz "w"
-   #.8byte         
    decimalout:    .asciz "%u"
-   #.8byte         
    hexout:        .asciz "%#X"
-   #.8byte
    octalout:      .asciz "%uo"
 
 
