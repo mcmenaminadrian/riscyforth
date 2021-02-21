@@ -33,29 +33,23 @@
 .endm
 
 .macro CODEHEADER Name, PrevName, flags
+nop
 TIL_\Name:
         .4byte  \flags
         .4byte  \Name
 ptr_\PrevName:
         .4byte TIL_\PrevName
 length_ASCII_\Name:
-        .4byte end_\Name - beg_\Name
+        .4byte (end_\Name - beg_\Name) + 1
 beg_\Name:
         .ascii "\Name"
 end_\Name:
+        .fill (24 - (end_\Name - beg_\Name)), 1, 0xFF
 \Name: 
 .endm
 
-.macro DONEXT
-        lw s8, 0(s7)
-        addi s7, s7, 4
-        la t0, RUN
-        jalr x0, t0, 0
-.endm
-
-
 .macro CODEEND Name, flags
-        nop
+nop
 TIL_\Name:
         .4byte  \flags
         .4byte  \Name
@@ -66,7 +60,7 @@ length_ASCII_\Name:
 beg_\Name:
         .ascii "\Name"
 end_\Name:
-        .balign 8 
+        .fill (24 - (end_\Name - beg_\Name)), 1, 0xFF
 \Name:
 .endm
 

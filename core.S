@@ -1,8 +1,7 @@
 #         RISCYFORTH dictionary
 ###############################
 
-.align 3
-
+.balign 8
   launchRISCYFORTH:
                 PRINT riscy_forth0
                 PRINT riscy_forth1
@@ -24,51 +23,23 @@
                 addi t1, zero, 10                   #decimal as start-up base
                 sw t1, CURRENT_BASE, t0
                 add s9, s9, -8
-                la s10, outer_loop
-                lw s7, 0(s10)
-                sw s7, 0(s9)
-                add s9, s9, -8
+                la t0, outer_loop
+                sw t0, 0(s9)
 
-
-  NEXT:         
-                add s9, s9, 8
+  NEXT:
                 lw s8, 0(s9)
-                jalr x0, s8, 0
-                addi s10, s10, 4
-                lw s7, 0(s10)
-                sw s7, 0(s9)
+                add s9, s9, 8
+                lw s10, 0(s8)                       #s10 holds code address now
+                add s8, s8, 4                       #get next word address into s8
                 add s9, s9, -8
-                j NEXT
-
+                sw s8, 0(s9)                        #back on the stack
+ RUN:
+                mv t0, s10
+                add s10, s10, 4
+                jalr zero, t0, 0 
                 
 
-#s8 -   Instruction register (I)
-#s9 -   Word Address (WA)
-#s10 -  Code Address (CA)
-#s11 -  Return Stack (RS)
-
-#  COLON:
-#               PUSHI
-#               mv s8, s9
-#               j NEXT
-#
-#  SEMI:       
-#              .4byte SEMIaddr
-#  SEMIaddr:
-#              POPI
-#
-#  NEXT:
-#              lw s8, 0(s9)
-#              add s9, s9, 4
-#
-#  RUN:
-#              lw s10, 0(s9)
-#              addi s9, s9, 4
-#              jalr x0, s10, 0
-
-#  EXECUTE:
-#              POP s10
-#              j RUN
-
-                
+#s9 <- instruction stack (off the stack)
+#s8 <- instruction register
+#s10 <-word address register
 

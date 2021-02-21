@@ -1,5 +1,6 @@
 #Basic primatives we need to get anything done
 
+.balign 8
 
   dictionary_top:
 		            CODEEND GETSTDIN, 0x01
@@ -17,7 +18,6 @@
                 #Fetch a line for immediate execution
                 #Leaves length (top) and address on stack
       		      POP a2
-                PUSH a2
                 la a0, INPUT_BUFFER
                 MARKINPUTBUFFER INPUT_BUFFER        #ensure buffer starts 'empty'
                 addi a1, zero, BUFFERLEN
@@ -25,31 +25,37 @@
                 sw a0, INPUT_START, t0
                 add a1, a0, a2                      #a2 has the end of input
                 sw a1, INPUT_END, t0
-                la t0, TOKENIZE_IMM
-                sw t0, 0(s9)
+                la t0, TIL_TOKENIZE_IMM + 4
                 addi s9, s9, -8
+                sw t0, 0(s9)
         		    tail NEXT
 
                 CODEHEADER OK, GETNEXTLINE_IMM, 0x01
                 la a0, Ok_msg
                 call puts
-                la t0, TYPE
-                sw t0, 0(s9)
+                la t0, TIL_GETNEXTLINE_IMM + 4
                 addi s9, s9, -8
-                la t0, GETNEXTLINE_IMM
                 sw t0, 0(s9)
+                la t0, TIL_GETSTDIN + 4
                 addi s9, s9, -8
+                sw t0, 0(s9)
+                la t0, TIL_TYPE + 4
+                addi s9, s9, -8
+                sw t0, 0(s9)
                 tail NEXT
 
                 CODEHEADER NOTOK, OK, 0x01
                 la a0, Error_msg
                 call puts
-                la t0, TYPE
-                sw t0, 0(s9)
+                la t0, TIL_GETNEXTLINE_IMM + 4
                 addi s9, s9, -8
-                la t0, GETNEXTLINE_IMM
                 sw t0, 0(s9)
+                la t0, TIL_GETSTDIN + 4
                 addi s9, s9, -8
+                sw t0, 0(s9)
+                la t0, TIL_TYPE + 4
+                addi s9, s9, -8
+                sw t0, 0(s9)
                 tail NEXT
 
 
@@ -58,9 +64,11 @@
                 #TOKEN_START and TOKEN_END hold valid values
                 lw a1, INPUT_END
                 lw a0, INPUT_START
-                bltu a0, a1, tokenize_have_data     #buffer has data
+                addi t0, a0, 2                              #account for minimal input
+                bltu t0, a1, tokenize_have_data             #buffer has data
   tokenize_all_over:
-                la t0, OK                           #we are done
+                la t0, TIL_OK + 4                           #we are done
+                addi s9, s9, -8
                 sw t0, 0(s9)
                 tail NEXT
   tokenize_have_data:
@@ -108,9 +116,9 @@
                 addi t1, t1, -1                   #prepare for next round
                 sw t0, TOKEN_START, t2
                 sw t1, TOKEN_END, t2
-                la t0, SEARCH
-                sw t0, 0(s9)                      #search as next command
+                la t0, TIL_SEARCH + 4
                 addi s9, s9, -8
+                sw t0, 0(s9)                      #search as next command
                 li t2, 1
                 PUSH t2                           #indicate TOKEN_ values are valid
                 tail NEXT
@@ -124,14 +132,14 @@
                 sw t1, TOKEN_END, t2
                 j search_continue
   search_no_token:
-                la t0, NOTOK                      #should never get here - so warn if we do
-                sw t0, 0(s9)
+                la t0, TIL_NOTOK + 4                      #should never get here - so warn if we do
                 addi s9, s9, -8
+                sw t0, 0(s9)
                 tail NEXT
   search_bad_pop:
-                la t0, NOTOK
-                sw t0, 0(s9)
+                la t0, TIL_NOTOK + 4
                 addi s9, s9, -8
+                sw t0, 0(s9)
                 PUSH a0                           #restore bad POP
                 PUSH t0
                 tail NEXT
@@ -163,6 +171,7 @@
 
   search_tokens_matched:
                 lw t3, 4(t3)
+                addi s9, s9, -8
                 sw t3, 0(s9)                      #store word address on the call stack
                 tail NEXT
 
@@ -255,7 +264,8 @@
                 j search_hex_continue
   search_hex_push_it:
                 PUSH a4                         #save number on stack
-                la t0, TOKENIZE_IMM             #keep tokenizing
+                la t0, TIL_TOKENIZE_IMM + 4           #keep tokenizing
+                addi s9, s9, -8
                 sw t0, 0(s9)
                 tail NEXT
                 nop
