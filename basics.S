@@ -22,26 +22,21 @@
                 MARKINPUTBUFFER INPUT_BUFFER        #ensure buffer starts 'empty'
                 addi a1, zero, BUFFERLEN
         		    call fgets
-                sw a0, INPUT_START, t0
-                add a1, a0, a2                      #a2 has the end of input
-                sw a1, INPUT_END, t0
+                addi t0, zero, 2
+                bgeu a2, t0, getnextline_imm_input
+                tail NEXT                           #no input
+  getnextline_imm_input:
                 la t0, TIL_TOKENIZE_IMM + 4
                 addi s9, s9, -8
                 sw t0, 0(s9)
+                sw a0, INPUT_START, t0
+                add a1, a0, a2                      #a2 has the end of input
+                sw a1, INPUT_END, t0
         		    tail NEXT
 
                 CODEHEADER OK, GETNEXTLINE_IMM, 0x01
                 la a0, Ok_msg
                 call puts
-                la t0, TIL_GETNEXTLINE_IMM + 4
-                addi s9, s9, -8
-                sw t0, 0(s9)
-                la t0, TIL_GETSTDIN + 4
-                addi s9, s9, -8
-                sw t0, 0(s9)
-                la t0, TIL_TYPE + 4
-                addi s9, s9, -8
-                sw t0, 0(s9)
                 tail NEXT
 
                 CODEHEADER NOTOK, OK, 0x01
@@ -67,9 +62,6 @@
                 addi t0, a0, 2                              #account for minimal input
                 bltu t0, a1, tokenize_have_data             #buffer has data
   tokenize_all_over:
-                la t0, TIL_OK + 4                           #we are done
-                addi s9, s9, -8
-                sw t0, 0(s9)
                 tail NEXT
   tokenize_have_data:
                 mv t0, a0                           #t0 tracks start of token, t1 the end
@@ -89,16 +81,16 @@
                 mv t1, t0
   tokenize_advance_search:
                 addi t1, t1, 1
-                bltu t1, a1, tokenize_end_token
-                lw t4, 0(t1)
+                bgeu t1, a1, tokenize_end_token
+                lb t4, 0(t1)
                 beq t4, t2, tokenize_end_token
                 beq t4, t3, tokenize_end_token
                 j tokenize_advance_search
   tokenize_end_token:
-                sw t1, INPUT_START, t5              #update the end point for subsequent searches
+                sw t0, INPUT_START, t5              #update the end point for subsequent searches
                 mv t2, t0
                 addi t5, zero, 0x61                 #lowercase a
-                addi t6, zero, 0x7A                 #lowercase z
+                addi t6, zero, 0x7B                 #lowercase z + 1
   tokenize_sanity_test:
                 lb t4, 0(t2)
                 blt t4, t5, tokenize_next_sane

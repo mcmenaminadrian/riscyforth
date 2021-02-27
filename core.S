@@ -22,20 +22,21 @@
                 sw zero, TOKEN_END, t0
                 addi t1, zero, 10                   #decimal as start-up base
                 sw t1, CURRENT_BASE, t0
-                add s9, s9, -8
+  OLSEMI:
+                addi s9, s9, -8
                 la t0, outer_loop
                 sw t0, 0(s9)
 
   NEXT:
                 lw s8, 0(s9)
-                add s9, s9, 8
+                addi s9, s9, 8
                 lw s10, 0(s8)                       #s10 holds code address now
-                add s8, s8, 4                       #get next word address into s8
-                add s9, s9, -8
+                addi s8, s8, 4                       #get next word address into s8
+                addi s9, s9, -8
                 sw s8, 0(s9)                        #back on the stack
  RUN:
                 mv t0, s10
-                add s10, s10, 4
+                addi s10, s10, 4
                 jalr zero, t0, 0 
                 
 
