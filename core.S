@@ -38,6 +38,11 @@
                 mv t0, s10
                 addi s10, s10, 4
                 jalr zero, t0, 0 
+ EXECUTE:                                           #execute the next command on the stack
+                lw s8, 0(s9)
+                addi s9, s9, 8
+                lw t0, 0(s8)
+                jalr zero, t0, 0
                 
 
 #s9 <- instruction stack (off the stack)

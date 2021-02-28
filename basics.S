@@ -32,9 +32,10 @@
                 sw a0, INPUT_START, t0
                 add a1, a0, a2                      #a2 has the end of input
                 sw a1, INPUT_END, t0
-        		    tail NEXT
+        		    tail EXECUTE
 
                 CODEHEADER OK, GETNEXTLINE_IMM, 0x01
+                #TODO: need to redirect to not ok if bad status
                 la a0, Ok_msg
                 call puts
                 tail NEXT
@@ -65,11 +66,10 @@
                 tail NEXT
   tokenize_have_data:
                 mv t0, a0                           #t0 tracks start of token, t1 the end
-                mv t1, zero
                 ori t2, t0, 0x20                    #t2 space
                 ori t3, t0, 0x0A                    #t3 CR
   tokenize_look_for_start:
-                lw t4, 0(t0)
+                lb t4, 0(t0)
                 beq t4, t2, tokenize_keep_going
                 bne t4, t3, tokenize_found_start
                 j tokenize_all_over
@@ -78,7 +78,7 @@
                 bltu t0, a1, tokenize_look_for_start
                 j tokenize_all_over                 #got nothing
   tokenize_found_start:
-                mv t1, t0
+                mv t1, t0                           #t1 to track end of token
   tokenize_advance_search:
                 addi t1, t1, 1
                 bgeu t1, a1, tokenize_end_token
@@ -87,6 +87,7 @@
                 beq t4, t3, tokenize_end_token
                 j tokenize_advance_search
   tokenize_end_token:
+                addi t1, t1, -1                     # space or NL not part of token
                 sw t0, INPUT_START, t5              #update the end point for subsequent searches
                 mv t2, t0
                 addi t5, zero, 0x61                 #lowercase a
@@ -113,15 +114,15 @@
                 sw t0, 0(s9)                      #search as next command
                 li t2, 1
                 PUSH t2                           #indicate TOKEN_ values are valid
-                tail NEXT
+                tail EXECUTE
 
 		            CODEHEADER SEARCH, TOKENIZE_IMM, 0x01
                 POP a0
                 beq a0, zero, search_no_token     
                 addi t0, zero, 1
                 bne a0, t0, search_bad_pop
-                sw t0, TOKEN_START, t1            #token values are valid
-                sw t1, TOKEN_END, t2
+                lw t0, TOKEN_START                        #token values are valid
+                lw t1, TOKEN_END
                 j search_continue
   search_no_token:
                 la t0, TIL_NOTOK + 4                      #should never get here - so warn if we do
@@ -150,7 +151,7 @@
                 lb t5, 0(a0)
                 lb t6, 0(a1)
                 bne t5, t6, search_tokens_do_not_match
-                add a2, a2, -1
+                addi a2, a2, -1
                 beq a2, zero, search_tokens_matched
                 addi a0, a0, 1
                 addi a1, a1, 1
@@ -162,13 +163,12 @@
                 j search_next_in_dictionary
 
   search_tokens_matched:
-                lw t3, 4(t3)
+                addi t3, t3, 4                    #address that points to the code
                 addi s9, s9, -8
                 sw t3, 0(s9)                      #store word address on the call stack
-                tail NEXT
+                tail EXECUTE
 
   search_exhausted:
-                nop                                  #TODO: Code to handle literals
                 lw t2, CURRENT_BASE
                 li t3, 16
                 beq t2, t3, search_check_hex
@@ -300,27 +300,27 @@
                 tail NEXT
 
 
-                CODEHEADER DECIMAL, SEARCH
+                CODEHEADER DECIMAL, SEARCH, 0x01
                 addi t1, zero, 10
                 sw t1, CURRENT_BASE, t0
                 tail NEXT
 
-                CODEHEADER HEX, DECIMAL
+                CODEHEADER HEX, DECIMAL, 0x01
                 addi t1, zero, 16
                 sw t1, CURRENT_BASE, t0
                 tail NEXT
 
-                CODEHEADER OCTAL, HEX
+                CODEHEADER OCTAL, HEX, 0x01
                 addi t1, zero, 8
                 sw t1, CURRENT_BASE, t0
                 tail NEXT
 
-                CODEHEADER BINARY, OCTAL
+                CODEHEADER BINARY, OCTAL, 0x01
                 addi t1, zero, 2
                 sw t1, CURRENT_BASE, t0
                 tail NEXT
 
-                CODEHEADER DOT, BINARY
+                CODEHEADER DOT, BINARY, 0x01
                 lw t0, CURRENT_BASE
                 POP a2                            #get item on stack
                 la a0, SCRATCH_PAD
@@ -347,7 +347,7 @@
                 WRITESTRINGR t0, t1
                 tail NEXT
 
-                CODEHEADER 1, DOT
+                CODEHEADER 1, DOT, 0x01
                 li t0, 1
                 PUSH t0
                 tail NEXT

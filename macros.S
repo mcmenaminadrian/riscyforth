@@ -33,6 +33,10 @@
 .endm
 
 .macro CODEHEADER Name, PrevName, flags
+.balign 8
+nop
+nop
+nop
 nop
 TIL_\Name:
         .4byte  \flags
@@ -40,7 +44,7 @@ TIL_\Name:
 ptr_\PrevName:
         .4byte TIL_\PrevName
 length_ASCII_\Name:
-        .4byte (end_\Name - beg_\Name) + 1
+        .4byte (end_\Name - beg_\Name)
 beg_\Name:
         .ascii "\Name"
 end_\Name:
@@ -49,6 +53,10 @@ end_\Name:
 .endm
 
 .macro CODEEND Name, flags
+.balign 8
+nop
+nop
+nop
 nop
 TIL_\Name:
         .4byte  \flags
