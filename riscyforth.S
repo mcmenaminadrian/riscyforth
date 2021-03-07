@@ -20,8 +20,8 @@
   main:
                 nop
                 nop
-                la s10, CALLSTACK
-                la s9, STACKBASE
+                la s10, STACK + 0x7FFF8
+                la s9, CALLSTACK + 0x7FFF8
                 la a0, riscy_forth0
                 call puts
                 la a0, riscy_forth0
@@ -48,13 +48,13 @@
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8
    .common SCRATCH_PAD, SYSTEMAREA, 8
-   .common TOKEN_START, 0x04, 0x04
-   .common TOKEN_END, 0x04, 0x04
-   .common CURRENT_BASE, 0x04, 0x04
-   .common INPUT_START, 0x04, 0x04
-   .common INPUT_END, 0x04, 0x04
+   .common TOKEN_START, 0x08, 0x08
+   .common TOKEN_END, 0x08, 0x08
+   .common CURRENT_BASE, 0x08, 0x08
+   .common INPUT_START, 0x08, 0x08
+   .common INPUT_END, 0x08, 0x08
    .common CALLSTACK, 0x80000, 0x08
-   .common STACKBASE, 0x80000, 0x08
+   .common STACK, 0x80000, 0x08
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"

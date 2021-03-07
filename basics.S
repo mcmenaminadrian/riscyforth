@@ -29,6 +29,7 @@
                 la t0, TIL_TOKENIZE_IMM + 4
                 addi s9, s9, -8
                 sw t0, 0(s9)
+                mv t0, zero
                 sw a0, INPUT_START, t0
                 add a1, a0, a2                      #a2 has the end of input
                 sw a1, INPUT_END, t0
