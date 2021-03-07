@@ -27,8 +27,14 @@
                 sub t0, a0, a1
                 tail NEXT
 
+                CODEHEADER Q, SUBTRACT, 0x01
+                PRINT riscy_forth0
+                PRINT riscy_forthQ
+                PRINT riscy_forth0
+                tail exit
+
 
 #Update this to point to the last (first) entry
 
-.equ           dictionary, TIL_SUBTRACT
+.equ           dictionary, TIL_Q
 

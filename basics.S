@@ -22,7 +22,11 @@
                 MARKINPUTBUFFER INPUT_BUFFER        #ensure buffer starts 'empty'
                 addi a1, zero, BUFFERLEN
         		    call fgets
-                addi t0, zero, 2
+                addi t0, zero, 1
+                blt a2, a5, getnextline_imm_checkinput
+                mv a2, a5                          #need to subsititute a5 for a2 for longer input
+                j getnextline_imm_input
+  getnextline_imm_checkinput:
                 bgeu a2, t0, getnextline_imm_input
                 tail NEXT                           #no input
   getnextline_imm_input:
@@ -37,31 +41,29 @@
 
                 CODEHEADER OK, GETNEXTLINE_IMM, 0x01
                 #TODO: need to redirect to not ok if bad status
+                lw a0, OKSTATUS
+                bne a0, zero, ok_not_ok
                 la a0, Ok_msg
                 call puts
                 tail NEXT
-
-                CODEHEADER NOTOK, OK, 0x01
+  ok_not_ok:
+                addi t0, zero, 1
+                bne a0, t0, ok_serious_issue_possibly
+                sw zero, OKSTATUS, t0
+                tail NEXT
+  ok_serious_issue_possibly:
                 la a0, Error_msg
                 call puts
-                la t0, TIL_GETNEXTLINE_IMM + 4
-                addi s9, s9, -8
-                sw t0, 0(s9)
-                la t0, TIL_GETSTDIN + 4
-                addi s9, s9, -8
-                sw t0, 0(s9)
-                la t0, TIL_TYPE + 4
-                addi s9, s9, -8
-                sw t0, 0(s9)
+                sw zero, OKSTATUS, t0
                 tail NEXT
 
 
-                CODEHEADER TOKENIZE_IMM, NOTOK, 0x01       
+                CODEHEADER TOKENIZE_IMM, OK, 0x01       
                 #puts 1 on stack if system variables
                 #TOKEN_START and TOKEN_END hold valid values
                 lw a1, INPUT_END
                 lw a0, INPUT_START
-                addi t0, a0, 2                              #account for minimal input
+                addi t0, a0, 1                              #account for minimal input
                 bltu t0, a1, tokenize_have_data             #buffer has data
   tokenize_all_over:
                 tail NEXT
@@ -126,16 +128,13 @@
                 lw t1, TOKEN_END
                 j search_continue
   search_no_token:
-                la t0, TIL_NOTOK + 4                      #should never get here - so warn if we do
-                addi s9, s9, -8
-                sw t0, 0(s9)
+                addi t0, zero, 2                      #should never get here - so warn if we do
+                sw t0, OKSTATUS, t1
                 tail NEXT
   search_bad_pop:
-                la t0, TIL_NOTOK + 4
-                addi s9, s9, -8
-                sw t0, 0(s9)
+                addi t0, zero, 2
+                sw t0, OKSTATUS, t1
                 PUSH a0                           #restore bad POP
-                PUSH t0
                 tail NEXT
   search_continue:
                 sub t2, t1, t0
@@ -290,14 +289,18 @@
 
   search_failed:
                 la t0, NotOk_msg
-                addi t1, zero, 24 
+                addi t1, zero, 24                   #error message is 24 chars long 
                 WRITESTRINGR t0, t1
                 li a0, 1
                 la t0, TOKEN_START
                 lw a1, 0(t0)
-                sub a2, t1, t0
+                la t1, TOKEN_END
+                lw a2, 0(t1)
+                sub a2, a2, a1
                 addi a2, a2, 1
                 call write                          #output error message
+                addi t0, zero, 1
+                sw t0, OKSTATUS, t1
                 tail NEXT
 
 
@@ -324,13 +327,14 @@
                 CODEHEADER DOT, BINARY, 0x01
                 lw t0, CURRENT_BASE
                 POP a2                            #get item on stack
-                la a0, SCRATCH_PAD
+                la a0, SCRATCH_PAD                #sprintf uses this
+                addi t1, zero, 16
                 beq t0, t1, ps_format_hex
                 addi t1, zero, 8
                 beq t0, t1, ps_format_octal
                 addi t1, zero, 2
                 beq t0, t1, ps_format_binary
-                la a1, hexout
+                la a1, decimalout
                 j dot_output
   ps_format_hex:
                 la a1, hexout
@@ -338,8 +342,6 @@
   ps_format_octal:
                 la a1, octalout
                 j dot_output
-  ps_format_binary:
-                la a1, hexout                   #no binary for now
   dot_output:
                 addi a3, zero, 3
                 call sprintf
@@ -347,6 +349,52 @@
                 mv t1, a0
                 WRITESTRINGR t0, t1
                 tail NEXT
+  ps_format_binary:                             #binary output not supported by sprintf, so do it ourselves
+                addi t0, zero, 1
+                addi t1, zero, 31
+  dot_test_against_shift:
+                sll t3, t0, t1
+                and a0, a2, t3
+                bne a0, zero, dot_start_binary  #past any trailing zeros - so start output
+                sub t1, t1, t0
+                beq t1, zero, dot_last_and_out
+                j dot_test_against_shift
+  dot_start_binary:
+                PUSH a2
+                PUSH t0
+                PUSH t1
+                PUSH t3
+                WRITECHAR 0x31                #output 1
+  dot_start_pop:
+                POP t3
+                POP t1
+                POP t0
+                POP a2
+  dot_shift_and_test:
+                sub t1, t1, t0
+                beq t1, zero, dot_last_and_out
+                sll t3, t0, t1
+                and a0, a2, t3
+                bne a0, zero, dot_start_binary
+                PUSH a2                     #got a zero so output that
+                PUSH t0
+                PUSH t1
+                PUSH t3
+                WRITECHAR 0x030
+                j dot_start_pop
+  dot_last_and_out:
+                and a0, a2, t0
+                beq a0, zero, dot_zero_and_out
+                WRITECHAR 0x31
+                j dot_output_b_and_space
+  dot_zero_and_out:
+                WRITECHAR 0x30
+  dot_output_b_and_space:
+                WRITECHAR 0x62            #b
+                WRITECHAR 0x20            #space
+                j NEXT
+                
+
 
                 CODEHEADER 1, DOT, 0x01
                 li t0, 1

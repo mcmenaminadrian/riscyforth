@@ -84,13 +84,13 @@ end_\Name:
 .endm
 
 .macro WRITECHAR char
-  addi a1, x0, \char
-  addi a0, x0, 1
+  addi a1, zero, \char
+  addi a0, zero, 1
   PUSH a1
   mv a1, sp
-  addi a2, x0, 1
+  addi a2, zero , 1
   call write
-  POP x0
+  POP zero
 .endm
 
 .macro WRITESTRINGR stringReg, lenReg
@@ -107,7 +107,7 @@ end_\Name:
 .endm
 
 .macro GETIN
-    mv a0, x0
+    mv a0, zero
     la a1, stdinopen
     call fdopen
 .endm

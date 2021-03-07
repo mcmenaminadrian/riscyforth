@@ -48,6 +48,7 @@
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8
    .common SCRATCH_PAD, SYSTEMAREA, 8
+   .common OKSTATUS, 0x08, 0x08
    .common TOKEN_START, 0x08, 0x08
    .common TOKEN_END, 0x08, 0x08
    .common CURRENT_BASE, 0x08, 0x08
@@ -64,14 +65,15 @@
    riscy_forth3:  .asciz "be executed as each line is entered."
    riscy_forth4:  .asciz "RISCYFORTH is licenced under version 2 of the GNU General Public Licence."
    riscy_forth5:  .asciz "See https://github.com/mcmenaminadrian/riscyforth.git"
+   riscy_forthQ:  .asciz "Exiting RISCYFORTH."
    Ok_msg:        .asciz "OK"
    NotOk_msg:     .ascii "Input fails with token: "
    .equ NOK_LEN,  24
    Error_msg:     .asciz "INTERPRETER FAILURE! System may be unstable."
    stdinopen:     .asciz "r"
    stdoutopen:    .asciz "w"
-   decimalout:    .asciz "%u"
-   hexout:        .asciz "%#X"
-   octalout:      .asciz "%uo"
+   decimalout:    .asciz "%u "
+   hexout:        .asciz "%#X "
+   octalout:      .asciz "%oo "
 
 
