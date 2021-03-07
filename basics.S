@@ -23,10 +23,7 @@
                 addi a1, zero, BUFFERLEN
         		    call fgets
                 addi t0, zero, 1
-                blt a2, a5, getnextline_imm_checkinput
-                mv a2, a5                          #need to subsititute a5 for a2 for longer input
-                j getnextline_imm_input
-  getnextline_imm_checkinput:
+                sub a2, a4, a0                      #a2 to hold length
                 bgeu a2, t0, getnextline_imm_input
                 tail NEXT                           #no input
   getnextline_imm_input:
@@ -69,8 +66,8 @@
                 tail NEXT
   tokenize_have_data:
                 mv t0, a0                           #t0 tracks start of token, t1 the end
-                ori t2, t0, 0x20                    #t2 space
-                ori t3, t0, 0x0A                    #t3 CR
+                addi t2, zero, 0x20                    #t2 space
+                addi t3, zero, 0x0A                    #t3 CR
   tokenize_look_for_start:
                 lb t4, 0(t0)
                 beq t4, t2, tokenize_keep_going
@@ -90,8 +87,8 @@
                 beq t4, t3, tokenize_end_token
                 j tokenize_advance_search
   tokenize_end_token:
+                sw t1, INPUT_START, t5              #update the end point for subsequent searches
                 addi t1, t1, -1                     # space or NL not part of token
-                sw t0, INPUT_START, t5              #update the end point for subsequent searches
                 mv t2, t0
                 addi t5, zero, 0x61                 #lowercase a
                 addi t6, zero, 0x7B                 #lowercase z + 1
@@ -106,10 +103,9 @@
                 sb t4, 0(t2)
   tokenize_next_sane:
                 addi t2, t2, 1
-                beq t2, t1, tokenize_finished_sanitization
+                blt t1, t2, tokenize_finished_sanitization
                 j tokenize_sanity_test
   tokenize_finished_sanitization:
-                addi t1, t1, -1                   #prepare for next round
                 sw t0, TOKEN_START, t2
                 sw t1, TOKEN_END, t2
                 la t0, TIL_SEARCH + 4
