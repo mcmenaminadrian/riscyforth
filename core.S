@@ -17,6 +17,7 @@
                 WRITECHAR 0x0A
                 WRITECR
                 WRITECHAR 0x0A
+                sw zero, OKSTATUS, t0
 
                 sw zero, TOKEN_START, t0
                 sw zero, TOKEN_END, t0

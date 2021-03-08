@@ -1,6 +1,6 @@
 #Simple integer calculations
 
-                CODEHEADER ADD, 1, 0x01
+                CODEHEADER ADD, DOT, 0x01
                 POP a0
                 POP a1
                 add t0, a0, a1

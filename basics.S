@@ -184,14 +184,17 @@
                 li t5, 48                         #ascii 0
                 li t6, 57
   search_octal_decimal_join:
-                sub t3, t1, t0
-                mv a7, t4
-                mul t4, t3, t2
-                beq t4, zero, search_increment_octdec
+                mv a7, zero                       #a7 will hold the number
+                sub t3, t1, t0                    #t3 holds radix power needed
+                mv a4, t0                         #a4 points to first digit
+                lb t4, 0(a4)                      #look at this
+                beq t4, t5, search_increment_octdec #is it zero?
                 j search_literal
   search_increment_octdec:
-                li t4, 1                          #number has to have at least 1 digit
-                j search_literal
+                addi a4, a4, 1                    #if leading zero advance
+                addi t3, t3, -1
+                bne t3, zero, search_octal_decimal_join
+                j search_literal                  #if we want to push 0
   search_check_hex:
                                                   #must begin with 0X
                 lb a0, 0(t0)
@@ -258,30 +261,29 @@
                 tail NEXT
                 nop
   search_literal:
-                mv a3, t0
-                mv a4, zero
+                bltu t6, t4, search_literal_fail  #digit above max range
+                bge t4, t5, search_octdec_continue #digit in range
+  search_literal_fail:
+                j search_failed
   search_octdec_continue:
-                lb a5, 0(a3)
-                bgeu a5, t5, search_check_max_octdec
-                j search_failed
-  search_check_max_octdec:
-                bltu a5, t6, search_octdec_stackup
-                beq a5, t6, search_octdec_stackup
-                j search_failed
-  search_octdec_stackup:
-                addi a5, a5, -48
-                mul a5, a5, t4
-                add a4, a4, a5
-                add a7, a7, -1 
-                bne a7, zero, search_reset_octdec_factor
-                li t4, 1
-                j search_next_octdec_char
-  search_reset_octdec_factor:
-                mul t4, a7, t2
-  search_next_octdec_char:
-                addi a3, a3, 1
-                blt t1, a3, search_hex_push_it
-                j search_octdec_continue
+                sub t4, t4, t5                    #reduce to number
+                beq t4, zero, search_add_in_octdec
+                beq t3, zero, search_add_in_octdec
+                mv a5, t3
+  search_octdec_multiple:
+                mul t4, t4, t2
+                addi a5, a5, -1
+                bne a5, zero, search_octdec_multiple
+  search_add_in_octdec:
+                add a7, a7, t4
+                beq t3, zero, search_push_octdec
+                addi t3, t3, -1
+                addi a4, a4, 1
+                lb t4, 0(a4)
+                j search_literal
+  search_push_octdec:
+                PUSH a7
+                tail NEXT
 
   search_failed:
                 la t0, NotOk_msg
@@ -390,13 +392,6 @@
                 WRITECHAR 0x20            #space
                 j NEXT
                 
-
-
-                CODEHEADER 1, DOT, 0x01
-                li t0, 1
-                PUSH t0
-                tail NEXT
-
 
 .include "integer.S"
 
