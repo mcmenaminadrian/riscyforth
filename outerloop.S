@@ -2,9 +2,11 @@
 
 .balign 8
 outer_loop:
-          .4byte TYPE
-          .4byte GETSTDIN
-          .4byte GETNEXTLINE_IMM   # should loop forever
-          .4byte OK                #fallback
-          .4byte OLSEMI
+          .4byte WA_TYPE
+          .4byte WA_GETSTDIN
+          .4byte WA_GETNEXTLINE_IMM   # should loop forever
+outer_loop_tokenize:
+          .4byte WA_TOKENIZE_IMM
+          .4byte WA_OK                #fallback
+          .4byte WA_OLSEMI
 

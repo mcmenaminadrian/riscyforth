@@ -27,14 +27,11 @@
                 bgeu a2, t0, getnextline_imm_input
                 tail NEXT                           #no input
   getnextline_imm_input:
-                la t0, TIL_TOKENIZE_IMM + 4
-                addi s9, s9, -8
-                sw t0, 0(s9)
-                mv t0, zero
                 sw a0, INPUT_START, t0
                 add a1, a0, a2                      #a2 has the end of input
                 sw a1, INPUT_END, t0
-        		    tail EXECUTE
+                tail NEXT
+          
 
                 CODEHEADER OK, GETNEXTLINE_IMM, 0x01
                 #TODO: need to redirect to not ok if bad status
@@ -108,12 +105,12 @@
   tokenize_finished_sanitization:
                 sw t0, TOKEN_START, t2
                 sw t1, TOKEN_END, t2
-                la t0, TIL_SEARCH + 4
-                addi s9, s9, -8
-                sw t0, 0(s9)                      #search as next command
+                la s8, WA_SEARCH                  #hit search directly now
                 li t2, 1
                 PUSH t2                           #indicate TOKEN_ values are valid
-                tail EXECUTE
+                call RUN
+
+                
 
 		            CODEHEADER SEARCH, TOKENIZE_IMM, 0x01
                 POP a0
@@ -160,8 +157,7 @@
 
   search_tokens_matched:
                 addi t3, t3, 4                    #address that points to the code
-                addi s9, s9, -8
-                sw t3, 0(s9)                      #store word address on the call stack
+                PUSH t3                           #store word address on the call stack
                 tail EXECUTE
 
   search_exhausted:
@@ -187,14 +183,15 @@
                 mv a7, zero                       #a7 will hold the number
                 sub t3, t1, t0                    #t3 holds radix power needed
                 mv a4, t0                         #a4 points to first digit
+  search_leading_zero_check:
                 lb t4, 0(a4)                      #look at this
                 beq t4, t5, search_increment_octdec #is it zero?
                 j search_literal
   search_increment_octdec:
-                addi a4, a4, 1                    #if leading zero advance
+                beq t3, zero, search_literal      #output 0 if nothing else
+                addi a4, a4, 1                    
                 addi t3, t3, -1
-                bne t3, zero, search_octal_decimal_join
-                j search_literal                  #if we want to push 0
+                j search_leading_zero_check       #if leading zero addvance
   search_check_hex:
                                                   #must begin with 0X
                 lb a0, 0(t0)
@@ -255,10 +252,9 @@
                 j search_hex_continue
   search_hex_push_it:
                 PUSH a4                         #save number on stack
-                la t0, TIL_TOKENIZE_IMM + 4           #keep tokenizing
-                addi s9, s9, -8
-                sw t0, 0(s9)
-                tail NEXT
+                la t0, WA_TOKENIZE_IMM          #keep tokenizing
+                PUSH t0
+                tail EXECUTE
                 nop
   search_literal:
                 bltu t6, t4, search_literal_fail  #digit above max range
@@ -283,7 +279,9 @@
                 j search_literal
   search_push_octdec:
                 PUSH a7
-                tail NEXT
+                la t0, WA_TOKENIZE_IMM
+                PUSH t0
+                tail EXECUTE
 
   search_failed:
                 la t0, NotOk_msg
@@ -322,7 +320,11 @@
                 sw t1, CURRENT_BASE, t0
                 tail NEXT
 
-                CODEHEADER DOT, BINARY, 0x01
+                CODEHEADER OLSEMI, BINARY, 0x0
+                la s7, outer_loop
+                j NEXT
+
+                CODEHEADER DOT, OLSEMI, 0x01
                 lw t0, CURRENT_BASE
                 POP a2                            #get item on stack
                 la a0, SCRATCH_PAD                #sprintf uses this

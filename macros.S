@@ -40,6 +40,7 @@ nop
 nop
 TIL_\Name:
         .4byte  \flags
+WA_\Name:
         .4byte  \Name
 ptr_\PrevName:
         .4byte TIL_\PrevName
@@ -60,6 +61,7 @@ nop
 nop
 TIL_\Name:
         .4byte  \flags
+WA_\Name:
         .4byte  \Name
 ptr_NULL:
         .4byte 0x0
