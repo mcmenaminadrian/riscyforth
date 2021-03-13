@@ -28,7 +28,7 @@
                 PUSH t0
                 tail NEXT
 
-                CODEHEADER Q, SUB, 0x01
+                CODEHEADER BYE, SUB, 0x01
                 PRINT riscy_forth0
                 PRINT riscy_forthQ
                 PRINT riscy_forth0
