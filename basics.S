@@ -337,9 +337,14 @@
 
                 CODEHEADER OLSEMI, BINARY, 0x0
                 la s7, outer_loop
-                j NEXT
+                tail NEXT
 
-                CODEHEADER DOT, OLSEMI, 0x01
+                CODEHEADER SEMI, OLSEMI, 0x01
+                lw s7, 0(s9)
+                addi s9, s9, STACKOFFSET
+                tail NEXT
+
+                CODEHEADER DOT, SEMI, 0x01
                 lw t0, CURRENT_BASE
                 POP a2                            #get item on stack
                 la a0, SCRATCH_PAD                #sprintf uses this

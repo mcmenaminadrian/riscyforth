@@ -30,17 +30,18 @@
 
   NEXT:
                 lw s8, 0(s7)                        #word address register takes content of next secondary
-                addi s7, s7, 4                      #next secondary along
+                addi s7, s7, INSTWIDTH              #next secondary along
   
   RUN:
                 lw t0, 0(s8)                        #extract first instruction address of primative
-                addi s8, s8, 4                      #increment WA
+                addi s8, s8, INSTWIDTH              #increment WA
                 jalr zero, t0, 0                    #run the code    
 
  EXECUTE:                                           #execute the next command on the stack
                la s7, outer_loop_tokenize
                POP s8
                j RUN
+
 
 #s9 <- instruction stack (off the stack)
 #s8 <- instruction register

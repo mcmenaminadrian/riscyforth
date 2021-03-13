@@ -32,6 +32,16 @@
       addi s11, s11, 4
 .endm
 
+.macro COLON Name
+      addi s9, s9, -STACKOFFSET
+      sw s7, 0(s9)
+      la s8, COLON_\Name
+      mv s7, s8
+      tail NEXT
+COLON_\Name:
+.endm
+
+
 .macro CODEHEADER Name, PrevName, flags
 .balign 8
 nop
