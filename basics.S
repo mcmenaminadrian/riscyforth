@@ -11,7 +11,7 @@
 		            CODEHEADER TYPE, GETSTDIN, 0x01
                 WRITECR
                 WRITECHAR 0x0A
-         		    WRITECHAR 0x3E                      #> prompt
+         		    WRITECHAR 0x3E                          #> prompt
           			tail NEXT
 
   		          CODEHEADER GETNEXTLINE_IMM, TYPE, 0x01
@@ -19,16 +19,16 @@
                 #Leaves length (top) and address on stack
       		      POP a2
                 la a0, INPUT_BUFFER
-                MARKINPUTBUFFER INPUT_BUFFER        #ensure buffer starts 'empty'
+                MARKINPUTBUFFER INPUT_BUFFER            #ensure buffer starts 'empty'
                 addi a1, zero, BUFFERLEN
         		    call fgets
                 addi t0, zero, 1
-                sub a2, a4, a0                      #a2 to hold length
+                sub a2, a4, a0                          #a2 to hold length
                 bgeu a2, t0, getnextline_imm_input
-                tail NEXT                           #no input
+                tail NEXT                               #no input
   getnextline_imm_input:
                 sw a0, INPUT_START, t0
-                add a1, a0, a2                      #a2 has the end of input
+                add a1, a0, a2                          #a2 has the end of input
                 sw a1, INPUT_END, t0
                 tail NEXT
           
@@ -57,14 +57,14 @@
                 #TOKEN_START and TOKEN_END hold valid values
                 lw a1, INPUT_END
                 lw a0, INPUT_START
-                addi t0, a0, 1                              #account for minimal input
-                bltu t0, a1, tokenize_have_data             #buffer has data
+                addi t0, a0, 1                        #account for minimal input
+                bltu t0, a1, tokenize_have_data       #buffer has data
   tokenize_all_over:
                 tail NEXT
   tokenize_have_data:
-                mv t0, a0                           #t0 tracks start of token, t1 the end
-                addi t2, zero, 0x20                    #t2 space
-                addi t3, zero, 0x0A                    #t3 CR
+                mv t0, a0                             #t0 tracks start of token, t1 the end
+                addi t2, zero, 0x20                   #t2 space
+                addi t3, zero, 0x0A                   #t3 CR
   tokenize_look_for_start:
                 lb t4, 0(t0)
                 beq t4, t2, tokenize_keep_going
@@ -73,9 +73,9 @@
   tokenize_keep_going:
                 addi t0, t0, 1
                 bltu t0, a1, tokenize_look_for_start
-                j tokenize_all_over                 #got nothing
+                j tokenize_all_over                   #got nothing
   tokenize_found_start:
-                mv t1, t0                           #t1 to track end of token
+                mv t1, t0                             #t1 to track end of token
   tokenize_advance_search:
                 addi t1, t1, 1
                 bgeu t1, a1, tokenize_end_token
@@ -84,11 +84,11 @@
                 beq t4, t3, tokenize_end_token
                 j tokenize_advance_search
   tokenize_end_token:
-                sw t1, INPUT_START, t5              #update the end point for subsequent searches
-                addi t1, t1, -1                     # space or NL not part of token
+                sw t1, INPUT_START, t5                #update the end point for subsequent searches
+                addi t1, t1, -1                       # space or NL not part of token
                 mv t2, t0
-                addi t5, zero, 0x61                 #lowercase a
-                addi t6, zero, 0x7B                 #lowercase z + 1
+                addi t5, zero, 0x61                   #lowercase a
+                addi t6, zero, 0x7B                   #lowercase z + 1
   tokenize_sanity_test:
                 lb t4, 0(t2)
                 blt t4, t5, tokenize_next_sane
@@ -105,9 +105,9 @@
   tokenize_finished_sanitization:
                 sw t0, TOKEN_START, t2
                 sw t1, TOKEN_END, t2
-                la s8, WA_SEARCH                  #hit search directly now
+                la s8, WA_SEARCH                      #hit search directly now
                 li t2, 1
-                PUSH t2                           #indicate TOKEN_ values are valid
+                PUSH t2                               #indicate TOKEN_ values are valid
                 call RUN
 
                 
@@ -117,7 +117,7 @@
                 beq a0, zero, search_no_token     
                 addi t0, zero, 1
                 bne a0, t0, search_bad_pop
-                lw t0, TOKEN_START                        #token values are valid
+                lw t0, TOKEN_START                    #token values are valid
                 lw t1, TOKEN_END
                 j search_continue
   search_no_token:
@@ -127,18 +127,18 @@
   search_bad_pop:
                 addi t0, zero, 2
                 sw t0, OKSTATUS, t1
-                PUSH a0                           #restore bad POP
+                PUSH a0                               #restore bad POP
                 tail NEXT
   search_continue:
                 sub t2, t1, t0
-                addi t2, t2, 1                    #t2 has length of token
+                addi t2, t2, 1                        #t2 has length of token
                 la t3, dictionary
   search_next_in_dictionary:
                 lb t4, 12(t3)
                 bne t4, t2, search_tokens_do_not_match
-                add a0, t3, 16                    #a0 now points into the name in the dictionary
-                mv a1, t0                         #a1 points to the name in the buffer
-                mv a2, t2                         #a2 checks how far we've gone 
+                add a0, t3, 16                        #a0 now points into the name in the dictionary
+                mv a1, t0                             #a1 points to the name in the buffer
+                mv a2, t2                             #a2 checks how far we've gone 
 
   search_loop_through_token:
                 lb t5, 0(a0)
@@ -151,13 +151,13 @@
                 j search_loop_through_token
                 
   search_tokens_do_not_match:
-                lw t3, 8(t3)                      #read the pointer to the next TIL command
-                beq t3, zero, search_exhausted    #at the end of the dictionary
+                lw t3, 8(t3)                          #read the pointer to the next TIL command
+                beq t3, zero, search_exhausted        #at the end of the dictionary
                 j search_next_in_dictionary
 
   search_tokens_matched:
-                addi t3, t3, 4                    #address that points to the code
-                PUSH t3                           #store word address on the call stack
+                addi t3, t3, 4                        #address that points to the code
+                PUSH t3                               #store word address on the call stack
                 tail EXECUTE
 
   search_exhausted:
@@ -166,7 +166,7 @@
                 beq t2, t3, search_check_hex
                 li t3, 8
                 bne t2, t3, search_assume_decimal
-                j search_check_octal              #go to octal code
+                j search_check_octal                  #go to octal code
   search_assume_decimal:
                 j search_setup_decimal
                 nop
@@ -176,93 +176,104 @@
                 li t6, 55
                 j search_octal_decimal_join
   search_setup_decimal:
-                li t2, 10                         #assume we are decimal - trust but verify
-                li t5, 48                         #ascii 0
+                li t2, 10                             #assume we are decimal - trust but verify
+                li t5, 48                             #ascii 0
                 li t6, 57
   search_octal_decimal_join:
-                mv a7, zero                       #a7 will hold the number
-                sub t3, t1, t0                    #t3 holds radix power needed
-                mv a4, t0                         #a4 points to first digit
+                mv a6, zero
+                mv a7, zero                           #a7 will hold the number
+                sub t3, t1, t0                        #t3 holds radix power needed
+                mv a4, t0                             #a4 points to first digit
+                lb t4, 0(a4)
+                la a5, 45
+                bne t4, a5, search_leading_zero_check
+                bne t3, zero, search_minus_more_than_nothing
+                j search_failed
+  search_minus_more_than_nothing:
+                addi a6, zero, -1
+                addi t3, t3, -1
+                addi a4, a4, 1
   search_leading_zero_check:
-                lb t4, 0(a4)                      #look at this
-                beq t4, t5, search_increment_octdec #is it zero?
+                lb t4, 0(a4)                          #look at this
+                beq t4, t5, search_increment_octdec   #is it zero?
                 j search_literal
   search_increment_octdec:
-                beq t3, zero, search_literal      #output 0 if nothing else
+                beq t3, zero, search_literal          #output 0 if nothing else
                 addi a4, a4, 1                    
                 addi t3, t3, -1
-                j search_leading_zero_check       #if leading zero addvance
+                j search_leading_zero_check           #if leading zero addvance
   search_check_hex:
-                                                  #must begin with 0X
-                lb a0, 0(t0)
-                li t5, 48
-                beq a0, t5, search_test_X
+                lb t4, 0(t0)
+                li t5, 48                             #check number begins with 0X
+                beq t4, t5, search_test_X
                 j search_failed
   search_test_X:
-                lb a0, 1(t0)
-                li t6, 88                         #X
-                beq a0, t6, search_build_hex
+                lb t4, 1(t0)
+                li t6, 88                             #X
+                beq t4, t6, search_build_hex
                 j search_failed
   search_build_hex:
-                li t6, 57
-                li a1, 65
-                li a2, 71                         #G
                 sub t3, t1, t0
                 add t3, t3, -2
-                mv a7, t4
-                mul t4, t3, t2
-                bne t4, zero, search_hex
-                li t4, 1
+                bge t3, zero, search_hex_entry_likely
+                j search_failed
+  search_hex_entry_likely:
+                mv a4, t0                             
+                addi a4, a4, 2                        #get a4 to point to first numeral
+                li t6, 58                             #: (1 > 9 in ascii)
+                li a1, 65
+                li a2, 71                             #G
+                mv a7, zero                           #total goes in a7
+  search_leading_zero_hex:
+                lb t4, 0(a4)
+                beq t3, zero, search_hex
+                beq t4, t5, search_increment_hex      #looking for end of trailing zeros
+                j search_hex
+  search_increment_hex:
+                addi a4, a4, 1
+                addi t3, t3, -1
+                j search_leading_zero_hex
   search_hex:
-                mv a3, t0
-                mv a4, zero                       #a4 holds value to push
-                addi a3, a3, 2
-                bgeu t1, a3, search_hex_continue
+                bge t4, a2, search_hex_fail             #too big
+                bge t4, a1, search_hex_letter           #A - F
+                bge t4, t6, search_hex_fail             #too big
+                bge t4, t5, search_hex_number           #0 -9
+  search_hex_fail:
                 j search_failed
-  search_hex_continue:
-                lb a5, 0(a3)
-                bgeu a5, t5, search_check_9_less
-                j search_failed
-  search_check_9_less:
-                bltu a5, t6, search_hex_stackup_num
-                beq a5, t6, search_hex_stackup_num
-                bltu a5, a2, search_hex_check_A
-                j search_failed
-  search_hex_check_A:
-                bgeu a5, a1, search_hex_stackup_alpha
-                j search_failed
-  search_hex_stackup_num:
-                addi a5, a5, -48                    #map 0 -> 0
-                mul a5, a5, t4
-                j search_hex_decrement
-  search_hex_stackup_alpha:
-                addi a5, a5, -55                    #map A -> 10
-                mul a5, a5, t4
-  search_hex_decrement:
-                add a4, a4, a5
-                add a7, a7, -1
-                bne a7, zero, search_reset_hex_factor
-                li t4, 1
-                j search_next_hex_char
-  search_reset_hex_factor:
-                mul t4, a7, t2
-  search_next_hex_char:
-                addi a3, a3, 1
-                blt t1, a3, search_hex_push_it
-                j search_hex_continue
+                
+  search_hex_letter:
+                addi t4, t4, -55
+                j search_hex_multi
+  search_hex_number:
+                addi t4, t4, -48
+  search_hex_multi:
+                beq t4, zero, search_add_in_hex
+                beq t3, zero, search_add_in_hex
+                mv a5, t3
+  search_hex_multiple:
+                mul t4, t4, t2
+                addi a5, a5, -1
+                bne a5, zero, search_hex_multiple
+  search_add_in_hex:
+                add a7, a7, t4
+                beq t3, zero, search_hex_push_it
+                add t3, t3, -1
+                add a4, a4, 1
+                lb t4, 0(a4)
+                j search_hex
   search_hex_push_it:
-                PUSH a4                         #save number on stack
-                la t0, WA_TOKENIZE_IMM          #keep tokenizing
+                PUSH a7                               #save number on stack
+                la t0, WA_TOKENIZE_IMM                #keep tokenizing
                 PUSH t0
                 tail EXECUTE
                 nop
   search_literal:
-                bltu t6, t4, search_literal_fail  #digit above max range
-                bge t4, t5, search_octdec_continue #digit in range
+                bltu t6, t4, search_literal_fail      #digit above max range
+                bge t4, t5, search_octdec_continue    #digit in range
   search_literal_fail:
                 j search_failed
   search_octdec_continue:
-                sub t4, t4, t5                    #reduce to number
+                sub t4, t4, t5                        #reduce to number
                 beq t4, zero, search_add_in_octdec
                 beq t3, zero, search_add_in_octdec
                 mv a5, t3
@@ -278,6 +289,10 @@
                 lb t4, 0(a4)
                 j search_literal
   search_push_octdec:
+                beq a6, zero, search_not_minus        #not a negative number
+                xori a7, a7, -1                       #is a negative
+                addi a7, a7, 1
+  search_not_minus:
                 PUSH a7
                 la t0, WA_TOKENIZE_IMM
                 PUSH t0
@@ -285,7 +300,7 @@
 
   search_failed:
                 la t0, NotOk_msg
-                addi t1, zero, 24                   #error message is 24 chars long 
+                addi t1, zero, 24                     #error message is 24 chars long 
                 WRITESTRINGR t0, t1
                 li a0, 1
                 la t0, TOKEN_START
@@ -294,7 +309,7 @@
                 lw a2, 0(t1)
                 sub a2, a2, a1
                 addi a2, a2, 1
-                call write                          #output error message
+                call write                            #output error message
                 addi t0, zero, 1
                 sw t0, OKSTATUS, t1
                 tail NEXT
@@ -396,7 +411,12 @@
                 
 
 .include "integer.S"
+.include "stackop.S"
 
 
 #Update this to point to the last (first) entry
+
+.equ           dictionary, TIL_DUP
+
+
           
