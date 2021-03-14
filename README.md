@@ -68,6 +68,8 @@ _Integer arithmetic_
 **MIN**                     Get the minimum of the top two items on the stack
 
 **MAX**                     Get the maximum of the same
+
+
 _Stack operations are show in diagrammatic form (before -> after). Top of the stack is to the right_
 
 **SWAP**                    s1 s0 -> s0 s1
