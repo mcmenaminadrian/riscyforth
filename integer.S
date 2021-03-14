@@ -28,11 +28,99 @@
                 PUSH t0
                 tail NEXT
 
-                CODEHEADER BYE, SUB, 0x01
+                CODEHEADER PLUS1, SUB, 0x01
+                POP t0
+                addi t0, t0, 1
+                PUSH t0
+                tail NEXT
+
+                CODEHEADER MINUS1, PLUS1, 0x01
+                POP t0
+                addi t0, t0, -1
+                PUSH t0
+                tail NEXT
+
+                CODEHEADER UNDERPLUS, MINUS1, 0x01
+                POP t0
+                POP t1
+                POP t2
+                add t0, t0, t2
+                PUSH t1
+                PUSH t0
+                tail NEXT
+
+                CODEHEADER MOD, UNDERPLUS, 0x01
+                POP t0
+                POP t1
+                beq t0, zero, mod_zero
+                div t2, t1, t0
+                mul t3, t2, t0
+                sub t0, t1, t3
+  mod_zero:
+                PUSH t0
+                tail NEXT
+
+                CODEHEADER SLASH_MOD, MOD, 0x01
+                POP t0
+                POP t1
+                bne t0, zero, slash_mod_continue
+                PUSH zero
+                PUSH zero
+                tail NEXT
+  slash_mod_continue:
+                div t2, t1, t0
+                mul t3, t2, t0
+                sub t0, t1, t3
+                PUSH t0
+                PUSH t2
+                tail NEXT
+
+                CODEHEADER NEGATE, SLASH_MOD, 0x01
+                POP t0
+                li t1, -1
+                xor t0, t0, t1
+                addi t0, t0, 1
+                PUSH t0
+                tail NEXT
+
+                CODEHEADER ABS, NEGATE, 0x01
+                POP t0
+                li t1, 0x80000000
+                or t2, t0, t1
+                beq t2, zero, abs_return_value
+                li t1, -1
+                xor t0, t0, t1
+                addi t0, t0, 1
+  abs_return_value:
+                PUSH t0
+                tail NEXT
+
+                CODEHEADER MIN, ABS, 0x01
+                POP t0
+                POP t1
+                blt t0, t1, min_return_first
+                PUSH t1
+                tail NEXT
+  min_return_first:
+                PUSH t0
+                tail NEXT
+
+                CODEHEADER MAX, MIN, 0x01
+                POP t0
+                POP t1
+                bge t0, t1, max_return_first
+                PUSH t1
+                tail NEXT
+  max_return_first:
+                PUSH t0
+                tail NEXT
+
+                CODEHEADER BYE, MAX, 0x01
                 PRINT riscy_forth0
                 PRINT riscy_forthQ
                 PRINT riscy_forth0
                 tail exit
+
 
 
 
