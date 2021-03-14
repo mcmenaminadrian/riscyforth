@@ -5,10 +5,11 @@ Currently RISCYFORTH targets the pk kernel emulator that runs on top of Spike. W
 
 To understand your rights and obligations with this code please read (version 2 of) the GNU General Public Licence. Contributions and suggestions are welcome.
 
-We are in the development stage of RISCYFORTH and on this page I aim to keep a list of the implemented publcily available functions. You'll need to read the code to see the details though.
+We are in the development stage of RISCYFORTH and on this page I aim to keep a list of the implemented functions. You'll need to read the code to see the details though.
 
 **DOT**                     Output top of stack
 **BYE**                     Quit RISCYFORTH
+**WORSLIST**                Output (public) keywords
 _Text entry_
 **GETSTDIN**                Gets the file pointer for stdin
 **TYPE**                    Gets a > prompt

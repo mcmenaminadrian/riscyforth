@@ -44,10 +44,6 @@ COLON_\Name:
 
 .macro CODEHEADER Name, PrevName, flags
 .balign 8
-nop
-nop
-nop
-nop
 TIL_\Name:
         .4byte  \flags
 WA_\Name:
@@ -65,10 +61,6 @@ end_\Name:
 
 .macro CODEEND Name, flags
 .balign 8
-nop
-nop
-nop
-nop
 TIL_\Name:
         .4byte  \flags
 WA_\Name:
@@ -86,13 +78,13 @@ end_\Name:
 
 
 .macro WRITECR
-  addi a0, x0, 1
-  addi a1, x0, 0x0D
+  addi a0, zero, 1
+  addi a1, zero, 0x0D
   PUSH a1
   mv a1, sp
-  addi a2, x0, 1
+  addi a2, zero, 1
   call write
-  POP x0
+  POP zero
 .endm
 
 .macro WRITECHAR char
@@ -106,7 +98,6 @@ end_\Name:
 .endm
 
 .macro WRITESTRINGR stringReg, lenReg
-  nop
   li a0, 1
   mv a1, \stringReg
   mv a2, \lenReg

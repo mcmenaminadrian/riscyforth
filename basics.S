@@ -417,11 +417,12 @@
 
 .include "integer.S"
 .include "stackop.S"
+.include "listwords.S"
 
 
 #Update this to point to the last (first) entry
 
-.equ           dictionary, TIL_DUP
+.equ           dictionary, TIL_WORDLIST
 
 
           
