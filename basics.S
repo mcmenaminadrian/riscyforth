@@ -33,7 +33,7 @@
                 tail NEXT
           
 
-                CODEHEADER OK, GETNEXTLINE_IMM, 0x01
+                CODEHEADER OK, GETNEXTLINE_IMM, 0x00
                 #TODO: need to redirect to not ok if bad status
                 lw a0, OKSTATUS
                 bne a0, zero, ok_not_ok
