@@ -14,7 +14,7 @@
          		    WRITECHAR 0x3E                          #> prompt
           			tail NEXT
 
-  		          CODEHEADER GETNEXTLINE_IMM, TYPE, 0x01
+  		          CODEHEADER GETNEXTLINE_IMM, TYPE, 0x0
                 #Fetch a line for immediate execution
                 #Leaves length (top) and address on stack
       		      POP a2
@@ -52,7 +52,7 @@
                 tail NEXT
 
 
-                CODEHEADER TOKENIZE_IMM, OK, 0x01       
+                CODEHEADER TOKENIZE_IMM, OK, 0x0       
                 #puts 1 on stack if system variables
                 #TOKEN_START and TOKEN_END hold valid values
                 lw a1, INPUT_END
@@ -112,7 +112,7 @@
 
                 
 
-		            CODEHEADER SEARCH, TOKENIZE_IMM, 0x01
+		            CODEHEADER SEARCH, TOKENIZE_IMM, 0x0
                 POP a0
                 beq a0, zero, search_no_token     
                 addi t0, zero, 1
