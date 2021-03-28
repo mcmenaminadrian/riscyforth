@@ -13,6 +13,8 @@ We are in the development stage of RISCYFORTH and on this page I aim to keep a l
 
 **WORDLIST**                Output (public) keywords
 
+**VARIABLE**                Put a variable on the variable stack
+
 
 _Text entry_
 

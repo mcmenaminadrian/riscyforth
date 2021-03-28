@@ -34,7 +34,6 @@
           
 
                 CODEHEADER OK, GETNEXTLINE_IMM, 0x00
-                #TODO: need to redirect to not ok if bad status
                 lw a0, OKSTATUS
                 bne a0, zero, ok_not_ok
                 la a0, Ok_msg
@@ -132,7 +131,8 @@
   search_continue:
                 sub t2, t1, t0
                 addi t2, t2, 1                        #t2 has length of token
-                la t3, dictionary
+                la t4, dictionary
+                lw t3, 0(t4)
   search_next_in_dictionary:
                 lb t4, 12(t3)
                 bne t4, t2, search_tokens_do_not_match
@@ -420,9 +420,7 @@
 .include "listwords.S"
 
 
-#Update this to point to the last (first) entry
 
-.equ           dictionary, TIL_WORDLIST
 
 
           

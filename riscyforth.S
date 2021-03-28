@@ -15,6 +15,7 @@
   .equ          INSTWIDTH2,    0x08
   .equ          INSTWIDTH3,    0x0C
   .equ          INSTWIDTH4,    0x10
+  .equ          NAMEMAXLEN,    0x18
 
 
 
@@ -24,7 +25,11 @@
   .globl main
   main:
                 nop
-                nop
+                la t4, (VARIABLES + 0xFFFF8)
+                la t1, TOP_VARS
+                sw t4, 0(t1)
+                la t3, BOTTOM_VARS
+                sw t4, 0(t3)
                 la s10, STACK + 0x7FFF8
                 la s9, CALLSTACK + 0x7FFF8
                 la a0, riscy_forth0
@@ -53,6 +58,8 @@
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8
    .common SCRATCH_PAD, SYSTEMAREA, 8
+   .common NEWWORDENTRY, 0x08, 0x08
+   .common CREATEFLAG, 0x08, 0x08
    .common OKSTATUS, 0x08, 0x08
    .common TOKEN_START, 0x08, 0x08
    .common TOKEN_END, 0x08, 0x08
@@ -61,6 +68,11 @@
    .common INPUT_END, 0x08, 0x08
    .common CALLSTACK, 0x80000, 0x08
    .common STACK, 0x80000, 0x08
+   .common NEWWORDS, 0x100000, 0x08
+   .common VARIABLES, 0x100000, 0x08
+   .common TOP_VARS, 0x08, 0x08
+   .common BOTTOM_VARS, 0x08, 0x08
+   .common dictionary, 0x08, 0x08 
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"

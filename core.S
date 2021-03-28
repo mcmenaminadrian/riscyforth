@@ -19,7 +19,23 @@
                 WRITECHAR 0x0A
                 WRITECR
                 WRITECHAR 0x0A
+                #clear varaibles stack
+                la t1, TOP_VARS
+                lw t2, 0(t1)
+                li t3, 0x100000
+  clean_var_stack:
+                sw zero, 0(t1)
+                addi t1, t1, -4
+                addi t3, t3, -4
+                bne zero, t3, clean_var_stack
+                
+
+                la t1, NEWWORDS
+                sw t1, NEWWORDENTRY, t0
                 sw zero, OKSTATUS, t0
+                sw zero, CREATEFLAG, t0
+                la t1, TIL_VARIABLE                   #start search from here
+                sw t1, dictionary, t0
 
                 sw zero, TOKEN_START, t0
                 sw zero, TOKEN_END, t0
@@ -42,8 +58,4 @@
                POP s8
                j RUN
 
-
-#s9 <- instruction stack (off the stack)
-#s8 <- instruction register
-#s10 <-word address register
 
