@@ -140,20 +140,25 @@
   variable_empty_space:
 								li t1, 0xdeadbeef										#mark in use
 								sw t1, 0(t3)
-								sw t2, INSTWIDTH(t3)								#length
-								addi t3, t3, INSTWIDTH2
+								sw t2, -INSTWIDTH(t3)								#length - stack grows down
+								addi t3, t3, -INSTWIDTH2
 								mv a3, t2
 								mv t4, t3
   variable_write_out_name:
 								lb t5, 0(a0)
 								sb t5, 0(t3)
-								addi t3, t3, 1
-								addi a0, a0, 1
+								addi t3, t3, -1
+								addi a0, a0, -1
 								addi a3, a3, -1
 								bne a3, zero, variable_write_out_name
-								addi t4, t4, NAMEMAXLEN
+								addi t4, t4, -NAMEMAXLEN
 								POP t0
 								sw t0, 0(t4)
+								#update bottom pointer
+								la t1, BOTTOM_VARS
+								lw t3, 0(t1)
+								addi t3, t3, -40
+								sw t3, 0(t1)
 								tail NEXT
 								
  

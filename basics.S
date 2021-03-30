@@ -161,6 +161,15 @@
                 tail EXECUTE
 
   search_exhausted:
+                #test if this is a variable (alpha first char)
+                mv a4, t0
+                li a5, 0x3A
+                lb t4, 0(a4)
+                bge t4, a5, search_check_variables
+                j search_check_numbers
+  search_check_variables:
+                j search_scan_variable_stack
+  search_check_numbers:
                 lw t2, CURRENT_BASE
                 li t3, 16
                 beq t2, t3, search_check_hex
@@ -185,7 +194,7 @@
                 sub t3, t1, t0                        #t3 holds radix power needed
                 mv a4, t0                             #a4 points to first digit
                 lb t4, 0(a4)
-                la a5, 45
+                li a5, 45
                 bne t4, a5, search_leading_zero_check
                 bne t3, zero, search_minus_more_than_nothing
                 j search_failed
@@ -294,6 +303,7 @@
                 addi a7, a7, 1
   search_not_minus:
                 PUSH a7
+  search_var_reentry:
                 la t0, WA_TOKENIZE_IMM
                 PUSH t0
                 tail EXECUTE
@@ -313,6 +323,47 @@
                 addi t0, zero, 1
                 sw t0, OKSTATUS, t1
                 tail NEXT
+  search_scan_variable_stack:
+                #now scan for a variable name
+                lw t0, TOKEN_START                    #token values are valid
+                lw t1, TOKEN_END
+  search_var_continue:
+                sub t2, t1, t0
+                addi t2, t2, 1                        #t2 has length of token
+                la t4, BOTTOM_VARS
+                lw t3, 0(t4)
+  search_var_next_in_dictionary:
+                lb t4, 32(t3)
+								#compare lengths
+                bne t4, t2, search_var_tokens_do_not_match
+                add a0, t3, 31                        #a0 now points into the name in the var stack
+                mv a1, t0                             #a1 points to the name in the buffer
+                mv a2, t2                             #a2 checks how far we've gone 
+
+  search_var_loop_through_token:
+                lb t5, 0(a0)
+                lb t6, 0(a1)
+                bne t5, t6, search_var_tokens_do_not_match
+                addi a2, a2, -1
+                beq a2, zero, search_var_tokens_matched
+                addi a0, a0, -1
+                addi a1, a1, 1
+                j search_var_loop_through_token
+
+  search_var_tokens_do_not_match:
+                add t4, t4, 40                        #advance up the var stack
+								la t3, TOP_VARS
+								lw t3, 0(t3)
+								bge t4, t3, search_var_no_match
+                j search_var_next_in_dictionary
+
+  search_var_tokens_matched:
+								#put variable value on the stack
+								lw t4, 0(t4)
+								PUSH t4
+								j search_var_reentry
+	search_var_no_match:
+								j search_failed
 
 
                 CODEHEADER DECIMAL, SEARCH, 0x01
