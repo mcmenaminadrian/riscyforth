@@ -25,11 +25,12 @@
   .globl main
   main:
                 nop
-                la t4, (VARIABLES + 0xFFFF8)
-                la t1, TOP_VARS
-                sw t4, 0(t1)
+                la t4, (VARIABLES + 0xFFFDC)
                 la t3, BOTTOM_VARS
                 sw t4, 0(t3)
+                la t1, TOP_VARS
+		addi t4, t4, 0x20
+                sw t4, 0(t1)
                 la s10, STACK + 0x7FFF8
                 la s9, CALLSTACK + 0x7FFF8
                 la a0, riscy_forth0

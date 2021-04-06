@@ -4,7 +4,7 @@
                 la t0, dictionary
   wordlist_fetch:
                 lw t1, 0(t0)
-								lw t2, 0(t1)
+		lw t2, 0(t1)
                 beq t2, zero, wordlist_get_next             #flag is zero, not for printing
                 lw t2, INSTWIDTH3(t1)                       #length of name
                 addi t1, t1, INSTWIDTH4                     #address of characters for name
@@ -15,10 +15,10 @@
                 POP t0
   wordlist_get_next:
 								lw t1, 0(t0)
-                lw t1, INSTWIDTH2(t1)                       #next pointer
+                lw t1, INSTWIDTH2(t1)                       	#next pointer
                 beq t1, zero, wordlist_finished
-								lw t1, 0(t0)
-								addi t1, t1, INSTWIDTH2
+		lw t1, 0(t0)
+		addi t1, t1, INSTWIDTH2
                 mv t0, t1
                 j wordlist_fetch
   wordlist_finished:
@@ -28,6 +28,8 @@
                 CODEHEADER VARIABLE, WORDLIST, 0x01
                 #create a variable in the variable dictionary
                 #first get the name and check it's not already present
+		#variable stack grows downwards but each entry in forwards direction
+		#
               	lw a1, INPUT_END
                 lw a0, INPUT_START
                 addi t0, a0, 1                        #account for minimal input
@@ -48,12 +50,12 @@
                 bltu t0, a1, variable_look_for_start
                 j variable_all_over                   #got nothing
   variable_found_start:
-								#variable name must start with a letter
-								addi a3, zero, 0x41									  #A
-								bge t4, a3, variable_good_start
-								#start with a bad character - report error
+		#variable name must start with a letter
+		addi a3, zero, 0x41									  #A
+		bge t4, a3, variable_good_start
+		#start with a bad character - report error
   variable_gone_bad:
-            		la t0, NotOk_msg
+            	la t0, NotOk_msg
                 addi t1, zero, 24                     #error message is 24 chars long 
                 WRITESTRINGR t0, t1
                 li a0, 1
@@ -98,13 +100,13 @@
   variable_finished_sanitization:
                 sw t0, TOKEN_START, t2
                 sw t1, TOKEN_END, t2
-								#now check this is not a keyword or a number
+		#now check this is not a keyword or a number
                 sub t2, t1, t0
                 addi t2, t2, 1                        #t2 has length of token
-								li t3, NAMEMAXLEN
-								bge t3, t2, variable_length_good
-								j variable_gone_bad
-	variable_length_good:
+		li t3, NAMEMAXLEN
+		bge t3, t2, variable_length_good
+		j variable_gone_bad
+  variable_length_good:
                 la t4, dictionary
                 lw t3, 0(t4)
   variable_next_in_dictionary:
@@ -122,44 +124,44 @@
                 addi a0, a0, 1
                 addi a1, a1, 1
                 j variable_loop_through_token
-	variable_tokens_do_not_match:
+  variable_tokens_do_not_match:
                 lw t3, 8(t3)                          #read the pointer to the next TIL command
                 beq t3, zero, variable_exhausted        #at the end of the dictionary
                 j variable_next_in_dictionary
 
   variable_tokens_matched:
-								j variable_gone_bad
+		j variable_gone_bad
 
   variable_exhausted:
-								#TODO:warning! we can redefine a variable
-								la t1, BOTTOM_VARS
-								lw t3, 0(t1)
-								lw t4, 0(t3)
-								beq zero, t4, variable_empty_space
-								j variable_gone_bad									#error in var stack
+		#TODO:warning! we can redefine a variable
+		la t1, BOTTOM_VARS
+		lw t3, 0(t1)
+		lw t4, 0(t3)
+		beq zero, t4, variable_empty_space
+		j variable_gone_bad			#error in var stack
   variable_empty_space:
-								li t1, 0xdeadbeef										#mark in use
-								sw t1, 0(t3)
-								sw t2, -INSTWIDTH(t3)								#length - stack grows down
-								addi t3, t3, -INSTWIDTH2
-								mv a3, t2
-								mv t4, t3
+		li t1, 0xdeadbeef			#mark in use
+		sw t1, 0(t3)
+		sw t2, -INSTWIDTH(t3)			#length - stack grows down
+		mv t4, t3
+		addi t3, t3, -(INSTWIDTH + 1)
+		mv a3, t2
   variable_write_out_name:
-								lb t5, 0(a0)
-								sb t5, 0(t3)
-								addi t3, t3, -1
-								addi a0, a0, -1
-								addi a3, a3, -1
-								bne a3, zero, variable_write_out_name
-								addi t4, t4, -NAMEMAXLEN
-								POP t0
-								sw t0, 0(t4)
-								#update bottom pointer
-								la t1, BOTTOM_VARS
-								lw t3, 0(t1)
-								addi t3, t3, -40
-								sw t3, 0(t1)
-								tail NEXT
+		lb t5, 0(a1)
+		sb t5, 0(t3)
+		addi t3, t3, -1
+		addi a1, a1, 1
+		addi a3, a3, -1
+		bne a3, zero, variable_write_out_name
+		addi t4, t4, -(NAMEMAXLEN + INSTWIDTH2)
+		POP t0
+		sw t0, 0(t4)
+		#update bottom pointer
+		la t1, BOTTOM_VARS
+		lw t3, 0(t1)
+		addi t3, t3, -36
+		sw t3, 0(t1)
+		tail NEXT
 								
  
 

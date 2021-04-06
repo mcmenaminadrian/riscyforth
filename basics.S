@@ -3,25 +3,25 @@
 .balign 8
 
   dictionary_top:
-		            CODEEND GETSTDIN, 0x01
-    		        GETIN
-        		    PUSH a0
-            		tail NEXT
+                CODEEND GETSTDIN, 0x01
+                GETIN
+                PUSH a0
+                tail NEXT
 
-		            CODEHEADER TYPE, GETSTDIN, 0x01
+	        CODEHEADER TYPE, GETSTDIN, 0x01
                 WRITECR
                 WRITECHAR 0x0A
-         		    WRITECHAR 0x3E                          #> prompt
-          			tail NEXT
+                WRITECHAR 0x3E                          #> prompt
+                tail NEXT
 
-  		          CODEHEADER GETNEXTLINE_IMM, TYPE, 0x0
+  	        CODEHEADER GETNEXTLINE_IMM, TYPE, 0x0
                 #Fetch a line for immediate execution
                 #Leaves length (top) and address on stack
-      		      POP a2
+      	        POP a2
                 la a0, INPUT_BUFFER
                 MARKINPUTBUFFER INPUT_BUFFER            #ensure buffer starts 'empty'
                 addi a1, zero, BUFFERLEN
-        		    call fgets
+                call fgets
                 addi t0, zero, 1
                 sub a2, a4, a0                          #a2 to hold length
                 bgeu a2, t0, getnextline_imm_input
@@ -327,16 +327,24 @@
                 #now scan for a variable name
                 lw t0, TOKEN_START                    #token values are valid
                 lw t1, TOKEN_END
-  search_var_continue:
                 sub t2, t1, t0
                 addi t2, t2, 1                        #t2 has length of token
                 la t4, BOTTOM_VARS
                 lw t3, 0(t4)
+		li a1, 36
+		add t3, t3, a1
+  search_var_next_check:
+		lw t4, 0(t3)
+		li a1, 0xFFFFFFFF
+		and t4, t4, a1
+		li a3, 0xdeadbeef
+		beq t4, a3, search_var_next_in_dictionary
+		j search_failed
   search_var_next_in_dictionary:
-                lb t4, 32(t3)
-								#compare lengths
+                lw t4, -4(t3)
+		#compare lengths
                 bne t4, t2, search_var_tokens_do_not_match
-                add a0, t3, 31                        #a0 now points into the name in the var stack
+                add a0, t3, -5                        #a0 now points into the name in the var stack
                 mv a1, t0                             #a1 points to the name in the buffer
                 mv a2, t2                             #a2 checks how far we've gone 
 
@@ -351,19 +359,19 @@
                 j search_var_loop_through_token
 
   search_var_tokens_do_not_match:
-                add t4, t4, 40                        #advance up the var stack
-								la t3, TOP_VARS
-								lw t3, 0(t3)
-								bge t4, t3, search_var_no_match
-                j search_var_next_in_dictionary
+                add t3, t3, 36                        #advance up the var stack
+		la t4, TOP_VARS
+		lw t4, 0(t4)
+		bge t3, t4, search_var_no_match
+                j search_var_next_check
 
   search_var_tokens_matched:
-								#put variable value on the stack
-								lw t4, 0(t4)
-								PUSH t4
-								j search_var_reentry
-	search_var_no_match:
-								j search_failed
+		#put variable value on the stack
+		lw t4, -32(t3)
+		PUSH t4
+		j search_var_reentry
+  search_var_no_match:
+		j search_failed
 
 
                 CODEHEADER DECIMAL, SEARCH, 0x01

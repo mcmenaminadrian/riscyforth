@@ -19,13 +19,13 @@
                 WRITECHAR 0x0A
                 WRITECR
                 WRITECHAR 0x0A
-                #clear varaibles stack
+                #clear variables stack
                 la t1, TOP_VARS
                 lw t2, 0(t1)
                 li t3, 0x100000
   clean_var_stack:
-                sw zero, 0(t1)
-                addi t1, t1, -4
+                sw zero, 0(t2)
+                addi t2, t2, -4
                 addi t3, t3, -4
                 bne zero, t3, clean_var_stack
                 
