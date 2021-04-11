@@ -41,7 +41,7 @@
                 addi t2, zero, 0x20                   #t2 space
                 addi t3, zero, 0x0A                   #t3 CR
   variable_look_for_start:
-                lb t4, 0(t0)
+                lbu t4, 0(t0)
                 beq t4, t2, variable_keep_going
                 bne t4, t3, variable_found_start
                 j variable_all_over
@@ -74,7 +74,7 @@
   variable_advance_search:
                 addi t1, t1, 1
                 bgeu t1, a1, variable_end_token
-                lb t4, 0(t1)
+                lbu t4, 0(t1)
                 beq t4, t2, variable_end_token
                 beq t4, t3, variable_end_token
                 j variable_advance_search
@@ -85,7 +85,7 @@
                 addi t5, zero, 0x61                   #lowercase a
                 addi t6, zero, 0x7B                   #lowercase z + 1
   variable_sanity_test:
-                lb t4, 0(t2)
+                lbu t4, 0(t2)
                 blt t4, t5, variable_next_sane
                 blt t4, t6, variable_sanitize
                 j variable_next_sane
@@ -110,14 +110,14 @@
                 la t4, dictionary
                 lw t3, 0(t4)
   variable_next_in_dictionary:
-                lb t4, 12(t3)
+                lbu t4, 12(t3)
                 bne t4, t2, variable_tokens_do_not_match
                 add a0, t3, 16                        #a0 now points into the name in the dictionary
                 mv a1, t0                             #a1 points to the name in the buffer
                 mv a2, t2                             #a2 checks how far we've gone 
   variable_loop_through_token:
-                lb t5, 0(a0)
-                lb t6, 0(a1)
+                lbu t5, 0(a0)
+                lbu t6, 0(a1)
                 bne t5, t6, variable_tokens_do_not_match
                 addi a2, a2, -1
                 beq a2, zero, variable_tokens_matched
@@ -166,8 +166,8 @@
                 mv a2, t2                             #a2 checks how far we've gone 
 
   variable_search_var_loop_through_token:
-                lb t5, 0(a0)
-                lb t6, 0(a1)
+                lbu t5, 0(a0)
+                lbu t6, 0(a1)
                 bne t5, t6, variable_search_var_tokens_do_not_match
                 addi a2, a2, -1
                 beq a2, zero, variable_search_var_tokens_matched
@@ -209,7 +209,7 @@
 		#reset a1
                 mv a1, t0
   variable_loop_write_out_name:
-		lb t5, 0(a1)
+		lbu t5, 0(a1)
 		sb t5, 0(t3)
 		addi t3, t3, -1
 		addi a1, a1, 1

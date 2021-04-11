@@ -58,6 +58,7 @@
 
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8
+   .common EXPANDED_BUFFER, BUFFERLEN, 8
    .common SCRATCH_PAD, SYSTEMAREA, 8
    .common NEWWORDENTRY, 0x08, 0x08
    .common CREATEFLAG, 0x08, 0x08

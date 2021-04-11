@@ -16,7 +16,6 @@
 
   	        CODEHEADER GETNEXTLINE_IMM, TYPE, 0x0
                 #Fetch a line for immediate execution
-                #Leaves length (top) and address on stack
       	        POP a2
                 la a0, INPUT_BUFFER
                 MARKINPUTBUFFER INPUT_BUFFER            #ensure buffer starts 'empty'
@@ -27,10 +26,12 @@
                 bgeu a2, t0, getnextline_imm_input
                 tail NEXT                               #no input
   getnextline_imm_input:
-                sw a0, INPUT_START, t0
+                #sw a0, INPUT_START, t0
                 add a1, a0, a2                          #a2 has the end of input
-                sw a1, INPUT_END, t0
-                tail NEXT
+                #sw a1, INPUT_END, t0
+		PUSH a0
+		PUSH a1
+		tail fix_up_input			#expand input line if needed
           
 
                 CODEHEADER OK, GETNEXTLINE_IMM, 0x00
@@ -111,7 +112,7 @@
 
                 
 
-		            CODEHEADER SEARCH, TOKENIZE_IMM, 0x0
+		CODEHEADER SEARCH, TOKENIZE_IMM, 0x0
                 POP a0
                 beq a0, zero, search_no_token     
                 addi t0, zero, 1
@@ -472,6 +473,110 @@
                 WRITECHAR 0x62            #b
                 WRITECHAR 0x20            #space
                 j NEXT
+
+  fix_up_input:
+		#code to expand standard FORTH commands
+		#to things we can use in RISC-V assembly
+		#CURRENT EXPANSIONS
+		# .  --> DOT
+		# ;  --> SEMI
+		# +  --> ADD
+		# -  --> SUB
+		# *  --> MUL
+		# /  --> DIV
+		POP a1		#input end
+		POP a0		#input start
+		la a2, EXPANDED_BUFFER
+		mv a3, a2
+		sw a2, INPUT_START, t0
+  fix_up_start:
+		lbu t1, 0(a0)
+  fix_up_dot:
+		addi t2, zero, 0x2E
+		bne t2, t1, fix_up_semi
+		addi t3, zero, 0x44
+		sb t3, 0(a2)
+		addi t3, zero, 0x4F
+		sb t3, 1(a2)
+		addi t3, zero, 0x54
+		sb t3, 2(a2)
+		addi a2, a2, 3
+		j fix_up_next
+  fix_up_semi:
+		addi t2, zero, 0x3B
+		bne t2, t1, fix_up_add
+		addi t3, zero, 0x53
+		sb t3, 0(a2)
+		addi t3, zero, 0x45
+		sb t3, 1(a2)
+		addi t3, zero, 0x4D
+		sb t3, 2(a2)
+		addi t3, zero, 0x49
+		sb t3, 3(a2)
+		addi a2, a2, 4
+		j fix_up_next
+
+  fix_up_add:
+		addi t2, zero, 0x2B
+		bne t2, t1, fix_up_sub
+		addi t3, zero, 0x41
+		sb t3, 0(a2)
+		addi t3, zero, 0x44
+		sb t3, 1(a2)
+		addi t3, zero, 0x44
+		sb t3, 2(a2)
+		addi a2, a2, 3
+		j fix_up_next
+		
+  fix_up_sub:
+		addi t2, zero, 0x2D
+		bne t2, t1, fix_up_mul
+		addi t3, zero, 0x53
+		sb t3, 0(a2)
+		addi t3, zero, 0x55
+		sb t3, 1(a2)
+		addi t3, zero, 0x42
+		sb t3, 2(a2)
+		addi a2, a2, 3
+		j fix_up_next
+		
+  fix_up_mul:
+		addi t2, zero, 0x2A
+		bne t2, t1, fix_up_div
+		addi t3, zero, 0x4D
+		sb t3, 0(a2)
+		addi t3, zero, 0x55
+		sb t3, 1(a2)
+		addi t3, zero, 0x4C
+		sb t3, 2(a2)
+		addi a2, a2, 3
+		j fix_up_next
+		
+  fix_up_div:
+		addi t2, zero, 0x2F
+		bne t2, t1, fix_up_copy
+		addi t3, zero, 0x44
+		sb t3, 0(a2)
+		addi t3, zero, 0x49
+		sb t3, 1(a2)
+		addi t3, zero, 0x56
+		sb t3, 2(a2)
+		addi a2, a2, 3
+		j fix_up_next
+
+  fix_up_copy:
+		sb t1, 0(a2)
+		addi a2, a2, 1
+
+  fix_up_next:
+		addi a0, a0, 1
+		bgt a0, a1, fix_up_finished
+		j fix_up_start
+
+  fix_up_finished:
+		
+                sw a2, INPUT_END, t0
+		tail NEXT
                 
 
 .include "integer.S"
