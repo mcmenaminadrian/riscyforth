@@ -7,7 +7,7 @@ To understand your rights and obligations with this code please read (version 2 
 
 We are in the development stage of RISCYFORTH and on this page I aim to keep a list of the implemented functions. You'll need to read the code to see the details though.
 
-**DOT**                     Output top of stack
+**DOT**                     Output top of stack (. is recognised and expanded to DOT)
 
 **BYE**                     Quit RISCYFORTH
 
@@ -43,15 +43,15 @@ _Integer arithmetic_
 
 **OLSEMI**                  Internal procedure - don't use
 
-**SEMI**                    Procedure to end all secondaries
+**SEMI**                    Procedure to end all secondaries (; is recognised and expanded to SEMI)
 
-**ADD**                     Add the numbers at the top iof the stack
+**ADD**                     Add the numbers at the top iof the stack (+ is recognised and expanded to ADD)
 
-**MUL**                     Multiply the same
+**MUL**                     Multiply the same (* is recognised and expanded to MUL)
 
-**DIV**                     Divide the top of the stack by the next to top
+**DIV**                     Divide the top of the stack by the next to top (/ is recognised and expanded to DIV)
 
-**SUB**                     Subtract the second item on the stack from the first
+**SUB**                     Subtract the second item on the stack from the first (- is recognised and expanded to SUB)
 
 **PLUS1**                   Increment the top of the stack by 1
 
