@@ -34,7 +34,7 @@
                 sw t1, NEWWORDENTRY, t0
                 sw zero, OKSTATUS, t0
                 sw zero, CREATEFLAG, t0
-                la t1, TIL_VARIABLE                   #start search from here
+                la t1, TIL_SPACES                   #start search from here
                 sw t1, dictionary, t0
 
                 sw zero, TOKEN_START, t0

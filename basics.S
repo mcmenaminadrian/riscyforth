@@ -582,7 +582,7 @@
 .include "integer.S"
 .include "stackop.S"
 .include "listwords.S"
-
+.include "loops.S"
 
 
 
