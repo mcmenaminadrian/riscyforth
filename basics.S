@@ -26,12 +26,10 @@
                 bgeu a2, t0, getnextline_imm_input
                 tail NEXT                               #no input
   getnextline_imm_input:
-                #sw a0, INPUT_START, t0
+                sw a0, INPUT_START, t0
                 add a1, a0, a2                          #a2 has the end of input
-                #sw a1, INPUT_END, t0
-		PUSH a0
-		PUSH a1
-		tail fix_up_input			#expand input line if needed
+                sw a1, INPUT_END, t0
+		tail NEXT
           
 
                 CODEHEADER OK, GETNEXTLINE_IMM, 0x00
@@ -87,6 +85,11 @@
                 sw t1, INPUT_START, t5                #update the end point for subsequent searches
                 addi t1, t1, -1                       # space or NL not part of token
                 mv t2, t0
+		bne t0, t1, tokenize_prepare_sanity_test
+		PUSH t0
+		jal fix_up_input		      #one character token so check for expansion
+		
+  tokenize_prepare_sanity_test:
                 addi t5, zero, 0x61                   #lowercase a
                 addi t6, zero, 0x7B                   #lowercase z + 1
   tokenize_sanity_test:
@@ -484,12 +487,12 @@
 		# -  --> SUB
 		# *  --> MUL
 		# /  --> DIV
-		POP a1		#input end
-		POP a0		#input start
-		la a2, EXPANDED_BUFFER
+		POP a0				#unexpanded token address
+		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
-		sw a2, INPUT_START, t0
   fix_up_start:
+		mv a1, t1
+		mv a5, t2
 		lbu t1, 0(a0)
   fix_up_dot:
 		addi t2, zero, 0x2E
@@ -500,8 +503,8 @@
 		sb t3, 1(a2)
 		addi t3, zero, 0x54
 		sb t3, 2(a2)
-		addi a2, a2, 3
-		j fix_up_next
+		addi a2, a2, 2
+		j fix_up_done
   fix_up_semi:
 		addi t2, zero, 0x3B
 		bne t2, t1, fix_up_add
@@ -513,8 +516,8 @@
 		sb t3, 2(a2)
 		addi t3, zero, 0x49
 		sb t3, 3(a2)
-		addi a2, a2, 4
-		j fix_up_next
+		addi a2, a2, 3
+		j fix_up_done
 
   fix_up_add:
 		addi t2, zero, 0x2B
@@ -525,8 +528,8 @@
 		sb t3, 1(a2)
 		addi t3, zero, 0x44
 		sb t3, 2(a2)
-		addi a2, a2, 3
-		j fix_up_next
+		addi a2, a2, 2
+		j fix_up_done
 		
   fix_up_sub:
 		addi t2, zero, 0x2D
@@ -537,8 +540,8 @@
 		sb t3, 1(a2)
 		addi t3, zero, 0x42
 		sb t3, 2(a2)
-		addi a2, a2, 3
-		j fix_up_next
+		addi a2, a2, 2
+		j fix_up_done
 		
   fix_up_mul:
 		addi t2, zero, 0x2A
@@ -549,35 +552,32 @@
 		sb t3, 1(a2)
 		addi t3, zero, 0x4C
 		sb t3, 2(a2)
-		addi a2, a2, 3
-		j fix_up_next
+		addi a2, a2, 2
+		j fix_up_done
 		
   fix_up_div:
 		addi t2, zero, 0x2F
-		bne t2, t1, fix_up_copy
+		bne t2, t1, fix_up_finished
 		addi t3, zero, 0x44
 		sb t3, 0(a2)
 		addi t3, zero, 0x49
 		sb t3, 1(a2)
 		addi t3, zero, 0x56
 		sb t3, 2(a2)
-		addi a2, a2, 3
-		j fix_up_next
+		addi a2, a2, 2
+		j fix_up_done
 
-  fix_up_copy:
-		sb t1, 0(a2)
-		addi a2, a2, 1
-
-  fix_up_next:
-		addi a0, a0, 1
-		bgt a0, a1, fix_up_finished
-		j fix_up_start
 
   fix_up_finished:
-		
-                sw a2, INPUT_END, t0
-		tail NEXT
-                
+		mv t0, a0
+		mv t1, a1
+		mv t2, a5
+		ret
+
+  fix_up_done:
+		mv t0, a3
+		mv t1, a2	
+                j tokenize_finished_sanitization 
 
 .include "integer.S"
 .include "stackop.S"

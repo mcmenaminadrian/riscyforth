@@ -1,13 +1,6 @@
 
-		CODEHEADER DO, VARIABLE, 0x00
-		POP a1		#index
-		POP a0		#limit
-		PUSH s0		#previous limit?
-		PUSH s1		#previous index?
-		mv s0, a0
-		mv s1, a1
 
-		CODEHEADER EMIT, DO, 0x01
+		CODEHEADER EMIT, VARIABLE, 0x01
 		POP a1
 		addi a0, zero, 1
 		PUSH a1
