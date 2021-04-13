@@ -7,7 +7,23 @@
 		mv s0, a0
 		mv s1, a1
 
-		CODEHEADER SPACES, DO, 0x01
+		CODEHEADER EMIT, DO, 0x01
+		POP a1
+		addi a0, zero, 1
+		PUSH a1
+		mv a1, sp
+		add a2, zero, 1
+		call write
+		POP zero
+		tail NEXT
+
+		CODEHEADER CR, EMIT, 0x01
+		WRITECR
+		WRITECHAR 0x0A
+		tail NEXT
+
+
+		CODEHEADER SPACES, CR, 0x01
 		POP a0		#how many spaces
 		PUSH s0
 		mv s0, a0
