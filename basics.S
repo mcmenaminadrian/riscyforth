@@ -487,6 +487,7 @@
 		# -  --> SUB
 		# *  --> MUL
 		# /  --> DIV
+		# :  --> COMPILE
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -494,6 +495,23 @@
 		mv a1, t1
 		mv a5, t2
 		lbu t1, 0(a0)
+
+  fix_up_colon:
+		addi t2, zero, 0x3A
+		bne t2, t1, fix_up_dot
+		addi t3, zero, 0x43
+		sb t3, 0(a2)
+		addi t3, zero, 0x4F
+		sb t3, 1(a2)
+		addi t3, zero, 0x4C
+		sb t3, 2(a2)
+		addi t3, zero, 0x4F
+		sb t3, 3(a2)
+		addi t3, zero, 0x4E
+		sb t3, 4(a2)
+		addi a2, a2, 4
+		j fix_up_done
+
   fix_up_dot:
 		addi t2, zero, 0x2E
 		bne t2, t1, fix_up_semi

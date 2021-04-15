@@ -16,6 +16,7 @@
   .equ          INSTWIDTH3,    0x0C
   .equ          INSTWIDTH4,    0x10
   .equ          NAMEMAXLEN,    0x18
+  .equ		BIGSPACE,      0x100000
 
 
 
@@ -70,11 +71,13 @@
    .common INPUT_END, 0x08, 0x08
    .common CALLSTACK, 0x80000, 0x08
    .common STACK, 0x80000, 0x08
-   .common NEWWORDS, 0x100000, 0x08
-   .common VARIABLES, 0x100000, 0x08
+   .common VARIABLES, BIGSPACE, 0x08
    .common TOP_VARS, 0x08, 0x08
    .common BOTTOM_VARS, 0x08, 0x08
    .common dictionary, 0x08, 0x08 
+   .common newdictionary, 0x08, 0x08
+   .balign 4096
+   .common NEWWORDS, BIGSPACE, 0x08
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
@@ -87,6 +90,7 @@
    riscy_forthQ:  .asciz "Exiting RISCYFORTH."
    Ok_msg:        .asciz "OK"
    NotOk_msg:     .ascii "Input fails with token: "
+   bad_colon:	  .asciz "COLON command failed: please use a key word for your new command."
    .equ NOK_LEN,  24
    Error_msg:     .asciz "INTERPRETER FAILURE! System may be unstable."
    stdinopen:     .asciz "r"

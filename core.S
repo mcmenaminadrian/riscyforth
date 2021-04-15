@@ -19,22 +19,12 @@
                 WRITECHAR 0x0A
                 WRITECR
                 WRITECHAR 0x0A
-                #clear variables stack
-                la t1, TOP_VARS
-                lw t2, 0(t1)
-                li t3, 0x100000
-  clean_var_stack:
-                sw zero, 0(t2)
-                addi t2, t2, -4
-                addi t3, t3, -4
-                bne zero, t3, clean_var_stack
-                
 
                 la t1, NEWWORDS
                 sw t1, NEWWORDENTRY, t0
                 sw zero, OKSTATUS, t0
                 sw zero, CREATEFLAG, t0
-                la t1, TIL_SPACES                   #start search from here
+                la t1, TIL_COLON                   #start search from here
                 sw t1, dictionary, t0
 
                 sw zero, TOKEN_START, t0
