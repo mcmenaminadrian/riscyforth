@@ -20,8 +20,16 @@
                 WRITECR
                 WRITECHAR 0x0A
 
-                la t1, NEWWORDS
-                sw t1, NEWWORDENTRY, t0
+                mv a0, zero
+		li a1, BIGSPACE
+		li a2, 0x07			  #read and execute
+		li a3, 0x22
+		li a4, -1
+		li a5, 0x1000
+		li a7, 222
+		ecall
+		la t0, newdictionary
+		sw a0, 0(t0)
                 sw zero, OKSTATUS, t0
                 sw zero, CREATEFLAG, t0
                 la t1, TIL_COLON                   #start search from here

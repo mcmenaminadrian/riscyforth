@@ -83,7 +83,8 @@ end_\Name:
   PUSH a1
   mv a1, sp
   addi a2, zero, 1
-  call write
+  addi a7, zero, 64
+  ecall
   POP zero
 .endm
 
@@ -93,7 +94,8 @@ end_\Name:
   PUSH a1
   mv a1, sp
   addi a2, zero , 1
-  call write
+  addi a7, zero, 64
+  ecall
   POP zero
 .endm
 
@@ -101,8 +103,10 @@ end_\Name:
   li a0, 1
   mv a1, \stringReg
   mv a2, \lenReg
-  call write
+  addi a7, zero, 64
+  ecall
 .endm
+
 
 .macro PRINT string
   la a0, \string

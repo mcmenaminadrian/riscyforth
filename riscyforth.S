@@ -76,8 +76,6 @@
    .common BOTTOM_VARS, 0x08, 0x08
    .common dictionary, 0x08, 0x08 
    .common newdictionary, 0x08, 0x08
-   .balign 4096
-   .common NEWWORDS, BIGSPACE, 0x08
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
