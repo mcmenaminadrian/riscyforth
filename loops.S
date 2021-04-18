@@ -131,61 +131,59 @@
   colon_name_written:
 		#now write out the colon code
 		li t0, 0x1ce1
-		sh t0, 40(t3)
+		sh t0, 40(t3)		#addi s9, s9, -8
 		li t0, 0x0001
-		sh t0, 42(t3)
-		li t0, 0x017ca023
-		sw t0, 44(t3)
-		#calculate the for auipc
-		addi t0, t3, 0x3C
-		slli t0, t0, 12
-		ori t0, t0, 0x417
-		sw t0, 48(t3)
+		sh t0, 42(t3)		#nop (to preserve alignment)
+		li t0, 0x017ca023	
+		sw t0, 44(t3)		#sw s7, 0(s9)
+		#calculate the offset for lui
+		addi t0, t3, 0x48
+		li t1, 0xFFFFF000
+		and t0, t0, t1
+		li t1, 0xC37
+		or t0, t0, t1
+		sw t0, 48(t3)		#lui word address
 		#calculate lower part of the sum
-		addi t0, t3, 0x42
+		addi t0, t3, 0x48
 		li t4, 0xFFF
 		and t0, t0, t4
 		slli t0, t0, 20
-		li t4, 0x20413
+		li t4, 0xc0c13
 		or t0, t0, t4
-		sw t0, 52(t3)
+		sw t0, 52(t3)		#add lower part
 		li t0, 0x8be2
-		sh t0, 56(t3)
+		sh t0, 56(t3)		#mv s7, s8
 		li t0, 0x01
-		sh t0, 58(t3)
-		#calculate the offset for jump
-		la t0, NEXT
-		addi t2, t3, 0x3C
-		sub t4, t2, t0
-		li t0, 0x6F
-		li t1, 0x100000
-		and t5, t4, t1
-		slli t5, t5, 11
-		or t0, t0, t5
-		li t1, 0x7FE
-		and t5, t4, t1
-		slli t5, t5, 20
-		or t0, t0, t5
-		li t1, 0x800
-		and t5, t4, t1
-		slli t5, t5, 9
-		or t0, t0, t5
-		li t1, 0xFF000
-		and t5, t4, t1
-		or t0, t0, t5
-		sw t0, 60(t3)
+		sh t0, 58(t3)		#nop (to preserve alignment)
+		#execute register based jump to NEXT
+		#TODO: fix this so it is not based on fixed NEXT
+		la t1, NEXT		#t1 has the number
+		#load the number into register t0
+		li t2, 0xFFFFF000
+		and t4, t1, t2
+		ori t4, t4, 0x2B7	#lui t0
+		sw t4, 60(t3)
+		li t4, 0xFFF
+		and t2, t1, t4
+		slli t4, t2, 20
+		li t5, 0x28293		#addi t0
+		or t4, t4, t5
+		sw t4, 64(t3)
+		li t0, 0x28067		#jalr zero, 0(t0)
+		sw t0, 68(t3)
 
 
 #NB this is just for testing
 		la t1, dictionary
 		sw t3, 0(t1)
 		la t0, WA_DUP
-		sw t0, 64(t3)
-		la t0, WA_MUL
-		sw t0, 68(t3)
-		la t0, WA_DOT
 		sw t0, 72(t3)
-
+		la t0, WA_MUL
+		sw t0, 76(t3)
+		la t0, WA_DOT
+		sw t0, 80(t3)
+		la t0, WA_SEMI
+		sw t0, 84(t3)
 
 		tail NEXT
 

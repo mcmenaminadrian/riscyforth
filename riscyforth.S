@@ -76,6 +76,7 @@
    .common BOTTOM_VARS, 0x08, 0x08
    .common dictionary, 0x08, 0x08 
    .common newdictionary, 0x08, 0x08
+   .common inputfileptr, 0x08, 0x08
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"

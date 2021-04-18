@@ -1,4 +1,4 @@
-#     RISCYFORTH macros
+#    RISCYFORTH macros
 
 .equ STACKWINDUP, 0x208
 

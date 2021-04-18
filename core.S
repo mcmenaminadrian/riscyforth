@@ -25,7 +25,7 @@
 		li a2, 0x07			  #read and execute
 		li a3, 0x22
 		li a4, -1
-		li a5, 0x1000
+		li a5, 0
 		li a7, 222
 		ecall
 		la t0, newdictionary

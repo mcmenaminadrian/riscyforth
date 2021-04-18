@@ -4,7 +4,13 @@
 
   dictionary_top:
                 CODEEND GETSTDIN, 0x01
+		la t0, inputfileptr
+                lw a0, 0(t0)
+		bne a0, zero, getstdin_getin
                 GETIN
+		la t0, inputfileptr
+		sw a0, 0(t0)
+  getstdin_getin:
                 PUSH a0
                 tail NEXT
 
