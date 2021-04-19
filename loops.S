@@ -81,6 +81,11 @@
                 bltu t0, a1, colon_tokenize_look_for_start
                 j colon_tokenize_all_over                   #got nothing
   colon_tokenize_found_start:
+		li t2, 0x30
+		li t3, 0x39
+		bgt t4, t3, colon_not_a_numeral
+		bge t4, t2, colon_tokenize_all_over	    #cannot redefine a number
+  colon_not_a_numeral:
                 mv t1, t0                             #t1 to track end of token
   colon_tokenize_advance_search:
                 addi t1, t1, 1
@@ -94,7 +99,7 @@
                 addi t1, t1, -1                       # space or NL not part of token
                 mv t2, t0
                 bne t0, t1, colon_tokenize_prepare_sanity_test
-                PUSH t0
+                PUSH t0				      #POPed by fix_up code
                 jal fix_up_input                      #one character token so check for expansion
   colon_tokenize_prepare_sanity_test:
                 addi t5, zero, 0x61                   #lowercase a
@@ -117,7 +122,6 @@
                 sw t1, TOKEN_END, t2
 		POP t3
 		sub t4, t1, t0
-		addi t4, t4, 1
 		sw t4, 12(t3)				#write out length
 		addi t1, t3, 16
   colon_write_out_name:
@@ -184,13 +188,19 @@
 		sw t0, 80(t3)
 		la t0, WA_SEMI
 		sw t0, 84(t3)
-
+		la t1, newdictionary
+		addi t3, t3, 88
+		sw t3, 0(t1)
 		tail NEXT
 
 
 
 colon_fail:
+		la t0, CREATEFLAG
+		li t1, 0x0
+		sw t1, 0(t0)				#set MODE to 0 (no compile)
 		POP zero
+		PRINT bad_colon
 		tail NEXT
 		
 		
