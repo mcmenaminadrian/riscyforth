@@ -181,7 +181,7 @@
 
 		la t1, newdictionary
 		lw t1, 0(t1)
-		#addi t1, t1, 72
+		addi t1, t1, 72
 		la t3, createwritepoint
 		sw t1, 0(t3)
 		tail NEXT

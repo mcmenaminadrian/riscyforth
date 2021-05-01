@@ -41,6 +41,7 @@
 		lw t1, 0(t0)
 		sw t3, 0(t1)			      #write out word address in definition
 		addi t1, t1, 4
+		sw t1, 0(t0)
 		la t0, WA_SEMI			      #are we finished with create?
 		bne t3, t0, search_create_leave_normal
 		#tidy up create as we are done
@@ -60,7 +61,7 @@
 		sw t1, 0(t0)			      #update address we will writenext word to
 		j search_create_leave
   search_create_leave_normal:
-                PUSH t1                               #we should keep searching
+		PUSH t1
   search_create_leave:
 		la s7, outer_loop_tokenize
                 tail NEXT
