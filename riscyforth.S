@@ -56,6 +56,8 @@
     .include "basics.S"
     .balign 8
     .include "outerloop.S"
+    .balign 8
+    .include "search_create.S"
 
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8
@@ -77,6 +79,7 @@
    .common dictionary, 0x08, 0x08 
    .common newdictionary, 0x08, 0x08
    .common inputfileptr, 0x08, 0x08
+   .common createwritepoint, 0x08, 0x08
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"

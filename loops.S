@@ -87,6 +87,8 @@
 		bge t4, t2, colon_tokenize_all_over	    #cannot redefine a number
   colon_not_a_numeral:
                 mv t1, t0                             #t1 to track end of token
+		addi t2, zero, 0x20			#back to checkinging space and CR
+		addi t3, zero, 0x0A
   colon_tokenize_advance_search:
                 addi t1, t1, 1
                 bgeu t1, a1, colon_tokenize_end_token
@@ -122,6 +124,7 @@
                 sw t1, TOKEN_END, t2
 		POP t3
 		sub t4, t1, t0
+		addi t4, t4, 1				#add 1 to get length
 		sw t4, 12(t3)				#write out length
 		addi t1, t3, 16
   colon_write_out_name:
@@ -160,7 +163,6 @@
 		li t0, 0x01
 		sh t0, 58(t3)		#nop (to preserve alignment)
 		#execute register based jump to NEXT
-		#TODO: fix this so it is not based on fixed NEXT
 		la t1, NEXT		#t1 has the number
 		#load the number into register t0
 		li t2, 0xFFFFF000
@@ -177,28 +179,17 @@
 		sw t0, 68(t3)
 
 
-#NB this is just for testing
-		la t1, dictionary
-		sw t3, 0(t1)
-		la t0, WA_DUP
-		sw t0, 72(t3)
-		la t0, WA_MUL
-		sw t0, 76(t3)
-		la t0, WA_DOT
-		sw t0, 80(t3)
-		la t0, WA_SEMI
-		sw t0, 84(t3)
 		la t1, newdictionary
-		addi t3, t3, 88
-		sw t3, 0(t1)
+		lw t1, 0(t1)
+		#addi t1, t1, 72
+		la t3, createwritepoint
+		sw t1, 0(t3)
 		tail NEXT
-
 
 
 colon_fail:
 		la t0, CREATEFLAG
-		li t1, 0x0
-		sw t1, 0(t0)				#set MODE to 0 (no compile)
+		sw zero, 0(t0)				#set MODE to 0 (no compile)
 		POP zero
 		PRINT bad_colon
 		tail NEXT

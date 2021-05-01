@@ -117,9 +117,8 @@
                 la s8, WA_SEARCH                      #hit search directly now
                 li t2, 1
                 PUSH t2                               #indicate TOKEN_ values are valid
-                call RUN
+                tail RUN
 
-                
 
 		CODEHEADER SEARCH, TOKENIZE_IMM, 0x0
                 POP a0
@@ -128,7 +127,10 @@
                 bne a0, t0, search_bad_pop
                 lw t0, TOKEN_START                    #token values are valid
                 lw t1, TOKEN_END
-                j search_continue
+		la t2, CREATEFLAG
+		lw t2, 0(t2)
+		beq t2, zero, search_continue	      #we are in immediate mode
+                j search_create_continue
   search_no_token:
                 addi t0, zero, 2                      #should never get here - so warn if we do
                 sw t0, OKSTATUS, t1
@@ -404,10 +406,12 @@
                 sw t1, CURRENT_BASE, t0
                 tail NEXT
 
-                CODEHEADER OLSEMI, BINARY, 0x0
+                #semi for outer loop
+		CODEHEADER OLSEMI, BINARY, 0x0
                 la s7, outer_loop
                 tail NEXT
-
+		
+		#semi for the rest of us
                 CODEHEADER SEMI, OLSEMI, 0x01
                 lw s7, 0(s9)
                 addi s9, s9, STACKOFFSET
@@ -493,7 +497,7 @@
 		# -  --> SUB
 		# *  --> MUL
 		# /  --> DIV
-		# :  --> COMPILE
+		# :  --> COLON
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
