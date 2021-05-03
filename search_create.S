@@ -35,6 +35,8 @@
 		#now check it is allowed
 		la t0, WA_COLON			      #cannot nest definitions
 		bne t3, t0, search_create_allowed
+		la t0, CREATEFLAG
+		sw zero, 0(t0)
 		tail search_failed		      #report error
   search_create_allowed:
 		la t0, createwritepoint
@@ -43,7 +45,7 @@
 		addi t1, t1, 4
 		sw t1, 0(t0)
 		la t0, WA_SEMI			      #are we finished with create?
-		bne t3, t0, search_create_leave_normal
+		bne t3, t0, search_create_leave
 		#tidy up create as we are done
 		la t0, CREATEFLAG
 		sw zero, 0(t0)			      #back to immediate execution
@@ -59,22 +61,20 @@
 		lw t3, 0(t0)			      #load address of new word
 		sw t3, 0(t2)			      #store address of new word as start for dictionary
 		sw t1, 0(t0)			      #update address we will writenext word to
-		j search_create_leave
-  search_create_leave_normal:
   search_create_leave:
 		la s7, outer_loop_tokenize
                 tail NEXT
 
   search_create_exhausted:
-		#test for variable
+		#test for variable etc
 		mv a4, t0
-		li a5, 0x3A 				#:
 		lb t4, 0(a4)
-		# have to treat as a variable
-		bge t4, a5, search_create_assign_variable
 		li a5, 0x23
 		#test for address #
 		beq t4, a5, search_create_read_address
+		li a5, 0x3A 				#:
+		# have to treat as a variable
+		bge t4, a5, search_create_assign_variable
 		#assume we have a number
 		lw t2, CURRENT_BASE
 		li t3, 16
@@ -95,6 +95,8 @@
   search_create_test_func_result:
 		li t2, 1
 		beq a1, t2, search_create_number_on_stack
+		la t0, CREATEFLAG
+		sw zero, 0(t0)
 		tail search_failed
 
   search_create_check_decimal:
@@ -131,6 +133,7 @@
 		lb t5, 0(a3)
 		sb t5, 0(a1)
 		addi a1, a1, 1
+		addi a3, a3, 1
 		addi a2, a2, -1
 		bne a2, zero, search_create_raw_var_name
 		li a2, 24
@@ -172,6 +175,8 @@
   search_create_test_func_result_address:
 		li t2, 1
 		beq a1, t2, search_create_address_on_stack
+		la t0, CREATEFLAG
+		sw zero, 0(t0)
 		tail search_failed
 
   search_create_check_decimal_address:
@@ -321,7 +326,6 @@ func_test_octal:
 		mv a2, zero
 		li a4, 8
 
-		li s2, 8
 		li s5, 48
 		li s6, 55
 		j func_octdec_join
@@ -344,11 +348,11 @@ func_test_octal:
 		mv a2, zero
 		li a4, 10
 
-		li s2, 10
 		li s5, 48
 		li s6, 57
 
   func_octdec_join:				#common octal decimal code
+		mv s7, zero
 		mv s10, zero
 		mv s11, zero
 		sub s3, a3, a0
@@ -404,9 +408,9 @@ func_test_octal:
 
   varin_scan_stack:
 		#come here with t3 pointing to the word with length
-		lw a2, 0(t3)			#a2 holds length
+		lw t2, 0(t3)			#t2 holds length
 		mv t0, t3
-		addi t0, t0, 1			#t0 now points to name
+		addi t0, t0, 4			#t0 now points to name
 		la t4, BOTTOM_VARS
 		lw t3, 0(t4)
 		addi t3, t3, 36
@@ -445,7 +449,6 @@ func_test_octal:
                 #put variable value on the stack
                 lw t4, -32(t3)
                 PUSH t4
-		la s7, outer_loop_tokenize
                 tail NEXT
   varin_no_match:
                 j varin_failed
