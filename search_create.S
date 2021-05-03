@@ -61,7 +61,6 @@
 		sw t1, 0(t0)			      #update address we will writenext word to
 		j search_create_leave
   search_create_leave_normal:
-		PUSH t1
   search_create_leave:
 		la s7, outer_loop_tokenize
                 tail NEXT
@@ -69,7 +68,7 @@
   search_create_exhausted:
 		#test for variable
 		mv a4, t0
-		li a5, 0x3A
+		li a5, 0x3A 				#:
 		lb t4, 0(a4)
 		# have to treat as a variable
 		bge t4, a5, search_create_assign_variable
@@ -89,7 +88,9 @@
 		#a0 - start address [in]
 		#a1 - valid [out]
 		#a2 - result [out]
+		#a3 - end address [in]
 		mv a0, t0
+		mv a3, t1
 		call func_test_hex
   search_create_test_func_result:
 		li t2, 1
@@ -98,11 +99,13 @@
 
   search_create_check_decimal:
 		mv a0, t0
+		mv a3, t1
 		call func_test_decimal
 		j search_create_test_func_result
 
   search_create_check_octal:
 		mv a0, t0
+		mv a3, t1
 		call func_test_octal
 		j search_create_test_func_result
 
@@ -141,6 +144,7 @@
 		#update createwritepoint and bail
 		la t0, createwritepoint
 		sw a1, 0(t0)
+		la s7, outer_loop_tokenize
 		tail NEXT
 
   search_create_read_address:
@@ -193,6 +197,7 @@
 		sw a2, 4(t1)
 		addi t1, t1, 8
 		sw t1, 0(t0)
+		la s7, outer_loop_tokenize
 		tail NEXT
 
 		#now number processing functions
@@ -200,6 +205,7 @@
 		#a1 valid [out]
 		#a2 result [out]
 		#a3 end of token [in]
+		#a4 base (set in fuction)
   func_test_hex:
 		PUSH s0
 		PUSH s1
@@ -215,6 +221,7 @@
 		PUSH s11
 		mv a1, zero
 		mv a2, zero
+		li a4, 16
 		
   func_check_hex:
                 lb s4, 0(a0)
@@ -233,9 +240,9 @@
                 j func_return_hex
   func_hex_entry_likely:
                 mv s4, a0 
-                addi s4, s4, 2                        #get a4 to point to first numeral
+                addi s4, s4, 2                        #get s4 to point to first numeral
                 li s6, 58                             #: (1 > 9 in ascii)
-                li s1, 65
+                li s1, 65			      #A
                 li s2, 71                             #G
                 mv s7, zero                           #total goes in a7
   func_leading_zero_hex:
@@ -265,7 +272,7 @@
                 beq s3, zero, func_add_in_hex
                 mv s5, s3
   func_hex_multiple:
-                mul s10, s10, s2
+                mul s10, s10, a4
                 addi s5, s5, -1
                 bne s5, zero, func_hex_multiple
 		
@@ -312,6 +319,7 @@ func_test_octal:
 		PUSH s11
 		mv a1, zero
 		mv a2, zero
+		li a4, 8
 
 		li s2, 8
 		li s5, 48
@@ -334,6 +342,7 @@ func_test_octal:
 		PUSH s11
 		mv a1, zero
 		mv a2, zero
+		li a4, 10
 
 		li s2, 10
 		li s5, 48
@@ -373,7 +382,7 @@ func_test_octal:
 		beq s3, zero, func_add_in_octdec
 		mv s8, s3
   func_octdec_multiple:
-		mul s9, s9, s2
+		mul s9, s9, a4
 		add s8, s8, -1
 		bne s8, zero, func_octdec_multiple
   func_add_in_octdec:
@@ -436,6 +445,7 @@ func_test_octal:
                 #put variable value on the stack
                 lw t4, -32(t3)
                 PUSH t4
+		la s7, outer_loop_tokenize
                 tail NEXT
   varin_no_match:
                 j varin_failed
