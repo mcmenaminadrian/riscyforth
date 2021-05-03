@@ -3,18 +3,8 @@
 .balign 8
 
   dictionary_top:
-                CODEEND GETSTDIN, 0x01
-		la t0, inputfileptr
-                lw a0, 0(t0)
-		bne a0, zero, getstdin_getin
-                GETIN
-		la t0, inputfileptr
-		sw a0, 0(t0)
-  getstdin_getin:
-                PUSH a0
-                tail NEXT
 
-	        CODEHEADER TYPE, GETSTDIN, 0x01
+	        CODEEND TYPE,  0x01
                 WRITECR
                 WRITECHAR 0x0A
                 WRITECHAR 0x3E                          #> prompt
@@ -22,18 +12,19 @@
 
   	        CODEHEADER GETNEXTLINE_IMM, TYPE, 0x0
                 #Fetch a line for immediate execution
-      	        POP a2
-                la a0, INPUT_BUFFER
                 MARKINPUTBUFFER INPUT_BUFFER            #ensure buffer starts 'empty'
-                addi a1, zero, BUFFERLEN
-                call fgets
-                addi t0, zero, 1
-                sub a2, a4, a0                          #a2 to hold length
+		mv a0, zero
+		la a1, INPUT_BUFFER
+		li a2, BUFFERLEN
+		li a7, 63
+		ecall
+		li t0, 1
+                mv a2, a0                          #a2 to hold length
                 bgeu a2, t0, getnextline_imm_input
                 tail NEXT                               #no input
   getnextline_imm_input:
-                sw a0, INPUT_START, t0
-                add a1, a0, a2                          #a2 has the end of input
+                sw a1, INPUT_START, t0
+                add a1, a1, a2                          #a2 has the end of input
                 sw a1, INPUT_END, t0
 		tail NEXT
           

@@ -92,8 +92,10 @@
    riscy_forthQ:  .asciz "Exiting RISCYFORTH."
    Ok_msg:        .asciz "OK"
    NotOk_msg:     .ascii "Input fails with token: "
-   bad_colon:	  .asciz "COLON command failed: please use a key word for your new command."
    .equ NOK_LEN,  24
+   bad_colon:	  .asciz "COLON command failed: please use a key word for your new command."
+   zerolen_varin: .asciz "Could not read variable (or command) - zero length?"
+   failed_varin:  .asciz "Failed to read variable"
    Error_msg:     .asciz "INTERPRETER FAILURE! System may be unstable."
    stdinopen:     .asciz "r"
    stdoutopen:    .asciz "w"

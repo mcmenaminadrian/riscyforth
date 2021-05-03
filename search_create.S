@@ -132,7 +132,7 @@
 		bne a2, zero, search_create_raw_var_name
 		li a2, 24
 		sub a2, a2, t2
-		li t5, 0xFF
+		li t5, 0x0A
   search_create_ff_var_name:
 		sb t5, 0(a1)
 		addi a1, a1, 1
@@ -393,3 +393,52 @@ func_test_octal:
 		j func_return_hex		#success
 
 
+  varin_scan_stack:
+		#come here with t3 pointing to the word with length
+		lw a2, 0(t3)			#a2 holds length
+		mv t0, t3
+		addi t0, t0, 1			#t0 now points to name
+		la t4, BOTTOM_VARS
+		lw t3, 0(t4)
+		addi t3, t3, 36
+  varin_next_check:
+		lw t4, 0(t3)
+		li a1, 0xFFFFFFFF
+		and t4, t4, a1
+		li a3, 0xdeadbeef
+		beq t4, a3, varin_next_in_dictionary
+		j varin_failed
+  varin_next_in_dictionary:
+		lw t4, -4(t3)
+		#compare lengths
+		bne t4, t2, varin_tokens_do_not_match
+                add a0, t3, -5                        #a0 now points into the name in the var stack
+                mv a1, t0                             #a1 points to the name in the buffer
+                mv a2, t2                             #a2 checks how far we've gone 
+
+  varin_loop_through_token:
+                lb t5, 0(a0)
+                lb t6, 0(a1)
+                bne t5, t6, varin_tokens_do_not_match
+                addi a2, a2, -1
+                beq a2, zero, varin_tokens_matched
+                addi a0, a0, -1
+                addi a1, a1, 1
+                j varin_loop_through_token
+  varin_tokens_do_not_match:
+                add t3, t3, 36                        #advance up the var stack
+                la t4, TOP_VARS
+                lw t4, 0(t4)
+                bge t3, t4, varin_no_match
+                j varin_next_check
+
+  varin_tokens_matched:
+                #put variable value on the stack
+                lw t4, -32(t3)
+                PUSH t4
+                tail NEXT
+  varin_no_match:
+                j varin_failed
+
+	
+		

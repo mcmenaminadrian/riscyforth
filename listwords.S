@@ -24,8 +24,50 @@
   wordlist_finished:
                 tail NEXT
 
+		CODEHEADER LITERALNUMB, WORDLIST, 0x0
+		#read in a number - next in the secondary
+		#store it on the stack and move on
+		lw t0, 0(s7)
+		addi sp, sp, -8
+		sw t0, 0(sp)
+		addi s7, s7, INSTWIDTH
+		tail NEXT
 
-                CODEHEADER VARIABLE, WORDLIST, 0x01
+		CODEHEADER LITERALADDR, LITERALNUMB, 0x0
+		#read in an address from the secondary
+		#then get the contents of that address
+		#and place those on the stack
+		lw t0, 0(s7)
+		lw t1, 0(t0)
+		addi sp, sp, -8
+		sw t1, 0(sp)
+		addi s7, s7, INSTWIDTH
+		tail NEXT
+
+		CODEHEADER VARIN, LITERALADDR, 0x0
+		#Look for a variable
+		#and place its value on the stack if it exists
+		mv t3, s7
+		lw t0, 0(s7)				#t0 nw holds the length
+		beq t0, zero, varin_failed_zero_length
+		addi s7, s7, 28				#name length and name itself
+		j varin_scan_stack
+  varin_failed_zero_length:
+		PRINT zerolen_varin
+		WRITECR
+		tail NEXT
+  varin_failed:
+		mv t0, s7
+		addi t0, t0, -28
+		lw t1, 0(t0)
+		addi t0, t0, 1
+		WRITESTRINGR t0, t1
+		WRITECR
+		PRINT failed_varin
+		tail NEXT
+		
+
+                CODEHEADER VARIABLE, VARIN, 0x01
                 #create a variable in the variable dictionary
                 #first get the name and check it's not already present
 		#variable stack grows downwards but each entry in forwards direction
