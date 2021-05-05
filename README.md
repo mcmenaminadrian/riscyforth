@@ -7,7 +7,6 @@ To understand your rights and obligations with this code please read (version 2 
 
 We are in the development stage of RISCYFORTH and on this page I aim to keep a list of the implemented functions. You'll need to read the code to see the details though.
 
-**DOT**                     Output top of stack (. is recognised and expanded to DOT)
 
 **BYE**                     Quit RISCYFORTH
 
@@ -15,6 +14,11 @@ We are in the development stage of RISCYFORTH and on this page I aim to keep a l
 
 **VARIABLE**                Put a variable on the variable stack
 
+_Compiling code_
+
+**COLON**		    Enter compiler mode (: is recognised explanded to COLON)
+
+**SEMI**                    Procedure to end all secondaries (; is recognised and expanded to SEMI)
 
 _Text entry_
 
@@ -30,6 +34,15 @@ _Text entry_
 
 **SEARCH**                  Searches the dictionary to match the token
 
+_Output_
+
+**DOT**                     Output top of stack (. is recognised and expanded to DOT)
+
+**SPACES**		    Output as many spaces as indicated by the number at the top of the stack
+
+**EMIT**		    Output the single character corresponding to the ASCII code of the number at the top of the stack
+
+**CR**			    Output a carriage return (newline)
 
 _Integer arithmetic_
 
@@ -42,8 +55,6 @@ _Integer arithmetic_
 **BINARY**                  Sets output to binary (input yet to be implemented)
 
 **OLSEMI**                  Internal procedure - don't use
-
-**SEMI**                    Procedure to end all secondaries (; is recognised and expanded to SEMI)
 
 **ADD**                     Add the numbers at the top iof the stack (+ is recognised and expanded to ADD)
 
