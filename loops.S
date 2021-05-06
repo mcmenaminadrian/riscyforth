@@ -19,8 +19,19 @@
 		WRITECHAR 0x20
 		tail NEXT
 
+		CODEHEADER LTR, SPACE, 0x01
+		POP t0
+		addi s9, s9, -STACKOFFSET
+		sw t0, 0(s9)
+		tail NEXT
 
-		CODEHEADER SPACES, SPACE, 0x01
+		CODEHEADER RGT, LTR, 0x01
+		lw t0, 0(s9)
+		PUSH t0
+		addi s9, s9, STACKOFFSET
+		tail NEXT
+
+		CODEHEADER SPACES, RGT, 0x01
 		POP a0		#how many spaces
 		PUSH s0
 		mv s0, a0

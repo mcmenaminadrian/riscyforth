@@ -16,7 +16,7 @@ We are in the development stage of RISCYFORTH and on this page I aim to keep a l
 
 _Compiling code_
 
-**COLON**		    Enter compiler mode (: is recognised explanded to COLON)
+**COLON**		    Enter compiler mode (: is recognised and explanded to COLON)
 
 **SEMI**                    Procedure to end all secondaries (; is recognised and expanded to SEMI)
 
@@ -39,6 +39,8 @@ _Output_
 **DOT**                     Output top of stack (. is recognised and expanded to DOT)
 
 **SPACES**		    Output as many spaces as indicated by the number at the top of the stack
+
+**SPACE**		    Output a single space.
 
 **EMIT**		    Output the single character corresponding to the ASCII code of the number at the top of the stack
 
@@ -118,4 +120,10 @@ _Stack operations are show in diagrammatic form (before -> after). Top of the st
 **SWAP2**                   s3 s2 s1 s0 -> s1 s0 s3 s2
 
 **ROT2**                    s5 s4 s3 s2 s1 s0 -> s3 s2 s1 s0 s5 s4 (NB executing ROT twice would give us s5 s4 s3 s0 s2 s1)
+
+Return stack operations
+
+**LTR**			    Pop top of the (data) stack and place on top of the return stack (<R in traditional FORTH)
+
+**RGT**			    Pop top of the return stack and place on top of the (data) stack (R> in traditional FORTH)
 
