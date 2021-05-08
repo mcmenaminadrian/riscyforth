@@ -19,19 +19,53 @@
 		WRITECHAR 0x20
 		tail NEXT
 
-		CODEHEADER LTR, SPACE, 0x01
+		CODEHEADER RDROP, SPACE, 0x01
+		addi s9, s9, STACKOFFSET
+		tail NEXT
+
+		CODEHEADER TWORDROP, RDROP, 0x01
+		addi s9, s9, (2 * STACKOFFSET)
+		tail NEXT
+
+		CODEHEADER RFETCH, TWORDROP, 0x01	#R@
+		lw t0, 0(s9)
+		PUSH t0
+		tail NEXT
+
+		CODEHEADER TWORFETCH, RFETCH, 0x01	#2R@
+		lw t0, 0(s9)
+		lw t1, STACKOFFSET(s9)
+		PUSH t1
+		PUSH t0
+		tail NEXT
+
+		CODEHEADER TOR2, TWORFETCH, 0x01  #2>R
+		POP t0
+		POP t1
+		add s9, s9, -(STACKOFFSET * 2)
+		sw t1, STACKOFFSET(s9)
+		sw t0, 0(s9)
+		tail NEXT
+
+		CODEHEADER TOR, TOR2, 0x01 #>R
 		POP t0
 		addi s9, s9, -STACKOFFSET
 		sw t0, 0(s9)
 		tail NEXT
 
-		CODEHEADER RGT, LTR, 0x01
+		CODEHEADER RFROM, TOR, 0x01 #R>
 		lw t0, 0(s9)
 		PUSH t0
 		addi s9, s9, STACKOFFSET
 		tail NEXT
 
-		CODEHEADER SPACES, RGT, 0x01
+		CODEHEADER STORE, RFROM, 0x01		#!
+		POP t0
+		POP t1
+		sw t1, 0(t0)
+		tail NEXT
+
+		CODEHEADER SPACES, STORE, 0x01
 		POP a0		#how many spaces
 		PUSH s0
 		mv s0, a0

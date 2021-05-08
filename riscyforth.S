@@ -58,6 +58,8 @@
     .include "outerloop.S"
     .balign 8
     .include "search_create.S"
+    .balign 8
+    .include "decision.S"
 
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8

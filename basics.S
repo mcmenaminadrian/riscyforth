@@ -489,6 +489,10 @@
 		# *  --> MUL
 		# /  --> DIV
 		# :  --> COLON
+		# !  --> STORE
+		# >  --> GT
+                # <  --> LT
+                # =  --> EQUALS
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -498,92 +502,146 @@
 		lbu t1, 0(a0)
 
   fix_up_colon:
-		addi t2, zero, 0x3A
+		li t2, 0x3A
 		bne t2, t1, fix_up_dot
-		addi t3, zero, 0x43
+		li t3, 0x43
 		sb t3, 0(a2)
-		addi t3, zero, 0x4F
+		li t3, 0x4F
 		sb t3, 1(a2)
-		addi t3, zero, 0x4C
+		li t3, 0x4C
 		sb t3, 2(a2)
-		addi t3, zero, 0x4F
+		li t3, 0x4F
 		sb t3, 3(a2)
-		addi t3, zero, 0x4E
+		li t3, 0x4E
 		sb t3, 4(a2)
 		addi a2, a2, 4
 		j fix_up_done
 
   fix_up_dot:
-		addi t2, zero, 0x2E
+		li t2, 0x2E
 		bne t2, t1, fix_up_semi
-		addi t3, zero, 0x44
+		li t3, 0x44
 		sb t3, 0(a2)
-		addi t3, zero, 0x4F
+		li t3, 0x4F
 		sb t3, 1(a2)
-		addi t3, zero, 0x54
+		li t3, 0x54
 		sb t3, 2(a2)
 		addi a2, a2, 2
 		j fix_up_done
   fix_up_semi:
-		addi t2, zero, 0x3B
+		li t2, 0x3B
 		bne t2, t1, fix_up_add
-		addi t3, zero, 0x53
+		li t3, 0x53
 		sb t3, 0(a2)
-		addi t3, zero, 0x45
+		li t3, 0x45
 		sb t3, 1(a2)
-		addi t3, zero, 0x4D
+		li t3, 0x4D
 		sb t3, 2(a2)
-		addi t3, zero, 0x49
+		li t3, 0x49
 		sb t3, 3(a2)
 		addi a2, a2, 3
 		j fix_up_done
 
   fix_up_add:
-		addi t2, zero, 0x2B
+		li t2, 0x2B
 		bne t2, t1, fix_up_sub
-		addi t3, zero, 0x41
+		li t3, 0x41
 		sb t3, 0(a2)
-		addi t3, zero, 0x44
+		li t3, 0x44
 		sb t3, 1(a2)
-		addi t3, zero, 0x44
+		li t3, 0x44
 		sb t3, 2(a2)
 		addi a2, a2, 2
 		j fix_up_done
 		
   fix_up_sub:
-		addi t2, zero, 0x2D
+		li t2, 0x2D
 		bne t2, t1, fix_up_mul
-		addi t3, zero, 0x53
+		li t3, 0x53
 		sb t3, 0(a2)
-		addi t3, zero, 0x55
+		li t3, 0x55
 		sb t3, 1(a2)
-		addi t3, zero, 0x42
+		li t3, 0x42
 		sb t3, 2(a2)
 		addi a2, a2, 2
 		j fix_up_done
 		
   fix_up_mul:
-		addi t2, zero, 0x2A
+		li t2, 0x2A
 		bne t2, t1, fix_up_div
-		addi t3, zero, 0x4D
+		li t3, 0x4D
 		sb t3, 0(a2)
-		addi t3, zero, 0x55
+		li t3, 0x55
 		sb t3, 1(a2)
-		addi t3, zero, 0x4C
+		li t3, 0x4C
 		sb t3, 2(a2)
 		addi a2, a2, 2
 		j fix_up_done
 		
   fix_up_div:
-		addi t2, zero, 0x2F
-		bne t2, t1, fix_up_finished
-		addi t3, zero, 0x44
+		li t2, 0x2F
+		bne t2, t1, fix_up_store
+		li t3, 0x44
 		sb t3, 0(a2)
-		addi t3, zero, 0x49
+		li t3, 0x49
 		sb t3, 1(a2)
-		addi t3, zero, 0x56
+		li t3, 0x56
 		sb t3, 2(a2)
 		addi a2, a2, 2
+		j fix_up_done
+
+  fix_up_store:
+		li t2, 0x21
+		bne t2, t1, fix_up_gt
+		li t3, 0x53
+		sb t3, 0(a2)
+		li t3, 0x54
+		sb t3, 1(a2)
+		li t3, 0x4F
+		sb t3, 2(a2)
+		li t3, 0x52
+		sb t3, 3(a2)
+		li t3, 0x45
+		sb t3, 4(a2)
+		addi a2, a2, 4
+		j fix_up_done
+
+  fix_up_gt:
+		li t2, 0x3E
+		bne t2, t1, fix_up_lt
+		li t3, 0x47
+		sb t3, 0(a2)
+		li t3, 0x54
+		sb t3, 1(a2)
+		addi a2, a2, 1
+		j fix_up_done 
+
+  fix_up_lt:
+		li t2, 0x3C
+		bne t2, t1, fix_up_equals
+		li t3, 0x4C
+		sb t3, 0(a2)
+		li t3, 0x54
+		sb t3, 1(a2)
+		addi a2, a2, 1
+		j fix_up_done
+
+  fix_up_equals:
+		li t2, 0x3D
+		bne t2, t1, fix_up_finished
+		li t3, 0x45
+		sb t3, 0(a2)
+		li t3, 0x51
+		sb t3, 1(a2)
+		li t3, 0x55
+		sb t3, 2(a2)
+		li t3, 0x41
+		sb t3, 3(a2)
+		li t3, 0x4C
+		sb t3, 4(a2)
+		li t3, 0x53
+		sb t3, 5(a2)
+		addi a2, a2, 5
 		j fix_up_done
 
 

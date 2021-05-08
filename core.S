@@ -32,7 +32,7 @@
 		sw a0, 0(t0)
                 sw zero, OKSTATUS, t0
                 sw zero, CREATEFLAG, t0
-                la t1, TIL_COLON                   #start search from here
+                la t1, TIL_EQUALS                   #start search from here
                 sw t1, dictionary, t0
 
                 sw zero, TOKEN_START, t0
