@@ -4,8 +4,8 @@
 		j gt_true
 
 		CODEHEADER GT, TRUE, 0x01
-		POP t0
 		POP t1
+		POP t0
   gt_test:
 		bgt t0, t1, gt_true
   gt_false:
@@ -17,8 +17,8 @@
 		tail NEXT
 
 		CODEHEADER LT, GT, 0x01
-		POP t1
 		POP t0
+		POP t1
 		j gt_test
 
 		CODEHEADER FALSE, LT, 0x01
