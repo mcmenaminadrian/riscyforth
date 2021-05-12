@@ -20,19 +20,44 @@
                 WRITECR
                 WRITECHAR 0x0A
 
+		li t0, 1
+		la t1, ifflag
+		sw t0, 0(t1)			  #ignore ELSE by default
+		#allocate space for new definitions
                 mv a0, zero
 		li a1, BIGSPACE
 		li a2, 0x07			  #read and execute
 		li a3, 0x22
 		li a4, -1
 		li a5, 0
-		li a7, 222
+		li a7, 222			  #mmap
 		ecall
 		la t0, newdictionary
 		sw a0, 0(t0)
+		#now allocate space for conditional blocks
+		mv a0, zero
+		li a1, BIGSPACE
+		li a2, 0x07
+		li a3, 0x22
+		li a4, -1
+		li a5, 0
+		li a7, 222
+		ecall
+		#set up the simple stack pointer for the decision creation
+		mv t0, a0
+		add t0, t0, a1
+		add t0, t0, -4
+		la t1, DECIDESTACKB
+		sw t0, 0(t1)			#top of the stack, holds address of next decision block block
+		sw a0, 0(t0)			#store address
+		addi t0, t0, -4
+		la t1, DECIDESTACKP
+		sw t0, 0(t1)
+		addi t1, t1, 4
+		sw zero, 0(t1)			    #zero skips currently
                 sw zero, OKSTATUS, t0
                 sw zero, CREATEFLAG, t0
-                la t1, TIL_EQUALS                   #start search from here
+                la t1, TIL_ELSE	                    #start search from here
                 sw t1, dictionary, t0
 
                 sw zero, TOKEN_START, t0

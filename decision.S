@@ -52,17 +52,15 @@
 		sw s2, 16(sp)
 		sw s3, 24(sp)
 		sw s4, 32(sp)
-		la s0, ifspace
-		lw s1, 0(s0)
-		la s0, ifindex
-		lw s2, 0(s0)
+		mv s1, a0		#base address
+		mv s2, a1		#current index
+		li s0, 0x30		#size of block
+		mul s3, s2, s0		#mukltiply by index
 		addi s2, s2, 1		#increment index
-		sw s2, 0(s0)
-		addi s2, s2, -1
-		li s0, 0x30
-		mul s3, s2, s0
-		add s1, s1, s3		#s1 now contains word address
-		mv s2, s1		#s2 writing address
+		la s0, DECIDESTACKP	
+		sw s2, 0(s0)		#store incremented index
+		add s1, s1, s3		#start address in s1
+		mv s2, s1		#copy to s2
 		#write out address where code begins
 		addi s1, s1, 4
 		sw s1, 0(s2)

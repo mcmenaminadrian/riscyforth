@@ -65,9 +65,37 @@
 		WRITECR
 		PRINT failed_varin
 		tail NEXT
-		
 
-                CODEHEADER VARIABLE, VARIN, 0x01
+		CODEHEADER TYPE, VARIN, 0x01
+		mv t1, zero
+		POP t2
+		lb t3, 0(t1)
+		addi t2, t2, 1
+		WRITESTRINGR t2, t1
+		j NEXT
+		
+		CODEHEADER DISPLAY, TYPE, 0x01
+		la t0, SCRATCH_PAD
+		mv t1, zero
+		mv t3, sp
+		li t4, 0x80
+  display_fetch_from_stack:
+		lb t5, 0(t3)
+		addi t3, t3, STACKOFFSET
+		and t6, t5, t4
+		bne t6, zero, display_data_collected
+		sb t5, 0(t0)
+		addi t0, t0, 1
+		addi t1, t1, 1
+		j display_fetch_from_stack
+  display_data_collected:
+		mv sp, t3
+		la t0, SCRATCH_PAD
+		WRITESTRINGR t0, t1
+		j NEXT
+
+		
+                CODEHEADER VARIABLE, DISPLAY, 0x01
                 #create a variable in the variable dictionary
                 #first get the name and check it's not already present
 		#variable stack grows downwards but each entry in forwards direction

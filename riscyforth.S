@@ -82,6 +82,13 @@
    .common newdictionary, 0x08, 0x08
    .common inputfileptr, 0x08, 0x08
    .common createwritepoint, 0x08, 0x08
+   .common ifflag, 0x08, 0x08
+   .common thenpoint, 0x08, 0x08
+   .common ifindex, 0x08, 0x08
+   .common ifdepth, 0x08, 0x08
+   .common ifspace, 0x08, 0x08
+   .common DECIDESTACKP, 0x08, 0x08
+   .common DECIDESTACKB, 0x08, 0x08
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"

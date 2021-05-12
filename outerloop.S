@@ -2,7 +2,7 @@
 
 .balign 8
 outer_loop:
-          .4byte WA_TYPE
+          .4byte WA_TYPEPROMPT
           .4byte WA_GETNEXTLINE_IMM 
 outer_loop_tokenize:
           .4byte WA_TOKENIZE_IMM

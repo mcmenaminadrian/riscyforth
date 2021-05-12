@@ -39,6 +39,98 @@
 		sw zero, 0(t0)
 		tail search_failed		      #report error
   search_create_allowed:
+		#test for conditionals
+		la t0, WA_IF
+		bne t3, t0, search_create_test_then
+		#if code
+		la t0, ifflag
+		li t1, 1
+		sw t1, 0(t0)				#activate ifflag
+		#now write out the test code
+		la a0, DECIDESTACKB
+		lw a0, 0(a0)
+		la a2, DECIDESTACKP
+		lw a1, 0(a2)
+		#write out a new zero for depth
+		li t0, 4
+		mul t0, t0, a1
+		add a2, a2, t0
+		sw zero, 0(a2)
+		call if_func_create
+		mv t3, a0 
+		j search_create_inscribe
+  search_create_test_then:
+		la t0, WA_THEN
+		#are we in if mode
+		bne t3, t0, search_create_test_else
+		#TODO: then code
+		#are we in if mode
+		la t0, ifflag
+		lw t0, 0(t0)
+		bnez t0, search_create_then_ifmode
+		tail search_failed
+  search_create_then_ifmode:
+		#read depth
+		la t0, DECIDESTACKP
+		lw t1, 0(t0)
+		li t2, 4
+		mul t3, t2, t1
+		add t2, t0, t3
+		lw t1, 0(t2)
+		li t0, 1
+		bne t0, t1, search_create_then_adjust_jump
+		#path to skip 1 instruction - default
+		#wind down the offset now
+		sw zero, 0(t2)
+		la t0, DECIDESTACKP
+		lw t1, 0(t0)
+		addi t1, t1, -1
+		sw t1, 0(t0)
+		j search_create_continue_inscription
+  search_create_then_adjust_jump:
+		#adjust skip number
+		la t0, DECIDESTACKP
+		lw t2, 0(t0)			#t2 holds index
+		mv t3, t2
+		addi t3, t3, -1
+		sw t3, 0(t0)			#decrease stored index
+		li t3, 4
+		mul t3, t3, t2
+		add t0, t3, t0
+		lw t3, 0(t0)			#t3 holds depth
+		sw zero, 0(t0)
+		li t0, 4
+		mul t3, t0, t3			#offset needed in bytes
+		andi t3, t3, 0x3FF		#ready to insert
+		la t0, DECIDESTACKB
+		lw t0, 0(t0)
+		li t1, 0x30
+		addi t2, t2, -1
+		mul t1, t2, t1			#base of code
+		addi t1, t1, 28
+		li t0, 0xB8B93
+		slli t3, t3, 20
+		or t0, t3, t0
+		sw t0, 0(t1)
+		j search_create_continue_inscription 
+  search_create_test_else:
+		la t0, WA_ELSE
+		#TODO: else code
+  search_create_inscribe:
+		#update the depth of the current skip
+		la t0, ifflag
+		lw t0, 0(t0)
+		beqz t0, search_create_continue_inscription
+		la t0, DECIDESTACKP
+		lw t1, 0(t0)
+		li t2, 4
+		mul t1, t2, t1
+		add t0, t0, t1
+		lw t1, 0(t0)
+		addi t1, t1, 1
+		sw t1, 0(t0)				#increment and store
+		
+  search_create_continue_inscription:
 		la t0, createwritepoint
 		lw t1, 0(t0)
 		sw t3, 0(t1)			      #write out word address in definition

@@ -4,13 +4,13 @@
 
   dictionary_top:
 
-	        CODEEND TYPE,  0x01
+	        CODEEND TYPEPROMPT,  0x01
                 WRITECR
                 WRITECHAR 0x0A
                 WRITECHAR 0x3E                          #> prompt
                 tail NEXT
 
-  	        CODEHEADER GETNEXTLINE_IMM, TYPE, 0x0
+  	        CODEHEADER GETNEXTLINE_IMM, TYPEPROMPT, 0x0
                 #Fetch a line for immediate execution
                 MARKINPUTBUFFER INPUT_BUFFER            #ensure buffer starts 'empty'
 		mv a0, zero
@@ -71,6 +71,7 @@
                 j tokenize_all_over                   #got nothing
   tokenize_found_start:
                 mv t1, t0                             #t1 to track end of token
+		
   tokenize_advance_search:
                 addi t1, t1, 1
                 bgeu t1, a1, tokenize_end_token
@@ -493,6 +494,8 @@
 		# >  --> GT
                 # <  --> LT
                 # =  --> EQUALS
+		# (  --> OBRACKET
+		# )  --> CBRACKET
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -628,7 +631,7 @@
 
   fix_up_equals:
 		li t2, 0x3D
-		bne t2, t1, fix_up_finished
+		bne t2, t1, fix_up_obracket
 		li t3, 0x45
 		sb t3, 0(a2)
 		li t3, 0x51
@@ -643,6 +646,36 @@
 		sb t3, 5(a2)
 		addi a2, a2, 5
 		j fix_up_done
+
+  fix_up_obracket:
+		li t2, 0x28
+		bne t2, t1, fix_up_cbracket
+		li t3, 0x4F
+		sb t3, 0(a2)
+  fix_up_bracket:
+		li t3, 0x42
+		sb t3, 1(a2)
+		li t3, 0x52
+		sb t3, 2(a2)
+		li t3, 0x41
+		sb t3, 3(a2)
+		li t3, 0x43
+		sb t3, 4(a2)
+		li t3, 0x4B
+		sb t3, 5(a2)
+		li t3, 0x45
+		sb t3, 5(a2)
+		li t3, 0x54
+		sb t3, 6(a2)
+		addi a2, a2, 6
+		j fix_up_done
+
+  fix_up_cbracket:
+		li t3, 0x29
+		bne t2, t1, fix_up_finished
+		li t3, 0x4F
+		sb t3, 0(a2)
+		j fix_up_bracket
 
 
   fix_up_finished:
