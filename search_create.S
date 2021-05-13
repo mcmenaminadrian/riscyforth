@@ -44,18 +44,14 @@
 		bne t3, t0, search_create_test_then
 		#if code
 		la t0, ifflag
-		li t1, 1
-		sw t1, 0(t0)				#activate ifflag
+		lw t1, 0(t0)
+		addi t1, t1, 1				#treat like a semaphore
+		sw t1, 0(t0)				#store incremented ifflag
 		#now write out the test code
 		la a0, DECIDESTACKB
 		lw a0, 0(a0)
 		la a2, DECIDESTACKP
 		lw a1, 0(a2)
-		#write out a new zero for depth
-		li t0, 4
-		mul t0, t0, a1
-		add a2, a2, t0
-		sw zero, 0(a2)
 		call if_func_create
 		mv t3, a0 
 		j search_create_inscribe
@@ -66,17 +62,26 @@
 		#TODO: then code
 		#are we in if mode
 		la t0, ifflag
+		mv t1, t0
 		lw t0, 0(t0)
+		mv t3, t0
+		addi t3, t3, -1
+		sw t3, 0(t1)
 		bnez t0, search_create_then_ifmode
+		la t0, CREATEFLAG
+		sw zero, 0(t0)
 		tail search_failed
   search_create_then_ifmode:
 		#read depth
 		la t0, DECIDESTACKP
 		lw t1, 0(t0)
+		mv t0, t1
+		lw t1, 0(t1)
 		li t2, 4
 		mul t3, t2, t1
-		add t2, t0, t3
+		sub t2, t0, t3
 		lw t1, 0(t2)
+		addi t1, t1, -1			#adjust for correct depth
 		li t0, 1
 		bne t0, t1, search_create_then_adjust_jump
 		#path to skip 1 instruction - default
@@ -84,30 +89,36 @@
 		sw zero, 0(t2)
 		la t0, DECIDESTACKP
 		lw t1, 0(t0)
+		lw t1, 0(t1)
 		addi t1, t1, -1
+		lw t0, 0(t0)
 		sw t1, 0(t0)
 		j search_create_continue_inscription
   search_create_then_adjust_jump:
 		#adjust skip number
 		la t0, DECIDESTACKP
+		lw t0, 0(t0)
 		lw t2, 0(t0)			#t2 holds index
 		mv t3, t2
 		addi t3, t3, -1
 		sw t3, 0(t0)			#decrease stored index
 		li t3, 4
 		mul t3, t3, t2
-		add t0, t3, t0
+		sub t0, t0, t3
 		lw t3, 0(t0)			#t3 holds depth
-		sw zero, 0(t0)
+		addi t3, t3, -1			#correct for counting starting at 1
+		sw zero, 0(t0)			#reduce to zero - as we are wiping here
 		li t0, 4
 		mul t3, t0, t3			#offset needed in bytes
 		andi t3, t3, 0x3FF		#ready to insert
 		la t0, DECIDESTACKB
 		lw t0, 0(t0)
+		lw t0, 0(t0)
 		li t1, 0x30
 		addi t2, t2, -1
-		mul t1, t2, t1			#base of code
+		mul t1, t2, t1			
 		addi t1, t1, 28
+		add t1, t1, t0			#update point
 		li t0, 0xB8B93
 		slli t3, t3, 20
 		or t0, t3, t0
@@ -121,11 +132,13 @@
 		la t0, ifflag
 		lw t0, 0(t0)
 		beqz t0, search_create_continue_inscription
-		la t0, DECIDESTACKP
+		la t0, DECIDESTACKP			#now add 1 to depth for this
 		lw t1, 0(t0)
+		mv t0, t1
+		lw t1, 0(t1)
 		li t2, 4
 		mul t1, t2, t1
-		add t0, t0, t1
+		sub t0, t0, t1
 		lw t1, 0(t0)
 		addi t1, t1, 1
 		sw t1, 0(t0)				#increment and store

@@ -40,25 +40,20 @@
 		CODEHEADER ELSE, THEN, 0x01
 		tail NEXT
 
-
-
-
-
   if_func_create:
-		#create 128 byte block of code
+		#create 0x30 byte block of code
 		addi sp, sp, -40
 		sw s0, 0(sp)
 		sw s1, 8(sp)
 		sw s2, 16(sp)
 		sw s3, 24(sp)
 		sw s4, 32(sp)
-		mv s1, a0		#base address
-		mv s2, a1		#current index
+		lw s1, 0(a0)		#base address
+		lw s2, 0(a1)		#current index
 		li s0, 0x30		#size of block
-		mul s3, s2, s0		#mukltiply by index
+		mul s3, s2, s0		#multiply by index
 		addi s2, s2, 1		#increment index
-		la s0, DECIDESTACKP	
-		sw s2, 0(s0)		#store incremented index
+		sw s2, 0(a1)		#store incremented index
 		add s1, s1, s3		#start address in s1
 		mv s2, s1		#copy to s2
 		#write out address where code begins
