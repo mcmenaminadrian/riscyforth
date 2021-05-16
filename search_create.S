@@ -96,24 +96,13 @@
 		j search_create_continue_inscription
   search_create_then_adjust_jump:
 		#adjust skip number
-		la t0, DECIDESTACKP
-		lw t0, 0(t0)
-		lw t2, 0(t0)			#t2 holds index
-		mv t3, t2
-		addi t3, t3, -1
-		sw t3, 0(t0)			#decrease stored index
-		li t3, 4
-		mul t3, t3, t2
-		sub t0, t0, t3
-		lw t3, 0(t0)			#t3 holds depth
-		addi t3, t3, -1			#correct for counting starting at 1
-		sw zero, 0(t0)			#reduce to zero - as we are wiping here
+		call get_if_depth
+		mv t3, a1
 		li t0, 4
 		mul t3, t0, t3			#offset needed in bytes
 		andi t3, t3, 0x3FF		#ready to insert
-		la t0, DECIDESTACKB
-		lw t0, 0(t0)
-		lw t0, 0(t0)
+		mv t0, a3
+		mv t2, a0
 		li t1, 0x30
 		addi t2, t2, -1
 		mul t1, t2, t1			
@@ -123,6 +112,8 @@
 		slli t3, t3, 20
 		or t0, t3, t0
 		sw t0, 0(t1)
+		la t3, WA_THEN			#write out this (useless) word address
+		call wind_back_if_depth
 		j search_create_continue_inscription 
   search_create_test_else:
 		la t0, WA_ELSE
@@ -132,16 +123,7 @@
 		la t0, ifflag
 		lw t0, 0(t0)
 		beqz t0, search_create_continue_inscription
-		la t0, DECIDESTACKP			#now add 1 to depth for this
-		lw t1, 0(t0)
-		mv t0, t1
-		lw t1, 0(t1)
-		li t2, 4
-		mul t1, t2, t1
-		sub t0, t0, t1
-		lw t1, 0(t0)
-		addi t1, t1, 1
-		sw t1, 0(t0)				#increment and store
+		call add_if_depth
 		
   search_create_continue_inscription:
 		la t0, createwritepoint
@@ -253,6 +235,12 @@
 		la t0, createwritepoint
 		sw a1, 0(t0)
 		la s7, outer_loop_tokenize
+		#update the depth of the current skip if needed
+		la t0, ifflag
+		lw t0, 0(t0)
+		beqz t0, search_create_varin_go
+		call add_if_depth
+  search_create_varin_go:
 		tail NEXT
 
   search_create_read_address:
@@ -308,6 +296,12 @@
 		addi t1, t1, 8
 		sw t1, 0(t0)
 		la s7, outer_loop_tokenize
+		#update the depth of the current skip if needed
+		la t0, ifflag
+		lw t0, 0(t0)
+		beqz t0, search_create_literal_go
+		call add_if_depth
+  search_create_literal_go:
 		tail NEXT
 
 		#now number processing functions
