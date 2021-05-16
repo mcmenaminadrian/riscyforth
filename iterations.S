@@ -74,8 +74,21 @@
 		li s3, 4
 		mul s3, s2, s3
 		sub s1, s1, s3
+		#have to cascade this down
+		lw s2, 0(s1)
 		sw zero, 0(s1)
-
+		lw s0, 0(s0)
+  wind_back_cascade:
+		addi s1, s1, 4
+		beq s1, s0, wind_back_check_finish
+		addi s2, s2, -1
+		lw s3, 0(s1)
+		add s2, s3, s2
+		sw s2, 0(s1)
+		j wind_back_cascade
+		
+		
+  wind_back_check_finish:
 		la s0, ifflag
 		lw s0, 0(s0)
 		beqz s0, wind_back_update_base_pointer
@@ -90,6 +103,7 @@
 		mul s3, s2, s0
 		add s4, s4, s3
 		sw s4, 0(s1)
+
   wind_back_leave:
 		lw s4, 32(sp)
 		lw s3, 24(sp)
