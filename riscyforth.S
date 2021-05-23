@@ -8,15 +8,17 @@
 #####################################################################################
 
 
-  .equ          SYSTEMAREA,   0x100          #for variables
-  .equ          BUFFERLEN,    0x200
-  .equ          STACKOFFSET,   0x08
-  .equ          INSTWIDTH,     0x04
-  .equ          INSTWIDTH2,    0x08
-  .equ          INSTWIDTH3,    0x0C
-  .equ          INSTWIDTH4,    0x10
-  .equ          NAMEMAXLEN,    0x18
-  .equ		BIGSPACE,      0x100000
+  .equ          SYSTEMAREA,   	0x100          	#for variables
+  .equ          BUFFERLEN,    	0x200
+  .equ          STACKOFFSET,   	0x08
+  .equ          INSTWIDTH,     	0x04
+  .equ          INSTWIDTH2,    	0x08
+  .equ          INSTWIDTH3,    	0x0C
+  .equ          INSTWIDTH4,    	0x10
+  .equ          NAMEMAXLEN,    	0x18
+  .equ		BIGSPACE,      	0x100000
+  .equ		CONDITIONALBLK, 0x40		#size of if/else block
+  .equ		CONDITIONALSTK, 0x14		#size of conditional stack entry
 
 
 
@@ -62,6 +64,8 @@
     .include "decision.S"
     .balign 8
     .include "iterations.S"
+    .balign 8
+    .include "transitions.S"
 
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8
@@ -87,7 +91,6 @@
    .common ifflag, 0x08, 0x08
    .common DECIDESTACKP, 0x08, 0x08
    .common DECIDESTACKB, 0x08, 0x08
-   .common conditionalhightide, 0x08, 0x08
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"

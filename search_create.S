@@ -41,33 +41,81 @@
   search_create_allowed:
 		#test for conditionals
 		la t0, WA_IF
-		bne t3, t0, search_create_test_then
+		bne t3, t0, search_create_test_else
 		#if code
-		la t0, ifflag
-		lw t1, 0(t0)
-		addi t1, t1, 1				#treat like a semaphore
-		sw t1, 0(t0)				#store incremented ifflag
+		call get_iffmode
+		bnez a0, search_create_start_if
+		call get_flag_mode
+		bnez a0, search_create_test_elseif
+		#if -> if
+		j search_create_start_if
+  search_create_test_elseif:
+		li a1, 0x02
+		and a2, a0, a1
+		beqz a2, search_create_test_thenif
+		#else -> if
+		j search_create_start_if
+  search_create_test_thenif:
+		li a1, 0x01
+		and a2, a0, a1
+		beqz a2, search_create_if_fail
+		j search_create_start_if
+  search_create_if_fail:
+		j search_create_bad_ifmode
+  search_create_start_if:
+		call increment_ifmode
 		#now write out the test code
-		la a0, DECIDESTACKB
-		lw a0, 0(a0)
-		la a2, DECIDESTACKP
-		lw a1, 0(a2)
-		call if_func_create
+		SETUP_CONDITIONAL_CALL
+		call ifelse_func_create
 		mv t3, a0 
 		j search_create_inscribe
+
+  search_create_test_else:
+		la t0, WA_ELSE
+		bne t0, t3, search_create_test_then
+		call get_iffmode
+		beqz a0, search_create_bad_ifmode
+		call get_flag_mode
+		li a1, 0x02			
+		and a3, a0, a1
+		beqz a3, search_create_test_thenelse
+		call transition_then_else		#just the same
+  search_create_test_thenelse:
+		li a1, 0x01
+		and a3, a0, a1				#test if this is an else after a then
+		bnez a0, search_create_setup_else
+		tail transition_thenelse
+  search_create_setup_else:
+		tail transition_ifelse
+
   search_create_test_then:
 		la t0, WA_THEN
+		bne t0, t3, XXXXX #TODO: FIX ME
 		#are we in if mode
-		bne t3, t0, search_create_test_else
-		#TODO: then code
-		#are we in if mode
-		la t0, ifflag
-		mv t1, t0
-		lw t0, 0(t0)
+		call get_iffmode
+		beqz a0, search_create_bad_ifmode
+		call get_flag_mode
+		bnez a0, search_create_test_then_state
+		call transition_ifthen
+		j XXXX
+  search_create_test_then_state:
+		#test for then->then
+		li a1, 0x01
+		and a3, a0, a1
+		beqz a3, search_create_test_elsethen
+		tail transition_thenthen
+  search_create_test_elsethen:
+		li a1, 0x02
+		and a3, a0, a1
+		beqz a3, search_create_bad_ifmode	#bad state
+		tail transition_elsethen
+
+		beqz t0, search_create_bad_ifmode
 		mv t3, t0
-		addi t3, t3, -1
+		addi t3, t3, -1				#decrease index
 		sw t3, 0(t1)
-		bnez t0, search_create_then_ifmode
+		j search_create_then_ifmode
+  search_create_bad_ifmode:
 		la t0, CREATEFLAG
 		sw zero, 0(t0)
 		tail search_failed
@@ -117,13 +165,29 @@
 		j search_create_continue_inscription 
   search_create_test_else:
 		la t0, WA_ELSE
+		bne t0, t3, search_create_inscribe
+		#check we are in if mode
+		la t0, ifflag
+		lw t0, 0(t0)
+		beqz t0, search_create_bad_ifmode
+		#now write out the test code
+		la a0, DECIDESTACKB
+		lw a0, 0(a0)
+		la a2, DECIDESTACKP
+		lw a1, 0(a2)
+		call else_func_create
+		
+
 		#TODO: else code
   search_create_inscribe:
 		#update the depth of the current skip
-		la t0, ifflag
-		lw t0, 0(t0)
-		beqz t0, search_create_continue_inscription
-		call add_if_depth
+		call get_iffmode
+		beqz a0, search_create_continue_inscription
+		la a0, DECIDESTACKB
+		lw a0, 0(a0)
+		la a2, DECIDESTACKP
+		lw a1, 0(a2)
+		call increment_current_skip
 		
   search_create_continue_inscription:
 		la t0, createwritepoint
@@ -311,18 +375,19 @@
 		#a3 end of token [in]
 		#a4 base (set in fuction)
   func_test_hex:
-		PUSH s0
-		PUSH s1
-		PUSH s2
-		PUSH s3
-		PUSH s4
-		PUSH s5
-		PUSH s6
-		PUSH s7
-		PUSH s8
-		PUSH s9
-		PUSH s10
-		PUSH s11
+		add sp, sp, -96
+		sw s0, 0(sp)
+		sw s1, 8(sp)
+		sw s2, 16(sp)
+		sw s3, 24(sp)
+		sw s4, 32(sp)
+		sw s5, 40(sp)
+		sw s6, 48(sp)
+		sw s7, 56(sp)
+		sw s8, 64(sp)
+		sw s9, 72(sp)
+		sw s10, 80(sp)
+		sw s11, 88(sp)
 		mv a1, zero
 		mv a2, zero
 		li a4, 16
@@ -393,34 +458,36 @@
 
   func_return_hex:
 		#common return for all number funcs
-		POP s11
-		POP s10
-		POP s9
-		POP s8
-		POP s7
-		POP s6
-		POP s5
-		POP s4
-		POP s3
-		POP s2
-		POP s1
-		POP s0
+		lw s11, 88(sp)
+		lw s10, 80(sp)
+		lw s9, 72(sp)
+		lw s8, 64(sp)
+		lw s7, 56(sp)
+		lw s6, 48(sp)
+		lw s5, 40(sp)
+		lw s4, 32(sp)
+		lw s3, 24(sp)
+		lw s2, 16(sp)
+		lw s1, 8(sp)
+		lw s0, 0(sp)
+		addi sp, sp, 96
 		ret		
 
 
 func_test_octal:
-		PUSH s0
-		PUSH s1
-		PUSH s2
-		PUSH s3
-		PUSH s4
-		PUSH s5
-		PUSH s6
-		PUSH s7
-		PUSH s8
-		PUSH s9
-		PUSH s10
-		PUSH s11
+		add sp, sp, -96
+		sw s0, 0(sp)
+		sw s1, 8(sp)
+		sw s2, 16(sp)
+		sw s3, 24(sp)
+		sw s4, 32(sp)
+		sw s5, 40(sp)
+		sw s6, 48(sp)
+		sw s7, 56(sp)
+		sw s8, 64(sp)
+		sw s9, 72(sp)
+		sw s10, 80(sp)
+		sw s11, 88(sp)
 		mv a1, zero
 		mv a2, zero
 		li a4, 8
@@ -431,18 +498,19 @@ func_test_octal:
 		
  
   func_test_decimal:
-		PUSH s0
-		PUSH s1
-		PUSH s2
-		PUSH s3
-		PUSH s4
-		PUSH s5
-		PUSH s6
-		PUSH s7
-		PUSH s8
-		PUSH s9
-		PUSH s10
-		PUSH s11
+		add sp, sp, -96
+		sw s0, 0(sp)
+		sw s1, 8(sp)
+		sw s2, 16(sp)
+		sw s3, 24(sp)
+		sw s4, 32(sp)
+		sw s5, 40(sp)
+		sw s6, 48(sp)
+		sw s7, 56(sp)
+		sw s8, 64(sp)
+		sw s9, 72(sp)
+		sw s10, 80(sp)
+		sw s11, 88(sp)
 		mv a1, zero
 		mv a2, zero
 		li a4, 10
