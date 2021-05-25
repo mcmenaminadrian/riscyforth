@@ -84,9 +84,9 @@
 		li a1, 0x01
 		and a3, a0, a1				#test if this is an else after a then
 		bnez a0, search_create_setup_else
-		tail transition_thenelse
+		tail transition_then_else
   search_create_setup_else:
-		tail transition_ifelse
+		tail transition_if_else
 
   search_create_test_then:
 		la t0, WA_THEN
@@ -96,14 +96,14 @@
 		beqz a0, search_create_bad_ifmode
 		call get_flag_mode
 		bnez a0, search_create_test_then_state
-		call transition_ifthen
+		call transition_if_then
 		j XXXX
   search_create_test_then_state:
 		#test for then->then
 		li a1, 0x01
 		and a3, a0, a1
 		beqz a3, search_create_test_elsethen
-		tail transition_thenthen
+		tail transition_then_then
   search_create_test_elsethen:
 		li a1, 0x02
 		and a3, a0, a1

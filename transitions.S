@@ -158,7 +158,7 @@
 
 
 	
-  transition_ifthen:
+  transition_if_then:
 			#standard then
 			TRANSISTION_PROLOGUE
 			SETUP_CONDITIONAL_CALL
@@ -179,6 +179,34 @@
 			SETUP_CONDITIONAL_CALL
 			call clean_conditional_stack
   finish_leave_if_then:
+			SETUP_CONDITIONAL_CALL
+			get iffmode
+			bnez a0, really_leave_if_then
+			SETUP_CONDITIONAL_CALL
+			call transition_bump_base_address
 			TRANSITION_EPILOGUE
-			ret
+			tail search_create_continue_inscription
+
+  transition_then_then:
+			TRANSITION_PROLOGUE
+			#as above - we are implementing jumps in the layer above
+			#but first we need to test there is one!
+			call get_iffmode
+			add a0, a0, -1
+			bnez a0, transition_then_then_upperlayer_exists
+			#we are in a bad nesting
+			TRANSITION_EPILOGUE
+			tail search_create_bad_ifmode
+  transition_then_then_upperlayer_exists:
+			SETUP_CONDITIONAL_CALL
+			call get_increments
+			mv s0, a0
+			SETUP_CONDITIONAL_CALL
+			call clean_conditional_stack
+			call decriment_iffmode
+			SETUP_CONDITIONAL_CALL
+			mv a2, s0
+			call transition_bump_then
+			call leave_if_then
+
 					
