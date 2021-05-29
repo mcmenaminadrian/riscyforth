@@ -78,11 +78,11 @@
 
   set_flag_mode_on:
 		#a0 contains bits to set on
-		add sp, sp, -24
+		add sp, sp, -32
 		sw s0, 0(sp)
 		sw s1, 8(sp)
 		sw s2, 16(sp)
-		sw s3, 20(sp)
+		sw s3, 24(sp)
 
 		la s0, DECIDESTACKP
 		li s1, 0x14		#size of stack entry
@@ -95,20 +95,20 @@
 		or a0, s1, a0		#set the bits
 		sw a0, 0(s2)		#a0 also returns new state
 
-		lw s3, 20(sp)
+		lw s3, 24(sp)
 		lw s2, 16(sp)
 		lw s1, 8(sp)
 		lw s0, 0(sp)
-		addi sp, sp, 24
+		addi sp, sp, 32
 		ret
 		
   set_flag_mode_off:
 		#a0 has bits to turn off
-		add sp, sp, -24
+		add sp, sp, -32
 		sw s0, 0(sp)
 		sw s1, 8(sp)
 		sw s2, 16(sp)
-		sw s3, 20(sp)
+		sw s3, 24(sp)
 
 		la s0, DECIDESTACKP
 		li s1, 0x14		#size of stack entry
@@ -122,19 +122,19 @@
 		and a0, s3, s1		# flag &=(!a0)
 		sw a0, 0(s2)		#a0 returns new state 
 
-		lw s3, 20(sp)
+		lw s3, 24(sp)
 		lw s2, 16(sp)
 		lw s1, 8(sp)
 		lw s0, 0(sp)
-		addi sp, sp, 24
+		addi sp, sp, 32
 		ret
 
   get_flag_mode:
-		add sp, sp, -24
+		add sp, sp, -32
 		sw s0, 0(sp)
 		sw s1, 8(sp)
 		sw s2, 16(sp)
-		sw s3, 20(sp)
+		sw s3, 24(sp)
 		
 		la s0, DECIDESTACKP
 		li s1, 0x14		#size of stack entry
@@ -145,11 +145,11 @@
 		add s2, s3, s0		#s2 has address
 		lw a0, 0(s2)		#a0 returns unaltered state
 		
-		lw s3, 20(sp)
+		lw s3, 24(sp)
 		lw s2, 16(sp)
 		lw s1, 8(sp)
 		lw s0, 0(sp)
-		addi sp, sp, 24
+		addi sp, sp, 32
 		ret
 		
 
