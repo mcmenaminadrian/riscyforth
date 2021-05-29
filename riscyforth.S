@@ -59,13 +59,11 @@
     .balign 8
     .include "outerloop.S"
     .balign 8
+    .include "transitions.S"
+    .balign 8
     .include "search_create.S"
     .balign 8
     .include "decision.S"
-    .balign 8
-    .include "iterations.S"
-    .balign 8
-    .include "transitions.S"
 
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8

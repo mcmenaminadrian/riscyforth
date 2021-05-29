@@ -63,9 +63,13 @@
   search_create_if_fail:
 		j search_create_bad_ifmode
   search_create_start_if:
-		call increment_ifmode
+		call increment_iffmode
 		#now write out the test code
-		SETUP_CONDITIONAL_CALL
+#		SETUP_CONDITIONAL_CALL
+		la a0, DECIDESTACKB
+		lw a0, 0(a0)
+		la a2, DECIDESTACKP
+		lw a1, 0(a2)
 		call ifelse_func_create
 		mv t3, a0 
 		j search_create_inscribe
@@ -90,97 +94,32 @@
 
   search_create_test_then:
 		la t0, WA_THEN
-		bne t0, t3, XXXXX #TODO: FIX ME
+		bne t0, t3, search_create_inscribe
 		#are we in if mode
 		call get_iffmode
 		beqz a0, search_create_bad_ifmode
 		call get_flag_mode
 		bnez a0, search_create_test_then_state
-		call transition_if_then
-		j XXXX
+		tail transition_if_then
   search_create_test_then_state:
 		#test for then->then
 		li a1, 0x01
 		and a3, a0, a1
-		beqz a3, search_create_test_elsethen
+		beqz a3, search_create_test_else_then
 		tail transition_then_then
-  search_create_test_elsethen:
+  search_create_test_else_then:
 		li a1, 0x02
 		and a3, a0, a1
 		beqz a3, search_create_bad_ifmode	#bad state
-		tail transition_elsethen
-
-		beqz t0, search_create_bad_ifmode
-		mv t3, t0
-		addi t3, t3, -1				#decrease index
-		sw t3, 0(t1)
-		j search_create_then_ifmode
+		tail transition_else_then
   search_create_bad_ifmode:
+		#error
 		la t0, CREATEFLAG
 		sw zero, 0(t0)
 		tail search_failed
-  search_create_then_ifmode:
-		#read depth
-		la t0, DECIDESTACKP
-		lw t1, 0(t0)
-		mv t0, t1
-		lw t1, 0(t1)
-		li t2, 4
-		mul t3, t2, t1
-		sub t2, t0, t3
-		lw t1, 0(t2)
-		addi t1, t1, -1			#adjust for correct depth
-		li t0, 1
-		bne t0, t1, search_create_then_adjust_jump
-		#path to skip 1 instruction - default
-		#wind down the offset now
-		sw zero, 0(t2)
-		la t0, DECIDESTACKP
-		lw t1, 0(t0)
-		lw t1, 0(t1)
-		addi t1, t1, -1
-		lw t0, 0(t0)
-		sw t1, 0(t0)
-		j search_create_continue_inscription
-  search_create_then_adjust_jump:
-		#adjust skip number
-		call get_if_depth
-		mv t3, a1
-		li t0, 4
-		mul t3, t0, t3			#offset needed in bytes
-		andi t3, t3, 0x3FF		#ready to insert
-		mv t0, a3
-		mv t2, a0
-		li t1, 0x30
-		addi t2, t2, -1
-		mul t1, t2, t1			
-		addi t1, t1, 28
-		add t1, t1, t0			#update point
-		li t0, 0xB8B93
-		slli t3, t3, 20
-		or t0, t3, t0
-		sw t0, 0(t1)
-		la t3, WA_THEN			#write out this (useless) word address
-		call wind_back_if_depth
-		j search_create_continue_inscription 
-  search_create_test_else:
-		la t0, WA_ELSE
-		bne t0, t3, search_create_inscribe
-		#check we are in if mode
-		la t0, ifflag
-		lw t0, 0(t0)
-		beqz t0, search_create_bad_ifmode
-		#now write out the test code
-		la a0, DECIDESTACKB
-		lw a0, 0(a0)
-		la a2, DECIDESTACKP
-		lw a1, 0(a2)
-		call else_func_create
-		
 
-		#TODO: else code
   search_create_inscribe:
-		#update the depth of the current skip
+		#update the depth of the current skip if needed
 		call get_iffmode
 		beqz a0, search_create_continue_inscription
 		la a0, DECIDESTACKB
@@ -300,10 +239,10 @@
 		sw a1, 0(t0)
 		la s7, outer_loop_tokenize
 		#update the depth of the current skip if needed
-		la t0, ifflag
-		lw t0, 0(t0)
-		beqz t0, search_create_varin_go
-		call add_if_depth
+		call get_iffmode
+		beqz a0, search_create_varin_go
+		SETUP_CONDITIONAL_CALL
+		call increment_current_skip
   search_create_varin_go:
 		tail NEXT
 
@@ -361,10 +300,10 @@
 		sw t1, 0(t0)
 		la s7, outer_loop_tokenize
 		#update the depth of the current skip if needed
-		la t0, ifflag
-		lw t0, 0(t0)
-		beqz t0, search_create_literal_go
-		call add_if_depth
+		call get_iffmode
+		beqz a0, search_create_literal_go
+		SETUP_CONDITIONAL_CALL
+		call increment_current_skip
   search_create_literal_go:
 		tail NEXT
 

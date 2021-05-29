@@ -53,7 +53,7 @@
 			andi s2, s2, 0x3FF
 			li s3, 0xFFFFF
 			and s1, s1, s3
-			slli s4, s2, s0
+			slli s4, s2, 20
 			or s3, s1, s4
 			sw s3, 28(s5)
 			TRANSITION_EPILOGUE
@@ -80,7 +80,7 @@
 			andi s2, s2, 0x3FF
 			li s3, 0xFFFFF
 			and s1, s1, s3
-			slli s4, s2, s0
+			slli s4, s2, 20
 			or s3, s1, s4
 			sw s3, 48(s5)
 			TRANSITION_EPILOGUE
@@ -113,17 +113,16 @@
 			#but first we need to test there is one!
 			call get_iffmode
 			add a0, a0, -1
-			bnez a0, transition_then_else_upperlayer_exists
+			bnez a0, transition_then_else_valid
 			#we are in a bad nesting
-			TRANSITION_EPILOGUE
-			tail search_create_bad_ifmode
-  transition_then_else_upperlayer_exists:
+			tail general_bad_nesting		#see below
+  transition_then_else_valid:
 			SETUP_CONDITIONAL_CALL
 			call get_increments
 			mv s0, a0
 			SETUP_CONDITIONAL_CALL
 			call clean_conditional_stack
-			call decriment_iffmode
+			call decrement_iffmode
 			SETUP_CONDITIONAL_CALL
 			mv a2, s0
   transition_setup_else:
@@ -138,11 +137,11 @@
 			SETUP_CONDITIONAL_CALL
 			call get_conditional_addresses
 			mv t3, a1
-			tail search_create_continue_inscription
+			tail search_create_inscribe
 			
 			
 
-  transition_if_else
+  transition_if_else:
 			#setup a standard else
 			TRANSITION_PROLOGUE
 			SETUP_CONDITIONAL_CALL
@@ -160,7 +159,16 @@
 	
   transition_if_then:
 			#standard then
-			TRANSISTION_PROLOGUE
+			TRANSITION_PROLOGUE
+			#test we are in a valid conditional
+			call get_iffmode
+			bnez a0, transition_if_then_valid
+			#bad conditional
+  general_bad_nesting:
+			TRANSITION_EPILOGUE
+			tail search_create_bad_ifmode
+  transition_if_then_valid:
+			#good conditional - at least we hope so
 			SETUP_CONDITIONAL_CALL
 			call get_increments
 			mv s0, a2
@@ -174,18 +182,15 @@
 			bnez a0, continue_leave_if_then
 			SETUP_CONDITIONAL_CALL
 			call transition_bump_base_address
-			j finish_leave_if_then
+			j leave_if_then_over
   continue_leave_if_then:
-			SETUP_CONDITIONAL_CALL
-			call clean_conditional_stack
-  finish_leave_if_then:
-			SETUP_CONDITIONAL_CALL
-			get iffmode
-			bnez a0, really_leave_if_then
-			SETUP_CONDITIONAL_CALL
-			call transition_bump_base_address
+			#in nested conditionals - so have to keep counting
+			call increment_iffmode		#reverse decrement as we are still counting
+			li a0, 0x01			#then mode
+			call set_flag_mode_on
+  leave_if_then_over:
 			TRANSITION_EPILOGUE
-			tail search_create_continue_inscription
+			tail search_create_inscribe
 
   transition_then_then:
 			TRANSITION_PROLOGUE
@@ -193,20 +198,56 @@
 			#but first we need to test there is one!
 			call get_iffmode
 			add a0, a0, -1
-			bnez a0, transition_then_then_upperlayer_exists
+			bnez a0, transition_then_then_valid
 			#we are in a bad nesting
-			TRANSITION_EPILOGUE
-			tail search_create_bad_ifmode
-  transition_then_then_upperlayer_exists:
+			tail general_bad_nesting
+  transition_then_then_valid:
 			SETUP_CONDITIONAL_CALL
 			call get_increments
 			mv s0, a0
 			SETUP_CONDITIONAL_CALL
 			call clean_conditional_stack
-			call decriment_iffmode
+			call decrement_iffmode
 			SETUP_CONDITIONAL_CALL
 			mv a2, s0
 			call transition_bump_then
 			call leave_if_then
+
+  transition_else_then:
+			TRANSITION_PROLOGUE
+			#test we are in a valid conditional
+			call get_iffmode
+			bnez a0, transition_else_then_valid
+			tail general_bad_nesting
+   transition_else_then_valid:
+			#this is standard else ... then sequence
+			SETUP_CONDITIONAL_CALL
+			call get_increments
+			mv s0, a1		#s0 now has what we need to add (else count)
+			li s1, 1
+			beq s0, s1, transition_else_then_inc_done #no need to adjust
+			#update the increment
+			SETUP_CONDITIONAL_CALL
+			mv a2, s0
+			call transition_bump_else
+  transition_else_then_inc_done:
+			call decrement_iffmode
+			bnez a0, transition_else_then_layer_prep
+			#leave cleanly
+			SETUP_CONDITIONAL_CALL
+			call transition_bump_base_address
+			j transition_else_then_leave
+  transition_else_then_layer_prep:
+			call increment_iffmode		#reverse decrement
+			#we have to switch modes now
+			li a0, 0xFF
+			call set_flag_mode_off
+			li a0, 0x01
+			call set_flag_mode_on
+  transition_else_then_leave:
+			TRANSITION_EPILOGUE
+			tail search_create_inscribe
+
+			
 
 					

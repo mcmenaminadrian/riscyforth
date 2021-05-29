@@ -53,8 +53,9 @@
 		addi t0, t0, -4
 		la t1, DECIDESTACKP
 		sw t0, 0(t1)
-		addi t1, t1, 4
-		sw zero, 0(t1)			    #zero skips currently
+		sw zero, 0(t0)			    #zero skips currently
+		addi t0, t0, -4
+		sw zero, 0(t0)			    #high tide also zero	
                 sw zero, OKSTATUS, t0
                 sw zero, CREATEFLAG, t0
                 la t1, TIL_ELSE	                    #start search from here

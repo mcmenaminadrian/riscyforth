@@ -52,7 +52,7 @@
 		add sp, sp, 8
 		ret
 
-  decriment_iffmode:
+  decrement_iffmode:
 		add sp, sp, -8
 		sw s0, 0(sp)
 		la s0, ifflag
@@ -263,7 +263,7 @@
 		sw s3, 60(s2)
 
 		#update the stack
-		sw s0, s2		#s0 - base address
+		mv s0, s2		#s0 - base address
 		lw s1, 0(a1)
 		lw s2, 0(s1)		#s2 counter		
 		sw s2, 8(a0)		#update hightide
@@ -315,7 +315,7 @@
 		#test for else mode
 		li s4, 0x02
 		and s5, s3, s2
-		beqz, incrementing_then_offset
+		beqz a5, incrementing_then_offset
 		addi s3, s3, 0x10	#point to else counter
 		j incrementing_skip_increment
   incrementing_then_offset:
@@ -336,7 +336,7 @@
 		
 
   get_increments:
-		#sum increments for current and retrun in a0
+		#sum increments for current and return in a0
 		#a1 returns else increments
 		#a2 returns then increments
 		addi sp, sp, -32
