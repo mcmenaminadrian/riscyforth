@@ -39,8 +39,7 @@
 			
 			TRANSITION_PROLOGUE
 			mv s0, a0
-			lw s1, 0(a1)
-			mv a1, s1
+			lw s0, 0(s0)
 			lw s1, 0(a1)
 			mv s2, a2
 
@@ -66,8 +65,7 @@
 			
 			TRANSITION_PROLOGUE
 			mv s0, a0
-			lw s1, 0(a1)
-			mv a1, s1
+			lw s0, 0(s0)
 			lw s1, 0(a1)
 			mv s2, a2
 
@@ -90,19 +88,19 @@
 			TRANSITION_PROLOGUE
 			mv s0, a0
 			lw s1, 0(s0)
-			lw s2, 8(s0)		#high tide
+			lw s2, -8(s0)		#high tide
 			li s3, CONDITIONALBLK
 			mul s4, s3, s2
 			add s5, s1, s4
 			sw s5, 0(s0)
 			#zero everything else
-			sw zero, 4(s0)
-			sw zero, 8(s0)
-			sw zero, 12(s0)
-			sw zero, 16(s0)
-			sw zero, 20(s0)
-			sw zero, 24(s0)
-			sw zero, 28(s0)
+			sw zero, -4(s0)
+			sw zero, -8(s0)
+			sw zero, -12(s0)
+			sw zero, -16(s0)
+			sw zero, -20(s0)
+			sw zero, -24(s0)
+			sw zero, -28(s0)
 			TRANSITION_EPILOGUE
 			ret			
 

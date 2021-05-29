@@ -46,7 +46,7 @@
 		#set up the simple stack pointer for the decision creation
 		mv t0, a0
 		add t0, t0, a1
-		add t0, t0, -4
+		addi t0, t0, -4
 		la t1, DECIDESTACKB
 		sw t0, 0(t1)			#top of the stack, holds address of next decision block block
 		sw a0, 0(t0)			#store address
@@ -54,8 +54,12 @@
 		la t1, DECIDESTACKP
 		sw t0, 0(t1)
 		sw zero, 0(t0)			    #zero skips currently
-		addi t0, t0, -4
-		sw zero, 0(t0)			    #high tide also zero	
+		sw zero, -4(t0)			    #high tide also zero	
+		sw zero, -8(t0)			    #ensure all of stack is zero
+		sw zero, -12(t0)
+		sw zero, -16(t0)
+		sw zero, -20(t0)
+		sw zero, -24(t0)
                 sw zero, OKSTATUS, t0
                 sw zero, CREATEFLAG, t0
                 la t1, TIL_ELSE	                    #start search from here

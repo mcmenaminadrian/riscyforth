@@ -44,7 +44,7 @@
 		bne t3, t0, search_create_test_else
 		#if code
 		call get_iffmode
-		bnez a0, search_create_start_if
+		beqz a0, search_create_start_if
 		call get_flag_mode
 		bnez a0, search_create_test_elseif
 		#if -> if
@@ -65,11 +65,7 @@
   search_create_start_if:
 		call increment_iffmode
 		#now write out the test code
-#		SETUP_CONDITIONAL_CALL
-		la a0, DECIDESTACKB
-		lw a0, 0(a0)
-		la a2, DECIDESTACKP
-		lw a1, 0(a2)
+		SETUP_CONDITIONAL_CALL
 		call ifelse_func_create
 		mv t3, a0 
 		j search_create_inscribe
@@ -122,10 +118,7 @@
 		#update the depth of the current skip if needed
 		call get_iffmode
 		beqz a0, search_create_continue_inscription
-		la a0, DECIDESTACKB
-		lw a0, 0(a0)
-		la a2, DECIDESTACKP
-		lw a1, 0(a2)
+		SETUP_CONDITIONAL_CALL
 		call increment_current_skip
 		
   search_create_continue_inscription:

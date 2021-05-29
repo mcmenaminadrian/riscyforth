@@ -85,11 +85,12 @@
 		sw s3, 24(sp)
 
 		la s0, DECIDESTACKP
-		li s1, 0x14		#size of stack entry
+		lw s0, 0(s0)
 		lw s2, 0(s0)
+		li s1, -20		#size of stack entry
 		addi s2, s2, -1		#offset for multiply
 		mul s3, s2, s1
-		addi s3, s3, 4		#to else mode adjusted for hightide
+		addi s3, s3, -12	#to else mode adjusted for hightide
 		add s2, s3, s0		#s2 has address
 		lw s1, 0(s2)
 		or a0, s1, a0		#set the bits
@@ -111,11 +112,12 @@
 		sw s3, 24(sp)
 
 		la s0, DECIDESTACKP
-		li s1, 0x14		#size of stack entry
+		lw s0, 0(s0)
+		li s1, -20		#size of stack entry
 		lw s2, 0(s0)
 		addi s2, s2, -1		#offset for multiply
 		mul s3, s2, s1
-		addi s3, s3, 4		#to else mode adjusted for hightide
+		addi s3, s3, -12	#to else mode adjusted for hightide
 		add s2, s3, s0		#s2 has address
 		not s1, a0
 		lw s3, 0(s2)
@@ -137,11 +139,12 @@
 		sw s3, 24(sp)
 		
 		la s0, DECIDESTACKP
-		li s1, 0x14		#size of stack entry
+		lw s0, 0(s0)
+		li s1, -20		#size of stack entry
 		lw s2, 0(s0)
 		addi s2, s2, -1		#offset for multiply
 		mul s3, s2, s1
-		addi s3, s3, 4		#to else mode adjusted for hightide
+		addi s3, s3, -20	#to else mode adjusted for hightide
 		add s2, s3, s0		#s2 has address
 		lw a0, 0(s2)		#a0 returns unaltered state
 		
@@ -180,15 +183,12 @@
 		sw s3, 24(sp)
 		sw s4, 32(sp)
 		lw s1, 0(a0)		#base address
-		lw s2, 0(a1)		#current index address
-		mv a1, s2
-		lw s2, 0(a1)
+		lw s2, -4(a1)		#current index address for writing (high tide)
 
 		li s0, CONDITIONALBLK	#size of block
 		mul s3, s2, s0		#multiply by index
 		addi s2, s2, 1		#increment index
-		sw s2, 0(a1)		#store incremented index
-		sw s2, 4(a1)		#and in high tide		
+		sw s2, -4(a1)		#store incremented index
 		add s1, s1, s3		#start address in s1
 		mv s2, s1		#copy to s2
 		#write out address where code begins
@@ -264,21 +264,21 @@
 
 		#update the stack
 		mv s0, s2		#s0 - base address
-		lw s1, 0(a1)
-		lw s2, 0(s1)		#s2 counter		
-		sw s2, 8(a0)		#update hightide
+		lw s2, 0(a1)
+		addi s2, s2, 1
+		sw s2, 0(a1)
 		#where are we on the stack
-		li s1, 0x14		#each stack entry is 20 bytes
+		li s1, -20		#each stack entry is 20 bytes
 		mul s3, s1, s2
 		addi s3, s3, -8		#adjust for first entry being offset 0 bytes - and for first 12 bytes
 		lw s1, 0(a0)
 		add s3, s1, s3		#s3 points to start of stack entry
 		sw s0, 0(s3)
-		addi s1, s0, 44
-		sw s1, 4(s3)		#addresses written
-		sw zero, 8(s3)		#zero out counts
-		sw zero, 12(s3)
-		sw zero, 16(s3)
+		addi s1, s0, -44
+		sw s1, -4(s3)		#addresses written
+		sw zero, -8(s3)		#zero out counts
+		sw zero, -12(s3)
+		sw zero, -16(s3)
 		
 		#now return
 		mv a0, s2
@@ -300,31 +300,29 @@
 		sw s3, 24(sp)
 		sw s4, 32(sp)
 		sw s5, 40(sp)
-
-		lw s0, 0(a0)
-		addi s0, s0, 12
-		lw s1, 0(a1)		#current index address
-		mv a1, s1
-		lw s1, 0(a1)		#now current index
-		li s2, CONDITIONALSTK
+		mv s0, a0
+		addi s0, s0, -12	#top of the stack entries
+		lw s1, 0(a1)		#current index 
+		li s2, -CONDITIONALSTK
 		addi s1, s1, -1		#rebase to zero
 		mul s3, s2, s1		#calculate raw offset
 		add s3, s3, s0		#and add to get actual address
+		PUSH ra
 		call get_flag_mode
+		POP ra
 		mv s2, a0
 		#test for else mode
 		li s4, 0x02
-		and s5, s3, s2
-		beqz a5, incrementing_then_offset
-		addi s3, s3, 0x10	#point to else counter
+		and s5, s2, s4
+		beqz s5, incrementing_then_offset
+		addi s3, s3, -16	#point to else counter
 		j incrementing_skip_increment
   incrementing_then_offset:
-		add s3, s3, 0x0C	#point to then counter
+		add s3, s3, -12		#point to then counter
   incrementing_skip_increment:
 		lw s0, 0(s3)
 		addi s0, s0, 1
 		sw s0, 0(s3)
-		
 		lw s5, 40(sp)
 		lw s4, 32(sp)
 		lw s3, 24(sp)
@@ -345,23 +343,20 @@
 		sw s2, 16(sp)
 		sw s3, 24(sp)
 
-		lw s0, 0(a0)
-		add s0, s0, 12
+		mv s0, a0
+		add s0, s0, -12		#s0 now pointing to bottom of stack
 		lw s1, 0(a1)
-		mv a1, s1
-		lw s1, 0(a1)
-		li s2, CONDITIONALSTK
+		li s2, -CONDITIONALSTK
 		addi s1, s1, -1
 		mul s3, s2, s1
 		add s3, s3, s0
-		lw s1, 16(s3)		#else count
+		lw s1, -16(s3)		#else count
 		mv a1, s1
 		add s0, zero, s1
-		lw s1, 12(s3)		#then count
+		lw s1, -12(s3)		#then count
 		mv a2, s1
 		add s0, s0, s1
 		mv a0, s0
-
 		lw s3, 24(sp)
 		lw s2, 16(sp)
 		lw s1, 8(sp)
@@ -411,11 +406,10 @@
 		sw s1, 8(sp)
 		sw s2, 16(sp)
 		sw s3, 24(sp)
-		add s0, s0, 12
+		mv s0, a0
+		add s0, s0, -12
 		lw s1, 0(a1)
-		mv a1, s1
-		lw s1, 0(a1)
-		li s2, CONDITIONALSTK
+		li s2, -CONDITIONALSTK
 		add s1, s1, -1
 		mul s3, s2, s1
 		add s3, s3, s0		#s3 has the address of the block
