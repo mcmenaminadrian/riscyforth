@@ -42,6 +42,8 @@
 			lw s0, 0(s0)
 			lw s1, 0(a1)
 			mv s2, a2
+			li s3, 4
+			mul s2, s2, s3		#4 bytes per instruction
 
 			addi s1, s1, -1		#correct to zero start
 			li s3, CONDITIONALBLK
@@ -68,6 +70,8 @@
 			lw s0, 0(s0)
 			lw s1, 0(a1)
 			mv s2, a2
+			li s3, 4
+			mul s2, s2, s3		#4 bytes per instruction
 
 			addi s1, s1, -1		#correct to zero start
 			li s3, CONDITIONALBLK
@@ -217,7 +221,7 @@
 			call get_iffmode
 			bnez a0, transition_else_then_valid
 			tail general_bad_nesting
-   transition_else_then_valid:
+  transition_else_then_valid:
 			#this is standard else ... then sequence
 			SETUP_CONDITIONAL_CALL
 			call get_increments

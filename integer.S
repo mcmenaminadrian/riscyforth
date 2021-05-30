@@ -1,43 +1,47 @@
 #Simple integer calculations
 
                 CODEHEADER ADD, DOT, 0x01
-                POP a0
-                POP a1
+		lw a0, 0(sp)
+		lw a1, 8(sp)
                 add t0, a0, a1
-                PUSH t0
+		sw t0, 8(sp)
+		addi sp, sp, 8
                 tail NEXT
 
                 CODEHEADER MUL, ADD, 0x01
-                POP a0
-                POP a1
+		lw a0, 0(sp)
+		lw a1, 8(sp)
                 mul t0, a0, a1
-                PUSH t0
+		sw t0, 8(sp)
+		addi sp, sp, 8
                 tail NEXT
 
                 CODEHEADER DIV, MUL, 0x01
-                POP a1
-                POP a0
+		lw a1, 0(sp)
+		lw a0, 8(sp)
                 div t0, a0, a1
-                PUSH t0
+		sw t0, 8(sp)
+		addi sp, sp, 8
                 tail NEXT
 
                 CODEHEADER SUB, DIV, 0x01
-                POP a1
-                POP a0
+		lw a1, 0(sp)
+		lw a0, 8(sp)
                 sub t0, a0, a1
-                PUSH t0
+		sw t0, 8(sp)
+		addi sp, sp, 8
                 tail NEXT
 
                 CODEHEADER PLUS1, SUB, 0x01
-                POP t0
+		lw t0, 0(sp)
                 addi t0, t0, 1
-                PUSH t0
+		sw t0, 0(sp)
                 tail NEXT
 
                 CODEHEADER MINUS1, PLUS1, 0x01
-                POP t0
+		lw t0, 0(sp)
                 addi t0, t0, -1
-                PUSH t0
+		sw t0, 0(sp)
                 tail NEXT
 
                 CODEHEADER UNDERPLUS, MINUS1, 0x01

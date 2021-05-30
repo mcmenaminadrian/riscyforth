@@ -144,10 +144,22 @@
 		lw s2, 0(s0)
 		addi s2, s2, -1		#offset for multiply
 		mul s3, s2, s1
-		addi s3, s3, -20	#to else mode adjusted for hightide
+		addi s3, s3, -16	#to flag adjusted for hightide
 		add s2, s3, s0		#s2 has address
 		lw a0, 0(s2)		#a0 returns unaltered state
-		
+		mv a1, zero
+		mv a2, zero
+		li s0, 0x02
+		and s1, s0, a0
+		beqz s1, test_flag_mode_then
+		li a2, 1
+ 		j get_flag_mode_leave
+  test_flag_mode_then:
+		li s0, 0x01
+		and s1, s0, a0
+		beqz s1, get_flag_mode_leave
+		li a1, 1
+  get_flag_mode_leave:		
 		lw s3, 24(sp)
 		lw s2, 16(sp)
 		lw s1, 8(sp)
