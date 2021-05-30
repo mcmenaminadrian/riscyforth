@@ -50,15 +50,11 @@
 		#if -> if
 		j search_create_start_if
   search_create_test_elseif:
-		li a1, 0x02
-		and a2, a0, a1
 		beqz a2, search_create_test_thenif
 		#else -> if
 		j search_create_start_if
   search_create_test_thenif:
-		li a1, 0x01
-		and a2, a0, a1
-		beqz a2, search_create_if_fail
+		beqz a1, search_create_if_fail
 		j search_create_start_if
   search_create_if_fail:
 		j search_create_bad_ifmode
@@ -76,14 +72,11 @@
 		call get_iffmode
 		beqz a0, search_create_bad_ifmode
 		call get_flag_mode
-		li a1, 0x02			
-		and a3, a0, a1
-		beqz a3, search_create_test_thenelse
-		call transition_then_else		#just the same
+		beqz a2, search_create_test_thenelse
+		#cannot have ELSE ... ELSE
+		j search_create_bad_ifmode		
   search_create_test_thenelse:
-		li a1, 0x01
-		and a3, a0, a1				#test if this is an else after a then
-		bnez a0, search_create_setup_else
+		beqz a1, search_create_setup_else
 		tail transition_then_else
   search_create_setup_else:
 		tail transition_if_else
@@ -99,9 +92,7 @@
 		tail transition_if_then
   search_create_test_then_state:
 		#test for then->then
-		li a1, 0x01
-		and a3, a0, a1
-		beqz a3, search_create_test_else_then
+		beqz a1, search_create_test_else_then
 		tail transition_then_then
   search_create_test_else_then:
 		li a1, 0x02

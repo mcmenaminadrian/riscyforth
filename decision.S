@@ -152,13 +152,13 @@
 		li s0, 0x02
 		and s1, s0, a0
 		beqz s1, test_flag_mode_then
-		li a2, 1
+		li a1, 1		#THEN
  		j get_flag_mode_leave
   test_flag_mode_then:
 		li s0, 0x01
 		and s1, s0, a0
 		beqz s1, get_flag_mode_leave
-		li a1, 1
+		li a2, 1		#ELSE
   get_flag_mode_leave:		
 		lw s3, 24(sp)
 		lw s2, 16(sp)
@@ -335,9 +335,7 @@
 		POP ra
 		mv s2, a0
 		#test for else mode
-		li s4, 0x02
-		and s5, s2, s4
-		beqz s5, incrementing_then_offset
+		beqz a2, incrementing_then_offset
 		addi s3, s3, -16	#point to else counter
 		j incrementing_skip_increment
   incrementing_then_offset:
