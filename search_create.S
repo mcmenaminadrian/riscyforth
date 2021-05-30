@@ -95,9 +95,7 @@
 		beqz a1, search_create_test_else_then
 		tail transition_then_then
   search_create_test_else_then:
-		li a1, 0x02
-		and a3, a0, a1
-		beqz a3, search_create_bad_ifmode	#bad state
+		beqz a2, search_create_bad_ifmode	#bad state
 		tail transition_else_then
   search_create_bad_ifmode:
 		#error

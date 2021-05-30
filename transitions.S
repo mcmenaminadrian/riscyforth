@@ -127,7 +127,6 @@
 			call decrement_iffmode
 			SETUP_CONDITIONAL_CALL
 			mv a2, s0
-  transition_setup_else:
 			call transition_bump_else
   transition_output_else:
 			li a0, 0xFF
@@ -135,7 +134,7 @@
 			li a0, 0x02
 			call set_flag_mode_on
 			TRANSITION_EPILOGUE
-			#now stock the created else into the stream
+			#now drop the created else into the stream
 			SETUP_CONDITIONAL_CALL
 			call get_conditional_addresses
 			mv t3, a1
@@ -153,7 +152,9 @@
 			beq s0, s1, leave_if_else	#if only 1 instruction nothing needed
 			SETUP_CONDITIONAL_CALL
 			mv a2, s0
-			call transition_setup_else
+			addi a2, a2, 1 			#increase by 1 to skip the else
+			call transition_bump_then	#we bump then as in simple IF ... ELSE
+			tail transition_output_else
   leave_if_else:
 			call transition_output_else
 

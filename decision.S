@@ -90,7 +90,7 @@
 		li s1, -20		#size of stack entry
 		addi s2, s2, -1		#offset for multiply
 		mul s3, s2, s1
-		addi s3, s3, -12	#to else mode adjusted for hightide
+		addi s3, s3, -16	#to else mode adjusted for hightide
 		add s2, s3, s0		#s2 has address
 		lw s1, 0(s2)
 		or a0, s1, a0		#set the bits
@@ -117,7 +117,7 @@
 		lw s2, 0(s0)
 		addi s2, s2, -1		#offset for multiply
 		mul s3, s2, s1
-		addi s3, s3, -12	#to else mode adjusted for hightide
+		addi s3, s3, -16	#to else mode adjusted for hightide
 		add s2, s3, s0		#s2 has address
 		not s1, a0
 		lw s3, 0(s2)
@@ -152,13 +152,13 @@
 		li s0, 0x02
 		and s1, s0, a0
 		beqz s1, test_flag_mode_then
-		li a1, 1		#THEN
+		li a2, 1		#ELSE
  		j get_flag_mode_leave
   test_flag_mode_then:
 		li s0, 0x01
 		and s1, s0, a0
 		beqz s1, get_flag_mode_leave
-		li a2, 1		#ELSE
+		li a1, 1		#THEN
   get_flag_mode_leave:		
 		lw s3, 24(sp)
 		lw s2, 16(sp)
@@ -256,7 +256,7 @@
 		mv s1, s2
 		addi s1, s1, 48
 		sw s1, 44(s2)		#WA for this else
-		#addi s7, s7, 1		#default is skip 1
+		#addi s7, s7, 4		#default is skip 1 instruction
 		li s3, 0x4B8B93
 		sw s3, 48(s2)
 		#register based jump to NEXT
@@ -274,10 +274,10 @@
 		li s3, 0x28067
 		sw s3, 60(s2)
 
-		mv a0, s2		# return the address we need
 		#update the stack
 		lw s0, 0(a0)		#s0 - holds base address we are writing to
 		mv s1, a0		#s1 - holds address at very bottom of the stack
+		mv a0, s2		#a0 - now holds the return the address we need
 		lw s2, 0(a1)		#s2 - holds index
 		#calculate where to write stack entry
 		li s3, -CONDITIONALSTK	#s3 - stack entry size
@@ -436,7 +436,7 @@
 		add s3, s3, s0		#s3 has the address of the block
 		#now grab the needed
 		lw a0, 0(s3)
-		lw a1, 4(s3)
+		lw a1, -4(s3)
 		lw s3, 24(sp)
 		lw s2, 16(sp)
 		lw s1, 8(sp)
