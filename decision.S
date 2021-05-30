@@ -274,6 +274,7 @@
 		li s3, 0x28067
 		sw s3, 60(s2)
 
+		mv a0, s2		# return the address we need
 		#update the stack
 		lw s0, 0(a0)		#s0 - holds base address we are writing to
 		mv s1, a0		#s1 - holds address at very bottom of the stack
@@ -304,7 +305,6 @@
 		sw zero, -16(s1)
 
 		#now return
-		mv a0, s4
 		lw s4, 32(sp)
 		lw s3, 24(sp)
 		lw s2, 16(sp)
