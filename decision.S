@@ -254,7 +254,7 @@
 
 		#now ELSE block
 		mv s1, s2
-		addi s1, s1, 4
+		addi s1, s1, 48
 		sw s1, 44(s2)		#WA for this else
 		#addi s7, s7, 1		#default is skip 1
 		li s3, 0x4B8B93
@@ -275,25 +275,36 @@
 		sw s3, 60(s2)
 
 		#update the stack
-		mv s0, s2		#s0 - base address
+		lw s0, 0(a0)		#s0 - holds base address we are writing to
+		mv s1, a0		#s1 - holds address at very bottom of the stack
+		lw s2, 0(a1)		#s2 - holds index
+		#calculate where to write stack entry
+		li s3, -CONDITIONALSTK	#s3 - stack entry size
+		mul s4, s3, s2		#s4 - offset to this stack entry
+		add s1, s4, s1		#s1 adjusted for offset
+		addi s1, s1, -12	#s1 adjusted for counter and high tide
+		#s1 now holds the bottom address for stack entry
+		#now calculate then and else
+		li s3, CONDITIONALBLK
+		#this has to be at the high tide mark
+		lw s2, -4(a1)		#s2 has high tide
+		addi s2, s2, -1		#correct to zero start
+		mul s4, s3, s2		#s4 has offset in the code block
+		add s4, s4, s0		#s4 now has start address of code block
+		sw s4, 0(s1)		#THEN address written
+		add s4, s4, 44		#ELSE address ...
+		sw s4, -4(s1)		#...written
+		#update the counter
 		lw s2, 0(a1)
 		addi s2, s2, 1
 		sw s2, 0(a1)
-		#where are we on the stack
-		li s1, -20		#each stack entry is 20 bytes
-		mul s3, s1, s2
-		addi s3, s3, -8		#adjust for first entry being offset 0 bytes - and for first 12 bytes
-		lw s1, 0(a0)
-		add s3, s1, s3		#s3 points to start of stack entry
-		sw s0, 0(s3)
-		addi s1, s0, -44
-		sw s1, -4(s3)		#addresses written
-		sw zero, -8(s3)		#zero out counts
-		sw zero, -12(s3)
-		sw zero, -16(s3)
-		
+		#zero the rest of the stack
+		sw zero, -8(s1)
+		sw zero, -12(s1)
+		sw zero, -16(s1)
+
 		#now return
-		mv a0, s2
+		mv a0, s4
 		lw s4, 32(sp)
 		lw s3, 24(sp)
 		lw s2, 16(sp)

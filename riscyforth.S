@@ -4,7 +4,7 @@
 #           Copyright (c) Adrian McMenamin <adrianmcmenamin@gmail.com> 2020, 2021   #
 #           Licensed for resuse under version 2 of the GPL                          #
 #                                                                                   #
-#           Please note this is experimental code only                              #
+#           As per the terms of the GPL no warranty is offered for this code        #
 #####################################################################################
 
 
