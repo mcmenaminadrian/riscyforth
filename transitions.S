@@ -56,7 +56,7 @@
 			and s1, s1, s3
 			slli s4, s2, 20
 			or s3, s1, s4
-			sw s3, 28(s5)
+			sw s3, 48(s5)
 			TRANSITION_EPILOGUE
 			ret
 			
@@ -147,16 +147,15 @@
 			TRANSITION_PROLOGUE
 			SETUP_CONDITIONAL_CALL
 			call get_increments
-			mv s0, a2
+			mv s0, a1
 			li s1, 1
 			beq s0, s1, leave_if_else	#if only 1 instruction nothing needed
 			SETUP_CONDITIONAL_CALL
 			mv a2, s0
 			addi a2, a2, 1 			#increase by 1 to skip the else
 			call transition_bump_then	#we bump then as in simple IF ... ELSE
-			tail transition_output_else
   leave_if_else:
-			call transition_output_else
+			tail transition_output_else
 
 
 	
@@ -174,7 +173,7 @@
 			#good conditional - at least we hope so
 			SETUP_CONDITIONAL_CALL
 			call get_increments
-			mv s0, a2
+			mv s0, a1
 			li s1, 1
 			beq s0, s1, leave_if_then	#only one instruction - nothing to do
 			SETUP_CONDITIONAL_CALL
@@ -226,7 +225,7 @@
 			#this is standard else ... then sequence
 			SETUP_CONDITIONAL_CALL
 			call get_increments
-			mv s0, a1		#s0 now has what we need to add (else count)
+			mv s0, a2		#s0 now has what we need to add (else count)
 			li s1, 1
 			beq s0, s1, transition_else_then_inc_done #no need to adjust
 			#update the increment

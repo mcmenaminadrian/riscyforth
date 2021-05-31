@@ -372,10 +372,10 @@
 		mul s3, s2, s1
 		add s3, s3, s0
 		lw s1, -16(s3)		#else count
-		mv a1, s1
+		mv a2, s1
 		add s0, zero, s1
 		lw s1, -12(s3)		#then count
-		mv a2, s1
+		mv a1, s1
 		add s0, s0, s1
 		mv a0, s0
 		lw s3, 24(sp)
