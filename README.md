@@ -121,9 +121,19 @@ _Stack operations are show in diagrammatic form (before -> after). Top of the st
 
 **ROT2**                    s5 s4 s3 s2 s1 s0 -> s3 s2 s1 s0 s5 s4 (NB executing ROT twice would give us s5 s4 s3 s0 s2 s1)
 
-Return stack operations
+_Return stack operations_
 
 **LTR**			    Pop top of the (data) stack and place on top of the return stack (<R in traditional FORTH)
 
 **RGT**			    Pop top of the return stack and place on top of the (data) stack (R> in traditional FORTH)
+
+_Conditionals_
+
+_Note: conditional code's outcome is undefined for immediate execution_
+
+**IF**			    Execute what follows if the top of the stack is non-zero (consumes top of stack)
+
+**ELSE**		    Alternative path of execution to **IF**, if the top of the stack is zero (consumes top of stack)
+
+**THEN**		    Code path taken once either **IF** and **ELSE** completed - **IF** must be followed by **THEN** though **ELSE** is optional
 
