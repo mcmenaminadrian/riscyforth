@@ -152,7 +152,7 @@
 			beq s0, s1, leave_if_else	#if only 1 instruction nothing needed
 			SETUP_CONDITIONAL_CALL
 			mv a2, s0
-			addi a2, a2, 1 			#increase by 1 to skip the else
+#			addi a2, a2, 1 			#increase by 1 to skip the else
 			call transition_bump_then	#we bump then as in simple IF ... ELSE
   leave_if_else:
 			tail transition_output_else
