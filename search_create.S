@@ -286,6 +286,8 @@
 		beqz a0, search_create_literal_go
 		SETUP_CONDITIONAL_CALL
 		call increment_current_skip
+		SETUP_CONDITIONAL_CALL
+		call increment_current_skip
   search_create_literal_go:
 		tail NEXT
 
