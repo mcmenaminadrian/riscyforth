@@ -39,6 +39,13 @@
 		sw zero, 0(t0)
 		tail search_failed		      #report error
   search_create_allowed:
+		#test for END
+		la t0, WA_END
+		bne t3, t0, search_create_test_conditionals
+		#insert three instruction simple loop back
+		la t3, WA__END				#susbititute
+		j search_create_inscribe
+  search_create_test_conditionals:
 		#test for conditionals
 		la t0, WA_IF
 		bne t3, t0, search_create_test_else
@@ -106,10 +113,18 @@
   search_create_inscribe:
 		#update the depth of the current skip if needed
 		call get_iffmode
-		beqz a0, search_create_continue_inscription
+		beqz a0, search_create_continue_test_end
 		SETUP_CONDITIONAL_CALL
 		call increment_current_skip
-		
+  search_create_continue_test_end:
+		#test for special case
+		la t0, WA__END
+		bne t0, t3, search_create_continue_inscription
+		#setup call to write additional WA__END stuff
+		mv a0, t3
+		call compile_in_end
+		bnez a0, search_create_leave
+		j search_create_bad_ifmode
   search_create_continue_inscription:
 		la t0, createwritepoint
 		lw t1, 0(t0)

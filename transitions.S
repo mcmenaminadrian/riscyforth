@@ -3,37 +3,6 @@
 
 #transitions.S - handle various nested conditional transitions
 
-  .macro TRANSITION_PROLOGUE
-			addi sp, sp, -56
-			sw s0, 0(sp)
-			sw s1, 8(sp)
-			sw s2, 16(sp)
-			sw s3, 24(sp)
-			sw s4, 32(sp)
-			sw s5, 40(sp)
-			sw s6, 48(sp)
-  .endm
-
-  .macro TRANSITION_EPILOGUE
-			lw s6, 48(sp)
-			lw s5, 40(sp)
-			lw s4, 32(sp)
-			lw s3, 24(sp)
-			lw s2, 16(sp)
-			lw s1, 8(sp)
-			lw s0, 0(sp)
-			addi sp, sp, 56
-  .endm
-
-  .macro SETUP_CONDITIONAL_CALL
-			la a0, DECIDESTACKB
-			lw a0, 0(a0)
-			la a2, DECIDESTACKP
-			lw a1, 0(a2)
-  .endm
-
-
-
 #IF FLAG CODE
   #returns value of ifflag in a0
   get_iffmode:

@@ -10,7 +10,23 @@
 		POP zero
 		tail NEXT
 
-		CODEHEADER CR, EMIT, 0x01
+		CODEHEADER BEGIN, EMIT, 0x01
+		tail NEXT			#BEGIN and END do nothing in immediate mode
+
+		CODEHEADER END, BEGIN, 0x01
+		tail NEXT
+
+		CODEHEADER _END, END, 0x0	#subsitituted in compiled
+		POP t0
+		bnez t0, end_of_end
+		lw t0, 0(s7)
+		add s7, s7, t0
+		tail NEXT
+  end_of_end:
+		add s7, s7, 4
+		tail NEXT
+
+		CODEHEADER CR, _END, 0x01
 		WRITECR
 		WRITECHAR 0x0A
 		tail NEXT
@@ -35,13 +51,15 @@
 		CODEHEADER TWORFETCH, RFETCH, 0x01	#2R@
 		lw t0, 0(s9)
 		lw t1, STACKOFFSET(s9)
-		PUSH t1
-		PUSH t0
+		addi sp, sp, -16
+		sw t1, 8(sp)
+		sw t0, 0(sp) 
 		tail NEXT
 
 		CODEHEADER TOR2, TWORFETCH, 0x01  #2>R
-		POP t0
-		POP t1
+		lw t0, 0(sp)
+		lw t1, 8(sp)
+		addi sp, sp, 16
 		add s9, s9, -(STACKOFFSET * 2)
 		sw t1, STACKOFFSET(s9)
 		sw t0, 0(s9)
@@ -60,8 +78,9 @@
 		tail NEXT
 
 		CODEHEADER STORE, RFROM, 0x01		#!
-		POP t0
-		POP t1
+		lw t0, 0(sp)
+		lw t1, 8(sp)
+		addi sp, sp, 16
 		sw t1, 0(t0)
 		tail NEXT
 
@@ -232,7 +251,7 @@
 		tail NEXT
 
 
-colon_fail:
+  colon_fail:
 		la t0, CREATEFLAG
 		sw zero, 0(t0)				#set MODE to 0 (no compile)
 		POP zero
@@ -240,6 +259,72 @@ colon_fail:
 		tail NEXT
 		
 		
-
-
+  compile_in_end:					#a0 has old s7 value
+		addi sp, sp, -80
+		sw ra, 72(sp)
+		sw s8, 64(sp)
+		sw s7, 56(sp)
+		sw s6, 48(sp)
+		sw s5, 40(sp)
+		sw s4, 32(sp)
+		sw s3, 24(sp)
+		sw s2, 16(sp)
+		sw s1, 8(sp)
+		sw s0, 0(sp)
 		
+		la s3, createwritepoint
+		lw s3, 0(s3)
+		sw a0, 0(s3)
+		
+		#now search for WA_BEGIN
+		li s0, 0x200				#max depth of search backwards
+		li s1, -4
+		li s2, 4
+		la s5, WA_BEGIN
+		mv s6, s3
+		mv s7, zero
+		la s8, WA__END
+  end_check_begin:
+		addi s3, s3, -4
+		lw s4, 0(s3)
+		bne s4, s8, end_keep_checking
+		addi s7, s7, 1
+		j end_check_next
+  end_keep_checking:
+		beq s5, s4, end_found_begin
+  end_check_next:
+		add s1, s1, -4
+		add s2, s2, 4
+		blt s2, s0, end_check_begin
+		#we have failed
+		mv a0, zero
+		j real_end_of_end
+  end_found_begin:
+		beqz s7, end_correct_begin
+		addi s7, s7, -1				#skip an inner loop
+		j end_check_next
+  end_correct_begin:
+		sw s1, 4(s6)				#write out offset
+		la s0, createwritepoint
+		addi s6, s6, 8
+		sw s6, 0(s0)
+		#now - are we in a conditional?
+		call get_iffmode
+		beqz a0, almost_end_of_end
+		SETUP_CONDITIONAL_CALL
+		call increment_current_skip		#we have to account for the literal (skip) if in a conditional
+  almost_end_of_end:
+		li a0, 1
+  real_end_of_end:
+		lw s0, 0(sp)
+		lw s1, 8(sp)
+		lw s2, 16(sp)
+		lw s3, 24(sp)
+		lw s4, 32(sp)
+		lw s5, 40(sp)
+		lw s6, 48(sp)
+		lw s7, 56(sp)
+		lw s8, 64(sp)
+		lw ra, 72(sp)
+		addi sp, sp, 80
+		ret
