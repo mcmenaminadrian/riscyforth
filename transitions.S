@@ -32,6 +32,134 @@
 			lw a1, 0(a2)
   .endm
 
+
+
+#IF FLAG CODE
+  #returns value of ifflag in a0
+  get_iffmode:
+		add sp, sp, -8
+		sw s0, 0(sp)
+		la s0, ifflag
+		lw a0, 0(s0)
+		lw s0, 0(sp)
+		add sp, sp, 8
+		ret
+
+  decrement_iffmode:
+		add sp, sp, -8
+		sw s0, 0(sp)
+		la s0, ifflag
+		lw a0, 0(s0)
+		add a0, a0, -1
+		sw a0, 0(s0)
+		lw s0, 0(sp)
+		add sp, sp, 8
+		ret
+
+  increment_iffmode:
+		add sp, sp, -8
+		sw s0, 0(sp)
+		la s0, ifflag
+		lw a0, 0(s0)
+		add a0, a0, 1
+		sw a0, 0(s0)
+		lw s0, 0(sp)
+		add sp, sp, 8
+		ret
+
+#ELSE-THEN FLAG CODE
+
+  set_flag_mode_on:
+		#a0 contains bits to set on
+		add sp, sp, -32
+		sw s0, 0(sp)
+		sw s1, 8(sp)
+		sw s2, 16(sp)
+		sw s3, 24(sp)
+
+		la s0, DECIDESTACKP
+		lw s0, 0(s0)
+		lw s2, 0(s0)
+		li s1, -20		#size of stack entry
+		addi s2, s2, -1		#offset for multiply
+		mul s3, s2, s1
+		addi s3, s3, -16	#to else mode adjusted for hightide
+		add s2, s3, s0		#s2 has address
+		lw s1, 0(s2)
+		or a0, s1, a0		#set the bits
+		sw a0, 0(s2)		#a0 also returns new state
+
+		lw s3, 24(sp)
+		lw s2, 16(sp)
+		lw s1, 8(sp)
+		lw s0, 0(sp)
+		addi sp, sp, 32
+		ret
+		
+  set_flag_mode_off:
+		#a0 has bits to turn off
+		add sp, sp, -32
+		sw s0, 0(sp)
+		sw s1, 8(sp)
+		sw s2, 16(sp)
+		sw s3, 24(sp)
+
+		la s0, DECIDESTACKP
+		lw s0, 0(s0)
+		li s1, -20		#size of stack entry
+		lw s2, 0(s0)
+		addi s2, s2, -1		#offset for multiply
+		mul s3, s2, s1
+		addi s3, s3, -16	#to else mode adjusted for hightide
+		add s2, s3, s0		#s2 has address
+		not s1, a0
+		lw s3, 0(s2)
+		and a0, s3, s1		# flag &=(!a0)
+		sw a0, 0(s2)		#a0 returns new state 
+
+		lw s3, 24(sp)
+		lw s2, 16(sp)
+		lw s1, 8(sp)
+		lw s0, 0(sp)
+		addi sp, sp, 32
+		ret
+
+  get_flag_mode:
+		add sp, sp, -32
+		sw s0, 0(sp)
+		sw s1, 8(sp)
+		sw s2, 16(sp)
+		sw s3, 24(sp)
+		
+		la s0, DECIDESTACKP
+		lw s0, 0(s0)
+		li s1, -20		#size of stack entry
+		lw s2, 0(s0)
+		addi s2, s2, -1		#offset for multiply
+		mul s3, s2, s1
+		addi s3, s3, -16	#to flag adjusted for hightide
+		add s2, s3, s0		#s2 has address
+		lw a0, 0(s2)		#a0 returns unaltered state
+		mv a1, zero
+		mv a2, zero
+		li s0, 0x02
+		and s1, s0, a0
+		beqz s1, test_flag_mode_then
+		li a2, 1		#ELSE
+ 		j get_flag_mode_leave
+  test_flag_mode_then:
+		li s0, 0x01
+		and s1, s0, a0
+		beqz s1, get_flag_mode_leave
+		li a1, 1		#THEN
+  get_flag_mode_leave:		
+		lw s3, 24(sp)
+		lw s2, 16(sp)
+		lw s1, 8(sp)
+		lw s0, 0(sp)
+		addi sp, sp, 32
+		ret
+
   transition_bump_else:
 			#increment else by value of a2
 			#a0 holds DECIDESTACKB value
@@ -152,7 +280,6 @@
 			beq s0, s1, leave_if_else	#if only 1 instruction nothing needed
 			SETUP_CONDITIONAL_CALL
 			mv a2, s0
-#			addi a2, a2, 1 			#increase by 1 to skip the else
 			call transition_bump_then	#we bump then as in simple IF ... ELSE
   leave_if_else:
 			tail transition_output_else
@@ -210,10 +337,23 @@
 			SETUP_CONDITIONAL_CALL
 			call clean_conditional_stack
 			call decrement_iffmode
+			call get_flag_mode			#should we increase then or else
+			beqz a2, transition_then_then_bump_then
+			SETUP_CONDITIONAL_CALL
+			call get_increments
+			add s0, s0, a2
+			SETUP_CONDITIONAL_CALL
+			mv a2, s0
+			call transition_bump_else
+			tail leave_if_then
+  transition_then_then_bump_then:
+			SETUP_CONDITIONAL_CALL
+			call get_increments
+			add s0, s0, a2
 			SETUP_CONDITIONAL_CALL
 			mv a2, s0
 			call transition_bump_then
-			call leave_if_then
+			tail leave_if_then
 
   transition_else_then:
 			TRANSITION_PROLOGUE
