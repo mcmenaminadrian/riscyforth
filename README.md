@@ -137,3 +137,9 @@ _Note: conditional code's outcome is undefined for immediate execution_
 
 **THEN**		    Code path taken once either **IF** and **ELSE** completed - **IF** must be followed by **THEN** though **ELSE** is optional
 
+_Looping_
+
+**BEGIN**		    Mark the start of a simple BEGIN ... END loop (may be nested)
+
+**END**			    Mark the end of a simple BEGIN ... END loop (NB: BEGIN and END are effectively nops for immediate mode)
+
