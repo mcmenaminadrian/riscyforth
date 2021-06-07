@@ -26,7 +26,15 @@
 		add s7, s7, 4
 		tail NEXT
 
-		CODEHEADER CR, _END, 0x01
+		CODEHEADER WHILE, _END, 0x01
+		tail NEXT
+
+		CODEHEADER _WHILE, WHILE, 0x0
+		lw t0, 0(s7)			#similar to _END but jump back is unconditional
+		add s7, s7, t0
+		tail NEXT
+
+		CODEHEADER CR, _WHILE, 0x01
 		WRITECR
 		WRITECHAR 0x0A
 		tail NEXT

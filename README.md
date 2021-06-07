@@ -127,6 +127,26 @@ _Return stack operations_
 
 **RGT**			    Pop top of the return stack and place on top of the (data) stack (R> in traditional FORTH)
 
+_Logic_
+
+**AND**			    Bitwise AND of top two stack entries (cosumes stack)
+
+**OR**			    Bitwise OR of top two stack entries (consumes stack)
+
+**XOR**			    Bitwise XOR of top two stack entries (consumes stack)
+
+**NOT**			    Replaces top of stack with logical inversion
+
+**EQUALS**	 	    Returns -1 (all bits set)  top two stack entries are equal, zero otherwise, = is recognised and expanded to this (consumes entries)
+
+**TRUE**		    Places -1 (all bits set) on top of stack
+
+**FALSE**		    Places 0 (no bits set) on top of stack
+
+**GT**			    Places -1 on stack if s1 > s0, otherwise places 0 on stack, > is recognised and explanded to this (consumes stack)
+
+**LT**			    Places -1 on stack if s1 < s0, otherwise places 0 on stack, < is recognised and expanded to this (consumes stack)
+
 _Conditionals_
 
 _Note: conditional code's outcome is undefined for immediate execution_
@@ -142,4 +162,6 @@ _Looping_
 **BEGIN**		    Mark the start of a simple BEGIN ... END loop (may be nested)
 
 **END**			    Mark the end of a simple BEGIN ... END loop (NB: BEGIN and END are effectively nops for immediate mode)
+
+**WHILE**		    Unconditionally returns to BEGIN in BEGIN ... IF ...(ELSE) .... WHILE (replacing THEN)
 

@@ -4,8 +4,9 @@
 		j gt_true
 
 		CODEHEADER GT, TRUE, 0x01
-		POP t1
-		POP t0
+		lw t1, 0(sp)
+		lw t0, 8(sp)
+		addi sp, sp, 16
   gt_test:
 		bgt t0, t1, gt_true
   gt_false:
@@ -17,20 +18,52 @@
 		tail NEXT
 
 		CODEHEADER LT, GT, 0x01
-		POP t0
-		POP t1
+		lw t0, 0(sp)
+		lw t1, 8(sp)
+		addi sp, sp, 16
 		j gt_test
 
 		CODEHEADER FALSE, LT, 0x01
 		j gt_false
 
 		CODEHEADER EQUALS, FALSE, 0x01
-		POP t0
-		POP t1
+		lw t0, 0(sp)
+		lw t1, 8(sp)
+		addi sp, sp, 16
 		bne t0, t1, gt_false
 		j gt_true
+
+		CODEHEADER AND, EQUALS, 0x01
+		lw t0, 0(sp)
+		lw t1, 8(sp)
+		and t3, t0, t1
+		sw t3, 8(sp)
+		addi sp, sp, 8
+		tail NEXT
+
+		CODEHEADER OR, AND, 0x01
+		lw t0, 0(sp)
+		lw t1, 8(sp)
+		or t3, t0, t1
+		sw t3, 8(sp)
+		addi sp, sp, 8
+		tail NEXT
 		
-		CODEHEADER IF, EQUALS, 0x01
+		CODEHEADER XOR, OR, 0x01
+		lw t0, 0(sp)
+		lw t1, 8(sp)
+		xor t3, t0, t1
+		sw t3, 8(sp)
+		addi sp, sp, 8
+		tail NEXT
+
+		CODEHEADER NOT, XOR, 0x01
+		lw t0, 0(sp)
+		not t1, t0
+		sw t1, 0(sp)
+		tail NEXT
+
+		CODEHEADER IF, NOT, 0x01
 		#just a place holder
 		tail NEXT
 
