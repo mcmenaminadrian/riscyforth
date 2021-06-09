@@ -1,11 +1,9 @@
 
 
 		CODEHEADER EMIT, VARIABLE, 0x01
-		POP a1
-		addi a0, zero, 1
-		PUSH a1
+		li a0, 1
 		mv a1, sp
-		add a2, zero, 1
+		li a2, 1
 		call write
 		POP zero
 		tail NEXT
