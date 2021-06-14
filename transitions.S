@@ -254,6 +254,8 @@
 			tail transition_output_else
 
 
+  transition_if_while:
+			call output_while
 	
   transition_if_then:
 			#standard then
@@ -290,6 +292,9 @@
 			TRANSITION_EPILOGUE
 			tail search_create_inscribe
 
+  transition_then_while:
+			call output_while
+
   transition_then_then:
 			TRANSITION_PROLOGUE
 			#as above - we are implementing jumps in the layer above
@@ -323,6 +328,9 @@
 			mv a2, s0
 			call transition_bump_then
 			tail leave_if_then
+
+  transition_else_when:
+			call output_while
 
   transition_else_then:
 			TRANSITION_PROLOGUE
@@ -359,6 +367,77 @@
 			TRANSITION_EPILOGUE
 			tail search_create_inscribe
 
+
+  output_while:
+  		mv a0, s7	                       #a0 has old s7 value
+                addi sp, sp, -80
+                sw ra, 72(sp)
+                sw s8, 64(sp)
+                sw s7, 56(sp)
+                sw s6, 48(sp)
+                sw s5, 40(sp)
+                sw s4, 32(sp)
+                sw s3, 24(sp)
+                sw s2, 16(sp)
+                sw s1, 8(sp)
+                sw s0, 0(sp)
+
+                la s3, createwritepoint
+                lw s3, 0(s3)
+                sw a0, 0(s3)
+
+                #now search for WA_BEGIN
+                li s0, 0x200                            #max depth of search backwards
+                li s1, -4
+                li s2, 4
+                la s5, WA_BEGIN
+                mv s6, s3
+                mv s7, zero
+                la s8, WA__WHILE
+  while_check_begin:
+                addi s3, s3, -4
+                lw s4, 0(s3)
+                bne s4, s8, while_keep_checking
+                addi s7, s7, 1
+                j while_check_next
+  while_keep_checking:
+                beq s5, s4, while_found_begin
+  while_check_next:
+                add s1, s1, -4
+                add s2, s2, 4
+                blt s2, s0, while_check_begin
+                #we have failed
+                mv a0, zero
+                j real_end_of_while
+  while_found_begin:
+                beqz s7, while_correct_begin
+                addi s7, s7, -1                         #skip an inner loop
+                j while_check_next
+  while_correct_begin:
+                sw s1, 4(s6)                            #write out offset
+                la s0, createwritepoint
+                addi s6, s6, 8
+                sw s6, 0(s0)
+                #now - are we in a conditional?
+                call get_iffmode
+                beqz a0, almost_end_of_while
+                SETUP_CONDITIONAL_CALL
+                call increment_current_skip             #we have to account for the literal (skip) if in a conditional
+  almost_end_of_while:
+                li a0, 1
+  real_end_of_while:
+                lw s0, 0(sp)
+                lw s1, 8(sp)
+                lw s2, 16(sp)
+                lw s3, 24(sp)
+                lw s4, 32(sp)
+                lw s5, 40(sp)
+                lw s6, 48(sp)
+                lw s7, 56(sp)
+                lw s8, 64(sp)
+                lw ra, 72(sp)
+                addi sp, sp, 80
+                ret
 			
 
 					

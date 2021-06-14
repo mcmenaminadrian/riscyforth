@@ -75,7 +75,7 @@
 
   search_create_test_else:
 		la t0, WA_ELSE
-		bne t0, t3, search_create_test_then
+		bne t0, t3, search_create_test_while
 		call get_iffmode
 		beqz a0, search_create_bad_ifmode
 		call get_flag_mode
@@ -87,6 +87,23 @@
 		tail transition_then_else
   search_create_setup_else:
 		tail transition_if_else
+
+  search_create_test_while:
+		la t0, WA_WHILE
+		bne t0, t3, search_create_test_then
+		#are we in if mode
+		call get_iffmode
+		beqz a0, search_create_bad_ifmode
+		call get_flag_mode
+		bnez a0, search_create_test_while_state
+		tail transition_if_while
+  search_create_test_while_state:
+		#test for then->while
+		beqz a1, search_create_test_else_while
+		tail transition_then_while
+  search_create_test_else_while:
+		beqz a2, search_create_bad_ifmode
+		tail transition_else_then
 
   search_create_test_then:
 		la t0, WA_THEN
