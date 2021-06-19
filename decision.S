@@ -4,8 +4,8 @@
 		j gt_true
 
 		CODEHEADER GT, TRUE, 0x01
-		lw t1, 0(sp)
-		lw t0, 8(sp)
+		ld t1, 0(sp)
+		ld t0, 8(sp)
 		addi sp, sp, 16
   gt_test:
 		bgt t0, t1, gt_true
@@ -18,8 +18,8 @@
 		tail NEXT
 
 		CODEHEADER LT, GT, 0x01
-		lw t0, 0(sp)
-		lw t1, 8(sp)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
 		addi sp, sp, 16
 		j gt_test
 
@@ -27,40 +27,40 @@
 		j gt_false
 
 		CODEHEADER EQUALS, FALSE, 0x01
-		lw t0, 0(sp)
-		lw t1, 8(sp)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
 		addi sp, sp, 16
 		bne t0, t1, gt_false
 		j gt_true
 
 		CODEHEADER AND, EQUALS, 0x01
-		lw t0, 0(sp)
-		lw t1, 8(sp)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
 		and t3, t0, t1
-		sw t3, 8(sp)
+		sd t3, 8(sp)
 		addi sp, sp, 8
 		tail NEXT
 
 		CODEHEADER OR, AND, 0x01
-		lw t0, 0(sp)
-		lw t1, 8(sp)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
 		or t3, t0, t1
-		sw t3, 8(sp)
+		sd t3, 8(sp)
 		addi sp, sp, 8
 		tail NEXT
 		
 		CODEHEADER XOR, OR, 0x01
-		lw t0, 0(sp)
-		lw t1, 8(sp)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
 		xor t3, t0, t1
-		sw t3, 8(sp)
+		sd t3, 8(sp)
 		addi sp, sp, 8
 		tail NEXT
 
 		CODEHEADER NOT, XOR, 0x01
-		lw t0, 0(sp)
+		ld t0, 0(sp)
 		not t1, t0
-		sw t1, 0(sp)
+		sd t1, 0(sp)
 		tail NEXT
 
 		CODEHEADER IF, NOT, 0x01
@@ -97,15 +97,15 @@
 		#writing it this way means we have a fixed address
 		#a0 returns address at which we start writing
 		addi sp, sp, -40
-		sw s0, 0(sp)
-		sw s1, 8(sp)
-		sw s2, 16(sp)
-		sw s3, 24(sp)
-		sw s4, 32(sp)
-		lw s1, 0(a0)		#base address
-		lw s2, -4(a1)		#current index address for writing (high tide)
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s2, 16(sp)
+		sd s3, 24(sp)
+		sd s4, 32(sp)
+		ld s1, 0(a0)		#base address
+		ld s2, -4(a1)		#current index address for writing (high tide)
 
-		li s0, CONDITIONALBLK	#size of block
+		li s0, CONDITIONALBLK	#size of block   #TODO CHECK!!
 		mul s3, s2, s0		#multiply by index
 		addi s2, s2, 1		#increment index
 		sw s2, -4(a1)		#store incremented index

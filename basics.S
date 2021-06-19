@@ -23,14 +23,15 @@
                 bgeu a2, t0, getnextline_imm_input
                 tail NEXT                               #no input
   getnextline_imm_input:
-                sw a1, INPUT_START, t0
+                sd a1, INPUT_START, t0
                 add a1, a1, a2                          #a2 has the end of input
-                sw a1, INPUT_END, t0
+                sd a1, INPUT_END, t0
 		tail NEXT
           
 
                 CODEHEADER OK, GETNEXTLINE_IMM, 0x00
-                lw a0, OKSTATUS
+                la a0, OKSTATUS
+		ld a0, 0(a0)
                 bne a0, zero, ok_not_ok
                 la a0, Ok_msg
                 call puts
@@ -38,20 +39,20 @@
   ok_not_ok:
                 addi t0, zero, 1
                 bne a0, t0, ok_serious_issue_possibly
-                sw zero, OKSTATUS, t0
+                sd zero, OKSTATUS, t0
                 tail NEXT
   ok_serious_issue_possibly:
                 la a0, Error_msg
                 call puts
-                sw zero, OKSTATUS, t0
+                sd zero, OKSTATUS, t0
                 tail NEXT
 
 
                 CODEHEADER TOKENIZE_IMM, OK, 0x0       
                 #puts 1 on stack if system variables
                 #TOKEN_START and TOKEN_END hold valid values
-                lw a1, INPUT_END
-                lw a0, INPUT_START
+                la a1, INPUT_END
+                la a0, INPUT_START
                 addi t0, a0, 1                        #account for minimal input
                 bltu t0, a1, tokenize_have_data       #buffer has data
   tokenize_all_over:
@@ -80,7 +81,7 @@
                 beq t4, t3, tokenize_end_token
                 j tokenize_advance_search
   tokenize_end_token:
-                sw t1, INPUT_START, t5                #update the end point for subsequent searches
+                sd t1, INPUT_START, t5                #update the end point for subsequent searches
                 addi t1, t1, -1                       # space or NL not part of token
                 mv t2, t0
 		bne t0, t1, tokenize_prepare_sanity_test
@@ -104,8 +105,8 @@
                 blt t1, t2, tokenize_finished_sanitization
                 j tokenize_sanity_test
   tokenize_finished_sanitization:
-                sw t0, TOKEN_START, t2
-                sw t1, TOKEN_END, t2
+                sd t0, TOKEN_START, t2
+                sd t1, TOKEN_END, t2
                 la s8, WA_SEARCH                      #hit search directly now
                 li t2, 1
                 PUSH t2                               #indicate TOKEN_ values are valid
@@ -117,26 +118,26 @@
                 beq a0, zero, search_no_token     
                 addi t0, zero, 1
                 bne a0, t0, search_bad_pop
-                lw t0, TOKEN_START                    #token values are valid
-                lw t1, TOKEN_END
+                la t0, TOKEN_START                    #token values are valid
+                la t1, TOKEN_END
 		la t2, CREATEFLAG
-		lw t2, 0(t2)
+		ld t2, 0(t2)
 		beq t2, zero, search_continue	      #we are in immediate mode
                 j search_create_continue
   search_no_token:
                 addi t0, zero, 2                      #should never get here - so warn if we do
-                sw t0, OKSTATUS, t1
+                sd t0, OKSTATUS, t1
                 tail NEXT
   search_bad_pop:
                 addi t0, zero, 2
-                sw t0, OKSTATUS, t1
+                sd t0, OKSTATUS, t1
                 PUSH a0                               #restore bad POP
                 tail NEXT
   search_continue:
                 sub t2, t1, t0
                 addi t2, t2, 1                        #t2 has length of token
                 la t4, dictionary
-                lw t3, 0(t4)
+                ld t3, 0(t4)
   search_next_in_dictionary:
                 lb t4, 12(t3)
                 bne t4, t2, search_tokens_do_not_match
@@ -155,7 +156,7 @@
                 j search_loop_through_token
                 
   search_tokens_do_not_match:
-                lw t3, 8(t3)                          #read the pointer to the next TIL command
+                ld t3, 8(t3)                          #read the pointer to the next TIL command
                 beq t3, zero, search_exhausted        #at the end of the dictionary
                 j search_next_in_dictionary
 
@@ -174,7 +175,7 @@
   search_check_variables:
                 j search_scan_variable_stack
   search_check_numbers:
-                lw t2, CURRENT_BASE
+                ld t2, CURRENT_BASE
                 li t3, 16
                 beq t2, t3, search_check_hex
                 li t3, 8
@@ -318,34 +319,34 @@
                 WRITESTRINGR t0, t1
                 li a0, 1
                 la t0, TOKEN_START
-                lw a1, 0(t0)
+                ld a1, 0(t0)
                 la t1, TOKEN_END
-                lw a2, 0(t1)
+                ld a2, 0(t1)
                 sub a2, a2, a1
                 addi a2, a2, 1
                 call write                            #output error message
                 addi t0, zero, 1
-                sw t0, OKSTATUS, t1
+                sd t0, OKSTATUS, t1
                 tail NEXT
   search_scan_variable_stack:
                 #now scan for a variable name
-                lw t0, TOKEN_START                    #token values are valid
-                lw t1, TOKEN_END
+                ld t0, TOKEN_START                    #token values are valid
+                ld t1, TOKEN_END
                 sub t2, t1, t0
                 addi t2, t2, 1                        #t2 has length of token
                 la t4, BOTTOM_VARS
-                lw t3, 0(t4)
+                ld t3, 0(t4)
 		li a1, 36
 		add t3, t3, a1
   search_var_next_check:
-		lw t4, 0(t3)
+		ld t4, 0(t3)
 		li a1, 0xFFFFFFFF
 		and t4, t4, a1
 		li a3, 0xdeadbeef
 		beq t4, a3, search_var_next_in_dictionary
 		j search_failed
   search_var_next_in_dictionary:
-                lw t4, -4(t3)
+                ld t4, -4(t3)
 		#compare lengths
                 bne t4, t2, search_var_tokens_do_not_match
                 add a0, t3, -5                        #a0 now points into the name in the var stack
@@ -365,13 +366,13 @@
   search_var_tokens_do_not_match:
                 add t3, t3, 36                        #advance up the var stack
 		la t4, TOP_VARS
-		lw t4, 0(t4)
+		ld t4, 0(t4)
 		bge t3, t4, search_var_no_match
                 j search_var_next_check
 
   search_var_tokens_matched:
 		#put variable value on the stack
-		lw t4, -32(t3)
+		ld t4, -32(t3)
 		PUSH t4
 		j search_var_reentry
   search_var_no_match:
@@ -385,17 +386,17 @@
 
                 CODEHEADER HEX, DECIMAL, 0x01
                 addi t1, zero, 16
-                sw t1, CURRENT_BASE, t0
+                sd t1, CURRENT_BASE, t0
                 tail NEXT
 
                 CODEHEADER OCTAL, HEX, 0x01
                 addi t1, zero, 8
-                sw t1, CURRENT_BASE, t0
+                sd t1, CURRENT_BASE, t0
                 tail NEXT
 
                 CODEHEADER BINARY, OCTAL, 0x01
                 addi t1, zero, 2
-                sw t1, CURRENT_BASE, t0
+                sd t1, CURRENT_BASE, t0
                 tail NEXT
 
                 #semi for outer loop
@@ -405,12 +406,12 @@
 		
 		#semi for the rest of us
                 CODEHEADER SEMI, OLSEMI, 0x01
-                lw s7, 0(s9)
+                ld s7, 0(s9)
                 addi s9, s9, STACKOFFSET
                 tail NEXT
 
                 CODEHEADER DOT, SEMI, 0x01
-                lw t0, CURRENT_BASE
+                ld t0, CURRENT_BASE
                 POP a2                            #get item on stack
                 la a0, SCRATCH_PAD                #sprintf uses this
                 addi t1, zero, 16
@@ -694,7 +695,3 @@
 .include "listwords.S"
 .include "loops.S"
 
-
-
-
-          

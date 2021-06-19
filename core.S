@@ -22,7 +22,7 @@
 
 		li t0, 1
 		la t1, ifflag
-		sw t0, 0(t1)			  #ignore ELSE by default
+		sd t0, 0(t1)			  #ignore ELSE by default
 		#allocate space for new definitions
                 mv a0, zero
 		li a1, BIGSPACE
@@ -33,7 +33,7 @@
 		li a7, 222			  #mmap
 		ecall
 		la t0, newdictionary
-		sw a0, 0(t0)
+		sd a0, 0(t0)
 		#now allocate space for conditional blocks
 		mv a0, zero
 		li a1, BIGSPACE
@@ -48,37 +48,37 @@
 		add t0, t0, a1
 		addi t0, t0, -4
 		la t1, DECIDESTACKB
-		sw t0, 0(t1)			#top of the stack, holds address of next decision block block
-		sw a0, 0(t0)			#store address
+		sd t0, 0(t1)			#top of the stack, holds address of next decision block block
+		sd a0, 0(t0)			#store address
 		addi t0, t0, -4
 		la t1, DECIDESTACKP
-		sw t0, 0(t1)
-		sw zero, 0(t0)			    #zero skips currently
-		sw zero, -4(t0)			    #high tide also zero	
-		sw zero, -8(t0)			    #ensure all of stack is zero
-		sw zero, -12(t0)
-		sw zero, -16(t0)
-		sw zero, -20(t0)
-		sw zero, -24(t0)
-                sw zero, OKSTATUS, t0
-                sw zero, CREATEFLAG, t0
+		sd t0, 0(t1)
+		sd zero, 0(t0)			    #zero skips currently
+		sd zero, -4(t0)			    #high tide also zero	
+		sd zero, -8(t0)			    #ensure all of stack is zero
+		sd zero, -12(t0)
+		sd zero, -16(t0)
+		sd zero, -20(t0)
+		sd zero, -24(t0)
+                sd zero, OKSTATUS, t0
+                sd zero, CREATEFLAG, t0
                 la t1, TIL_ELSE	                    #start search from here
-                sw t1, dictionary, t0
-		sw zero, ifflag, t0
+                sd t1, dictionary, t0
+		sd zero, ifflag, t0
 
-                sw zero, TOKEN_START, t0
-                sw zero, TOKEN_END, t0
+                sd zero, TOKEN_START, t0
+                sd zero, TOKEN_END, t0
                 addi t1, zero, 10                   #decimal as start-up base
-                sw t1, CURRENT_BASE, t0
+                sd t1, CURRENT_BASE, t0
   
                 la s7, outer_loop                   #set instruction register to start of outer loop
 
   NEXT:
-                lw s8, 0(s7)                        #word address register takes content of next secondary
+                ld s8, 0(s7)                        #word address register takes content of next secondary
                 addi s7, s7, INSTWIDTH              #next secondary along
   
   RUN:
-                lw t0, 0(s8)                        #extract first instruction address of primative
+                ld t0, 0(s8)                        #extract first instruction address of primative
                 addi s8, s8, INSTWIDTH              #increment WA
                 jalr zero, t0, 0                    #run the code    
 

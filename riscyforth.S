@@ -18,7 +18,7 @@
   .equ          NAMEMAXLEN,    	0x18
   .equ		BIGSPACE,      	0x100000
   .equ		CONDITIONALBLK, 0x40		#size of if/else block
-  .equ		CONDITIONALSTK, 0x14		#size of conditional stack entry
+  .equ		CONDITIONALSTK, 0x28		#size of conditional stack entry
 
 
 
