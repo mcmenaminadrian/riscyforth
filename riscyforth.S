@@ -109,8 +109,8 @@
    Error_msg:     .asciz "INTERPRETER FAILURE! System may be unstable."
    stdinopen:     .asciz "r"
    stdoutopen:    .asciz "w"
-   decimalout:    .asciz "%d "
-   hexout:        .asciz "%#X "
-   octalout:      .asciz "%oo "
+   decimalout:    .asciz "%lld "
+   hexout:        .asciz "%#llX "
+   octalout:      .asciz "%lloo "
 
 

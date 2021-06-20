@@ -78,32 +78,32 @@ end_\Name:
 
 
 .macro WRITECR
-  addi a0, zero, 1
-  addi a1, zero, 0x0D
+  li a0, 1
+  li a1, 0x0D
   PUSH a1
   mv a1, sp
-  addi a2, zero, 1
-  addi a7, zero, 64
+  li a2, 1
+  li a7, 64
   ecall
-  POP zero
+  addi sp, sp, 8
 .endm
 
 .macro WRITECHAR char
-  addi a1, zero, \char
-  addi a0, zero, 1
+  li a1, \char
+  li a0, 1
   PUSH a1
   mv a1, sp
-  addi a2, zero , 1
-  addi a7, zero, 64
+  li a2, 1
+  li a7, 64
   ecall
-  POP zero
+  addi sp, sp, 8
 .endm
 
 .macro WRITESTRINGR stringReg, lenReg
   li a0, 1
   mv a1, \stringReg
   mv a2, \lenReg
-  addi a7, zero, 64
+  li a7, 64
   ecall
 .endm
 
@@ -129,7 +129,7 @@ end_\Name:
 
 .macro MARKINPUTBUFFER, ADDRESS
     la t0, \ADDRESS
-    addi t1, zero, 0x0A
+    li t1,  0x0A
     sd t1, 0(t0)
 .endm
 

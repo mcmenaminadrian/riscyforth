@@ -440,8 +440,8 @@
                 WRITESTRINGR t0, t1
                 tail NEXT
   ps_format_binary:                             #binary output not supported by sprintf, so do it ourselves
-                addi t0, zero, 1
-                addi t1, zero, 31
+                li t0, 1
+                li t1, 63
   dot_test_against_shift:
                 sll t3, t0, t1
                 and a0, a2, t3
@@ -450,27 +450,30 @@
                 beq t1, zero, dot_last_and_out
                 j dot_test_against_shift
   dot_start_binary:
-                PUSH a2
-                PUSH t0
-                PUSH t1
-                PUSH t3
+		addi sp, sp, -32
+		sd a2, 24(sp)
+		sd t0, 16(sp)
+		sd t1, 8(sp)
+		sd t3, 0(sp)
                 WRITECHAR 0x31                #output 1
   dot_start_pop:
-                POP t3
-                POP t1
-                POP t0
-                POP a2
+		ld t3, 0(sp)
+		ld t1, 8(sp)
+		ld t0, 16(sp)
+		ld a2, 24(sp)
+		addi sp, sp, 32
   dot_shift_and_test:
                 sub t1, t1, t0
                 beq t1, zero, dot_last_and_out
                 sll t3, t0, t1
                 and a0, a2, t3
                 bne a0, zero, dot_start_binary
-                PUSH a2                     #got a zero so output that
-                PUSH t0
-                PUSH t1
-                PUSH t3
-                WRITECHAR 0x030
+		addi sp, sp, -32
+		sd a2, 24(sp)
+		sd t0, 16(sp)
+		sd t1, 8(sp)
+		sd t3, 0(sp)
+                WRITECHAR 0x030		#output 0
                 j dot_start_pop
   dot_last_and_out:
                 and a0, a2, t0
