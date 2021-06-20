@@ -52,7 +52,9 @@
                 #puts 1 on stack if system variables
                 #TOKEN_START and TOKEN_END hold valid values
                 la a1, INPUT_END
+		ld a1, 0(a1)
                 la a0, INPUT_START
+		ld a0, 0(a0)
                 addi t0, a0, 1                        #account for minimal input
                 bltu t0, a1, tokenize_have_data       #buffer has data
   tokenize_all_over:
@@ -116,20 +118,22 @@
 		CODEHEADER SEARCH, TOKENIZE_IMM, 0x0
                 POP a0
                 beq a0, zero, search_no_token     
-                addi t0, zero, 1
+                li t0, 1
                 bne a0, t0, search_bad_pop
                 la t0, TOKEN_START                    #token values are valid
+		ld t0, 0(t0)
                 la t1, TOKEN_END
+		ld t1, 0(t1)
 		la t2, CREATEFLAG
 		ld t2, 0(t2)
 		beq t2, zero, search_continue	      #we are in immediate mode
                 j search_create_continue
   search_no_token:
-                addi t0, zero, 2                      #should never get here - so warn if we do
+                li t0, 2                      #should never get here - so warn if we do
                 sd t0, OKSTATUS, t1
                 tail NEXT
   search_bad_pop:
-                addi t0, zero, 2
+                li t0, 2
                 sd t0, OKSTATUS, t1
                 PUSH a0                               #restore bad POP
                 tail NEXT
@@ -139,9 +143,9 @@
                 la t4, dictionary
                 ld t3, 0(t4)
   search_next_in_dictionary:
-                lb t4, 12(t3)
+                lb t4, 24(t3)
                 bne t4, t2, search_tokens_do_not_match
-                add a0, t3, 16                        #a0 now points into the name in the dictionary
+                add a0, t3, 32                        #a0 now points into the name in the dictionary
                 mv a1, t0                             #a1 points to the name in the buffer
                 mv a2, t2                             #a2 checks how far we've gone 
 
@@ -156,12 +160,12 @@
                 j search_loop_through_token
                 
   search_tokens_do_not_match:
-                ld t3, 8(t3)                          #read the pointer to the next TIL command
+                ld t3, 16(t3)                          #read the pointer to the next TIL command
                 beq t3, zero, search_exhausted        #at the end of the dictionary
                 j search_next_in_dictionary
 
   search_tokens_matched:
-                addi t3, t3, 4                        #address that points to the code
+                addi t3, t3, 8                        #address that points to the code
                 PUSH t3                               #store word address on the call stack
                 tail EXECUTE
 
