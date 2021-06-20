@@ -11,6 +11,7 @@
   .equ          SYSTEMAREA,   	0x100          	#for variables
   .equ          BUFFERLEN,    	0x200
   .equ          STACKOFFSET,   	0x08
+  .equ		ADDRWIDTH,	0x08
   .equ          INSTWIDTH,     	0x04
   .equ          INSTWIDTH2,    	0x08
   .equ          INSTWIDTH3,    	0x0C

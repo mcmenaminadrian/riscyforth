@@ -2,10 +2,10 @@
 
 .balign 8
 outer_loop:
-          .4byte WA_TYPEPROMPT
-          .4byte WA_GETNEXTLINE_IMM 
+          .8byte WA_TYPEPROMPT
+          .8byte WA_GETNEXTLINE_IMM 
 outer_loop_tokenize:
-          .4byte WA_TOKENIZE_IMM
-          .4byte WA_OK                #fallback
-          .4byte WA_OLSEMI
+          .8byte WA_TOKENIZE_IMM
+          .8byte WA_OK                #fallback
+          .8byte WA_OLSEMI
 

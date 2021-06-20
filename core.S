@@ -75,11 +75,11 @@
 
   NEXT:
                 ld s8, 0(s7)                        #word address register takes content of next secondary
-                addi s7, s7, INSTWIDTH              #next secondary along
+                addi s7, s7, ADDRWIDTH              #next secondary along
   
   RUN:
                 ld t0, 0(s8)                        #extract first instruction address of primative
-                addi s8, s8, INSTWIDTH              #increment WA
+                addi s8, s8, ADDRWIDTH              #increment WA
                 jalr zero, t0, 0                    #run the code    
 
  EXECUTE:                                           #execute the next command on the stack

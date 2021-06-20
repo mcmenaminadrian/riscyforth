@@ -1,47 +1,47 @@
 #Simple integer calculations
 
                 CODEHEADER ADD, DOT, 0x01
-		lw a0, 0(sp)
-		lw a1, 8(sp)
+		ld a0, 0(sp)
+		ld a1, 8(sp)
                 add t0, a0, a1
-		sw t0, 8(sp)
+		sd t0, 8(sp)
 		addi sp, sp, 8
                 tail NEXT
 
                 CODEHEADER MUL, ADD, 0x01
-		lw a0, 0(sp)
-		lw a1, 8(sp)
+		ld a0, 0(sp)
+		ld a1, 8(sp)
                 mul t0, a0, a1
-		sw t0, 8(sp)
+		sd t0, 8(sp)
 		addi sp, sp, 8
                 tail NEXT
 
                 CODEHEADER DIV, MUL, 0x01
-		lw a1, 0(sp)
-		lw a0, 8(sp)
+		ld a1, 0(sp)
+		ld a0, 8(sp)
                 div t0, a0, a1
-		sw t0, 8(sp)
+		sd t0, 8(sp)
 		addi sp, sp, 8
                 tail NEXT
 
                 CODEHEADER SUB, DIV, 0x01
-		lw a1, 0(sp)
-		lw a0, 8(sp)
+		ld a1, 0(sp)
+		ld a0, 8(sp)
                 sub t0, a0, a1
-		sw t0, 8(sp)
+		sd t0, 8(sp)
 		addi sp, sp, 8
                 tail NEXT
 
                 CODEHEADER PLUS1, SUB, 0x01
-		lw t0, 0(sp)
+		ld t0, 0(sp)
                 addi t0, t0, 1
-		sw t0, 0(sp)
+		sd t0, 0(sp)
                 tail NEXT
 
                 CODEHEADER MINUS1, PLUS1, 0x01
-		lw t0, 0(sp)
+		ld t0, 0(sp)
                 addi t0, t0, -1
-		sw t0, 0(sp)
+		sd t0, 0(sp)
                 tail NEXT
 
                 CODEHEADER UNDERPLUS, MINUS1, 0x01
@@ -89,7 +89,7 @@
 
                 CODEHEADER ABS, NEGATE, 0x01
                 POP t0
-                li t1, 0x80000000
+                li t1, 0x8000000000000000
                 or t2, t0, t1
                 beq t2, zero, abs_return_value
                 li t1, -1
@@ -124,7 +124,4 @@
                 PRINT riscy_forthQ
                 PRINT riscy_forth0
                 tail exit
-
-
-
 

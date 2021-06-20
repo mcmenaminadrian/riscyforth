@@ -4,37 +4,37 @@
 
 .macro PUSH register
         addi sp, sp, -8
-        sw  \register, 0(sp)
+        sd  \register, 0(sp)
 .endm
 
 .macro POP register
-        lw \register, 0(sp)
+        ld \register, 0(sp)
         addi sp, sp, 8
 .endm
 
 .macro PUSHRS register
-        addi s11, s11, -4
-        sw  \register, 0(s11)
+        addi s11, s11, -8
+        sd  \register, 0(s11)
 .endm
 
 .macro POPRS register
-        lw \register, 0(s11)
-        addi s11, s11, 4
+        ld \register, 0(s11)
+        addi s11, s11, 8
 .endm
 
 .macro PUSHI
-        addi s11, s11, -4
-        sw s8, 0(s11)
+        addi s11, s11, -8
+        sd s8, 0(s11)
 .endm
 
 .macro POPI
-      lw s8, 0(s11)
+      ld s8, 0(s11)
       addi s11, s11, 4
 .endm
 
 .macro COLON Name
       addi s9, s9, -STACKOFFSET
-      sw s7, 0(s9)
+      sd s7, 0(s9)
       la s8, COLON_\Name
       mv s7, s8
       tail NEXT
@@ -45,13 +45,13 @@ COLON_\Name:
 .macro CODEHEADER Name, PrevName, flags
 .balign 8
 TIL_\Name:
-        .4byte  \flags
+        .8byte  \flags
 WA_\Name:
-        .4byte  \Name
+        .8byte  \Name
 ptr_\PrevName:
-        .4byte TIL_\PrevName
+        .8byte TIL_\PrevName
 length_ASCII_\Name:
-        .4byte (end_\Name - beg_\Name)
+        .8byte (end_\Name - beg_\Name)
 beg_\Name:
         .ascii "\Name"
 end_\Name:
@@ -62,13 +62,13 @@ end_\Name:
 .macro CODEEND Name, flags
 .balign 8
 TIL_\Name:
-        .4byte  \flags
+        .8byte  \flags
 WA_\Name:
-        .4byte  \Name
+        .8byte  \Name
 ptr_NULL:
-        .4byte 0x0
+        .8byte 0x0
 length_ASCII_\Name:
-        .4byte end_\Name - beg_\Name
+        .8byte end_\Name - beg_\Name
 beg_\Name:
         .ascii "\Name"
 end_\Name:
@@ -130,35 +130,35 @@ end_\Name:
 .macro MARKINPUTBUFFER, ADDRESS
     la t0, \ADDRESS
     addi t1, zero, 0x0A
-    sw t1, 0(t0)
+    sd t1, 0(t0)
 .endm
 
 .macro TRANSITION_PROLOGUE
 			addi sp, sp, -56
-			sw s0, 0(sp)
-			sw s1, 8(sp)
-			sw s2, 16(sp)
-			sw s3, 24(sp)
-			sw s4, 32(sp)
-			sw s5, 40(sp)
-			sw s6, 48(sp)
+			sd s0, 0(sp)
+			sd s1, 8(sp)
+			sd s2, 16(sp)
+			sd s3, 24(sp)
+			sd s4, 32(sp)
+			sd s5, 40(sp)
+			sd s6, 48(sp)
   .endm
 
   .macro TRANSITION_EPILOGUE
-			lw s6, 48(sp)
-			lw s5, 40(sp)
-			lw s4, 32(sp)
-			lw s3, 24(sp)
-			lw s2, 16(sp)
-			lw s1, 8(sp)
-			lw s0, 0(sp)
+			ld s6, 48(sp)
+			ld s5, 40(sp)
+			ld s4, 32(sp)
+			ld s3, 24(sp)
+			ld s2, 16(sp)
+			ld s1, 8(sp)
+			ld s0, 0(sp)
 			addi sp, sp, 56
   .endm
 
   .macro SETUP_CONDITIONAL_CALL
 			la a0, DECIDESTACKB
-			lw a0, 0(a0)
+			ld a0, 0(a0)
 			la a2, DECIDESTACKP
-			lw a1, 0(a2)
+			ld a1, 0(a2)
   .endm
 
