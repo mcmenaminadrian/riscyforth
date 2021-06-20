@@ -5,20 +5,20 @@
   wordlist_fetch:
                 ld t1, 0(t0)
 		ld t2, 0(t1)
-                beq t2, zero, wordlist_get_next             #flag is zero, not for printing
-                ld t2, INSTWIDTH3(t1)                       #length of name
-                addi t1, t1, INSTWIDTH4                     #address of characters for name
+                beq t2, zero, wordlist_get_next 	       	#flag is zero, not for printing
+                ld t2, 24(t1)		                       	#length of name
+                addi t1, t1, 32		                     	#address of characters for name
                 PUSH t0
                 WRITESTRINGR t1, t2
                 WRITECHAR 0x20
                 WRITECHAR 0x20
                 POP t0
   wordlist_get_next:
-								lw t1, 0(t0)
-                ld t1, INSTWIDTH2(t1)                       	#next pointer
+		ld t1, 0(t0)
+                ld t1, 16(t1)		                       	#next pointer
                 beq t1, zero, wordlist_finished
 		ld t1, 0(t0)
-		addi t1, t1, INSTWIDTH2
+		addi t1, t1, 16
                 mv t0, t1
                 j wordlist_fetch
   wordlist_finished:
