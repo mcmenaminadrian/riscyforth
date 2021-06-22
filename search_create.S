@@ -7,7 +7,7 @@
                 sub t2, t1, t0
                 addi t2, t2, 1                        #t2 has length of token
                 la t4, dictionary
-                lw t3, 0(t4)
+                ld t3, 0(t4)
   search_create_next_in_dictionary:
                 lb t4, 12(t3)
                 bne t4, t2, search_create_tokens_do_not_match
@@ -26,7 +26,7 @@
                 j search_create_loop_through_token
 
   search_create_tokens_do_not_match:
-                lw t3, 8(t3)                          #read the pointer to the next TIL command
+                ld t3, 8(t3)                          #read the pointer to the next TIL command
                 beq t3, zero, search_create_exhausted        #at the end of the dictionary
                 j search_create_next_in_dictionary
 
@@ -36,7 +36,7 @@
 		la t0, WA_COLON			      #cannot nest definitions
 		bne t3, t0, search_create_allowed
 		la t0, CREATEFLAG
-		sw zero, 0(t0)
+		sd zero, 0(t0)
 		tail search_failed		      #report error
   search_create_allowed:
 		#test for END
@@ -124,7 +124,7 @@
   search_create_bad_ifmode:
 		#error
 		la t0, CREATEFLAG
-		sw zero, 0(t0)
+		sd zero, 0(t0)
 		tail search_failed
 
   search_create_inscribe:
@@ -144,15 +144,15 @@
 		j search_create_bad_ifmode
   search_create_continue_inscription:
 		la t0, createwritepoint
-		lw t1, 0(t0)
-		sw t3, 0(t1)			      #write out word address in definition
-		addi t1, t1, 4
-		sw t1, 0(t0)
+		ld t1, 0(t0)
+		sd t3, 0(t1)			      #write out word address in definition
+		addi t1, t1, 8
+		sd t1, 0(t0)
 		la t0, WA_SEMI			      #are we finished with create?
 		bne t3, t0, search_create_leave
 		#tidy up create as we are done
 		la t0, CREATEFLAG
-		sw zero, 0(t0)			      #back to immediate execution
+		sd zero, 0(t0)			      #back to immediate execution
 		li t0, 0x07
 		and t0, t0, t1
 		beq t0, zero, search_create_address_aligned_ok #already aligned
@@ -162,9 +162,9 @@
   search_create_address_aligned_ok:
 		la t0, newdictionary
 		la t2, dictionary
-		lw t3, 0(t0)			      #load address of new word
-		sw t3, 0(t2)			      #store address of new word as start for dictionary
-		sw t1, 0(t0)			      #update address we will writenext word to
+		ld t3, 0(t0)			      #load address of new word
+		sd t3, 0(t2)			      #store address of new word as start for dictionary
+		sd t1, 0(t0)			      #update address we will writenext word to
   search_create_leave:
 		la s7, outer_loop_tokenize
                 tail NEXT
@@ -180,7 +180,7 @@
 		# have to treat as a variable
 		bge t4, a5, search_create_assign_variable
 		#assume we have a number
-		lw t2, CURRENT_BASE
+		ld t2, CURRENT_BASE
 		li t3, 16
 		beq t2, t3, search_create_check_hex
 		li t3, 8
@@ -200,7 +200,7 @@
 		li t2, 1
 		beq a1, t2, search_create_number_on_stack
 		la t0, CREATEFLAG
-		sw zero, 0(t0)
+		sd zero, 0(t0)
 		tail search_failed
 
   search_create_check_decimal:
@@ -220,10 +220,10 @@
 		#then write out would-be variable name (up to 24 chars)
 		la t3, WA_VARIN
 		la a0, createwritepoint
-		lw a1, 0(a0)
-		sw t3, 0(a1)			      #write out word address in definition
+		ld a1, 0(a0)
+		sd t3, 0(a1)			      #write out word address in definition
 		addi a1, a1, 4
-		sw a1, 0(a0)
+		sd a1, 0(a0)
 		#write out var name
 		#t0 holds start
 		#t1 holds end
@@ -231,8 +231,8 @@
 		mv a2, t2
 		mv a3, t0
 		#write out length
-		sw a2, 0(a1)
-		addi a1, a1, 4
+		sd a2, 0(a1)
+		addi a1, a1, 8
   search_create_raw_var_name:
 		lb t5, 0(a3)
 		sb t5, 0(a1)
@@ -286,7 +286,7 @@
 		li t2, 1
 		beq a1, t2, search_create_address_on_stack
 		la t0, CREATEFLAG
-		sw zero, 0(t0)
+		sd zero, 0(t0)
 		tail search_failed
 
   search_create_check_decimal_address:
@@ -308,9 +308,9 @@
   search_create_literal_out:		
 		la t0, createwritepoint
 		lw t1, 0(t0)
-		sw t3, 0(t1)			      #write out word address in definition
-		sw a2, 4(t1)
-		addi t1, t1, 8
+		sd t3, 0(t1)			      #write out word address in definition
+		sd a2, 8(t1)
+		addi t1, t1, 16
 		sw t1, 0(t0)
 		la s7, outer_loop_tokenize
 		#update the depth of the current skip if needed
@@ -331,18 +331,18 @@
 		#a4 base (set in fuction)
   func_test_hex:
 		add sp, sp, -96
-		sw s0, 0(sp)
-		sw s1, 8(sp)
-		sw s2, 16(sp)
-		sw s3, 24(sp)
-		sw s4, 32(sp)
-		sw s5, 40(sp)
-		sw s6, 48(sp)
-		sw s7, 56(sp)
-		sw s8, 64(sp)
-		sw s9, 72(sp)
-		sw s10, 80(sp)
-		sw s11, 88(sp)
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s2, 16(sp)
+		sd s3, 24(sp)
+		sd s4, 32(sp)
+		sd s5, 40(sp)
+		sd s6, 48(sp)
+		sd s7, 56(sp)
+		sd s8, 64(sp)
+		sd s9, 72(sp)
+		sd s10, 80(sp)
+		sd s11, 88(sp)
 		mv a1, zero
 		mv a2, zero
 		li a4, 16
@@ -413,36 +413,36 @@
 
   func_return_hex:
 		#common return for all number funcs
-		lw s11, 88(sp)
-		lw s10, 80(sp)
-		lw s9, 72(sp)
-		lw s8, 64(sp)
-		lw s7, 56(sp)
-		lw s6, 48(sp)
-		lw s5, 40(sp)
-		lw s4, 32(sp)
-		lw s3, 24(sp)
-		lw s2, 16(sp)
-		lw s1, 8(sp)
-		lw s0, 0(sp)
+		ld s11, 88(sp)
+		ld s10, 80(sp)
+		ld s9, 72(sp)
+		ld s8, 64(sp)
+		ld s7, 56(sp)
+		ld s6, 48(sp)
+		ld s5, 40(sp)
+		ld s4, 32(sp)
+		ld s3, 24(sp)
+		ld s2, 16(sp)
+		ld s1, 8(sp)
+		ld s0, 0(sp)
 		addi sp, sp, 96
 		ret		
 
 
 func_test_octal:
 		add sp, sp, -96
-		sw s0, 0(sp)
-		sw s1, 8(sp)
-		sw s2, 16(sp)
-		sw s3, 24(sp)
-		sw s4, 32(sp)
-		sw s5, 40(sp)
-		sw s6, 48(sp)
-		sw s7, 56(sp)
-		sw s8, 64(sp)
-		sw s9, 72(sp)
-		sw s10, 80(sp)
-		sw s11, 88(sp)
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s2, 16(sp)
+		sd s3, 24(sp)
+		sd s4, 32(sp)
+		sd s5, 40(sp)
+		sd s6, 48(sp)
+		sd s7, 56(sp)
+		sd s8, 64(sp)
+		sd s9, 72(sp)
+		sd s10, 80(sp)
+		sd s11, 88(sp)
 		mv a1, zero
 		mv a2, zero
 		li a4, 8
@@ -454,18 +454,18 @@ func_test_octal:
  
   func_test_decimal:
 		add sp, sp, -96
-		sw s0, 0(sp)
-		sw s1, 8(sp)
-		sw s2, 16(sp)
-		sw s3, 24(sp)
-		sw s4, 32(sp)
-		sw s5, 40(sp)
-		sw s6, 48(sp)
-		sw s7, 56(sp)
-		sw s8, 64(sp)
-		sw s9, 72(sp)
-		sw s10, 80(sp)
-		sw s11, 88(sp)
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s2, 16(sp)
+		sd s3, 24(sp)
+		sd s4, 32(sp)
+		sd s5, 40(sp)
+		sd s6, 48(sp)
+		sd s7, 56(sp)
+		sd s8, 64(sp)
+		sd s9, 72(sp)
+		sd s10, 80(sp)
+		sd s11, 88(sp)
 		mv a1, zero
 		mv a2, zero
 		li a4, 10
@@ -530,21 +530,21 @@ func_test_octal:
 
   varin_scan_stack:
 		#come here with t3 pointing to the word with length
-		lw t2, 0(t3)			#t2 holds length
+		ld t2, 0(t3)			#t2 holds length
 		mv t0, t3
 		addi t0, t0, 4			#t0 now points to name
 		la t4, BOTTOM_VARS
-		lw t3, 0(t4)
+		ld t3, 0(t4)
 		addi t3, t3, 36
   varin_next_check:
-		lw t4, 0(t3)
-		li a1, 0xFFFFFFFF
+		ld t4, 0(t3)
+		li a1, -1
 		and t4, t4, a1
 		li a3, 0xdeadbeef
 		beq t4, a3, varin_next_in_dictionary
 		j varin_failed
   varin_next_in_dictionary:
-		lw t4, -4(t3)
+		ld t4, -4(t3)
 		#compare lengths
 		bne t4, t2, varin_tokens_do_not_match
                 add a0, t3, -5                        #a0 now points into the name in the var stack
@@ -563,17 +563,15 @@ func_test_octal:
   varin_tokens_do_not_match:
                 add t3, t3, 36                        #advance up the var stack
                 la t4, TOP_VARS
-                lw t4, 0(t4)
+                ld t4, 0(t4)
                 bge t3, t4, varin_no_match
                 j varin_next_check
 
   varin_tokens_matched:
                 #put variable value on the stack
-                lw t4, -32(t3)
+                ld t4, -32(t3)
                 PUSH t4
                 tail NEXT
   varin_no_match:
                 j varin_failed
 
-	
-		
