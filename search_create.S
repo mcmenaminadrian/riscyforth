@@ -26,12 +26,12 @@
                 j search_create_loop_through_token
 
   search_create_tokens_do_not_match:
-                ld t3, 8(t3)                          #read the pointer to the next TIL command
+                ld t3, 16(t3)                          #read the pointer to the next TIL command
                 beq t3, zero, search_create_exhausted        #at the end of the dictionary
                 j search_create_next_in_dictionary
 
   search_create_tokens_matched:
-                addi t3, t3, 4                        #address that points to the code
+                addi t3, t3, 8                        #address that points to the code
 		#now check it is allowed
 		la t0, WA_COLON			      #cannot nest definitions
 		bne t3, t0, search_create_allowed
