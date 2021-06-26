@@ -27,6 +27,7 @@
   .text
   .align 3
   .globl main
+  _start:
   main:
                 nop
                 la t4, (VARIABLES + 0xFFFDC)

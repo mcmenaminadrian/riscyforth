@@ -116,15 +116,16 @@
 		ld t3, 0(t1)
 		li t2, 0x01
 		sd t2, 0(t3)				#flag
-		addi t2, t3, 0x28			#word address of new word
+		addi t2, t3, 0x38			#word address of new word
 		sd t2, 8(t3)
 		la t0, dictionary
 		ld t1, 0(t0)
 		sd t1, 16(t3)				#words address of previous word
-		li t2, 0XFFFFFFFFFFFFFFFF			#now fill in name space
-		sd t2, 24(t3)
+		sd zero, 24(t3)				#zero length
+		li t2, 0XFFFFFFFFFFFFFFFF		#now fill in name space
 		sd t2, 32(t3)
 		sd t2, 40(t3)
+		sd t2, 48(t3)
 		#now read in the name
 		PUSH t3		
 
@@ -204,49 +205,61 @@
 		j colon_write_out_name
   colon_name_written:
 		#now write out the colon code
-		li t0, 0x0FFC8C9B
+		li t0, 0xFF8C8C93
 		sw t0, 56(t3)		#addi s9, s9, -8,
 		li t0, 0x017cb023	
 		sw t0, 60(t3)		#sd s7, 0(s9)
-		#calculate the offset for lui
-		addi t0, t3, 0x58	#88 byte jump
+		#calculate the address we need to jump to for 64 bits
+		mv t2, t3
+		srli t2, t2, 32
+		slli t2, t2, 20
+		li t1, 0xC13
+		or t2, t2, t1
+		sw t2, 64(t3)		#addi s8, zero, [upper 32 bits >> 32]
+		li t2, 0x20C1C13
+		sw t2, 68(t3)		#slli s8, s8, 32
 		li t1, 0xFFFFF000
-		and t0, t0, t1
-		li t1, 0xC37
+		and t0, t3, t1
+		li t1, 0x2B7
 		or t0, t0, t1
-		sw t0, 64(t3)		#lui word address
-		#calculate lower part of the sum
-		addi t0, t3, 0x58 	#88byte jump
-		li t4, 0xFFF
-		and t0, t0, t4
+		sw t0, 72(t3)		#lui t0, [bits 12 - 31]
+		li t1, 0xFFF
+		and t0, t3, t1
 		slli t0, t0, 20
-		li t4, 0xc0c13
-		or t0, t0, t4
-		sw t0, 68(t3)		#add lower part
+		li t1, 0x2E293
+		or t0, t0, t1
+		sw t0, 76(t3)		#ori t0, t0, [bits 11 -0]
+		li t0, 0x5C6C33
+		sw t0, 80(t3)		#or s8, s8, t0
+		li t0, 104		#offset set here
+		slli t0, t0, 20
+		li t1, 0xC0C13
+		or t0, t0, t1
+		sw t0, 84(t3)		#addi s8, s8, [offset]
 		li t0, 0x8be2
-		sh t0, 72(t3)		#mv s7, s8
+		sh t0, 88(t3)		#mv s7, s8
 		li t0, 0x01
-		sh t0, 74(t3)		#nop (to preserve alignment)
+		sh t0, 90(t3)		#NOP
 		#execute register based jump to NEXT
 		la t1, NEXT		#t1 has the number
 		#load the number into register t0
 		li t2, 0xFFFFF000
 		and t4, t1, t2
 		ori t4, t4, 0x2B7	#lui t0
-		sw t4, 76(t3)
+		sw t4, 92(t3)
 		li t4, 0xFFF
 		and t2, t1, t4
 		slli t4, t2, 20
 		li t5, 0x28293		#addi t0
 		or t4, t4, t5
-		sw t4, 80(t3)
+		sw t4, 96(t3)
 		li t0, 0x28067		#jalr zero, 0(t0)
-		sw t0, 84(t3)
+		sw t0, 100(t3)
 
 
 		la t1, newdictionary
 		ld t1, 0(t1)
-		addi t1, t1, 72
+		addi t1, t1, 104
 		la t3, createwritepoint
 		sd t1, 0(t3)
 		tail NEXT

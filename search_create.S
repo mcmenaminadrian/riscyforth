@@ -9,9 +9,9 @@
                 la t4, dictionary
                 ld t3, 0(t4)
   search_create_next_in_dictionary:
-                lb t4, 12(t3)
+                lb t4, 24(t3)
                 bne t4, t2, search_create_tokens_do_not_match
-                add a0, t3, 16                        #a0 now points into the name in the dictionary
+                add a0, t3, 32                        #a0 now points into the name in the dictionary
                 mv a1, t0                             #a1 points to the name in the buffer
                 mv a2, t2                             #a2 checks how far we've gone 
 
