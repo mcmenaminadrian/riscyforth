@@ -222,7 +222,7 @@
 		la a0, createwritepoint
 		ld a1, 0(a0)
 		sd t3, 0(a1)			      #write out word address in definition
-		addi a1, a1, 4
+		addi a1, a1, 8
 		sd a1, 0(a0)
 		#write out var name
 		#t0 holds start
@@ -250,7 +250,7 @@
 		bne a2, zero, search_create_ff_var_name
 		#update createwritepoint and bail
 		la t0, createwritepoint
-		sw a1, 0(t0)
+		sd a1, 0(t0)
 		la s7, outer_loop_tokenize
 		#update the depth of the current skip if needed
 		call get_iffmode
@@ -264,7 +264,7 @@
 		#hash at first address
 		#then check numbers
 		
-		lw t2, CURRENT_BASE
+		ld t2, CURRENT_BASE
 		addi t0, t0, 1
 		li t3, 16
 		beq t2, t3, search_create_check_hex_address
@@ -307,11 +307,11 @@
 
   search_create_literal_out:		
 		la t0, createwritepoint
-		lw t1, 0(t0)
+		ld t1, 0(t0)
 		sd t3, 0(t1)			      #write out word address in definition
 		sd a2, 8(t1)
 		addi t1, t1, 16
-		sw t1, 0(t0)
+		sd t1, 0(t0)
 		la s7, outer_loop_tokenize
 		#update the depth of the current skip if needed
 		call get_iffmode

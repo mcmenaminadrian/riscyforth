@@ -30,7 +30,7 @@
 		ld t0, 0(s7)
 		addi sp, sp, -8
 		sd t0, 0(sp)
-		addi s7, s7, INSTWIDTH
+		addi s7, s7, ADDRWIDTH
 		tail NEXT
 
 		CODEHEADER LITERALADDR, LITERALNUMB, 0x0
@@ -41,7 +41,7 @@
 		ld t1, 0(t0)
 		addi sp, sp, -8
 		sd t1, 0(sp)
-		addi s7, s7, INSTWIDTH
+		addi s7, s7, ADDRWIDTH
 		tail NEXT
 
 		CODEHEADER VARIN, LITERALADDR, 0x0
