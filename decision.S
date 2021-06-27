@@ -105,7 +105,7 @@
 		ld s1, 0(a0)		#base address
 		ld s2, -8(a1)		#current index address for writing (high tide)
 
-		li s0, CONDITIONALBLK	#size of block
+		li s0, CONDITIONALBLK	#size of block`
 		mul s3, s2, s0		#multiply by index
 		addi s2, s2, 1		#increment index
 		sw s2, -8(a1)		#store incremented index
@@ -117,7 +117,7 @@
 		#now the code
 		#fetch condition off the stack
 		#(write out) ld t0, 0(sp)
-		li s3, 0x12383
+		li s3, 0x13283
 		sw s3, 8(s2)
 		#addi sp, sp, 8
 		li s3, 0x810113

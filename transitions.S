@@ -147,13 +147,13 @@
 			mul s4, s3, s1
 			add s5, s4, s0		#s5 points to block
 			#now prepare the change
-			ld s1, 48(s5)
+			lw s1, 56(s5)		#we update the addi s7,s7,8
 			andi s2, s2, 0x3FF
 			li s3, 0xFFFFF
 			and s1, s1, s3
-			slli s4, s2, 40
+			slli s4, s2, 20
 			or s3, s1, s4
-			sd s3, 48(s5)
+			sw s3, 56(s5)
 			TRANSITION_EPILOGUE
 			ret
 			
@@ -175,13 +175,13 @@
 			mul s4, s3, s1
 			add s5, s4, s0		#s5 points to block
 			#now prepare the change
-			ld s1, 28(s5)
+			lw s1, 32(s5)		#update the addi s7,s7,8
 			andi s2, s2, 0x3FF
 			li s3, 0xFFFFF
 			and s1, s1, s3
 			slli s4, s2, 20
 			or s3, s1, s4
-			sd s3, 28(s5)
+			sw s3, 32(s5)
 			TRANSITION_EPILOGUE
 			ret
 
