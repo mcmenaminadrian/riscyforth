@@ -168,7 +168,7 @@
 			ld s1, 0(a1)
 			mv s2, a2
 			li s3, 8
-			mul s2, s2, s3		#4 bytes per instruction
+			mul s2, s2, s3		#8 bytes per instruction (address)
 
 			addi s1, s1, -1		#correct to zero start
 			li s3, CONDITIONALBLK

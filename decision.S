@@ -115,8 +115,9 @@
 		addi s1, s1, 8
 		sd s1, 0(s2)
 		#now the code
-		#write out lw t0, 0(sp)
-		li s3, 0x12283
+		#fetch condition off the stack
+		#(write out) ld t0, 0(sp)
+		li s3, 0x12383
 		sw s3, 8(s2)
 		#addi sp, sp, 8
 		li s3, 0x810113
@@ -161,10 +162,10 @@
 
 		#now ELSE block
 		mv s1, s2
-		addi s1, s1, 48
+		addi s1, s1, 56
 		sd s1, 48(s2)		#WA for this else
-		#addi s7, s7, 4		#default is skip 1 instruction
-		li s3, 0x4B8B93
+		#addi s7, s7, 8		#default is skip 1 instruction
+		li s3, 0x8B8B93
 		sw s3, 56(s2)
 		#register based jump to NEXT
 		la s0, NEXT
@@ -200,16 +201,16 @@
 		mul s4, s3, s2		#s4 has offset in the code block
 		add s4, s4, s0		#s4 now has start address of code block
 		sd s4, 0(s1)		#THEN address written
-		add s4, s4, 44		#ELSE address ...
-		sw s4, -8(s1)		#...written
+		add s4, s4, 0x30	#ELSE address ...
+		sd s4, -8(s1)		#...written
 		#update the counter
-		lw s2, 0(a1)
+		ld s2, 0(a1)
 		addi s2, s2, 1
-		sw s2, 0(a1)
+		sd s2, 0(a1)
 		#zero the rest of the stack
-		sd zero, -16(s1)
-		sd zero, -24(s1)
-		sd zero, -32(s1)
+		sd zero, -16(s1)	#FLAG
+		sd zero, -24(s1)	#THEN count
+		sd zero, -32(s1)	#ELSE count
 
 		#now return
 		ld s4, 32(sp)
@@ -224,15 +225,15 @@
   increment_current_skip:
 
 		addi sp, sp, -48
-		sw s0, 0(sp)
-		sw s1, 8(sp)
-		sw s2, 16(sp)
-		sw s3, 24(sp)
-		sw s4, 32(sp)
-		sw s5, 40(sp)
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s2, 16(sp)
+		sd s3, 24(sp)
+		sd s4, 32(sp)
+		sd s5, 40(sp)
 		mv s0, a0
-		addi s0, s0, -12	#top of the stack entries
-		lw s1, 0(a1)		#current index 
+		addi s0, s0, -24	#top of the stack entries
+		ld s1, 0(a1)		#current index 
 		li s2, -CONDITIONALSTK
 		addi s1, s1, -1		#rebase to zero
 		mul s3, s2, s1		#calculate raw offset
@@ -243,20 +244,20 @@
 		mv s2, a0
 		#test for else mode
 		beqz a2, incrementing_then_offset
-		addi s3, s3, -16	#point to else counter
+		addi s3, s3, -32	#point to else counter
 		j incrementing_skip_increment
   incrementing_then_offset:
-		add s3, s3, -12		#point to then counter
+		add s3, s3, -24		#point to then counter
   incrementing_skip_increment:
-		lw s0, 0(s3)
+		ld s0, 0(s3)
 		addi s0, s0, 1
-		sw s0, 0(s3)
-		lw s5, 40(sp)
-		lw s4, 32(sp)
-		lw s3, 24(sp)
-		lw s2, 16(sp)
-		lw s1, 8(sp)
-		lw s0, 0(sp)
+		sd s0, 0(s3)
+		ld s5, 40(sp)
+		ld s4, 32(sp)
+		ld s3, 24(sp)
+		ld s2, 16(sp)
+		ld s1, 8(sp)
+		ld s0, 0(sp)
 		addi sp, sp, 48
 		ret
 		
@@ -266,61 +267,61 @@
 		#a1 returns else increments
 		#a2 returns then increments
 		addi sp, sp, -32
-		sw s0, 0(sp)
-		sw s1, 8(sp)
-		sw s2, 16(sp)
-		sw s3, 24(sp)
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s2, 16(sp)
+		sd s3, 24(sp)
 
 		mv s0, a0
-		add s0, s0, -12		#s0 now pointing to bottom of stack
-		lw s1, 0(a1)
+		add s0, s0, -24		#s0 now pointing to bottom of stack
+		ld s1, 0(a1)
 		li s2, -CONDITIONALSTK
 		addi s1, s1, -1
 		mul s3, s2, s1
 		add s3, s3, s0
-		lw s1, -16(s3)		#else count
+		ld s1, -32(s3)		#else count
 		mv a2, s1
 		add s0, zero, s1
-		lw s1, -12(s3)		#then count
+		ld s1, -24(s3)		#then count
 		mv a1, s1
 		add s0, s0, s1
 		mv a0, s0
-		lw s3, 24(sp)
-		lw s2, 16(sp)
-		lw s1, 8(sp)
-		lw s0, 0(sp)
+		ld s3, 24(sp)
+		ld s2, 16(sp)
+		ld s1, 8(sp)
+		ld s0, 0(sp)
 		addi sp, sp, 32
 		ret
 
   clean_conditional_stack:
 		#zero out the top of the conditional stack
 		addi sp, sp, -32
-		sw s0, 0(sp)
-		sw s1, 8(sp)
-		sw s2, 16(sp)
-		sw s3, 24(sp)
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s2, 16(sp)
+		sd s3, 24(sp)
 		mv s0, a0
 		add s0, s0, -12
-		lw s1, 0(a1)
+		ld s1, 0(a1)
 		li s2, -CONDITIONALSTK
 		add s1, s1, -1
 		mul s3, s2, s1
 		add s3, s3, s0
 		#now zero the lot
-		sw zero, 0(s3)
-		sw zero, -4(s3)
-		sw zero, -8(s3)
-		sw zero, -12(s3)
-		sw zero, -16(s3)
+		sd zero, 0(s3)
+		sd zero, -8(s3)
+		sd zero, -16(s3)
+		sd zero, -24(s3)
+		sd zero, -32(s3)
 		#store the decremented counter
-		sw s1, 0(a1)
+		sd s1, 0(a1)
 		#return the decemented counter
 		mv a0, s1
 		#wind up
-		lw s3, 24(sp)
-		lw s2, 16(sp)
-		lw s1, 8(sp)
-		lw s0, 0(sp)
+		ld s3, 24(sp)
+		ld s2, 16(sp)
+		ld s1, 8(sp)
+		ld s0, 0(sp)
 		addi sp, sp, 32
 		ret
 
@@ -328,24 +329,25 @@
 		#a0 returns IF
 		#a1 returns ELSE
 		addi sp, sp, -32
-		sw s0, 0(sp)
-		sw s1, 8(sp)
-		sw s2, 16(sp)
-		sw s3, 24(sp)
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s2, 16(sp)
+		sd s3, 24(sp)
 		mv s0, a0
-		add s0, s0, -12
+		add s0, s0, -24
 		lw s1, 0(a1)
 		li s2, -CONDITIONALSTK
 		add s1, s1, -1
 		mul s3, s2, s1
 		add s3, s3, s0		#s3 has the address of the block
 		#now grab the needed
-		lw a0, 0(s3)
-		lw a1, -4(s3)
-		lw s3, 24(sp)
-		lw s2, 16(sp)
-		lw s1, 8(sp)
-		lw s0, 0(sp)
+		ld a0, 0(s3)
+		ld a1, -8(s3)
+		#unwind stack
+		ld s3, 24(sp)
+		ld s2, 16(sp)
+		ld s1, 8(sp)
+		ld s0, 0(sp)
 		addi sp, sp, 32
 		ret	
 		
