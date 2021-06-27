@@ -76,17 +76,17 @@
 
 		
 
-#		CONDITIONAL STACK - v2
-#		======================
-#		4 bytes - write point
-#		4 bytes - counter
-#     		4 bytes - high tide 
+#		CONDITIONAL STACK - v3 (RV64I)
+#		==============================
+#		8 bytes - write point
+#		8 bytes - counter
+#     		8 bytes - high tide 
 #		--- stack entry ---
-#		4 bytes - then address
-#		4 bytes - else address
-#		4 bytes - flag: ...|else|then|
-#     		4 bytes - then count 
-#		4 bytes - else count
+#		8 bytes - then address
+#		8 bytes - else address
+#		8 bytes - flag: ...|else|then|
+#     		8 bytes - then count 
+#		8 bytes - else count
 
 
 
@@ -103,121 +103,120 @@
 		sd s3, 24(sp)
 		sd s4, 32(sp)
 		ld s1, 0(a0)		#base address
-		ld s2, -4(a1)		#current index address for writing (high tide)
+		ld s2, -8(a1)		#current index address for writing (high tide)
 
-		li s0, CONDITIONALBLK	#size of block   #TODO CHECK!!
+		li s0, CONDITIONALBLK	#size of block
 		mul s3, s2, s0		#multiply by index
 		addi s2, s2, 1		#increment index
-		sw s2, -4(a1)		#store incremented index
+		sw s2, -8(a1)		#store incremented index
 		add s1, s1, s3		#start address in s1
 		mv s2, s1		#copy to s2
 		#write out address where code begins
-		addi s1, s1, 4
-		sw s1, 0(s2)
+		addi s1, s1, 8
+		sd s1, 0(s2)
 		#now the code
 		#write out lw t0, 0(sp)
 		li s3, 0x12283
-		sw s3, 4(s2)
+		sw s3, 8(s2)
 		#addi sp, sp, 8
 		li s3, 0x810113
-		sw s3, 8(s2)
+		sw s3, 12(s2)
 		#beq t0, zero, +16
 		li s3, 0x28863
-		sw s3, 12(s2)
+		sw s3, 16(s2)
 		#now in true path
 		#register based jump to NEXT
 		la s0, NEXT
 		li s4, 0xFFFFF000
 		and s3, s0, s4
 		ori s3, s3, 0x2B7
-		sw s3, 16(s2)
+		sw s3, 20(s2)
 		li s3, 0xFFF
 		and s4, s0, s3
 		slli s3, s4, 20
 		li s1, 0x28293
 		or s3, s3, s1
-		sw s3, 20(s2)
-		li s3, 0x28067
 		sw s3, 24(s2)
+		li s3, 0x28067
+		sw s3, 28(s2)
 		#now in the then/else path
 		#simplest/default case, skip one instruction
-		#addi s7, s7, 4
-		li s3, 0x4B8B93
-		sw s3, 28(s2)
+		#addi s7, s7, 8
+		li s3, 0x8B8B93
+		sw s3, 32(s2)
 		#register based jump to NEXT
-	#register based jump to NEXT
 		la s0, NEXT
 		li s4, 0xFFFFF000
 		and s3, s0, s4
 		ori s3, s3, 0x2B7
-		sw s3, 32(s2)
+		sw s3, 36(s2)
 		li s3, 0xFFF
 		and s4, s0, s3
 		slli s3, s4, 20
 		li s1, 0x28293
 		or s3, s3, s1
-		sw s3, 36(s2)
-		li s3, 0x28067
 		sw s3, 40(s2)
+		li s3, 0x28067
+		sw s3, 44(s2)
 
 		#now ELSE block
 		mv s1, s2
 		addi s1, s1, 48
-		sw s1, 44(s2)		#WA for this else
+		sd s1, 48(s2)		#WA for this else
 		#addi s7, s7, 4		#default is skip 1 instruction
 		li s3, 0x4B8B93
-		sw s3, 48(s2)
+		sw s3, 56(s2)
 		#register based jump to NEXT
 		la s0, NEXT
 		li s4, 0xFFFFF000
 		and s3, s0, s4
 		ori s3, s3, 0x2B7
-		sw s3, 52(s2)
+		sw s3, 60(s2)
 		li s3, 0xFFF
 		and s4, s0, s3
 		slli s3, s4, 20
 		li s1, 0x28293
 		or s3, s3, s1
-		sw s3, 56(s2)
+		sw s3, 64(s2)
 		li s3, 0x28067
-		sw s3, 60(s2)
+		sw s3, 68(s2)
 
 		#update the stack
-		lw s0, 0(a0)		#s0 - holds base address we are writing to
+		ld s0, 0(a0)		#s0 - holds base address we are writing to
 		mv s1, a0		#s1 - holds address at very bottom of the stack
 		mv a0, s2		#a0 - now holds the return the address we need
-		lw s2, 0(a1)		#s2 - holds index
+		ld s2, 0(a1)		#s2 - holds index
 		#calculate where to write stack entry
 		li s3, -CONDITIONALSTK	#s3 - stack entry size
 		mul s4, s3, s2		#s4 - offset to this stack entry
 		add s1, s4, s1		#s1 adjusted for offset
-		addi s1, s1, -12	#s1 adjusted for counter and high tide
+		addi s1, s1, -24	#s1 adjusted for counter and high tide
 		#s1 now holds the bottom address for stack entry
 		#now calculate then and else
 		li s3, CONDITIONALBLK
 		#this has to be at the high tide mark
-		lw s2, -4(a1)		#s2 has high tide
+		ld s2, -8(a1)		#s2 has high tide
 		addi s2, s2, -1		#correct to zero start
 		mul s4, s3, s2		#s4 has offset in the code block
 		add s4, s4, s0		#s4 now has start address of code block
-		sw s4, 0(s1)		#THEN address written
+		sd s4, 0(s1)		#THEN address written
 		add s4, s4, 44		#ELSE address ...
-		sw s4, -4(s1)		#...written
+		sw s4, -8(s1)		#...written
 		#update the counter
 		lw s2, 0(a1)
 		addi s2, s2, 1
 		sw s2, 0(a1)
 		#zero the rest of the stack
-		sw zero, -8(s1)
-		sw zero, -12(s1)
-		sw zero, -16(s1)
+		sd zero, -16(s1)
+		sd zero, -24(s1)
+		sd zero, -32(s1)
 
 		#now return
-		lw s4, 32(sp)
-		lw s3, 24(sp)
-		lw s2, 16(sp)
-		lw s1, 8(sp)
-		lw s0, 0(sp)
+		ld s4, 32(sp)
+		ld s3, 24(sp)
+		ld s2, 16(sp)
+		ld s1, 8(sp)
+		ld s0, 0(sp)
 		addi sp, sp, 40
 		ret
 
