@@ -21,7 +21,7 @@
 		add s7, s7, t0
 		tail NEXT
   end_of_end:
-		add s7, s7, 4
+		add s7, s7, 8
 		tail NEXT
 
 		CODEHEADER WHILE, _END, 0x01
@@ -260,14 +260,12 @@
 		li t0, 0x28067		#jalr zero, 0(t0)
 		sw t0, 108(t3)
 
-
 		la t1, newdictionary
 		ld t1, 0(t1)
 		addi t1, t1, 112
 		la t3, createwritepoint
 		sd t1, 0(t3)
 		tail NEXT
-
 
   colon_fail:
 		la t0, CREATEFLAG
@@ -296,14 +294,14 @@
 		
 		#now search for WA_BEGIN
 		li s0, 0x200				#max depth of search backwards
-		li s1, -4
-		li s2, 4
+		li s1, -8
+		li s2, 8
 		la s5, WA_BEGIN
 		mv s6, s3
 		mv s7, zero
 		la s8, WA__END
   end_check_begin:
-		addi s3, s3, -4
+		addi s3, s3, -8
 		lw s4, 0(s3)
 		bne s4, s8, end_keep_checking
 		addi s7, s7, 1
