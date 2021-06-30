@@ -83,7 +83,20 @@
                 .8byte WA_DROP
                 .8byte WA_SEMI
 
-                CODEHEADER NIP2, DROP2, 0x01
+		CODEHEADER SQUARE, DROP2, 0x01
+		ld t0, 0(sp)
+		mul t1, t0, t0
+		sd t1, 0(sp)
+		tail NEXT
+
+		CODEHEADER CUBE, SQUARE, 0x01
+		ld t0, 0(sp)
+		mul t1, t0, t0
+		mul t1, t0, t1
+		sd t1, 0(sp)
+		tail NEXT
+
+                CODEHEADER NIP2, CUBE, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		sd t1, 24(sp)
