@@ -101,6 +101,7 @@
   search_create_test_while_state:
 		#test for then->while
 		beqz a1, search_create_test_else_while
+		la a0, WA__WHILE
 		tail transition_then_while
   search_create_test_else_while:
 		beqz a2, search_create_bad_ifmode

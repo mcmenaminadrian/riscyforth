@@ -329,9 +329,6 @@
 			call transition_bump_then
 			tail leave_if_then
 
-  transition_else_while:
-			call output_while
-
   transition_else_then:
 			TRANSITION_PROLOGUE
 			#test we are in a valid conditional
