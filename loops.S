@@ -302,7 +302,7 @@
 		la s8, WA__END
   end_check_begin:
 		addi s3, s3, -8
-		lw s4, 0(s3)
+		ld s4, 0(s3)
 		bne s4, s8, end_keep_checking
 		addi s7, s7, 1
 		j end_check_next

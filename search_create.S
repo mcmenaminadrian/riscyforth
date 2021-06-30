@@ -96,6 +96,7 @@
 		beqz a0, search_create_bad_ifmode
 		call get_flag_mode
 		bnez a0, search_create_test_while_state
+		la a0, WA__WHILE				#write out _WHILE
 		tail transition_if_while
   search_create_test_while_state:
 		#test for then->while

@@ -329,7 +329,7 @@
 			call transition_bump_then
 			tail leave_if_then
 
-  transition_else_when:
+  transition_else_while:
 			call output_while
 
   transition_else_then:
@@ -369,9 +369,10 @@
 
 
   output_while:
-  		mv a0, s7	                       #a0 has old s7 value
-                addi sp, sp, -80
-                sd ra, 72(sp)
+		#a0 has WA__WHILE
+                addi sp, sp, -88
+                sd ra, 80(sp)
+		sd s9, 72(sp)
                 sd s8, 64(sp)
                 sd s7, 56(sp)
                 sd s6, 48(sp)
@@ -384,20 +385,24 @@
 
                 la s3, createwritepoint
                 ld s3, 0(s3)
-                sd a0, 0(s3)
+                sd a0, 0(s3)				#write out WA__WHILE
+
 
                 #now search for WA_BEGIN
                 li s0, 0x200                            #max depth of search backwards
-                li s1, -8
+                li s1, -8				#account for offset too
                 li s2, 8
                 la s5, WA_BEGIN
                 mv s6, s3
                 mv s7, zero
                 la s8, WA__WHILE
+		la s9, WA__END
   while_check_begin:
                 addi s3, s3, -8
                 ld s4, 0(s3)
+		beq s4, s9, while_skip_loop
                 bne s4, s8, while_keep_checking
+  while_skip_loop:
                 addi s7, s7, 1
                 j while_check_next
   while_keep_checking:
@@ -435,8 +440,9 @@
                 ld s6, 48(sp)
                 ld s7, 56(sp)
                 ld s8, 64(sp)
-                ld ra, 72(sp)
-                addi sp, sp, 80
+		ld s9, 72(sp)
+                ld ra, 80(sp)
+                addi sp, sp, 88
                 ret
 			
 
