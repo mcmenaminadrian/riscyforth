@@ -340,20 +340,18 @@
                 addi t2, t2, 1                        #t2 has length of token
                 la t4, BOTTOM_VARS
                 ld t3, 0(t4)
-		li a1, 36
+		li a1, 48
 		add t3, t3, a1
   search_var_next_check:
 		ld t4, 0(t3)
-		li a1, 0xFFFFFFFF
-		and t4, t4, a1
-		li a3, 0xdeadbeef
+		li a3, 0xbaadcafe
 		beq t4, a3, search_var_next_in_dictionary
 		j search_failed
   search_var_next_in_dictionary:
-                ld t4, -4(t3)
+                ld t4, -8(t3)
 		#compare lengths
                 bne t4, t2, search_var_tokens_do_not_match
-                add a0, t3, -5                        #a0 now points into the name in the var stack
+                add a0, t3, -9                        #a0 now points into the name in the var stack
                 mv a1, t0                             #a1 points to the name in the buffer
                 mv a2, t2                             #a2 checks how far we've gone 
 
@@ -368,7 +366,7 @@
                 j search_var_loop_through_token
 
   search_var_tokens_do_not_match:
-                add t3, t3, 36                        #advance up the var stack
+                add t3, t3, 48                        #advance up the var stack
 		la t4, TOP_VARS
 		ld t4, 0(t4)
 		bge t3, t4, search_var_no_match

@@ -121,7 +121,7 @@
                 j variable_all_over                   #got nothing
   variable_found_start:
 		#variable name must start with a letter
-		addi a3, zero, 0x41									  #A
+		li a3, 0x41									  #A
 		bge t4, a3, variable_good_start
 		#start with a bad character - report error
   variable_gone_bad:
@@ -152,8 +152,8 @@
                 sd t1, INPUT_START, t5                #update the end point for subsequent searches
                 addi t1, t1, -1                       # space or NL not part of token
                 mv t2, t0
-                addi t5, zero, 0x61                   #lowercase a
-                addi t6, zero, 0x7B                   #lowercase z + 1
+                li t5, 0x61                   #lowercase a
+                li t6, 0x7B                   #lowercase z + 1
   variable_sanity_test:
                 lbu t4, 0(t2)
                 blt t4, t5, variable_next_sane
@@ -180,9 +180,9 @@
                 la t4, dictionary
                 ld t3, 0(t4)
   variable_next_in_dictionary:
-                lbu t4, 12(t3)
+                ld t4, 24(t3)
                 bne t4, t2, variable_tokens_do_not_match
-                add a0, t3, 16                        #a0 now points into the name in the dictionary
+                add a0, t3, 32                        #a0 now points into the name in the dictionary
                 mv a1, t0                             #a1 points to the name in the buffer
                 mv a2, t2                             #a2 checks how far we've gone 
   variable_loop_through_token:
@@ -195,11 +195,12 @@
                 addi a1, a1, 1
                 j variable_loop_through_token
   variable_tokens_do_not_match:
-                ld t3, 8(t3)                          #read the pointer to the next TIL command
+                ld t3, 16(t3)                          #read the pointer to the next TIL command
                 beq t3, zero, variable_search_scan_variable_stack        #at the end of the dictionary
                 j variable_next_in_dictionary
 
   variable_tokens_matched:
+		#cannot have variable with same name as word
 		j variable_gone_bad
 
  #enable update of existing variable
@@ -209,7 +210,7 @@
 		la t0, TOP_VARS
                 ld t2, 0(t4)
 		ld t3, 0(t0)
-  		addi t3, t3, -0x20
+  		addi t3, t3, -0x30
 		bne t2, t3, variable_consider_update
 		j variable_search_var_no_match	      #no variables have been defined yet
   variable_consider_update:
@@ -269,11 +270,11 @@
 		beq zero, t4, variable_empty_space
 		j variable_gone_bad			#error in var stack
   variable_empty_space:
-		li t1, 0xdeadbeef			#mark in use
+		li t1, 0xbaadcafe			#mark in use
 		sd t1, 0(t3)
-		sd t2, -INSTWIDTH(t3)			#length - stack grows down
+		sd t2, -ADDRWIDTH(t3)			#length - stack grows down
 		mv t4, t3
-		addi t3, t3, -(INSTWIDTH + 1)
+		addi t3, t3, -(ADDRWIDTH + 1)
 		mv a3, t2
   variable_write_out_name:
 		#reset a1
@@ -291,7 +292,7 @@
 		#update bottom pointer
 		la t1, BOTTOM_VARS
 		ld t3, 0(t1)
-		addi t3, t3, -36
+		addi t3, t3, -48
 		sd t3, 0(t1)
 		tail NEXT
 

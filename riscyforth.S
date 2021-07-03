@@ -29,12 +29,11 @@
   .globl main
   _start:
   main:
-                nop
                 la t4, (VARIABLES + 0xFFFDC)
                 la t3, BOTTOM_VARS
                 sw t4, 0(t3)
                 la t1, TOP_VARS
-		addi t4, t4, 0x20
+		addi t4, t4, 0x30	#variable structure used (8), length (8), name (24), value (8) 
                 sw t4, 0(t1)
                 la s10, STACK + 0x7FFF8
                 la s9, CALLSTACK + 0x7FFF8
