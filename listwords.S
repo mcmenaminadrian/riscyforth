@@ -210,7 +210,6 @@
 		la t0, TOP_VARS
                 ld t2, 0(t4)
 		ld t3, 0(t0)
-  		addi t3, t3, -0x30
 		bne t2, t3, variable_consider_update
 		j variable_search_var_no_match	      #no variables have been defined yet
   variable_consider_update:
@@ -218,21 +217,18 @@
                 ld t1, TOKEN_END
                 sub t2, t1, t0
                 addi t2, t2, 1                        #t2 has length of token
+		li a1, 48
+		add t4, t4, a1			      #BOTTOM_VARS points to address beyond stack
                 ld t3, 0(t4)
-		li a1, 36
-		add t3, t3, a1
   variable_search_var_next_check:
-		ld t4, 0(t3)
-		li a1, 0xFFFFFFFF
-		and t4, t4, a1
-		li a3, 0xdeadbeef
+		li a3, 0xbaadcafe
 		beq t4, a3, variable_search_var_next_in_dictionary
 		j variable_gone_bad
   variable_search_var_next_in_dictionary:
-                ld t4, -4(t3)
+                ld t4, -8(t3)
 		#compare lengths
                 bne t4, t2, variable_search_var_tokens_do_not_match
-                add a0, t3, -5                        #a0 now points into the name in the var stack
+                add a0, t3, -9                        #a0 now points into the name in the var stack
                 mv a1, t0                             #a1 points to the name in the buffer
                 mv a2, t2                             #a2 checks how far we've gone 
 
@@ -247,16 +243,16 @@
                 j variable_search_var_loop_through_token
 
   variable_search_var_tokens_do_not_match:
-                add t3, t3, 36                        #advance up the var stack
+                add t3, t3, 48                        #advance up the var stack
 		la t4, TOP_VARS
 		ld t4, 0(t4)
-		bge t3, t4, variable_search_var_no_match
+		bgt t3, t4, variable_search_var_no_match
                 j search_var_next_check
 
   variable_search_var_tokens_matched:
 		#update the value
 		POP t0
-		sd t0, -32(t3)
+		sd t0, -40(t3)
 		tail NEXT
 		
   variable_search_var_no_match:
