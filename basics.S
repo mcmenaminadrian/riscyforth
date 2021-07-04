@@ -369,7 +369,7 @@
                 add t3, t3, 48                        #advance up the var stack
 		la t4, TOP_VARS
 		ld t4, 0(t4)
-		bge t3, t4, search_var_no_match
+		bgt t3, t4, search_var_no_match
                 j search_var_next_check
 
   search_var_tokens_matched:

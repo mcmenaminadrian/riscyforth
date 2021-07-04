@@ -31,9 +31,9 @@
   main:
                 la t4, (VARIABLES + BIGSPACE)
                 la t3, BOTTOM_VARS
-                sw t4, 0(t3)
+                sd t4, 0(t3)
                 la t1, TOP_VARS
-                sw t4, 0(t1)
+                sd t4, 0(t1)
                 la s10, STACK + 0x7FFF8
                 la s9, CALLSTACK + 0x7FFF8
                 la a0, riscy_forth0
