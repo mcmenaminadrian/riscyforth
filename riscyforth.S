@@ -89,6 +89,8 @@
    .common ifflag, 0x08, 0x08
    .common DECIDESTACKP, 0x08, 0x08
    .common DECIDESTACKB, 0x08, 0x08
+   .common COMPILEDFLAG, 0x08, 0x08
+   .common VARIABLEFLAG, 0x08, 0x08
 
    .data
    welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"

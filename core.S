@@ -62,6 +62,8 @@
 		sd zero, -48(t0)
                 sd zero, OKSTATUS, t0
                 sd zero, CREATEFLAG, t0
+		sd zero, VARIABLEFLAG, t0
+		sd zero, COMPILEDFLAG, t0
                 la t1, TIL_ELSE	                    #start search from here
                 sd t1, dictionary, t0
 		sd zero, ifflag, t0
@@ -82,9 +84,13 @@
                 addi s8, s8, ADDRWIDTH              #increment WA
                 jalr zero, t0, 0                    #run the code    
 
- EXECUTE:                                           #execute the next command on the stack
-               la s7, outer_loop_tokenize
-               POP s8
-               j RUN
+  EXECUTE:                                          #execute the next command on the stack
+               	la s7, outer_loop_tokenize
+               	POP s8
+               	j RUN
 
-
+  COLON_NEXT:
+	       	ld t0, COMPILEDFLAG
+		addi t0, t0, 1
+	       	sd t0, COMPILEDFLAG, t1
+	       	j NEXT

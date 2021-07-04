@@ -47,6 +47,16 @@
 		CODEHEADER VARIN, LITERALADDR, 0x0
 		#Look for a variable
 		#and place its value on the stack if it exists
+		#also handle variable creation update in create mode
+		ld t0, COMPILEDFLAG
+		beq zero, t0, varin_normal_start
+		ld t0, VARIABLEFLAG
+		beq zero, t0, varin_normal_start
+		sd zero, VARIABLEFLAG, t0
+		addi s7, s7, 32
+		tail NEXT
+		
+  varin_normal_start:
 		mv t3, s7
 		ld t0, 0(s7)				#t0 nw holds the length
 		beq t0, zero, varin_failed_zero_length
@@ -100,6 +110,14 @@
                 #first get the name and check it's not already present
 		#variable stack grows downwards but each entry in forwards direction
 		#
+		ld t0, COMPILEDFLAG
+		beq zero, t0, variable_imm_start
+		li t1, 1
+		sd t1, VARIABLEFLAG, t0		      	#we are creating/updating a variable in create mode
+		ld t2, 8(s7)				#length
+		addi a1, s7, 16				#points to name
+		j variable_create_mode			#search for match
+  variable_imm_start:
               	ld a1, INPUT_END
                 ld a0, INPUT_START
                 addi t0, a0, 1                        #account for minimal input
@@ -203,6 +221,19 @@
 		#cannot have variable with same name as word
 		j variable_gone_bad
 
+  variable_create_mode:
+                #now scan for a variable name
+		sd a1, TOKEN_START, t0
+		add a1, a1, t2
+		addi a1, a1, -1
+		sd a1, TOKEN_END, t0		
+		la t4, BOTTOM_VARS
+		la t0, TOP_VARS
+                ld t2, 0(t4)
+		ld t3, 0(t0)
+		bne t2, t3, variable_consider_update_backwards
+		j variable_backwards_var_no_match
+
  #enable update of existing variable
   variable_search_scan_variable_stack:
                 #now scan for a variable name
@@ -213,6 +244,7 @@
 		bne t2, t3, variable_consider_update
 		j variable_search_var_no_match	      #no variables have been defined yet
   variable_consider_update:
+		bne zero, a5, variable_consider_update_backwards
                 ld t0, TOKEN_START                    #token values are valid
                 ld t1, TOKEN_END
                 sub t2, t1, t0
@@ -220,6 +252,41 @@
 		ld t4, 0(t4)
 		addi t4, t4, 48
                 ld t3, 0(t4)			      #check value at first flag
+		j variable_search_var_next_check
+
+  variable_consider_update_backwards:
+                ld t0, TOKEN_END
+		ld t1, TOKEN_START
+		sub t2, t1, t0
+		add t2, t2, 1
+		ld t4, 0(t4)
+  variable_backwards_keep_going:
+		add t4, t4, 48
+		la t3, TOP_VARS
+		ld t3, 0(t3)
+		bgt t4, t3, variable_backwards_var_no_match
+		ld t3, 0(t4)
+		li a3, 0xbaadcafe
+		beq t3, a3, variable_search_var_next_backwards_in_dictionary
+		j variable_gone_bad
+  variable_search_var_next_backwards_in_dictionary:
+		ld t3, -8(t4)
+		bne t3, t2, variable_search_backwards_tokens_do_not_match
+		addi a0, t4, -9
+		mv a1, t1
+		mv a2, t2			#how far
+  variable_search_backwards_loop:
+  		lbu t5, 0(a0)
+		lbu t6, 0(a1)
+		bne t5, t6, variable_search_backwards_tokens_do_not_match
+		addi a2, a2, -1			#countdown size
+		beq a2, zero, variable_search_var_tokens_matched
+		addi a0, a0, -1
+		addi a1, a1, 1
+		j variable_search_backwards_loop
+  variable_search_backwards_tokens_do_not_match:
+		j variable_backwards_keep_going
+
   variable_search_var_next_check:
 		li a3, 0xbaadcafe
 		beq t3, a3, variable_search_var_next_in_dictionary
@@ -255,12 +322,50 @@
 		POP t0
 		sd t0, -32(t4)
 		tail NEXT
+  
+  variable_backwards_var_no_match:
+                ld t1, TOKEN_START                    #reset t2
+                ld t0, TOKEN_END
+                sub t2, t0, t1
+                addi t2, t2, 1                        #t2 has length of token
+		la t1, BOTTOM_VARS
+		ld t3, 0(t1)
+		ld t4, 0(t3)
+		beq zero, t4, variable_backwards_empty_space
+		j variable_gone_bad			#error in var stack
+  variable_backwards_empty_space:
+		li t1, 0xbaadcafe			#mark in use
+		sd t1, 0(t3)
+		sd t2, -ADDRWIDTH(t3)			#length - stack grows down
+		mv t4, t3
+		addi t3, t3, -(ADDRWIDTH + 1)
+		mv a3, t2
+		#reset a1
+		ld a1, TOKEN_START
+  variable_backwards_write_out_name:
+		lbu t5, 0(a1)
+		sb t5, 0(t3)
+		addi t3, t3, -1
+		addi a1, a1, 1
+		addi a3, a3, -1
+		bne a3, zero, variable_backwards_write_out_name
+		addi t4, t4, -(NAMEMAXLEN + INSTWIDTH2)
+		POP t0
+		sd t0, 0(t4)
+		#update bottom pointer
+		la t1, BOTTOM_VARS
+		ld t3, 0(t1)
+		addi t3, t3, -48
+		sd t3, 0(t1)
+		tail NEXT
+		
 		
   variable_search_var_no_match:
                 ld t0, TOKEN_START                    #reset t2
                 ld t1, TOKEN_END
                 sub t2, t1, t0
                 addi t2, t2, 1                        #t2 has length of token
+  variable_varin_entry_point:
 		la t1, BOTTOM_VARS
 		ld t3, 0(t1)
 		ld t4, 0(t3)

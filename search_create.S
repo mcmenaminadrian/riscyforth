@@ -540,8 +540,6 @@ func_test_octal:
 		addi t3, t3, 48
   varin_next_check:
 		ld t4, 0(t3)
-		li a1, -1
-		and t4, t4, a1
 		li a3, 0xbaadcafe
 		beq t4, a3, varin_next_in_dictionary
 		j varin_failed

@@ -245,7 +245,7 @@
 		li t0, 0x01
 		sh t0, 98(t3)		#NOP
 		#execute register based jump to NEXT
-		la t1, NEXT		#t1 has the number
+		la t1, COLON_NEXT		#t1 has the number
 		#load the number into register t0
 		li t2, 0xFFFFF000
 		and t4, t1, t2
