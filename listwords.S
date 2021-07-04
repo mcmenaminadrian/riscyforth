@@ -50,7 +50,7 @@
 		mv t3, s7
 		ld t0, 0(s7)				#t0 nw holds the length
 		beq t0, zero, varin_failed_zero_length
-		addi s7, s7, 28				#name length and name itself
+		addi s7, s7, 32				#name length and name itself
 		j varin_scan_stack
   varin_failed_zero_length:
 		PRINT zerolen_varin
@@ -58,7 +58,7 @@
 		tail NEXT
   varin_failed:
 		mv t0, s7
-		addi t0, t0, -28
+		addi t0, t0, -32
 		ld t1, 0(t0)
 		addi t0, t0, 1
 		WRITESTRINGR t0, t1
@@ -253,7 +253,7 @@
   variable_search_var_tokens_matched:
 		#update the value
 		POP t0
-		sd t0, -40(t4)
+		sd t0, -32(t4)
 		tail NEXT
 		
   variable_search_var_no_match:

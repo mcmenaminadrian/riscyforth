@@ -534,22 +534,22 @@ func_test_octal:
 		#come here with t3 pointing to the word with length
 		ld t2, 0(t3)			#t2 holds length
 		mv t0, t3
-		addi t0, t0, 4			#t0 now points to name
+		addi t0, t0, 8			#t0 now points to name
 		la t4, BOTTOM_VARS
 		ld t3, 0(t4)
-		addi t3, t3, 36
+		addi t3, t3, 48
   varin_next_check:
 		ld t4, 0(t3)
 		li a1, -1
 		and t4, t4, a1
-		li a3, 0xdeadbeef
+		li a3, 0xbaadcafe
 		beq t4, a3, varin_next_in_dictionary
 		j varin_failed
   varin_next_in_dictionary:
-		ld t4, -4(t3)
+		ld t4, -8(t3)
 		#compare lengths
 		bne t4, t2, varin_tokens_do_not_match
-                add a0, t3, -5                        #a0 now points into the name in the var stack
+                add a0, t3, -9                        #a0 now points into the name in the var stack
                 mv a1, t0                             #a1 points to the name in the buffer
                 mv a2, t2                             #a2 checks how far we've gone 
 
@@ -563,10 +563,10 @@ func_test_octal:
                 addi a1, a1, 1
                 j varin_loop_through_token
   varin_tokens_do_not_match:
-                add t3, t3, 36                        #advance up the var stack
+                add t3, t3, 48                        #advance up the var stack
                 la t4, TOP_VARS
                 ld t4, 0(t4)
-                bge t3, t4, varin_no_match
+                bgt t3, t4, varin_no_match
                 j varin_next_check
 
   varin_tokens_matched:
