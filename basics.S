@@ -415,7 +415,11 @@
                 addi s9, s9, STACKOFFSET
                 tail NEXT
 
-                CODEHEADER DOT, SEMI, 0x01
+		CODEHEADER ENCSQ, SEMI, 0x00
+		#Read in a string
+		tail NEXT
+
+                CODEHEADER DOT, ENCSQ, 0x01
                 ld t0, CURRENT_BASE
                 POP a2                            #get item on stack
                 la a0, SCRATCH_PAD                #sprintf uses this
@@ -505,6 +509,7 @@
                 # =  --> EQUALS
 		# (  --> OBRACKET
 		# )  --> CBRACKET
+		# [  --> ENCSQ
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -673,19 +678,34 @@
 		li t3, 0x4B
 		sb t3, 5(a2)
 		li t3, 0x45
-		sb t3, 5(a2)
-		li t3, 0x54
 		sb t3, 6(a2)
-		addi a2, a2, 6
+		li t3, 0x54
+		sb t3, 7(a2)
+		addi a2, a2, 7
 		j fix_up_done
 
   fix_up_cbracket:
-		li t3, 0x29
-		bne t2, t1, fix_up_finished
-		li t3, 0x4F
+		li t2, 0x29
+		bne t2, t1, fix_up_encsq
+		li t3, 0x43
 		sb t3, 0(a2)
 		j fix_up_bracket
 
+  fix_up_encsq:
+		li t2, 0x5B
+		bne t2, t1, fix_up_finished
+		li t3, 0x45
+		sb t3, 0(a2)
+		li t3, 0x4E
+		sb t3, 1(a2)
+		li t3, 0x43
+		sb t3, 2(a2)
+		li t3, 0x53
+		sb t3, 3(a2)
+		li t3, 0x51
+		sb t3, 4(a2)
+		addi a2, a2, 4
+		j fix_up_done
 
   fix_up_finished:
 		mv t0, a0
