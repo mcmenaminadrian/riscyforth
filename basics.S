@@ -417,7 +417,7 @@
 
 		CODEHEADER ENCSQ, SEMI, 0x00
 		#Print in a string
-		#in immediate mode?
+		#what moder are we in?
 		ld t0, COMPILEDFLAG
 		beq zero, t0, encsq_immediate_start
 		tail NEXT

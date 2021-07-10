@@ -39,6 +39,12 @@
 		sd zero, 0(t0)
 		tail search_failed		      #report error
   search_create_allowed:
+		#test for ENCSQ (ie string printing)
+		la t0, WA_ENCSQ
+		bne t3, t0, search_waend
+		#jump to code that will count string and embed length and literal
+		tail embed_encsq
+  search_waend:
 		#test for END
 		la t0, WA_END
 		bne t3, t0, search_create_test_conditionals
@@ -259,6 +265,13 @@
 		beqz a0, search_create_varin_go
 		SETUP_CONDITIONAL_CALL
 		call increment_current_skip
+		SETUP_CONDITIONAL_CALL
+		call increment_current_skip
+		SETUP_CONDITIONAL_CALL
+		call increment_current_skip
+		SETUP_CONDITIONAL_CALL
+		call increment_current_skip
+
   search_create_varin_go:
 		tail NEXT
 
@@ -575,3 +588,22 @@ func_test_octal:
   varin_no_match:
                 j varin_failed
 
+
+  embed_encsq:
+		#embed string - after we count how long it is
+		la t0, createwritepoint
+		ld t1, 0(t0)
+		sd t3, 0(t1)			      #write out word address in definition
+		sd a2, 8(t1)
+		addi t1, t1, 16
+		sd t1, 0(t0)
+		la s7, outer_loop_tokenize
+		#update the depth of the current skip if needed
+		call get_iffmode
+		beqz a0, search_create_encsq_go
+		SETUP_CONDITIONAL_CALL
+		call increment_current_skip
+		SETUP_CONDITIONAL_CALL
+		call increment_current_skip
+  search_create_encsq_go:
+		tail NEXT
