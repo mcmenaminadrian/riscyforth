@@ -416,8 +416,37 @@
                 tail NEXT
 
 		CODEHEADER ENCSQ, SEMI, 0x00
-		#Read in a string
+		#Print in a string
+		#in immediate mode?
+		ld t0, COMPILEDFLAG
+		beq zero, t0, encsq_immediate_start
 		tail NEXT
+  encsq_immediate_start:
+		#first of all, get the address and length of the string
+		la t5, INPUT_END
+		ld t5, 0(t5)		#absolute end of string
+		li t3, 0
+		la t6, INPUT_START
+		ld t4, 0(t6)
+		li t1, 0x5D		#]
+  encsq_check_next:
+		lb t0, 0(t4)
+		beq t0, t1, encsq_prep_imm_syscall
+		addi t3, t3, 1
+		add t4, t4, 1
+		blt t4, t5, encsq_check_next
+		la t0, String_err
+		li t1, 18		#length of error message
+		WRITESTRINGR t0, t1
+		tail NEXT
+  encsq_prep_imm_syscall:
+		ld t4, 0(t6)
+		addi t2, t3, 1
+		add t1, t4, t2
+		sd t1, 0(t6)
+		WRITESTRINGR t4, t3
+		tail NEXT
+		
 
                 CODEHEADER DOT, ENCSQ, 0x01
                 ld t0, CURRENT_BASE
@@ -706,7 +735,7 @@
 		sb t3, 4(a2)
 		addi a2, a2, 4
 		j fix_up_done
-
+		
   fix_up_finished:
 		mv t0, a0
 		mv t1, a1
