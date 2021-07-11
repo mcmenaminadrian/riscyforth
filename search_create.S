@@ -595,17 +595,73 @@ func_test_octal:
 		#embed string - after we count how long it is
 		la t0, createwritepoint
 		ld t1, 0(t0)
-		sd t3, 0(t1)			      #write out word address in definition
-		sd a2, 8(t1)
-		addi t1, t1, 16
-		sd t1, 0(t0)
-		la s7, outer_loop_tokenize
-		#update the depth of the current skip if needed
+		sd t3, 0(t1)			      	#write out word address in definition
+		#now get length
+		mv t0, a5
+		addi t0, t0, 1			      	#pass the opening [
+		mv a0, t0
+		li a1, 0
+		li a2, 0x201				#max length
+		li t2, 0x5D				#]
+  embed_encsq_check_next:
+		lb a3, 0(a0)
+		beq a3, t2, embed_encsq_gotlength
+		addi a0, a0, 1
+		addi a1, a1, 1
+		blt a1, a2, embed_encsq_check_next
+		la t0, String_err
+		li t1, 18
+		WRITESTRINGR t0, t1
+		WRITECR
+		tail NEXT				#failed
+  embed_encsq_gotlength:
+		#write out the length
+		sd a1, 8(t1)
+		addi t1, t1, 16				#prepare to embed the string
+		#t0 points to the start of the string in buffer
+		#a1 holds its length
+		#t1 the write point
+		mv a2, a1				#countdown
+		mv a3, t0
+  embed_encsq_embed:
+		beqz a2, embed_encsq_checkalignment
+		lb a4, 0(a3)
+		sb a4, 0(t1)
+		addi a2, a2, -1
+		addi a3, a3, 1
+		addi t1, t1, 1
+		j embed_encsq_embed
+  embed_encsq_checkalignment:
+		#need to ensure alignment of output maintained
+		#a1 holds length
+		li a0, 0x07
+		li a2, 0x08
+		la t1, INPUT_START
+		ld t0, 0(t1)
+		add t0, t0, a1
+		addi t0, t0, 1				#account for ]
+		sd t0, 0(t1)
+		and t0, a1, a0
+		beqz t0, embed_encsq_alignmentadjusted
+		sub t2, a2, t0
+		add a1, a1, t2
+  embed_encsq_alignmentadjusted:
+		addi a1, a1, 16				#account for length too
+		la t1, createwritepoint
+		ld t0, 0(t1)
+		add t0, t0, a1
+		sd t0, 0(t1)
 		call get_iffmode
-		beqz a0, search_create_encsq_go
+		beqz a0, embed_encsq_done
+		#increment the conditionals
+		srli a5, a1, 3
+  embed_encsq_skiploop:
+		beqz a5, embed_encsq_done
 		SETUP_CONDITIONAL_CALL
 		call increment_current_skip
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip
-  search_create_encsq_go:
+		addi a5, a5, -1
+		j embed_encsq_skiploop
+  embed_encsq_done:
+		la s7, outer_loop_tokenize
 		tail NEXT
+
