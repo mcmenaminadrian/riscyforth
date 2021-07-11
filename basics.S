@@ -430,6 +430,7 @@
 		addi s7, s7, 1
 		j encsq_compiled_loopup
   encsq_compiled_readyoutput:
+		addi s7, s7, 8
 		addi a1, a1, 8
 		mv a2, a0
 		li a0, 1
