@@ -18,7 +18,7 @@ _Compiling code_
 
 **COLON**		    Enter compiler mode (: is recognised and explanded to COLON)
 
-**SEMI**                    Procedure to end all secondaries (; is recognised and expanded to SEMI)
+**SEMI**                    Procedure to end all secondaries (; is recognised and expanded to SEMI) - DO NOT USE outside a compilation
 
 _Text entry_
 
@@ -45,6 +45,8 @@ _Output_
 **EMIT**		    Output the single character corresponding to the ASCII code of the number at the top of the stack
 
 **CR**			    Output a carriage return (newline)
+
+**ENCSQ**		    Output a string (use via [ _STRING_ ] )
 
 _Integer arithmetic_
 
