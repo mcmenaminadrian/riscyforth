@@ -64,7 +64,7 @@
                 sd zero, CREATEFLAG, t0
 		sd zero, VARIABLEFLAG, t0
 		sd zero, COMPILEDFLAG, t0
-                la t1, TIL_ELSE	                    #start search from here
+                la t1, TIL_LOAD	                    #start search from here
                 sd t1, dictionary, t0
 		sd zero, ifflag, t0
 

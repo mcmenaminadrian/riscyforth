@@ -64,6 +64,8 @@
     .include "search_create.S"
     .balign 8
     .include "decision.S"
+    .balign 8
+    .include "load.S"
 
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8
