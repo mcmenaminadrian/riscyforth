@@ -20,6 +20,10 @@
                 WRITECR
                 WRITECHAR 0x0A
 
+		la t0, INFILELOAD
+		sd zero, 0(t0)			  #we are not in file load mode
+		la t0, LOADLINESETUP
+		sd zero, 0(t0) 
 		li t0, 1
 		la t1, ifflag
 		sd t0, 0(t1)			  #ignore ELSE by default

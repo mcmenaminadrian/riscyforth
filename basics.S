@@ -51,6 +51,14 @@
                 CODEHEADER TOKENIZE_IMM, OK, 0x0       
                 #puts 1 on stack if system variables
                 #TOKEN_START and TOKEN_END hold valid values
+		la t0, INFILELOAD
+		ld t0, 0(t0)
+		beqz t0, tokenize_normal
+		la t0, LOADLINESETUP
+		ld t0, 0(t0)
+		bnez t0, tokenize_normal
+		jal load_get_next_line		      #suck in a line
+  tokenize_normal:
                 la a1, INPUT_END
 		ld a1, 0(a1)
                 la a0, INPUT_START
@@ -58,6 +66,12 @@
                 addi t0, a0, 1                        #account for minimal input
                 bltu t0, a1, tokenize_have_data       #buffer has data
   tokenize_all_over:
+		la t0, INFILELOAD
+		ld t0, 0(t0)
+		beqz t0, tokenize_really_all_over
+		la t0, LOADLINESETUP
+		sd zero, 0(t0)
+  tokenize_really_all_over:
                 tail NEXT
   tokenize_have_data:
                 mv t0, a0                             #t0 tracks start of token, t1 the end
@@ -403,8 +417,15 @@
 
                 #semi for outer loop
 		CODEHEADER OLSEMI, BINARY, 0x0
+		la t1, INFILELOAD
+		ld t0, 0(t1)
+		bnez t0, olsemi_fileload
                 la s7, outer_loop
                 tail NEXT
+  olsemi_fileload:
+		#loading a file
+		la s7, outer_loop_tokenize
+		tail NEXT
 		
 		#semi for the rest of us
                 CODEHEADER SEMI, OLSEMI, 0x0
