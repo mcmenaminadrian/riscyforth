@@ -175,6 +175,7 @@
 		sd t1, 0(t0)			      #update address we will writenext word to
   search_create_leave:
 		la s7, outer_loop_tokenize
+		fence.i 				      #ensure cache coherency
                 tail NEXT
 
   search_create_exhausted:
@@ -275,6 +276,7 @@
 		call increment_current_skip
 
   search_create_varin_go:
+		fence.i
 		tail NEXT
 
   search_create_read_address:
@@ -338,6 +340,7 @@
 		SETUP_CONDITIONAL_CALL
 		call increment_current_skip
   search_create_literal_go:
+		fence.i
 		tail NEXT
 
 		#now number processing functions
@@ -663,5 +666,6 @@ func_test_octal:
 		j embed_encsq_skiploop
   embed_encsq_done:
 		la s7, outer_loop_tokenize
+		fence.i
 		tail NEXT
 
