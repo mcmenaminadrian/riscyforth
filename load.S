@@ -74,6 +74,7 @@
 	PUSH ra
 	call fgets
 	POP ra
+	fence
 	beqz a0, load_free_malloc #nothing returned
 	sd a0, 16(sp)
 	#output the read in line
@@ -97,7 +98,6 @@
 
   load_malloc_failed:
 #	ld a0, 0(sp)
-
 #	call fclose
 	add sp, sp, 24
 	la t0, INFILELOAD
@@ -116,5 +116,4 @@
 	ld s1, 8(sp)
 	ld s0, 0(sp)
 	addi sp, sp, 72
-	fence
 	tail NEXT
