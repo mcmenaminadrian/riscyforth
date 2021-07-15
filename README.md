@@ -1,7 +1,8 @@
 Create a FORTH-like language for RISC-V
 Licensed under GPL v2
 
-Currently RISCYFORTH targets the pk kernel emulator that runs on top of Spike. When I get a real RISC-V computer it will focus on that instead.
+Riscyforth is compiled and tested on the RVBoards Nezha 64-bit single board Risc-V computer (running Debian Linux with GNU Libc). Other boards will be added as they become
+available.
 
 To understand your rights and obligations with this code please read (version 2 of) the GNU General Public Licence. Contributions and suggestions are welcome.
 
