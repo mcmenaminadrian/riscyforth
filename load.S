@@ -47,7 +47,7 @@
 	call fopen
 	addi s10, s10, 1
 	sd s10, 0(s0)
-	bgt zero, a0, load_failed_nopath
+	bgeu zero, a0, load_failed_nopath
 	#create an area on the stack to store some values
 	add sp, sp, -24
 	sd a0, 0(sp)		#file pointer
@@ -96,13 +96,16 @@
 	call free
 
   load_malloc_failed:
+#	ld a0, 0(sp)
+
+#	call fclose
 	add sp, sp, 24
 	la t0, INFILELOAD
 	sd zero, 0(t0)
 	la t0, LOADLINESETUP
 	sd zero, 0(t0)
-	la s7, outer_loop_ok			#we are done
   load_failed_nopath:
+	la s7, outer_loop_ok			#we are done
 	ld s11, 64(sp)
 	ld s10, 56(sp)
 	ld s6, 48(sp)

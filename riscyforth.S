@@ -29,7 +29,7 @@
   .globl main
   _start:
   main:
-                la t4, (VARIABLES + BIGSPACE)
+                la t4, (VARIABLES + BIGSPACE - 0x08)
                 la t3, BOTTOM_VARS
                 sd t4, 0(t3)
                 la t1, TOP_VARS
