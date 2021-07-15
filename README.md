@@ -8,6 +8,7 @@ To understand your rights and obligations with this code please read (version 2 
 
 We are in the development stage of RISCYFORTH and on this page I aim to keep a list of the implemented functions. You'll need to read the code to see the details though.
 
+**LOAD**		    Load (and execute) - use like load /path/to/file
 
 **BYE**                     Quit RISCYFORTH
 
@@ -31,7 +32,7 @@ _Text entry_
 
 **OK**                      Output OK (or error) message
 
-**TOKENIZE_IMM**            Gets the next valid token from input
+**TOKENIZE_IMM**            Gets the next valid token from input and executes
 
 **SEARCH**                  Searches the dictionary to match the token
 
@@ -64,6 +65,10 @@ _Integer arithmetic_
 **ADD**                     Add the numbers at the top iof the stack (+ is recognised and expanded to ADD)
 
 **MUL**                     Multiply the same (* is recognised and expanded to MUL)
+
+**SQUARE**		    Square the number at the top of the stack
+
+**CUBE**		    Cube the number at the top of the stack
 
 **DIV**                     Divide the top of the stack by the next to top (/ is recognised and expanded to DIV)
 
