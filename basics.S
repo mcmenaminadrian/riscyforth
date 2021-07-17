@@ -485,14 +485,11 @@
 		tail NEXT
 
 		CODEHEADER COMMENT, ENCSQ, 0x01
-		la t0, INFILELOAD	#test if we are loading a file
-		ld t0, 0(t0)
-		beqz t0, comment_normal
-		la t0, LOADLINESETUP
-		sd zero, 0(t0)		#ensure we fetch next line
-  comment_normal:
-		#do not process rest of the line
-		la s7, outer_loop_ok
+		#the line is now done
+		la t0, INPUT_START
+		la t1, INPUT_END
+		ld t2, 0(t1)
+		sd t2, 0(t0)
 		tail NEXT
 		
                 CODEHEADER DOT, COMMENT, 0x01
@@ -620,7 +617,7 @@
 		beq t2, t1, fix_up_obracket
 		li t2, 0x29
 		beq t2, t1, fix_up_cbracket
-		li t2, 0x58
+		li t2, 0x5B
 		beq t2, t1, fix_up_encsq
 		li t2, 0x5C
 		beq t2, t1, fix_up_comment
