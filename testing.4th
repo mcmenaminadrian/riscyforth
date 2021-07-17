@@ -32,7 +32,7 @@ drop2
 50 = SWAP 40 = AND SWAP 10 = AND if [ NIP2 passed ] else [ NIP2 failed ] then cr 
 ;
 
-
+\ Now the tests
 : runTests
 testDrop2 testSquare
 testCube testMUL

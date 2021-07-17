@@ -485,6 +485,12 @@
 		tail NEXT
 
 		CODEHEADER COMMENT, ENCSQ, 0x01
+		la t0, INFILELOAD	#test if we are loading a file
+		ld t0, 0(t0)
+		beqz t0, comment_normal
+		la t0, LOADLINESETUP
+		sd zero, 0(t0)		#ensure we fetch next line
+  comment_normal:
 		#do not process rest of the line
 		la s7, outer_loop_ok
 		tail NEXT
