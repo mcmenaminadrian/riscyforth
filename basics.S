@@ -483,9 +483,13 @@
 		sd t1, 0(t6)
 		WRITESTRINGR t4, t3
 		tail NEXT
-		
 
-                CODEHEADER DOT, ENCSQ, 0x01
+		CODEHEADER COMMENT, ENCSQ, 0x01
+		#do not process rest of the line
+		la s7, outer_loop_ok
+		tail NEXT
+		
+                CODEHEADER DOT, COMMENT, 0x01
                 ld t0, CURRENT_BASE
                 POP a2                            #get item on stack
                 la a0, SCRATCH_PAD                #sprintf uses this
@@ -576,6 +580,7 @@
 		# (  --> OBRACKET
 		# )  --> CBRACKET
 		# [  --> ENCSQ
+		# \  --> COMMENT
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -583,10 +588,50 @@
 		mv a1, t1
 		mv a5, t2
 		lbu t1, 0(a0)
+		li t2, 0x3A
+		beq t2, t1, fix_up_colon
+		li t2, 0x2E
+		beq t2, t1, fix_up_dot
+		li t2, 0x3B
+		beq t2, t1, fix_up_semi
+		li t2, 0x2B
+		beq t2, t1, fix_up_add
+		li t2, 0x2D
+		beq t2, t1, fix_up_sub
+		li t2, 0x2A
+		beq t2, t1, fix_up_mul
+		li t2, 0x2F
+		beq t2, t1, fix_up_div
+		li t2, 0x21
+		beq t2, t1, fix_up_store
+		li t2, 0x3E
+		beq t2, t1, fix_up_gt
+		li t2, 0x3C
+		beq t2, t1, fix_up_lt
+		li t2, 0x3D
+		beq t2, t1, fix_up_equals
+		li t2, 0x28
+		beq t2, t1, fix_up_obracket
+		li t2, 0x29
+		beq t2, t1, fix_up_cbracket
+		li t2, 0x58
+		beq t2, t1, fix_up_encsq
+		li t2, 0x5C
+		beq t2, t1, fix_up_comment
+
+  fix_up_finished:
+		mv t0, a0
+		mv t1, a1
+		mv t2, a5
+		ret
+
+  fix_up_done:
+		mv t0, a3
+		mv t1, a2	
+                j tokenize_finished_sanitization 
+
 
   fix_up_colon:
-		li t2, 0x3A
-		bne t2, t1, fix_up_dot
 		li t3, 0x43
 		sb t3, 0(a2)
 		li t3, 0x4F
@@ -601,8 +646,6 @@
 		j fix_up_done
 
   fix_up_dot:
-		li t2, 0x2E
-		bne t2, t1, fix_up_semi
 		li t3, 0x44
 		sb t3, 0(a2)
 		li t3, 0x4F
@@ -612,8 +655,6 @@
 		addi a2, a2, 2
 		j fix_up_done
   fix_up_semi:
-		li t2, 0x3B
-		bne t2, t1, fix_up_add
 		li t3, 0x53
 		sb t3, 0(a2)
 		li t3, 0x45
@@ -626,8 +667,6 @@
 		j fix_up_done
 
   fix_up_add:
-		li t2, 0x2B
-		bne t2, t1, fix_up_sub
 		li t3, 0x41
 		sb t3, 0(a2)
 		li t3, 0x44
@@ -638,8 +677,6 @@
 		j fix_up_done
 		
   fix_up_sub:
-		li t2, 0x2D
-		bne t2, t1, fix_up_mul
 		li t3, 0x53
 		sb t3, 0(a2)
 		li t3, 0x55
@@ -650,8 +687,6 @@
 		j fix_up_done
 		
   fix_up_mul:
-		li t2, 0x2A
-		bne t2, t1, fix_up_div
 		li t3, 0x4D
 		sb t3, 0(a2)
 		li t3, 0x55
@@ -662,8 +697,6 @@
 		j fix_up_done
 		
   fix_up_div:
-		li t2, 0x2F
-		bne t2, t1, fix_up_store
 		li t3, 0x44
 		sb t3, 0(a2)
 		li t3, 0x49
@@ -674,8 +707,6 @@
 		j fix_up_done
 
   fix_up_store:
-		li t2, 0x21
-		bne t2, t1, fix_up_gt
 		li t3, 0x53
 		sb t3, 0(a2)
 		li t3, 0x54
@@ -690,8 +721,6 @@
 		j fix_up_done
 
   fix_up_gt:
-		li t2, 0x3E
-		bne t2, t1, fix_up_lt
 		li t3, 0x47
 		sb t3, 0(a2)
 		li t3, 0x54
@@ -700,8 +729,6 @@
 		j fix_up_done 
 
   fix_up_lt:
-		li t2, 0x3C
-		bne t2, t1, fix_up_equals
 		li t3, 0x4C
 		sb t3, 0(a2)
 		li t3, 0x54
@@ -710,8 +737,6 @@
 		j fix_up_done
 
   fix_up_equals:
-		li t2, 0x3D
-		bne t2, t1, fix_up_obracket
 		li t3, 0x45
 		sb t3, 0(a2)
 		li t3, 0x51
@@ -728,8 +753,6 @@
 		j fix_up_done
 
   fix_up_obracket:
-		li t2, 0x28
-		bne t2, t1, fix_up_cbracket
 		li t3, 0x4F
 		sb t3, 0(a2)
   fix_up_bracket:
@@ -751,15 +774,11 @@
 		j fix_up_done
 
   fix_up_cbracket:
-		li t2, 0x29
-		bne t2, t1, fix_up_encsq
 		li t3, 0x43
 		sb t3, 0(a2)
 		j fix_up_bracket
 
   fix_up_encsq:
-		li t2, 0x5B
-		bne t2, t1, fix_up_finished
 		li t3, 0x45
 		sb t3, 0(a2)
 		li t3, 0x4E
@@ -772,18 +791,25 @@
 		sb t3, 4(a2)
 		addi a2, a2, 4
 		j fix_up_done
+
+  fix_up_comment:
+		li t3, 0x43
+		sb t3, 0(a2)	
+		li t3, 0x4F
+		sb t3, 1(a2)	
+		li t3, 0x4D
+		sb t3, 2(a2)	
+		li t3, 0x4D
+		sb t3, 3(a2)	
+		li t3, 0x45
+		sb t3, 4(a2)	
+		li t3, 0x4E
+		sb t3, 5(a2)	
+		li t3, 0x54
+		sb t3, 6(a2)
+		addi a2, a2, 6
+		j fix_up_done	
 		
-  fix_up_finished:
-		mv t0, a0
-		mv t1, a1
-		mv t2, a5
-		ret
-
-  fix_up_done:
-		mv t0, a3
-		mv t1, a2	
-                j tokenize_finished_sanitization 
-
 .include "integer.S"
 .include "stackop.S"
 .include "listwords.S"
