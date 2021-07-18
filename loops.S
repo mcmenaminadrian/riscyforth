@@ -223,46 +223,55 @@
 		li t1, 0x2B7
 		or t0, t0, t1
 		sw t0, 72(t3)		#lui t0, [bits 12 - 31]
-		li t1, 0xFFF
-		and t0, t3, t1
-		slli t0, t0, 20
-		li t1, 0x2E293
-		or t0, t0, t1
-		sw t0, 76(t3)		#ori t0, t0, [bits 11 -0]
 		li t2, 0x2029293
-		sw t2, 80(t3)		#slli t0, t0, 32
+		sw t2, 76(t3)		#slli t0 32
 		li t2, 0x202D293
-		sw t2, 84(t3)		#srli t0, t0, 32 (zero out upper 32 bits) 
+		sw t2, 80(t3)		#srli t0 32	(zero out upper 32 bits)
+		li t1, 0xFFF
+		and t0, t3, t1		#t0 now has lower 12 bits
+		mv t1, t0		#t1 has same lower 12 bits
+		srli t1, t1, 11		#t1 now just top bit
+		slli t1, t1, 11
+		li t2, 0x313
+		or t2, t1, t2
+		sw t2, 84(t3)		#either addi t1, zero, 1 or addi t1, zero, 0
+		li t1, 0xC31313
+		sw t1, 88(t3)		#slli t1, t1, 12
+		andi t0, t0, 0x7FF	#lower eleven bits
+		slli t0, t0, 20
+		li t1, 0x30313
+		or t1, t0, t1
+		sw t1, 92(t3)		#add bottom 11 bits to t1
+		li t1, 0x6282B3
+		sw t1, 96(t3)		#add t0, t0, t1
 		li t0, 0x5C6C33
-		sw t0, 88(t3)		#or s8, s8, t0
-		li t0, 112		#offset set here
+		sw t0, 100(t3)		#or s8, s8, t0
+		li t0, 120		#offset set here
 		slli t0, t0, 20
 		li t1, 0xC0C13
 		or t0, t0, t1
-		sw t0, 92(t3)		#addi s8, s8, [offset]
+		sw t0, 104(t3)		#addi s8, s8, [offset]
 		li t0, 0x8be2
-		sh t0, 96(t3)		#mv s7, s8
-		li t0, 0x01
-		sh t0, 98(t3)		#NOP
+		sh t0, 108(t3)		#mv s7, s8
 		#execute register based jump to NEXT
 		la t1, COLON_NEXT		#t1 has the number
 		#load the number into register t0
 		li t2, 0xFFFFF000
 		and t4, t1, t2
 		ori t4, t4, 0x2B7	#lui t0
-		sw t4, 100(t3)
+		sw t4, 110(t3)
 		li t4, 0xFFF
 		and t2, t1, t4
 		slli t4, t2, 20
 		li t5, 0x28293		#addi t0
 		or t4, t4, t5
-		sw t4, 104(t3)
+		sw t4, 114(t3)
 		li t0, 0x28067		#jalr zero, 0(t0)
-		sw t0, 108(t3)
+		sw t0, 116(t3)
 
 		la t1, newdictionary
 		ld t1, 0(t1)
-		addi t1, t1, 112
+		addi t1, t1, 120
 		la t3, createwritepoint
 		sd t1, 0(t3)
 		tail NEXT

@@ -165,7 +165,7 @@
 		and t0, t0, t1
 		beq t0, zero, search_create_address_aligned_ok #already aligned
 		addi t1, t1, 0x08
-		li t0, 0xFFFFFFF8
+		li t0, 0xFFFFFFFFFFFFFFF8
 		and t1, t1, t0			      #ensure alignment
   search_create_address_aligned_ok:
 		la t0, newdictionary
