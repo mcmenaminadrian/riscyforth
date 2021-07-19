@@ -1,3 +1,5 @@
+# offset for jumping
+.equ CREATEOFFSET,	120
 
 
 		CODEHEADER EMIT, VARIABLE, 0x01
@@ -211,6 +213,7 @@
 		sw t0, 60(t3)		#sd s7, 0(s9)
 		#calculate the address we need to jump to for 64 bits
 		mv t2, t3
+		addi t2, t2, CREATEOFFSET
 		srli t2, t2, 32
 		slli t2, t2, 20
 		li t1, 0xC13
@@ -219,7 +222,8 @@
 		li t2, 0x20C1C13
 		sw t2, 68(t3)		#slli s8, s8, 32
 		li t1, 0xFFFFF000
-		and t0, t3, t1
+		addi t4, t3, CREATEOFFSET
+		and t0, t4, t1
 		li t1, 0x2B7
 		or t0, t0, t1
 		sw t0, 72(t3)		#lui t0, [bits 12 - 31]
@@ -228,10 +232,11 @@
 		li t2, 0x202D293
 		sw t2, 80(t3)		#srli t0 32	(zero out upper 32 bits)
 		li t1, 0xFFF
-		and t0, t3, t1		#t0 now has lower 12 bits
+		and t0, t4, t1		#t0 now has lower 12 bits
 		mv t1, t0		#t1 has same lower 12 bits
 		srli t1, t1, 11		#t1 now just top bit
-		slli t1, t1, 11
+		slli t1, t1, 20
+		
 		li t2, 0x313
 		or t2, t1, t2
 		sw t2, 84(t3)		#either addi t1, zero, 1 or addi t1, zero, 0
@@ -246,32 +251,27 @@
 		sw t1, 96(t3)		#add t0, t0, t1
 		li t0, 0x5C6C33
 		sw t0, 100(t3)		#or s8, s8, t0
-		li t0, 120		#offset set here
-		slli t0, t0, 20
-		li t1, 0xC0C13
-		or t0, t0, t1
-		sw t0, 104(t3)		#addi s8, s8, [offset]
 		li t0, 0x8be2
-		sh t0, 108(t3)		#mv s7, s8
+		sh t0, 104(t3)		#mv s7, s8
 		#execute register based jump to NEXT
 		la t1, COLON_NEXT		#t1 has the number
 		#load the number into register t0
 		li t2, 0xFFFFF000
 		and t4, t1, t2
 		ori t4, t4, 0x2B7	#lui t0
-		sw t4, 110(t3)
+		sw t4, 106(t3)
 		li t4, 0xFFF
 		and t2, t1, t4
 		slli t4, t2, 20
 		li t5, 0x28293		#addi t0
 		or t4, t4, t5
-		sw t4, 114(t3)
+		sw t4, 110(t3)
 		li t0, 0x28067		#jalr zero, 0(t0)
-		sw t0, 116(t3)
+		sw t0, 114(t3)
 
 		la t1, newdictionary
 		ld t1, 0(t1)
-		addi t1, t1, 120
+		addi t1, t1, CREATEOFFSET
 		la t3, createwritepoint
 		sd t1, 0(t3)
 		tail NEXT
