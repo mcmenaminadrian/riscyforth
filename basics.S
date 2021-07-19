@@ -448,8 +448,9 @@
   encsq_compiled_loopup:
 		and t1, s7, t0
 		beqz t1, encsq_compiled_readyoutput
-		addi s7, s7, 1
-		j encsq_compiled_loopup
+		li t2, 8
+		sub t2, t2, t1
+		add s7, s7, t2
   encsq_compiled_readyoutput:
 		addi s7, s7, 8
 		addi a1, a1, 8
