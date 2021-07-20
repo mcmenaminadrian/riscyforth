@@ -240,8 +240,8 @@
 		li t2, 0x313
 		or t2, t1, t2
 		sw t2, 84(t3)		#either addi t1, zero, 1 or addi t1, zero, 0
-		li t1, 0xC31313
-		sw t1, 88(t3)		#slli t1, t1, 12
+		li t1, 0xB31313
+		sw t1, 88(t3)		#slli t1, t1, 11
 		andi t0, t0, 0x7FF	#lower eleven bits
 		slli t0, t0, 20
 		li t1, 0x30313
