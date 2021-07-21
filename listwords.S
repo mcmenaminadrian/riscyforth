@@ -44,17 +44,17 @@
 		addi s7, s7, ADDRWIDTH
 		tail NEXT
 
-		CODEHEADER VARIN, LITERALADDR, 0x0
-		#Look for a variable
-		#and place its value on the stack if it exists
-		#also handle variable creation update in create mode
-		ld t0, COMPILEDFLAG
-		beq zero, t0, varin_normal_start
+		CODEHEADER _VARIN, LITERALADDR, 0x0
 		ld t0, VARIABLEFLAG
 		beq zero, t0, varin_normal_start
 		sd zero, VARIABLEFLAG, t0
 		addi s7, s7, 32
 		tail NEXT
+
+		CODEHEADER VARIN, _VARIN, 0x0
+		#Look for a variable
+		#and place its value on the stack if it exists
+		#also handle variable creation update in create mode
 		
   varin_normal_start:
 		mv t3, s7
@@ -104,20 +104,18 @@
 		WRITESTRINGR t0, t1
 		j NEXT
 
-		
-                CODEHEADER VARIABLE, DISPLAY, 0x01
-                #create a variable in the variable dictionary
-                #first get the name and check it's not already present
-		#variable stack grows downwards but each entry in forwards direction
-		#
-		ld t0, COMPILEDFLAG
-		beq zero, t0, variable_imm_start
+		CODEHEADER _VARIABLE, DISPLAY, 0x0
 		li t1, 1
 		sd t1, VARIABLEFLAG, t0		      	#we are creating/updating a variable in create mode
 		ld t2, 8(s7)				#length
 		addi a1, s7, 16				#points to name
 		j variable_create_mode			#search for match
-  variable_imm_start:
+		
+                CODEHEADER VARIABLE, _VARIABLE, 0x01
+                #create a variable in the variable dictionary
+                #first get the name and check it's not already present
+		#variable stack grows downwards but each entry in forwards direction
+		#
               	ld a1, INPUT_END
                 ld a0, INPUT_START
                 addi t0, a0, 1                        #account for minimal input

@@ -429,23 +429,16 @@
 		
 		#semi for the rest of us
                 CODEHEADER SEMI, OLSEMI, 0x0
-		ld t0, COMPILEDFLAG
-		addi t0, t0, -1
-		sd t0, COMPILEDFLAG, t1
                 ld s7, 0(s9)
                 addi s9, s9, STACKOFFSET
                 tail NEXT
 
-		CODEHEADER ENCSQ, SEMI, 0x01
-		#Print in a string
-		#what moder are we in?
-		ld t0, COMPILEDFLAG
-		beq zero, t0, encsq_immediate_start
+		CODEHEADER _ENCSQ, SEMI, 0x00
+		#compiled ENCSQ
 		ld a0, 0(s7)
 		mv a1, s7
 		add s7, s7, a0
 		li t0, 7
-  encsq_compiled_loopup:
 		and t1, s7, t0
 		beqz t1, encsq_compiled_readyoutput
 		li t2, 8
@@ -459,7 +452,9 @@
 		li a7, 64
 		ecall			#make system call
 		tail NEXT
-  encsq_immediate_start:
+
+		CODEHEADER ENCSQ, _ENCSQ, 0x01
+		#Print in a string
 		#first of all, get the address and length of the string
 		la t5, INPUT_END
 		ld t5, 0(t5)		#absolute end of string

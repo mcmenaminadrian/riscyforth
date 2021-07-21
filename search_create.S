@@ -42,14 +42,21 @@
 		#test for ENCSQ (ie string printing)
 		la t0, WA_ENCSQ
 		bne t3, t0, search_waend
+		#substitute WA__ENCSQ
+		la t3, WA__ENCSQ
 		#jump to code that will count string and embed length and literal
 		tail embed_encsq
   search_waend:
 		#test for END
 		la t0, WA_END
-		bne t3, t0, search_create_test_conditionals
+		bne t3, t0, search_create_test_variable
 		#insert three instruction simple loop back
 		la t3, WA__END				#susbititute
+		j search_create_inscribe
+  search_create_test_variable:
+		la t0, WA_VARIABLE
+		bne t3, t0, search_create_test_conditionals
+		la t3, WA__VARIABLE
 		j search_create_inscribe
   search_create_test_conditionals:
 		#test for conditionals
@@ -227,7 +234,7 @@
   search_create_assign_variable:
 		#word address for VARIN function
 		#then write out would-be variable name (up to 24 chars)
-		la t3, WA_VARIN
+		la t3, WA__VARIN
 		la a0, createwritepoint
 		ld a1, 0(a0)
 		sd t3, 0(a1)			      #write out word address in definition

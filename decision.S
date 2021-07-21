@@ -127,7 +127,7 @@
 		sw s3, 16(s2)
 		#now in true path
 		#register based jump to NEXT
-		la s0, COLON_NEXT
+		la s0, NEXT
 		li s4, 0xFFFFF000
 		and s3, s0, s4
 		ori s3, s3, 0x2B7
@@ -146,7 +146,7 @@
 		li s3, 0x8B8B93
 		sw s3, 32(s2)
 		#register based jump to NEXT
-		la s0, COLON_NEXT
+		la s0, NEXT
 		li s4, 0xFFFFF000
 		and s3, s0, s4
 		ori s3, s3, 0x2B7
@@ -168,7 +168,7 @@
 		li s3, 0x8B8B93
 		sw s3, 56(s2)
 		#register based jump to NEXT
-		la s0, COLON_NEXT
+		la s0, NEXT
 		li s4, 0xFFFFF000
 		and s3, s0, s4
 		ori s3, s3, 0x2B7

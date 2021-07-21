@@ -67,7 +67,6 @@
                 sd zero, OKSTATUS, t0
                 sd zero, CREATEFLAG, t0
 		sd zero, VARIABLEFLAG, t0
-		sd zero, COMPILEDFLAG, t0
                 la t1, TIL_LOAD	                    #start search from here
                 sd t1, dictionary, t0
 		sd zero, ifflag, t0
@@ -92,9 +91,3 @@
                	la s7, outer_loop_tokenize
                	POP s8
                	j RUN
-
-  COLON_NEXT:
-	       	ld t0, COMPILEDFLAG
-		addi t0, t0, 1
-	       	sd t0, COMPILEDFLAG, t1
-	       	j NEXT
