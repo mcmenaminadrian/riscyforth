@@ -46,13 +46,50 @@ drop2
 700 = SWAP 800 = AND SWAP 700 = AND SWAP 800 = AND if [ DUP2 passed] else [ DUP2 failed ] then cr
 ;
 
+: testOVER2
+[ Testing OVER2 ] 5 spaces
+1 2 3 4 5 6 7 8 OVER2
+6 = swap 5 = and swap 8 = and if [ OVER2 passed ] else [ OVER2 failed ] then cr
+;
+
+: testtuck2
+[ Testing TUCK2 ] 5 spaces
+1 2 3 4 5 6 TUCK2
+6 = swap 5 = and swap 4 = and swap 3 = and swap 6 = and swap 5 = and if [ TUCK2 passed] else [ TUCK2 failed ] then cr
+;
+
+: testswap2
+[ Testing SWAP2 ] 5 spaces
+1 2 3 4 5 6 7 8 SWAP2
+6 = swap 5 = and swap 8 = and if [ SWAP2 passed ] else [ SWAP2 failed ] then cr
+;
+
+: testrot2
+[ Testing ROT2 ] 5 spaces
+99 2 3 4 5 6 ROT2
+2 = swap 99 = and swap 6 = and if [ ROT2 passed ] else [ ROT2 failed ] then cr
+;
+
+: TESTDUP
+[ Testing DUP ] 5 spaces
+34 45 DUP
+45 = SWAP 45 = AND swap 34 = AND IF [ DUP passed ] else [ DUP failed ] then cr ;
 
 \ Now the tests
-: runTests
+: STACKOPTESTS
+[ Running stackop tests ] cr
 testDrop2 testSquare
 testCube testMUL
 testNIP2 testDUP2
-testOVER2
+testOVER2 testtuck2
+testtuck2 testswap2 testrot2 testdup
+[ stackop tests over ] cr
+;
+
+: UNITTESTS
+[ Running unit tests ] cr
+STACKOPTESTS
+[ Unit tests complete ] cr
 ;
 
 

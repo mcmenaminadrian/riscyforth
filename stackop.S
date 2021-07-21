@@ -156,8 +156,8 @@
 		sd t2, 32(sp)
 		sd t1, 24(sp)
 		sd t0, 16(sp)
-		sd t4, 8(sp)
-		sd t5, 0(sp)
+		sd t5, 8(sp)
+		sd t4, 0(sp)
                 tail NEXT
 
 
