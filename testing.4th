@@ -30,13 +30,6 @@ drop2
 28 = if [ CUBE failed ] else [ CUBE passed ] then cr
 ;
 
-: testMUL
-[ Testing MUL ] 5 spaces
-5 5 5 * *
-5 cube
-= if [ MUL passed ] else [ MUL failed ] then cr
-;
-
 : testNIP2
 [ Testing NIP2 ] 5 spaces
 10 20 30 40 50 NIP2
@@ -130,13 +123,47 @@ BINARY [ powers of 2 from 9 to 0 in binary... ] cr
 [ Verifying DOT ] 5 spaces 0 1 2 3 4 5
 [ ... should see countdown from 5 to 0: ] . . . . . . CR ;
 
+: TESTADD
+[ Testing ADD ] 5 SPACES 900 -899 +
+IF [ ADD passed ] ELSE [ ADD failed ] THEN CR ;
+
+: testMUL
+[ Testing MUL ] 5 spaces
+5 5 5 * *
+5 cube
+= if [ MUL passed ] else [ MUL failed ] then cr
+;
+
+: TESTDIV
+[ Testing DIV ] 5 SPACES 99 11 / 101 11 / * 81 =
+IF [ DIV passed ] else [ DIV failed ] then cr ;
+
+: TESTSUB
+[ Testing SUB ] 5 spaces 
+75 22 - 53 = IF [ SUB passed ] else [ SUB failed ] then cr ;
+
+: TESTPLUS1
+[ Testing PLUS1 ] 5 SPACES
+10 PLUS1 11 = IF [ PLUS1 passed ] ELSE [ PLUS1 failed ] THEN CR ;
+
+: TESTMINUS1
+[ Testing MINUS1 ] 5 spaces
+-1 MINUS1 -2 = IF [ MINUS1 passed ] ELSE [ MINUS1 failed ] THEN CR ;
+
 \ Test groupings
+
+\ Test integer
+: INTEGERTESTS
+[ Running integer tests ] cr
+TESTADD TESTMUL TESTDIV TESTSUB TESTPLUS1 TESTMINUS1
+[ Integer tests complete ] CR
+;
 
 \ Group of stack operations tests
 : STACKOPTESTS
 [ Running stackop tests ] cr
 testDrop2 testSquare
-testCube testMUL
+testCube
 testNIP2 testDUP2
 testOVER2 testtuck2
 testtuck2 testswap2 testrot2 testdup
@@ -167,6 +194,8 @@ DECIMAL
 STACKOPTESTS
 [ Press enter to continue ] GETNEXTLINE_IMM OK
 BASICSTESTS
+[ Press enter to continue ] GETNEXTLINE_IMM OK
+INTEGERTESTS
 [ Unit tests complete ] cr
 ;
 

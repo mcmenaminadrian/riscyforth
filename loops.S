@@ -1,5 +1,5 @@
 # offset for jumping
-.equ CREATEOFFSET,	120
+.equ CREATEOFFSET,	160
 
 
 		CODEHEADER EMIT, VARIABLE, 0x01
@@ -254,20 +254,50 @@
 		li t0, 0x8be2
 		sh t0, 104(t3)		#mv s7, s8
 		#execute register based jump to NEXT
+		#make this fully portable even at cost of unneeded code
 		la t1, NEXT		#t1 has the number
-		#load the number into register t0
+		srli t1, t1, 32		#eliminate the lower 32 bits
+		slli t1, t1, 20		#in right place for the add
+		li t0, 0x293
+		or t0, t0, t1
+		sw t0, 106(t3)		#addi t0, zero, [upper 32 of NEXT]
+		li t0, 0x2029293
+		sw t0, 110(t3)		#slli t0, t0, 32
+		#now deal with lower 32 bits of NEXT address
+		la t1, NEXT
 		li t2, 0xFFFFF000
-		and t4, t1, t2
-		ori t4, t4, 0x2B7	#lui t0
-		sw t4, 106(t3)
-		li t4, 0xFFF
-		and t2, t1, t4
-		slli t4, t2, 20
-		li t5, 0x28293		#addi t0
-		or t4, t4, t5
-		sw t4, 110(t3)
+		and t1, t1, t2		#take upper 20 bits of lower 32
+		li t2, 0x337
+		or t0, t1, t2
+		sw t0, 114(t3)		#lui t1, [bits 12 - 31]
+		li t0, 0x2031313
+		sw t0, 118(t3)		#slli t1, t1, 0x20
+		li t0, 0x2035313
+		sw t0, 122(t3)		#srli t1, t1, 0x20 (zero out upper 32 bits)
+		la t1, NEXT
+		li t2, 0xFFF
+		and t0, t1, t2		#lower 12 bits only
+		srli t1, t0, 11		#t1 has tweleth bit only
+		li t2, 0x7FF
+		and t0, t0, t2		#t0 has the lower 11 bits
+		li t4, 0x393
+		slli t1, t1, 20
+		or t4, t4, t1
+		sw t4, 126(t3)		#addi t2, zero, [0 or 1]
+		li t4, 0xB39393
+		sw t4, 130(t3)		#slli t2, t2, 11
+		li t4, 0x7282B3
+		sw t4, 134(t3)		#add t0, t0, t2
+		li t4, 0x393
+		slli t0, t0, 20
+		or t4, t4, t0
+		sw t4, 138(t3)		#addi t2, zero, [lower 11 bits]
+		li t4, 0x7282B3
+		sw t4, 142(t3)		#add t0, t0, t2
+		li t4, 0x6282B3
+		sw t4, 146(t3)		#add t0, t0, t1
 		li t0, 0x28067		#jalr zero, 0(t0)
-		sw t0, 114(t3)
+		sw t0, 150(t3)
 
 		la t1, newdictionary
 		ld t1, 0(t1)
