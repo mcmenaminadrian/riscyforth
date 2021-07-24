@@ -119,6 +119,9 @@ DECIMAL 20 DUP
 20 = IF [ DECIMAL passed wth output 20 = ] DUP . [ = ] HEX . DECIMAL ELSE [ DECIMAL failed with output 20 = ] DUP . [ = ] HEX . DECIMAL THEN CR
 ;
 
+: TESTOCTAL [ Testing OCTAL ] 5 SPACES OCTAL 20 DUP DECIMAL 16 = IF [ OCTAL passed with output 20o = ] DUP OCTAL . [ = ] DECIMAL .
+ELSE [ OCTAL failed with 20o = ] DUP OCTAL . [ = ] DECIMAL . THEN CR ;
+
 \ Test groupings
 
 \ Group of stack operations tests
@@ -140,7 +143,7 @@ VERIFYGETNEXTLINE_IMM
 VERIFYOK
 VERIFYTOKENIZE_IMM
 VERIFYSEARCH
-TESTHEX TESTDECIMAL
+TESTHEX TESTDECIMAL TESTOCTAL
 [ Basics tests and verifications over ] cr
 ;
 

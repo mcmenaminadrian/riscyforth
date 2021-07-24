@@ -57,6 +57,7 @@
 		la t0, LOADLINESETUP
 		ld t0, 0(t0)
 		bnez t0, tokenize_normal
+  pull_in_another:
 		jal load_get_next_line		      #suck in a line
   tokenize_normal:
                 la a1, INPUT_END
@@ -792,6 +793,11 @@
 		j fix_up_done
 
   fix_up_comment:
+		la t0, INFILELOAD
+		ld t0, 0(t0)
+		beqz t0, keep_fixing_up_comment
+		j pull_in_another		      #suck in a line
+  keep_fixing_up_comment:
 		li t3, 0x43
 		sb t3, 0(a2)	
 		li t3, 0x4F
