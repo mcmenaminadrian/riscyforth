@@ -396,22 +396,22 @@
 
 
                 CODEHEADER DECIMAL, SEARCH, 0x01
-                addi t1, zero, 10
-                sw t1, CURRENT_BASE, t0
+		li t1, 10
+                sd t1, CURRENT_BASE, t0
                 tail NEXT
 
                 CODEHEADER HEX, DECIMAL, 0x01
-                addi t1, zero, 16
+		li t1, 16
                 sd t1, CURRENT_BASE, t0
                 tail NEXT
 
                 CODEHEADER OCTAL, HEX, 0x01
-                addi t1, zero, 8
+		li t1, 8
                 sd t1, CURRENT_BASE, t0
                 tail NEXT
 
                 CODEHEADER BINARY, OCTAL, 0x01
-                addi t1, zero, 2
+		li t1, 2
                 sd t1, CURRENT_BASE, t0
                 tail NEXT
 

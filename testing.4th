@@ -1,5 +1,8 @@
 \ Unit tests
 
+
+\ Stack operations tests
+
 : testOVER2
 [ Testing OVER2 ] 5 SPACES
 10 30 50 90 70 OVER2
@@ -75,7 +78,50 @@ drop2
 34 45 DUP
 45 = SWAP 45 = AND swap 34 = AND IF [ DUP passed ] else [ DUP failed ] then cr ;
 
-\ Now the tests
+\ Basic tests
+
+: VERIFYTYPEPROMPT
+[ Verifying TYPEPROMPT ] cr
+TYPEPROMPT cr
+;
+
+: VERIFYGETNEXTLINE_IMM
+[ Verifying GETNEXTLINE_IMM - please press RETURN only ] cr
+GETNEXTLINE_IMM cr
+;
+
+: VERIFYOK
+[ Verifying OK ] cr
+OK cr
+;
+
+: VERIFYTOKENIZE_IMM
+[ Verifying TOKENIZE_IMM ] cr
+TOKENIZE_IMM
+;
+
+: VERIFYSEARCH
+[ Verifying SEARCH ] cr
+SEARCH
+;
+
+: TESTHEX
+[ Testing HEX ] 5 SPACES
+HEX 0x10 0xFF + DUP
+0x10F = IF [ HEX passed with output 0x10F = ] . ELSE [ HEX failed with output 0x10F =  ] . then cr
+\ ensure other tests keep testdup2
+DECIMAL
+;
+
+: TESTDECIMAL
+[ Testing DECIMAL ] 5 SPACES
+DECIMAL 20 DUP
+20 = IF [ DECIMAL passed wth output 20 = ] DUP . [ = ] HEX . DECIMAL ELSE [ DECIMAL failed with output 20 = ] DUP . [ = ] HEX . DECIMAL THEN CR
+;
+
+\ Test groupings
+
+\ Group of stack operations tests
 : STACKOPTESTS
 [ Running stackop tests ] cr
 testDrop2 testSquare
@@ -86,9 +132,25 @@ testtuck2 testswap2 testrot2 testdup
 [ stackop tests over ] cr
 ;
 
+\ Group of Basics tests
+: BASICSTESTS
+[ Running basics tests and verifications ] cr
+VERIFYTYPEPROMPT
+VERIFYGETNEXTLINE_IMM
+VERIFYOK
+VERIFYTOKENIZE_IMM
+VERIFYSEARCH
+TESTHEX TESTDECIMAL
+[ Basics tests and verifications over ] cr
+;
+
+
+\ Run all the tests
 : UNITTESTS
+DECIMAL
 [ Running unit tests ] cr
 STACKOPTESTS
+BASICSTESTS
 [ Unit tests complete ] cr
 ;
 

@@ -50,6 +50,8 @@ _Output_
 
 **ENCSQ**		    Output a string (use via [ _STRING_ ] )
 
+**DISPLAY**		    Will output characters from the stack (stops when reaching character value >=128)
+
 _Integer arithmetic_
 
 **DECIMAL**                 Sets input/output to decimal

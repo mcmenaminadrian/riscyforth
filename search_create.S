@@ -163,6 +163,32 @@
 		sd t3, 0(t1)			      #write out word address in definition
 		addi t1, t1, 8
 		sd t1, 0(t0)
+		#now test for base changes
+		#and if present update base to ensure input recognised
+		la t0, WA_HEX
+		bne t3, t0, search_create_test_decimal
+		li t1, 16
+		sd t1, CURRENT_BASE, t0
+		j search_create_leave
+  search_create_test_decimal:
+		la t0, WA_DECIMAL
+		bne t3, t0, search_create_test_octal
+		li t1, 10
+		sd t1, CURRENT_BASE, t0
+		j search_create_leave
+  search_create_test_octal:
+		la t0, WA_OCTAL
+		bne t3, t0, search_create_test_binary
+		li t1, 8
+		sd t1, CURRENT_BASE, t0
+		j search_create_leave
+  search_create_test_binary:
+		la t0, WA_BINARY
+		bne t3, t0, search_create_test_semi
+		li t1, 2
+		sd t1, CURRENT_BASE, t0
+		j search_create_leave
+  search_create_test_semi:
 		la t0, WA_SEMI			      #are we finished with create?
 		bne t3, t0, search_create_leave
 		#tidy up create as we are done
