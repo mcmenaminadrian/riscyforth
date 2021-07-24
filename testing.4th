@@ -122,6 +122,14 @@ DECIMAL 20 DUP
 : TESTOCTAL [ Testing OCTAL ] 5 SPACES OCTAL 20 DUP DECIMAL 16 = IF [ OCTAL passed with output 20o = ] DUP OCTAL . [ = ] DECIMAL .
 ELSE [ OCTAL failed with 20o = ] DUP OCTAL . [ = ] DECIMAL . THEN CR ;
 
+: VERIFYBINARY [ Verifying BINARY  - ] 1 2 4 8 16 32 64 128 256 512
+BINARY [ powers of 2 from 9 to 0 in binary... ] cr
+. cr . cr . cr . cr . cr . cr . cr . cr . cr . cr DECIMAL ;
+
+: VERIFYDOT
+[ Verifying DOT ] 5 spaces 0 1 2 3 4 5
+[ ... should see countdown from 5 to 0: ] . . . . . . CR ;
+
 \ Test groupings
 
 \ Group of stack operations tests
@@ -141,18 +149,23 @@ testtuck2 testswap2 testrot2 testdup
 VERIFYTYPEPROMPT
 VERIFYGETNEXTLINE_IMM
 VERIFYOK
-VERIFYTOKENIZE_IMM
-VERIFYSEARCH
-TESTHEX TESTDECIMAL TESTOCTAL
+VERIFYTOKENIZE_IMM 
+VERIFYSEARCH OK
+[ ***Above message on interpreter failure can be ignored*** ] CR
+TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY
+[ Verifying ENCSQ with this output ] cr
+[ Verifying COMMENT ] cr \ [ COMMENT verification failed ] 
+VERIFYDOT
 [ Basics tests and verifications over ] cr
 ;
 
 
 \ Run all the tests
-: UNITTESTS
+: UTS
 DECIMAL
 [ Running unit tests ] cr
 STACKOPTESTS
+[ Press enter to continue ] GETNEXTLINE_IMM OK
 BASICSTESTS
 [ Unit tests complete ] cr
 ;
