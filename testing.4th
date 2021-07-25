@@ -144,7 +144,20 @@ IF [ DIV passed ] else [ DIV failed ] then cr ;
 [ Testing MINUS1 ] 5 spaces
 -1 MINUS1 -2 = IF [ MINUS1 passed ] ELSE [ MINUS1 failed ] THEN CR ;
 
+: VERIFYWORDLIST [ Verifying WORDLIST .... ] WORDLIST CR ;
+: TESTLITERALNUMB [ Testing LITERALNUMB .... ] 213 213 = IF [ LITERALNUMB passed ] ELSE [ LITERALNUMB failed ] THEN CR ;
+
+: TESTVARIABLE [ Testing VARIABLE and VARIN ] 5 SPACES
+901 VARIABLE OLDGEEZER OLDGEEZER 1 + VARIABLE OLDGEEZER 902 OLDGEEZER =
+IF [ VARIABLE and VARIN passed ] ELSE [ VARIABLE and VARIN failed ] THEN CR ;
+
 \ Test groupings
+
+\ Test listwords
+: LISTWORDSTESTS
+[ Running 'listwords' group of tests ] CR
+VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE
+[ 'listwords' group of tests complete ] CR ;
 
 \ Test integer
 : INTEGERTESTS
@@ -187,10 +200,12 @@ VERIFYDOT
 DECIMAL
 [ Running unit tests ] cr
 STACKOPTESTS
-[ Press enter to continue ] GETNEXTLINE_IMM OK
+[ Press enter to continue ] GETNEXTLINE_IMM 
 BASICSTESTS
-[ Press enter to continue ] GETNEXTLINE_IMM OK
+[ Press enter to continue ] GETNEXTLINE_IMM
 INTEGERTESTS
+[ Press enter to continue ] GETNEXTLINE_IMM
+LISTWORDSTESTS
 [ Unit tests complete ] cr
 ;
 
