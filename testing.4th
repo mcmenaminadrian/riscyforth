@@ -151,12 +151,17 @@ IF [ DIV passed ] else [ DIV failed ] then cr ;
 901 VARIABLE OLDGEEZER OLDGEEZER 1 + VARIABLE OLDGEEZER 902 OLDGEEZER =
 IF [ VARIABLE and VARIN passed ] ELSE [ VARIABLE and VARIN failed ] THEN CR ;
 
+: TESTTYPE [ Verifying GETLINE, TYPE and TIB ] CR [ Please enter some text to be echoed back. ] CR
+GETLINE CR [ Echoing... ] TIB SWAP TYPE CR ;
+
+
+
 \ Test groupings
 
 \ Test listwords
 : LISTWORDSTESTS
 [ Running 'listwords' group of tests ] CR
-VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE
+VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE TESTTYPE
 [ 'listwords' group of tests complete ] CR ;
 
 \ Test integer
@@ -173,7 +178,6 @@ TESTOVER2
 testDrop2 testSquare
 testCube
 testNIP2 testDUP2
-testtuck2
 testtuck2 testswap2 testrot2 testdup
 [ stackop tests over ] cr
 ;
@@ -186,7 +190,7 @@ VERIFYGETNEXTLINE_IMM
 VERIFYOK
 VERIFYTOKENIZE_IMM 
 VERIFYSEARCH OK
-[ ***Above message on interpreter failure can be ignored*** ] CR
+[ ***Any error message above can almost certainly be ignored*** ] CR
 TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY
 [ Verifying ENCSQ with this output ] cr
 [ Verifying COMMENT ] cr \ [ COMMENT verification failed ] 
@@ -200,11 +204,11 @@ VERIFYDOT
 DECIMAL
 [ Running unit tests ] cr
 STACKOPTESTS
-[ Press enter to continue ] GETNEXTLINE_IMM 
+[ Press enter to continue ] GETLINE 
 BASICSTESTS
-[ Press enter to continue ] GETNEXTLINE_IMM
+[ Press enter to continue ] GETLINE
 INTEGERTESTS
-[ Press enter to continue ] GETNEXTLINE_IMM
+[ Press enter to continue ] GETLINE
 LISTWORDSTESTS
 [ Unit tests complete ] cr
 ;

@@ -13,6 +13,7 @@
   	        CODEHEADER GETNEXTLINE_IMM, TYPEPROMPT, 0x0
                 #Fetch a line for immediate execution
                 MARKINPUTBUFFER INPUT_BUFFER            #ensure buffer starts 'empty'
+  getnextline_imm_entry:
 		mv a0, zero
 		la a1, INPUT_BUFFER
 		li a2, BUFFERLEN
@@ -27,9 +28,30 @@
                 add a1, a1, a2                          #a2 has the end of input
                 sd a1, INPUT_END, t0
 		tail NEXT
-          
 
-                CODEHEADER OK, GETNEXTLINE_IMM, 0x00
+		CODEHEADER GETLINE, GETNEXTLINE_IMM, 0x01
+		#Fetch a line - not available for tokenization
+		mv a0, zero
+		la a1, INPUT_BUFFER
+		li a2, BUFFERLEN
+		li a7, 63
+		ecall
+		PUSH a1				#where text can be found
+		PUSH a0				#length of inputted text
+		la a0, INPUT_BUFFER		#ensure no tokenization
+		sd a0, INPUT_START, t0
+		sd a0, INPUT_END, t0
+		tail NEXT
+
+		CODEHEADER DROPINPUT, GETLINE, 0x01
+		#stop input line being processed
+		la t0, INPUT_END
+		ld t0, 0(t0)
+		la t1, INPUT_START
+		sd t0, 0(t1)
+		tail NEXT
+          
+                CODEHEADER OK, DROPINPUT, 0x00
                 la a0, OKSTATUS
 		ld a0, 0(a0)
                 bne a0, zero, ok_not_ok

@@ -26,9 +26,13 @@ _Text entry_
 
 **GETSTDIN**                Gets the file pointer for stdin
 
-**TYPE**                    Gets a > prompt
+**TYPEPROMPT**              Gets a > prompt
 
 **GETNEXTLINE_IMM**         Fetch a line for immediate execution
+
+**GETLINE**		    Fetch a line of text, not for processing - (uu-uuab) a is address, b length
+
+**DROPINPUT**		    Halts any further processing on input line
 
 **OK**                      Output OK (or error) message
 
@@ -51,6 +55,10 @@ _Output_
 **ENCSQ**		    Output a string (use via [ _STRING_ ] )
 
 **DISPLAY**		    Will output characters from the stack (stops when reaching character value >=128)
+
+**TIB**			    Return the address of the terminal input buffer on the stack
+
+**TYPE**		    (uuab-uu) Outputs string of length b at address a
 
 _Integer arithmetic_
 

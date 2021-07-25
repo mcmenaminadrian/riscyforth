@@ -77,14 +77,21 @@
 		tail NEXT
 
 		CODEHEADER TYPE, VARIN, 0x01
-		mv t1, zero
-		POP t2
-		lb t3, 0(t1)
-		addi t2, t2, 1
-		WRITESTRINGR t2, t1
-		j NEXT
+		ld t0, 0(sp)
+		bnez t0, type_continue
+		tail NEXT
+  type_continue:
+		ld t1, 8(sp)
+		WRITESTRINGR t1, t0
+		tail NEXT
+
+		CODEHEADER TIB, TYPE, 0x01
+		#return address of input buffer
+		la t0, INPUT_BUFFER
+		PUSH t0
+		tail NEXT
 		
-		CODEHEADER DISPLAY, TYPE, 0x01
+		CODEHEADER DISPLAY, TIB, 0x01
 		la t0, SCRATCH_PAD
 		mv t1, zero
 		mv t3, sp
@@ -102,7 +109,7 @@
 		mv sp, t3
 		la t0, SCRATCH_PAD
 		WRITESTRINGR t0, t1
-		j NEXT
+		tail NEXT
 
 		CODEHEADER _VARIABLE, DISPLAY, 0x0
 		li t1, 1
