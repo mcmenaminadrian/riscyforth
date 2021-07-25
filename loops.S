@@ -277,7 +277,7 @@
 		la t1, NEXT
 		li t2, 0xFFF
 		and t0, t1, t2		#lower 12 bits only
-		srli t1, t0, 11		#t1 has tweleth bit only
+		srli t1, t0, 11		#t1 has twelveth bit only
 		li t2, 0x7FF
 		and t0, t0, t2		#t0 has the lower 11 bits
 		li t4, 0x393

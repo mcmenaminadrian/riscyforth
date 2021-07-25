@@ -3,6 +3,9 @@
 
 #transitions.S - handle various nested conditional transitions
 
+.equ ELSEPOINT, 128
+.equ THENPOINT, 68
+
 #IF FLAG CODE
   #returns value of ifflag in a0
   get_iffmode:
@@ -147,13 +150,13 @@
 			mul s4, s3, s1
 			add s5, s4, s0		#s5 points to block
 			#now prepare the change
-			lw s1, 56(s5)		#we update the addi s7,s7,8
+			lw s1, ELSEPOINT(s5)		#we update the addi s7,s7,8
 			andi s2, s2, 0x3FF
 			li s3, 0xFFFFF
 			and s1, s1, s3
 			slli s4, s2, 20
 			or s3, s1, s4
-			sw s3, 56(s5)
+			sw s3, ELSEPOINT(s5)
 			TRANSITION_EPILOGUE
 			ret
 			
@@ -175,13 +178,13 @@
 			mul s4, s3, s1
 			add s5, s4, s0		#s5 points to block
 			#now prepare the change
-			lw s1, 32(s5)		#update the addi s7,s7,8
+			lw s1, THENPOINT(s5)		#update the addi s7,s7,8
 			andi s2, s2, 0x3FF
 			li s3, 0xFFFFF
 			and s1, s1, s3
 			slli s4, s2, 20
 			or s3, s1, s4
-			sw s3, 32(s5)
+			sw s3, THENPOINT(s5)
 			TRANSITION_EPILOGUE
 			ret
 

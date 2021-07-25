@@ -42,12 +42,6 @@ drop2
 700 = SWAP 800 = AND SWAP 700 = AND SWAP 800 = AND if [ DUP2 passed] else [ DUP2 failed ] then cr
 ;
 
-: testOVER2
-[ Testing OVER2 ] 5 spaces
-1 2 3 4 5 6 7 8 OVER2
-6 = swap 5 = and swap 8 = and if [ OVER2 passed ] else [ OVER2 failed ] then cr
-;
-
 : testtuck2
 [ Testing TUCK2 ] 5 spaces
 1 2 3 4 5 6 TUCK2
@@ -162,10 +156,11 @@ TESTADD TESTMUL TESTDIV TESTSUB TESTPLUS1 TESTMINUS1
 \ Group of stack operations tests
 : STACKOPTESTS
 [ Running stackop tests ] cr
+TESTOVER2
 testDrop2 testSquare
 testCube
 testNIP2 testDUP2
-testOVER2 testtuck2
+testtuck2
 testtuck2 testswap2 testrot2 testdup
 [ stackop tests over ] cr
 ;

@@ -122,8 +122,8 @@
 		#addi sp, sp, 8
 		li s3, 0x810113
 		sw s3, 12(s2)
-		#beq t0, zero, +48 (to point where s7 updated)
-		li s3, 0x2028863
+		#beq t0, zero, +52 (to point where s7 updated)
+		li s3, 0x2028A63 
 		sw s3, 16(s2)
 		#now in true path
 		#register based jump to NEXT
@@ -144,6 +144,8 @@
 		sw t0, 28(s2)
 		li t0, 0x2031313
 		sw t0, 32(s2)
+		li t0, 0x2035313
+		sw t0, 36(s2)
 		la t1, NEXT
 		li t2, 0xFFF
 		and t0, t1, t2
@@ -153,43 +155,45 @@
 		li t4, 0x393
 		slli t1, t1, 20
 		or t4, t4, t1
-		sw t4, 36(s2)
-		li t4, 0xB39393
 		sw t4, 40(s2)
-		li t4, 0x7282B3
+		li t4, 0xB39393
 		sw t4, 44(s2)
+		li t4, 0x7282B3
+		sw t4, 48(s2)
 		li t4, 0x393
 		slli t0, t0, 20
 		or t4, t4, t0
-		sw t4, 48(s2)
-		li t4, 0x7282B3
 		sw t4, 52(s2)
-		li t4, 0x6282B3
+		li t4, 0x7282B3
 		sw t4, 56(s2)
+		li t4, 0x6282B3
+		sw t4, 60(s2)
 		li t0, 0x28067
-		sw t0, 60(s2)
+		sw t0, 64(s2)
 		#now in the then/else path
 		#simplest/default case, skip one instruction
 		#addi s7, s7, 8
 		li s3, 0x8B8B93
-		sw s3, 64(s2)
+		sw s3, 68(s2)				#THENPOINT
 		#register based jump to NEXT
 		la t1, NEXT
 		srli t1, t1, 32
 		slli t1, t1, 20
 		li t0, 0x293
 		or t0, t0, t1
-		sw t0, 68(s2)
-		li t0, 0x2029293
 		sw t0, 72(s2)
+		li t0, 0x2029293
+		sw t0, 76(s2)
 		la t1, NEXT
 		li t2, 0xFFFFF000
 		and t1, t1, t2
 		li t2, 0x337
 		or t0, t1, t2
-		sw t0, 76(s2)
-		li t0, 0x2031313
 		sw t0, 80(s2)
+		li t0, 0x2031313
+		sw t0, 84(s2)
+		li t0, 0x2035313
+		sw t0, 88(s2)
 		la t1, NEXT
 		li t2, 0xFFF
 		and t0, t1, t2
@@ -199,46 +203,48 @@
 		li t4, 0x393
 		slli t1, t1, 20
 		or t4, t4, t1
-		sw t4, 84(s2)
-		li t4, 0xB39393
-		sw t4, 88(s2)
-		li t4, 0x7282B3
 		sw t4, 92(s2)
-		li t4, 0x393
-		slli t0, t0, 20
-		or t4, t4, t0
+		li t4, 0xB39393
 		sw t4, 96(s2)
 		li t4, 0x7282B3
 		sw t4, 100(s2)
-		li t4, 0x6282B3
+		li t4, 0x393
+		slli t0, t0, 20
+		or t4, t4, t0
 		sw t4, 104(s2)
+		li t4, 0x7282B3
+		sw t4, 108(s2)
+		li t4, 0x6282B3
+		sw t4, 112(s2)
 		li t0, 0x28067
-		sw t0, 108(s2)
+		sw t0, 116(s2)
 
 		#now ELSE block
 		mv s1, s2
-		addi s1, s1, 116
-		sd s1, 112(s2)		#WA for this else
+		addi s1, s1, 128	#where our code starts (addi s7, s7, 8 line)
+		sd s1, 120(s2)		#WA for this else
 		#addi s7, s7, 8		#default is skip 1 instruction
 		li s3, 0x8B8B93
-		sw s3, 120(s2)
+		sw s3, 128(s2)				#ELSEPOINT
 		#register based jump to NEXT
 		la t1, NEXT
 		srli t1, t1, 32
 		slli t1, t1, 20
 		li t0, 0x293
 		or t0, t0, t1
-		sw t0, 124(s2)
+		sw t0, 132(s2)
 		li t0, 0x2029293
-		sw t0, 128(s2)
+		sw t0, 136(s2)
 		la t1, NEXT
 		li t2, 0xFFFFF000
 		and t1, t1, t2
 		li t2, 0x337
 		or t0, t1, t2
-		sw t0, 132(s2)
+		sw t0, 140(s2)
 		li t0, 0x2031313
-		sw t0, 136(s2)
+		sw t0, 144(s2)
+		li t0, 0x2035313
+		sw t0, 148(s2)
 		la t1, NEXT
 		li t2, 0xFFF
 		and t0, t1, t2
@@ -248,21 +254,21 @@
 		li t4, 0x393
 		slli t1, t1, 20
 		or t4, t4, t1
-		sw t4, 140(s2)
+		sw t4, 152(s2)
 		li t4, 0xB39393
-		sw t4, 144(s2)
+		sw t4, 156(s2)
 		li t4, 0x7282B3
-		sw t4, 148(s2)
+		sw t4, 160(s2)
 		li t4, 0x393
 		slli t0, t0, 20
 		or t4, t4, t0
-		sw t4, 152(s2)
+		sw t4, 164(s2)
 		li t4, 0x7282B3
-		sw t4, 156(s2)
+		sw t4, 168(s2)
 		li t4, 0x6282B3
-		sw t4, 160(s2)
+		sw t4, 172(s2)
 		li t0, 0x28067
-		sw t0, 164(s2)
+		sw t0, 176(s2)
 
 		#update the stack
 		ld s0, 0(a0)		#s0 - holds base address we are writing to
@@ -283,7 +289,7 @@
 		mul s4, s3, s2		#s4 has offset in the code block
 		add s4, s4, s0		#s4 now has start address of code block
 		sd s4, 0(s1)		#THEN address written
-		add s4, s4, 112		#ELSE address ...
+		add s4, s4, 120		#ELSE address ...
 		sd s4, -8(s1)		#...written
 		#update the counter
 		ld s2, 0(a1)
