@@ -52,7 +52,7 @@ _Output_
 
 **CR**			    Output a carriage return (newline)
 
-**ENCSQ**		    Output a string (use via [ _STRING_ ] )
+**ENCSQ**		    Output a string (use via ." _STRING_ " )
 
 **DISPLAY**		    Will output characters from the stack (stops when reaching character value >=128)
 
@@ -84,9 +84,9 @@ _Integer arithmetic_
 
 **SUB**                     Subtract the second item on the stack from the first (- is recognised and expanded to SUB)
 
-**PLUS1**                   Increment the top of the stack by 1
+**PLUS1**                   Increment the top of the stack by 1 - 1+ is recognised and expanded to PLUS1
 
-**MINUS1**                  Decrement the top of the stack by 1
+**MINUS1**                  Decrement the top of the stack by 1 - 1- is recognised and expanded to MINUS1
 
 **UNDERPLUS**               Add the top of the stack to the third item in the stack
 

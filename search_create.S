@@ -634,11 +634,11 @@ func_test_octal:
 		sd t3, 0(t1)			      	#write out word address in definition
 		#now get length
 		mv t0, a5
-		addi t0, t0, 1			      	#pass the opening [
+		addi t0, t0, 3			      	#pass the opening "
 		mv a0, t0
 		li a1, 0
 		li a2, 0x201				#max length
-		li t2, 0x5D				#]
+		li t2, 0x22				#"
   embed_encsq_check_next:
 		lb a3, 0(a0)
 		beq a3, t2, embed_encsq_gotlength
@@ -675,7 +675,7 @@ func_test_octal:
 		la t1, INPUT_START
 		ld t0, 0(t1)
 		add t0, t0, a1
-		addi t0, t0, 1				#account for ]
+		addi t0, t0, 3				#account for "
 		sd t0, 0(t1)
 		and t0, a1, a0
 		beqz t0, embed_encsq_alignmentadjusted

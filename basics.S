@@ -502,7 +502,7 @@
 		li t3, 0
 		la t6, INPUT_START
 		ld t4, 0(t6)
-		li t1, 0x5D		#]
+		li t1, 0x22		#"
   encsq_check_next:
 		lb t0, 0(t4)
 		beq t0, t1, encsq_prep_imm_syscall
@@ -607,6 +607,8 @@
                 #SUPPORTED EXPANSIONS
 		# 1+  --> PLUS1
 		# 1-  --> MINUS1
+		# ."  --> ENCSQ
+		# ".  --> ]
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -615,6 +617,8 @@
 		lbu t1, 0(a0)
 		li t2, 0x31			#1
 		beq t1, t2, length_two_begin1
+		li t2, 0x2E			#.
+		beq t1, t2, length_two_begindot
 		
   fix_up_length_two_finished:
 		j fix_up_finished
@@ -625,6 +629,12 @@
 		beq t1, t2, fix_up_plus1
 		li t2, 0x2D			#-
 		beq t1, t2, fix_up_minus1
+		j fix_up_length_two_finished
+
+   length_two_begindot:
+		lbu t1, 1(a0)
+		li t2, 0x22			#"
+		beq t1, t2, fix_up_encsq
 		j fix_up_length_two_finished
 		
 
@@ -646,7 +656,6 @@
                 # =  --> EQUALS
 		# (  --> OBRACKET
 		# )  --> CBRACKET
-		# [  --> ENCSQ
 		# \  --> COMMENT
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
@@ -681,8 +690,6 @@
 		beq t2, t1, fix_up_obracket
 		li t2, 0x29
 		beq t2, t1, fix_up_cbracket
-		li t2, 0x5B
-		beq t2, t1, fix_up_encsq
 		li t2, 0x5C
 		beq t2, t1, fix_up_comment
 
