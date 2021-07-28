@@ -123,7 +123,25 @@
                 sd t1, INPUT_START, t5                #update the end point for subsequent searches
                 addi t1, t1, -1                       # space or NL not part of token
                 mv t2, t0
-		bne t0, t1, tokenize_prepare_sanity_test
+		sub a0, t1, t0			      #a0 has length of token - 1
+		bnez a0, tokenize_test_length_two
+		li a0, 0x41			      #A
+		li a1, 0x5A			      #Z
+		li a2, 0x61			      #a
+		li a3, 0X7A			      #z
+		lb a4, 0(t0)
+		blt a4, a0, tokenize_fix_up_single
+		bltu a4, a0, tokenize_prepare_sanity_test
+		blt a4, a2, tokenize_fix_up_single
+		bltu a4, a3, tokenize_prepare_sanity_test
+		j tokenize_fix_up_single
+  tokenize_test_length_two:
+		li a1, 1			      #test if input is of length 2
+		bne a0, a1, tokenize_prepare_sanity_test
+		PUSH t0
+		jal fix_up_length_two
+		j tokenize_prepare_sanity_test
+  tokenize_fix_up_single:
 		PUSH t0
 		jal fix_up_input		      #one character token so check for expansion
 		
@@ -584,6 +602,33 @@
                 WRITECHAR 0x20            #space
                 j NEXT
 
+  fix_up_length_two:
+                #code to expand, if needed, two character input
+                #SUPPORTED EXPANSIONS
+		# 1+  --> PLUS1
+		# 1-  --> MINUS1
+		POP a0				#unexpanded token address
+		la a2, EXPANDED_BUFFER 		#store expanded token
+		mv a3, a2
+		mv a1, t1
+		mv a5, t2
+		lbu t1, 0(a0)
+		li t2, 0x31			#1
+		beq t1, t2, length_two_begin1
+		
+  fix_up_length_two_finished:
+		j fix_up_finished
+
+  length_two_begin1:
+		lbu t1, 1(a0)
+		li t2, 0x2B			#+
+		beq t1, t2, fix_up_plus1
+		li t2, 0x2D			#-
+		beq t1, t2, fix_up_minus1
+		j fix_up_length_two_finished
+		
+
+
   fix_up_input:
 		#code to expand standard FORTH commands
 		#to things we can use in RISC-V assembly
@@ -836,6 +881,37 @@
 		sb t3, 6(a2)
 		addi a2, a2, 6
 		j fix_up_done	
+
+  fix_up_plus1:
+		li t3, 0x50
+		sb t3, 0(a2)
+		li t3, 0x4C
+		sb t3, 1(a2)
+		li t3, 0x55
+		sb t3, 2(a2)
+		li t3, 0x53
+		sb t3, 3(a2)
+		li t3, 0x31
+		sb t3, 4(a2)
+		addi a2, a2, 4
+		j fix_up_done
+
+  fix_up_minus1:
+		li t3, 0x4D
+		sb t3, 0(a2)
+		li t3, 0x49
+		sb t3, 1(a2)
+		li t3, 0x4E
+		sb t3, 2(a2)
+		li t3, 0x55
+		sb t3, 3(a2)
+		li t3, 0x53
+		sb t3, 4(a2)
+		li t3, 0x31
+		sb t3, 5(a2)
+		addi a2, a2, 5
+		j fix_up_done
+
 		
 .include "integer.S"
 .include "stackop.S"
