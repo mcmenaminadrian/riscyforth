@@ -137,12 +137,44 @@ IF ." DIV passed " else ." DIV failed " then cr ;
 75 22 - 53 = IF ." SUB passed " else ." SUB failed " then cr ;
 
 : TESTPLUS1
-." Testing PLUS1 " 5 SPACES
-10 PLUS1 11 = IF ." PLUS1 passed " ELSE ." PLUS1 failed " THEN CR ;
+." Testing 1+ " 5 SPACES
+10 1+ 11 = IF ." 1+ passed " ELSE ." 1+ failed " THEN CR ;
+
+: TESTPLUS2
+." Testing 2+ " 5 SPACES
+10 2+ 12 = IF ." 2+ passed " ELSE ." 2+ failed " THEN CR ;
 
 : TESTMINUS1
-." Testing MINUS1 " 5 spaces
--1 MINUS1 -2 = IF ." MINUS1 passed " ELSE ." MINUS1 failed " THEN CR ;
+." Testing 1- " 5 spaces
+-1 1- -2 = IF ." 1- passed " ELSE ." 1- failed " THEN CR ;
+
+: TESTMINUS2
+." Testing 2- " 5 SPACES
+10 2- 8 = IF ." 2- passed " ELSE ." 2- failed " THEN CR ;
+
+: TESTUNDERPLUS
+." Testing UNDERPLUS" 5 spaces
+10 15 20 underplus 30 = if ." UNDERPLUS passed" else ." UNDERPLUS failed" then cr ;
+
+: TESTMOD
+." Testing MOD" 5 spaces
+13 7 mod 6 = if ." MOD passed" else ." MOD failed" then cr ;
+
+: TESTSLASH_MOD
+." Testing SLASH_MOD" 5 spaces
+13 7 slash_mod 1 = swap 6 = and if ." SLASH_MOD passed " else ." SLASH_MOD failed" then cr ;
+
+: TESTNEGATE
+." Testing NEGATE" 5 spaces 13 negate -13 =
+if ." NEGATE passed" else ." NEGATE failed" then cr ;
+
+: TESTABS
+." Testing ABS" 5 spaces -13 abs 13 =
+if ." ABS passed" else ." ABS failed" then cr ;
+
+: TESTMINMAX
+." Testing MAX and MIN" 5 spaces
+20 10 dup2 MAX 20 = if ." MAX passed and " else ." MAX failed and " then min 10 = if ." MIN passed." else ." MIN failed." then cr ;
 
 : VERIFYWORDLIST ." Verifying WORDLIST .... " WORDLIST CR ;
 : TESTLITERALNUMB ." Testing LITERALNUMB .... " 213 213 = IF ." LITERALNUMB passed " ELSE ." LITERALNUMB failed " THEN CR ;
@@ -168,6 +200,7 @@ VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE TESTTYPE
 : INTEGERTESTS
 ." Running integer tests " cr
 TESTADD TESTMUL TESTDIV TESTSUB TESTPLUS1 TESTMINUS1
+TESTminus2 testplus2 testunderplus testminmax testmod testslash_mod testabs testnegate
 ." Integer tests complete " CR
 ;
 

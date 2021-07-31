@@ -607,8 +607,9 @@
                 #SUPPORTED EXPANSIONS
 		# 1+  --> PLUS1
 		# 1-  --> MINUS1
+		# 2+  --> PLUS2
+		# 2-  --> MINUS2
 		# ."  --> ENCSQ
-		# ".  --> ]
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -619,6 +620,8 @@
 		beq t1, t2, length_two_begin1
 		li t2, 0x2E			#.
 		beq t1, t2, length_two_begindot
+		li t2, 0x32			#2
+		beq t1, t2, length_two_begin2
 		
   fix_up_length_two_finished:
 		j fix_up_finished
@@ -637,6 +640,13 @@
 		beq t1, t2, fix_up_encsq
 		j fix_up_length_two_finished
 		
+  length_two_begin2:
+		lbu t1, 1(a0)
+		li t2, 0x2B			#+
+		beq t1, t2, fix_up_plus2
+		li t2, 0x2D			#-
+		beq t1, t2, fix_up_minus2
+		j fix_up_length_two_finished
 
 
   fix_up_input:
@@ -919,6 +929,35 @@
 		addi a2, a2, 5
 		j fix_up_done
 
+  fix_up_plus2:
+		li t3, 0x50
+		sb t3, 0(a2)
+		li t3, 0x4C
+		sb t3, 1(a2)
+		li t3, 0x55
+		sb t3, 2(a2)
+		li t3, 0x53
+		sb t3, 3(a2)
+		li t3, 0x32
+		sb t3, 4(a2)
+		addi a2, a2, 4
+		j fix_up_done
+
+  fix_up_minus2:
+		li t3, 0x4D
+		sb t3, 0(a2)
+		li t3, 0x49
+		sb t3, 1(a2)
+		li t3, 0x4E
+		sb t3, 2(a2)
+		li t3, 0x55
+		sb t3, 3(a2)
+		li t3, 0x53
+		sb t3, 4(a2)
+		li t3, 0x32
+		sb t3, 5(a2)
+		addi a2, a2, 5
+		j fix_up_done
 		
 .include "integer.S"
 .include "stackop.S"

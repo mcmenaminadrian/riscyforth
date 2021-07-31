@@ -88,6 +88,10 @@ _Integer arithmetic_
 
 **MINUS1**                  Decrement the top of the stack by 1 - 1- is recognised and expanded to MINUS1
 
+**PLUS2**                   Increment the top of the stack by 2 - 2+ is recognised and expanded to PLUS2
+
+**MINUS2**                  Decrement the top of the stack by 2 - 2- is recognised and expanded to MINUS2
+
 **UNDERPLUS**               Add the top of the stack to the third item in the stack
 
 **MOD**                     Get the second item in the stack modulo the top item
