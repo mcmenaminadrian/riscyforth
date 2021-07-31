@@ -262,7 +262,7 @@
   variable_consider_update_backwards:
                 ld t0, TOKEN_END
 		ld t1, TOKEN_START
-		sub t2, t1, t0
+		sub t2, t0, t1
 		add t2, t2, 1
 		ld t4, 0(t4)
   variable_backwards_keep_going:
