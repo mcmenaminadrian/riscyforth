@@ -186,6 +186,7 @@
 			or s3, s1, s4
 			sw s3, THENPOINT(s5)
 			TRANSITION_EPILOGUE
+			fence.i
 			ret
 
   transition_bump_base_address:
@@ -206,6 +207,7 @@
 			sd zero, -48(s0)
 			sd zero, -56(s0)
 			TRANSITION_EPILOGUE
+			fence.i
 			ret			
 
 
@@ -443,6 +445,7 @@
 		ld s9, 72(sp)
                 ld ra, 80(sp)
                 addi sp, sp, 88
+		fence.i
                 ret
 			
 

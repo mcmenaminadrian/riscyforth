@@ -688,14 +688,14 @@ func_test_octal:
 		add t0, t0, a1
 		sd t0, 0(t1)
 		call get_iffmode
-		beqz a0, embed_encsq_done
+		beq a0, zero, embed_encsq_done
 		#increment the conditionals
 		srli a5, a1, 3
   embed_encsq_skiploop:
-		beqz a5, embed_encsq_done
 		SETUP_CONDITIONAL_CALL
 		call increment_current_skip
 		addi a5, a5, -1
+		beq a5, zero, embed_encsq_done
 		j embed_encsq_skiploop
   embed_encsq_done:
 		la s7, outer_loop_tokenize

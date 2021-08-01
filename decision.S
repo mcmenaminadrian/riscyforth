@@ -307,18 +307,30 @@
 		ld s1, 8(sp)
 		ld s0, 0(sp)
 		addi sp, sp, 40
+		fence.i
 		ret
 
-
-  increment_current_skip:
-
-		addi sp, sp, -48
+  increment_then_count:
+		#a0 holds sum
+		addi sp, sp, -56
 		sd s0, 0(sp)
 		sd s1, 8(sp)
 		sd s2, 16(sp)
 		sd s3, 24(sp)
 		sd s4, 32(sp)
 		sd s5, 40(sp)
+		sd ra, 48(sp)
+
+
+  increment_current_skip:
+		addi sp, sp, -56
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s2, 16(sp)
+		sd s3, 24(sp)
+		sd s4, 32(sp)
+		sd s5, 40(sp)
+		sd ra, 48(sp)
 		mv s0, a0
 		addi s0, s0, -24	#top of the stack entries
 		ld s1, 0(a1)		#current index 
@@ -326,9 +338,7 @@
 		addi s1, s1, -1		#rebase to zero
 		mul s3, s2, s1		#calculate raw offset
 		add s3, s3, s0		#and add to get actual address
-		PUSH ra
 		call get_flag_mode
-		POP ra
 		mv s2, a0
 		#test for else mode
 		beqz a2, incrementing_then_offset
@@ -340,13 +350,15 @@
 		ld s0, 0(s3)
 		addi s0, s0, 1
 		sd s0, 0(s3)
+		ld ra, 48(sp)
 		ld s5, 40(sp)
 		ld s4, 32(sp)
 		ld s3, 24(sp)
 		ld s2, 16(sp)
 		ld s1, 8(sp)
 		ld s0, 0(sp)
-		addi sp, sp, 48
+		addi sp, sp, 56
+		fence.i
 		ret
 		
 
