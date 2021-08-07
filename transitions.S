@@ -121,9 +121,7 @@
  		j get_flag_mode_leave
   test_flag_mode_then:
 		li s0, 0x01
-		and s1, s0, a0
-		beqz s1, get_flag_mode_leave
-		li a1, 1		#THEN
+		and a1, s0, a0          #THEN
   get_flag_mode_leave:		
 		ld s3, 24(sp)
 		ld s2, 16(sp)
