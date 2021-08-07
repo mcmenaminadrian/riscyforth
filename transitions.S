@@ -208,7 +208,6 @@
 		fence.i
 		ret			
 
-
   transition_then_else:
 		TRANSITION_PROLOGUE
 		#we are implementing jumps in the layer above
@@ -227,7 +226,8 @@
 		call decrement_iffmode
 		SETUP_CONDITIONAL_CALL
 		mv a2, s0
-		call transition_bump_else
+		call transition_bump_then
+		#call transition_bump_else
   transition_output_else:
 		li a0, 0xFF
 		call set_flag_mode_off
@@ -239,7 +239,6 @@
 		call get_conditional_addresses
 		mv t3, a1
 		tail search_create_inscribe
-			
 			
 
   transition_if_else:
