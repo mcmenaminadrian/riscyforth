@@ -156,6 +156,7 @@
 		or s3, s1, s4
 		sw s3, ELSEPOINT(s5)
 		TRANSITION_EPILOGUE
+		fence.i
 		ret
 			
   transition_bump_then:
@@ -225,9 +226,11 @@
 		call clean_conditional_stack
 		call decrement_iffmode
 		SETUP_CONDITIONAL_CALL
+		call get_increments
+		add s0, s0, a1
+		SETUP_CONDITIONAL_CALL
 		mv a2, s0
 		call transition_bump_then
-		#call transition_bump_else
   transition_output_else:
 		li a0, 0xFF
 		call set_flag_mode_off
@@ -325,7 +328,7 @@
   transition_then_then_bump_then:
 		SETUP_CONDITIONAL_CALL
 		call get_increments
-		add s0, s0, a2
+		add s0, s0, a1
 		SETUP_CONDITIONAL_CALL
 		mv a2, s0
 		call transition_bump_then
