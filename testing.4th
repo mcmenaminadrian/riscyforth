@@ -186,7 +186,11 @@ IF ." VARIABLE and VARIN passed " ELSE ." VARIABLE and VARIN failed " THEN CR ;
 : TESTTYPE ." Verifying GETLINE, TYPE and TIB " CR ." Please enter some text to be echoed back. " CR
 GETLINE CR ." Echoing... " TIB SWAP TYPE CR ;
 
-
+\ Test if else then
+: TESTCONDITIONALS ." Testing IF ... ELSE ... THEN conditionals. " CR
+1 if ." Simple IF passed " else ." Simple IF failed " then cr
+0 1 if ." Testing nested IF... " if ." Nested IF failed " else ." Nested IF passed " then 5 5 * . then ." = 25 " cr
+1 0 if ." Failed a final test of IF " else ." A final test of IF ... " if ." is passed " else ." is failed " then then cr ;
 
 \ Test groupings
 
@@ -243,6 +247,8 @@ BASICSTESTS
 INTEGERTESTS
 ." Press enter to continue " GETLINE
 LISTWORDSTESTS
+." Press enter to continue " GETLINE
+TESTCONDITIONALS
 ." Unit tests complete " cr
 ;
 

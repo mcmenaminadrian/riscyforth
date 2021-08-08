@@ -401,7 +401,7 @@
 		sd s2, 16(sp)
 		sd s3, 24(sp)
 		mv s0, a0
-		add s0, s0, -12
+		add s0, s0, -24
 		ld s1, 0(a1)
 		li s2, -CONDITIONALSTK
 		add s1, s1, -1
@@ -449,6 +449,5 @@
 		ld s1, 8(sp)
 		ld s0, 0(sp)
 		addi sp, sp, 32
-		ret	
-		
-		
+		ret
+	

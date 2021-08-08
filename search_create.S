@@ -51,7 +51,7 @@
 		la t0, WA_END
 		bne t3, t0, search_create_test_variable
 		#insert three instruction simple loop back
-		la t3, WA__END				#susbititute
+		la t3, WA__END				#substitute
 		j search_create_inscribe
   search_create_test_variable:
 		la t0, WA_VARIABLE
