@@ -66,6 +66,8 @@
     .include "decision.S"
     .balign 8
     .include "load.S"
+    .balign 8
+    .include "coredefs.S"
 
    .bss
    .common INPUT_BUFFER, BUFFERLEN, 8
