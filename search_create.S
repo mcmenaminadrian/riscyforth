@@ -39,6 +39,13 @@
 		sd zero, 0(t0)
 		tail search_failed		      #report error
   search_create_allowed:
+		#handle in the same way as printed strings generally
+		la t0, WA_ABORTCOMM
+		bne t3, t0, search_encsq
+                la t3, WA__ABORTCOMM
+		add a5, a5, 4			      #clear the command
+		tail embed_encsq
+  search_encsq:
 		#test for ENCSQ (ie string printing)
 		la t0, WA_ENCSQ
 		bne t3, t0, search_waend

@@ -79,7 +79,7 @@ end_\Name:
 
 .macro WRITECR
   li a0, 1
-  li a1, 0x0D
+  li a1, 0x0A
   PUSH a1
   mv a1, sp
   li a2, 1

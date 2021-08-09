@@ -16,6 +16,8 @@ We are in the development stage of RISCYFORTH and on this page I aim to keep a l
 
 **VARIABLE**                Put a variable on the variable stack
 
+**ABORT**		    End Forth program - also **ABORT"** (expanded to ABORTCOMM) - abort with message
+
 _Compiling code_
 
 **COLON**		    Enter compiler mode (: is recognised and explanded to COLON)
