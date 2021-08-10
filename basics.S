@@ -630,6 +630,8 @@
 		# 2+  --> PLUS2
 		# 2-  --> MINUS2
 		# ."  --> ENCSQ
+		# R@  --> RFETCH
+		# >R  --> TOR
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -642,6 +644,14 @@
 		beq t1, t2, length_two_begindot
 		li t2, 0x32			#2
 		beq t1, t2, length_two_begin2
+		li t2, 0x3E			#>
+		beq t1, t2, length_two_beginGT
+		PUSH t1
+		andi t1, t1, 0x5F		#character based tests all in here
+		li t2, 0x52
+		beq t1, t2, length_two_beginR
+		POP t1
+		
 		
   fix_up_length_two_finished:
 		j fix_up_finished
@@ -668,6 +678,22 @@
 		beq t1, t2, fix_up_minus2
 		j fix_up_length_two_finished
 
+  length_two_beginR:
+		sb t1, 0(a2)
+		addi sp, sp, 8			#drop the pushed character
+		lbu t1, 1(a0)
+		li t2, 0x40			#@
+		beq t1, t2, fix_up_rfetch
+		li t2, 0x3E			#>
+		beq t1, t2, fix_up_rfrom
+		j fix_up_length_two_finished
+
+  length_two_beginGT:
+		lbu t1, 1(a0)
+		andi t1, t1, 0x5F
+		li t2, 0x52			#R
+		beq t1, t2, fix_up_tor
+		j fix_up_length_two_finished  
 
   fix_up_input:
 		#code to expand standard FORTH commands
@@ -1004,6 +1030,42 @@
 		li t3, 0x32
 		sb t3, 5(a2)
 		addi a2, a2, 5
+		j fix_up_done
+
+  fix_up_rfetch:
+		li t3, 0x46
+		sb t3, 1(a2)
+		li t3, 0x45
+		sb t3, 2(a2)
+		li t3, 0x54
+		sb t3, 3(a2)
+		li t3, 0x43
+		sb t3, 4(a2)
+		li t3, 0x48
+		sb t3, 5(a2)
+		addi a2, a2, 5
+		j fix_up_done
+
+  fix_up_rfrom:
+		li t3, 0x46
+		sb t3, 1(a2)
+		li t3, 0x52
+		sb t3, 2(a2)
+		li t3, 0x4F
+		sb t3, 3(a2)
+		li t3, 0x4D
+		sb t3, 4(a2)
+		addi a2, a2, 4
+		j fix_up_done
+
+  fix_up_tor:
+		li t3, 0x54
+		sb t3, 0(a2)
+		li t3, 0x4F
+		sb t3, 1(a2)
+		li t3, 0x52
+		sb t3, 2(a2)
+		addi a2, a2, 2
 		j fix_up_done
 		
 .include "integer.S"

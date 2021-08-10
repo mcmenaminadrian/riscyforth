@@ -192,7 +192,19 @@ GETLINE CR ." Echoing... " TIB SWAP TYPE CR ;
 0 1 if ." Testing nested IF... " if ." Nested IF failed " else ." Nested IF passed " then 5 5 * . then ." = 25 " cr
 1 0 if ." Failed a final test of IF " else ." A final test of IF ... " if ." is passed " else ." is failed " then then cr ;
 
+\ Test return stack words
+: TESTRSTACKBASICS
+." Testing >R, R@ and R> along with RDROP" cr
+34 35 36 >R >R >R R@ 34 = RDROP R@ 35 = AND RDROP R@ 36 = AND RDROP if ." >R, R@ and RDROP PASSED " else ." >R, R@ and RDROP FAILED" then cr
+99 >R R> 99 = if ." R> PASSED " else ." R> FAILED " then cr ;
+
 \ Test groupings
+
+\ Test Rstack
+: RSTACKTESTS
+." Testing return stack" cr
+testrstackbasics 
+." Testing return stack complete" cr ;
 
 \ Test listwords
 : LISTWORDSTESTS
@@ -249,7 +261,10 @@ INTEGERTESTS
 LISTWORDSTESTS
 ." Press enter to continue " GETLINE
 TESTCONDITIONALS
-." Unit tests complete " cr
+." Press enter to continue " GETLINE
+RSTACKTESTS
+." Press enter to continue " GETLINE
+\ ABORT" Verifying ABORTCOMM and leaving tests with this message "
 ;
 
 

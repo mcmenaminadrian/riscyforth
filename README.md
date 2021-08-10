@@ -147,9 +147,13 @@ _Stack operations are show in diagrammatic form (before -> after). Top of the st
 
 _Return stack operations_
 
-**LTR**			    Pop top of the (data) stack and place on top of the return stack (<R in traditional FORTH)
+**TOR**			    Pop top of the (data) stack and place on top of the return stack (>R is expanded to this)
 
-**RGT**			    Pop top of the return stack and place on top of the (data) stack (R> in traditional FORTH)
+**RFETCH**		    Copy the top of the return stack to the data stack (R@ is expanded to this)
+
+**RDROP**                   Drop the top of the return stack
+
+**RFROM**                   Move the top of the return stack to the top of the data stack (R> is expanded to this)
 
 _Logic_
 

@@ -35,7 +35,6 @@
 		tail NEXT
 
 		CODEHEADER CR, _WHILE, 0x01
-		WRITECR
 		WRITECHAR 0x0A
 		tail NEXT
 
