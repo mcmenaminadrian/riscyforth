@@ -228,7 +228,7 @@
   search_tokens_matched:
                 addi t3, t3, 8                        #address that points to the code
                 PUSH t3                               #store word address on the call stack
-                tail EXECUTE
+                tail EXE
 
   search_exhausted:
                 #test if this is a variable (alpha first char)
@@ -344,7 +344,7 @@
                 PUSH a7                               #save number on stack
                 la t0, WA_TOKENIZE_IMM                #keep tokenizing
                 PUSH t0
-                tail EXECUTE
+                tail EXE
                 nop
   search_literal:
                 bltu t6, t4, search_literal_fail      #digit above max range
@@ -376,7 +376,7 @@
   search_var_reentry:
                 la t0, WA_TOKENIZE_IMM
                 PUSH t0
-                tail EXECUTE
+                tail EXE
 
   search_failed:
                 la t0, NotOk_msg

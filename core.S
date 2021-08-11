@@ -87,7 +87,7 @@
                 addi s8, s8, ADDRWIDTH              #increment WA
                 jalr zero, t0, 0                    #run the code    
 
-  EXECUTE:                                          #execute the next command on the stack
+  EXE:                                          #execute the next command on the stack
                	la s7, outer_loop_tokenize
                	POP s8
                	j RUN

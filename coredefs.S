@@ -54,7 +54,13 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADER ABORT, ABORTCOMM, 0x01
+		CODEHEADER EXECUTE, ABORTCOMM, 0x01
+		#Code will crash system if used badly!
+		POP s8
+		tail RUN
+		
+
+		CODEHEADER ABORT, EXECUTE, 0x01
 		la s7, outer_loop_ok
 		tail NEXT
 
