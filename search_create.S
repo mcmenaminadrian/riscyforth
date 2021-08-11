@@ -682,7 +682,7 @@ func_test_octal:
 		la t1, INPUT_START
 		ld t0, 0(t1)
 		add t0, t0, a1
-		addi t0, t0, 3				#account for "
+		addi t0, t0, 2				#account for "
 		sd t0, 0(t1)
 		and t0, a1, a0
 		beqz t0, embed_encsq_alignmentadjusted
@@ -695,7 +695,7 @@ func_test_octal:
 		add t0, t0, a1
 		sd t0, 0(t1)
 		call get_iffmode
-		beq a0, zero, embed_encsq_done
+		beqz a0, embed_encsq_done
 		#increment the conditionals
 		srli a5, a1, 3
   embed_encsq_skiploop:

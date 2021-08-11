@@ -264,7 +264,7 @@ TESTCONDITIONALS
 ." Press enter to continue " GETLINE
 RSTACKTESTS
 ." Press enter to continue " GETLINE
-\ ABORT" Verifying ABORTCOMM and leaving tests with this message "
+ ABORT" Verifying ABORTCOMM and leaving tests with this message "
 ;
 
 
