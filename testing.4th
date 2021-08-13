@@ -198,7 +198,23 @@ GETLINE CR ." Echoing... " TIB SWAP TYPE CR ;
 34 35 36 >R >R >R R@ 34 = RDROP R@ 35 = AND RDROP R@ 36 = AND RDROP if ." >R, R@ and RDROP PASSED " else ." >R, R@ and RDROP FAILED" then cr
 99 >R R> 99 = if ." R> PASSED " else ." R> FAILED " then cr ;
 
+\ loop
+: TESTBEGINEND
+." Testing BEGIN ... END loop " 5 SPACES
+32 BEGIN DUP EMIT 1+ DUP 127 > END ."  BEGIN ... END PASSED " CR ;
+
+: TESTBEGINWHILE
+." Testing BEGIN ... WHILE " 5 spaces
+32 BEGIN DUP space hex . space decimal DUP 100 < IF DUP EMIT 1+ ELSE DUP 32 - EMIT 1+ WHILE DUP 110 = END ."  BEGIN ... WHILE passed " cr ;
+
 \ Test groupings
+
+\ Test loops
+: TESTLOOPS
+." Running tests of looping " cr
+TESTBEGINEND
+testbeginwhile
+." Testing of loops complete" CR ;
 
 \ Test Rstack
 : RSTACKTESTS
@@ -263,6 +279,8 @@ LISTWORDSTESTS
 TESTCONDITIONALS
 ." Press enter to continue " GETLINE
 RSTACKTESTS
+." Press enter to continue " GETLINE
+TESTLOOPS
 ." Press enter to continue " GETLINE
  ABORT" Verifying ABORTCOMM and leaving tests with this message "
 ;
