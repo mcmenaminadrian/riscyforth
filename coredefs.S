@@ -58,8 +58,61 @@
 		#Code will crash system if used badly!
 		POP s8
 		tail RUN
+
+		CODEHEADER TICK, EXECUTE, 0x01
+		#Parse the input
+		#Sanitize it first
+		la a0, INPUT_START
+		la a1, INPUT_END
+		ld a0, 0(a0)
+		ld a1, 0(a1)
+		add t0, a0, 1
+		bltu t0, a1, tick_have_data
+		tail search_failed			#bail
+  tick_have_data:
+		mv t0, a0
+		li t2, 0x020
+		li t3, 0x0A
+  tick_look_for_start:
+		lb t4, 0(t0)
+		beq t4, t2, tick_keep_going
+		bne t4, t3, tick_found_start
+		tail search_failed
+  tick_keep_going:
+		add t0, t0, 1
+		bltu t0, a1, tick_look_for_start
+		tail search_failed
+  tick_found_start:
+		mv t1, t0
+  tick_advance_search:
+		addi t1, t1, 1
+		bgeu t1, a1, tick_end_token
+		lb t4, 0(t1)
+		beq t4, t2, tick_end_token
+		beq t4, t3, tick_end_token
+		j tick_advance_search
+  tick_end_token:
+		sd t1, INPUT_START, t5
+		addi t1, t1, -1				#space or CR not part of token
+		mv t2, t0
+		sub a0, t1, t0				# will be 0 if token is of length 1 etc
+		bnez a0, tick_length_two_or_more
+		j tick_fix_up_single
+  tick_length_two_or_more:
+		li a1, 1
+		bne a0, a1, tick_length_three_or_more
+		j tick_fix_up_length_two
+  tick_length_three_or_more:
+		li a1, 5
+		bne a0, a1, tick_prepare_sanity_test
+		j tick_fix_up_length_six
+  tick_fix_up_length_two:
+  tick_prepare_sanity_test:
+  tick_fix_up_length_six:
+		#look up the command
+		
 	
-		CODEHEADER EXCLAIM, EXECUTE, 0x01
+		CODEHEADER EXCLAIM, TICK, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 16
@@ -70,4 +123,9 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
+
+  tick_fix_up_single:
+		mv a0, t0
+		la a2, EXPANDED_BUFFER
+		mv a3, a2
 
