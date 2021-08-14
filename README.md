@@ -26,6 +26,10 @@ _Compiling code_
 
 **SEMI**                    Procedure to end all secondaries (; is recognised and expanded to SEMI) - DO NOT USE outside a compilation
 
+_Memory_
+
+**EXCLAIM**		    (xa -- ) store x at address a - **!** is recognised and expanded to EXCLAIM
+
 _Text entry_
 
 **GETSTDIN**                Gets the file pointer for stdin
