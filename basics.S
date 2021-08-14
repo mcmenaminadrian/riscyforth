@@ -713,6 +713,7 @@
 		# (  --> OBRACKET
 		# )  --> CBRACKET
 		# \  --> COMMENT
+		# !  --> EXCLAIM
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -748,6 +749,8 @@
 		beq t2, t1, fix_up_cbracket
 		li t2, 0x5C
 		beq t2, t1, fix_up_comment
+		li t2, 0x21
+		beq t2, t1, fix_up_exclaim
 
   fix_up_finished:
 		mv t0, a0
@@ -970,7 +973,25 @@
 		li t3, 0x54
 		sb t3, 6(a2)
 		addi a2, a2, 6
-		j fix_up_done	
+		j fix_up_done
+
+  fix_up_exclaim:
+		li t3, 0x45
+		sb t3, 0(a2)
+		li t3, 0x58
+		sb t3, 1(a2)
+		li t3, 0x43
+		sb t3, 2(a2)
+		li t3, 0x4C
+		sb t3, 3(a2)
+		li t3, 0x41
+		sb t3, 4(a2)
+		li t3, 0x49
+		sb t3, 5(a2)
+		li t3, 0x4D
+		sb t3, 6(a2)
+		addi a2, a2, 6
+		j fix_up_done 
 
   fix_up_plus1:
 		li t3, 0x50

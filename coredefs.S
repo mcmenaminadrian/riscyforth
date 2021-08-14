@@ -58,9 +58,15 @@
 		#Code will crash system if used badly!
 		POP s8
 		tail RUN
-		
+	
+		CODEHEADER EXCLAIM, EXECUTE, 0x01
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		addi sp, sp, 16
+		sd t1, 0(t0)
+		tail NEXT	
 
-		CODEHEADER ABORT, EXECUTE, 0x01
+		CODEHEADER ABORT, EXCLAIM, 0x01
 		la s7, outer_loop_ok
 		tail NEXT
 
