@@ -128,4 +128,101 @@
 		mv a0, t0
 		la a2, EXPANDED_BUFFER
 		mv a3, a2
+		mv a1, t1
+		mv a5, t2
+		lbu t1, 0(a0)
+		li t2, 0x3A
+		beq t2, t1, tix_up_colon
+		li t2, 0x2E
+		beq t2, t1, tix_up_dot
+		li t2, 0x3B
+		beq t2, t1, tix_up_semi
+		li t2, 0x2B
+		beq t2, t1, tix_up_add
+		li t2, 0x2D
+		beq t2, t1, tix_up_sub
+		li t2, 0x2A
+		beq t2, t1, tix_up_mul
+		li t2, 0x2F
+		beq t2, t1, tix_up_div
+		li t2, 0x21
+		beq t2, t1, tix_up_store
+		li t2, 0x3E
+		beq t2, t1, tix_up_gt
+		li t2, 0x3C
+		beq t2, t1, tix_up_lt
+		li t2, 0x3D
+		beq t2, t1, tix_up_equals
+		li t2, 0x28
+		beq t2, t1, tix_up_obracket
+		li t2, 0x29
+		beq t2, t1, tix_up_cbracket
+		li t2, 0x5C
+		beq t2, t1, tix_up_comment
+		li t2, 0x21
+		beq t2, t1, tix_up_exclaim
+		li t2, 0x27
+		beq t2, t1, tix_up_tick
+		j tix_up_finished
+  tix_up_colon:
+		call do_fix_up_colon
+		j tix_up_done
+  tix_up_dot:
+		call do_fix_up_dot
+		j tix_up_done
+  tix_up_semi:
+		call do_fix_up_semi
+		j tix_up_done
+  tix_up_add:
+		call do_fix_up_add
+		j tix_up_done
+  tix_up_sub:
+		call do_fix_up_sub
+		j tix_up_done
+  tix_up_mul:
+		call do_fix_up_mul
+		j tix_up_done
+  tix_up_div:
+		call do_fix_up_div
+		j tix_up_done
+  tix_up_store:
+		call do_fix_up_store
+		j tix_up_done
+  tix_up_gt:
+		call do_fix_up_gt
+		j tix_up_done
+  tix_up_lt:
+		call do_fix_up_lt
+		j tix_up_done
+  tix_up_equals:
+		call do_fix_up_equals
+		j tix_up_done
+  tix_up_obracket:
+		call do_fix_up_obracket
+		j tix_up_done
+  tix_up_cbracket:
+		call do_fix_up_cbracket
+		j tix_up_done
+  tix_up_comment:
+		call do_fix_up_comment
+		j tix_up_done
+  tix_up_exclaim:
+		call do_fix_up_exclaim
+		j tix_up_done
+  tix_up_tick:
+		call do_fix_up_tick
+		j tix_up_done
+
+  tix_up_done:
+		mv t0, a3
+		mv t1, a1
+		#j tick_finished_santization
+
+  tix_up_finished:
+		mv t0, a0
+		mv t1, a1
+		mv t2, a5
+		ret
+
+
 

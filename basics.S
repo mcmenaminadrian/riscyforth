@@ -659,23 +659,38 @@
   length_two_begin1:
 		lbu t1, 1(a0)
 		li t2, 0x2B			#+
-		beq t1, t2, fix_up_plus1
+		bne t1, t2, length_two_test_minus1
+		call fix_up_plus1
+		j fix_up_done
+  length_two_test_minus1:
 		li t2, 0x2D			#-
-		beq t1, t2, fix_up_minus1
+		bne t1, t2, length_two_plusminus_done
+		call fix_up_minus1
+		j fix_up_done
+  length_two_plusminus_done:
 		j fix_up_length_two_finished
 
-   length_two_begindot:
+  length_two_begindot:
 		lbu t1, 1(a0)
 		li t2, 0x22			#"
-		beq t1, t2, fix_up_encsq
+		bne t1, t2, length_two_begindot_done
+                call fix_up_encsq
+		j fix_up_done
+  length_two_begindot_done:
 		j fix_up_length_two_finished
 		
   length_two_begin2:
 		lbu t1, 1(a0)
 		li t2, 0x2B			#+
-		beq t1, t2, fix_up_plus2
+		bne t1, t2, length_two_testminus2
+		call fix_up_plus2
+		j fix_up_done
+  length_two_testminus2:
 		li t2, 0x2D			#-
-		beq t1, t2, fix_up_minus2
+		bne t1, t2, length_two_begin2_done
+		call fix_up_minus2
+		j fix_up_done
+  length_two_begin2_done:
 		j fix_up_length_two_finished
 
   length_two_beginR:
@@ -683,16 +698,25 @@
 		addi sp, sp, 8			#drop the pushed character
 		lbu t1, 1(a0)
 		li t2, 0x40			#@
-		beq t1, t2, fix_up_rfetch
+		bne t1, t2, length_two_test_rfrom
+		call fix_up_rfetch
+		j fix_up_done
+  length_two_test_rfrom:
 		li t2, 0x3E			#>
-		beq t1, t2, fix_up_rfrom
+		bne t1, t2, length_two_r_done
+		call fix_up_rfrom
+		j fix_up_done
+  length_two_r_done:
 		j fix_up_length_two_finished
 
   length_two_beginGT:
 		lbu t1, 1(a0)
 		andi t1, t1, 0x5F
 		li t2, 0x52			#R
-		beq t1, t2, fix_up_tor
+		bne t1, t2, length_two_GT_done
+		call fix_up_tor
+		j fix_up_done
+  length_two_GT_done:
 		j fix_up_length_two_finished  
 
   fix_up_input:
@@ -803,8 +827,12 @@
 		j fix_up_done
   fix_up_tick:
 		call do_fix_up_tick
-		j fix_up_done
+#		j fix_up_done
 		
+  fix_up_done:
+		mv t0, a3
+		mv t1, a2	
+                j tokenize_finished_sanitization 
 
   fix_up_finished:
 		mv t0, a0
@@ -812,10 +840,6 @@
 		mv t2, a5
 		ret
 
-  fix_up_done:
-		mv t0, a3
-		mv t1, a2	
-                j tokenize_finished_sanitization 
 
   fix_up_comma:
 		#copy 0 - 5 then expand "
@@ -1070,7 +1094,8 @@
 		li t3, 0x31
 		sb t3, 4(a2)
 		addi a2, a2, 4
-		j fix_up_done
+		ret
+		#j fix_up_done
 
   fix_up_minus1:
 		li t3, 0x4D
@@ -1086,7 +1111,8 @@
 		li t3, 0x31
 		sb t3, 5(a2)
 		addi a2, a2, 5
-		j fix_up_done
+		ret
+		#j fix_up_done
 
   fix_up_plus2:
 		li t3, 0x50
@@ -1100,7 +1126,8 @@
 		li t3, 0x32
 		sb t3, 4(a2)
 		addi a2, a2, 4
-		j fix_up_done
+		ret
+		#j fix_up_done
 
   fix_up_minus2:
 		li t3, 0x4D
@@ -1116,7 +1143,8 @@
 		li t3, 0x32
 		sb t3, 5(a2)
 		addi a2, a2, 5
-		j fix_up_done
+		ret
+		#j fix_up_done
 
   fix_up_rfetch:
 		li t3, 0x46
@@ -1130,7 +1158,8 @@
 		li t3, 0x48
 		sb t3, 5(a2)
 		addi a2, a2, 5
-		j fix_up_done
+		ret
+		#j fix_up_done
 
   fix_up_rfrom:
 		li t3, 0x46
@@ -1142,7 +1171,8 @@
 		li t3, 0x4D
 		sb t3, 4(a2)
 		addi a2, a2, 4
-		j fix_up_done
+		ret
+		#j fix_up_done
 
   fix_up_tor:
 		li t3, 0x54
@@ -1152,7 +1182,8 @@
 		li t3, 0x52
 		sb t3, 2(a2)
 		addi a2, a2, 2
-		j fix_up_done
+		ret
+		#j fix_up_done
 		
 .include "integer.S"
 .include "stackop.S"
