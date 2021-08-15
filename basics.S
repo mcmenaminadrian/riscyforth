@@ -618,7 +618,10 @@
 		mv a5, t2
 		lbu t1, 5(a0)
 		li t2, 0x22		 #"
-		beq t1, t2, fix_up_comma
+		bne t1, t2, fix_up_six_done
+		call fix_up_comma
+		j fix_up_done
+  fix_up_six_done:
 		j fix_up_finished
 		
 
@@ -827,7 +830,7 @@
 		j fix_up_done
   fix_up_tick:
 		call do_fix_up_tick
-#		j fix_up_done
+		j fix_up_done
 		
   fix_up_done:
 		mv t0, a3
@@ -865,7 +868,7 @@
 		li t3, 0x4D4D
 		sh t3, 7(a2)
 		addi a2, a2, 8
-		j fix_up_done
+		ret
 
   do_fix_up_colon:
 		li t3, 0x43

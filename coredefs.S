@@ -106,10 +106,54 @@
 		li a1, 5
 		bne a0, a1, tick_prepare_sanity_test
 		j tick_fix_up_length_six
-  tick_fix_up_length_two:
   tick_prepare_sanity_test:
-  tick_fix_up_length_six:
+		li t3, 0x5F
+		addi t5, zero, 0x61
+		addi t6, zero, 0x7B
+  tick_sanity_test:
+		lb t4, 0(t2)
+		blt t4, t5, tick_next_sane
+		blt t4, t6, tick_sanitize
+		j tick_next_sane
+  tick_sanitize:
+		and t4, t4, t3
+		sb t4, 0(t2)
+  tick_next_sane:
+		addi t2, t2, 1
+		blt t1, t2, tick_finished_sanitization
+		j tick_sanity_test
+  tick_finished_sanitization:
 		#look up the command
+		sub t2, t1, t0
+		addi t2, t2, 1
+		la t4, dictionary
+		ld t3, 0(t4)
+  tick_next_in_dictionary:
+		lb t4, 24(t3)
+		bne t4, t2, tick_tokens_do_not_match
+		add a0, t3, 32
+		mv a1, t0
+		mv a2, t2
+  tick_loop_through_token:
+		lb t5, 0(a0)
+                lb t6, 0(a1)
+                bne t5, t6, tick_tokens_do_not_match
+                addi a2, a2, -1
+                beq a2, zero, tick_tokens_matched
+                addi a0, a0, 1
+                addi a1, a1, 1
+                j tick_loop_through_token
+  tick_tokens_do_not_match:
+		ld t3, 16(t3)
+		beqz t3, tick_exhausted
+		j tick_next_in_dictionary
+  tick_tokens_matched:
+		ld t3, 16(t3)
+		PUSH t3
+		tail NEXT
+  tick_exhausted:
+		tail search_failed
+
 		
 	
 		CODEHEADER EXCLAIM, TICK, 0x01
@@ -223,6 +267,112 @@
 		mv t1, a1
 		mv t2, a5
 		ret
+
+
+
+  tick_fix_up_length_two:
+		mv a0, t0
+		la a2, EXPANDED_BUFFER 		#store expanded token
+		mv a3, a2
+		mv a1, t1
+		mv a5, t2
+		lbu t1, 0(a0)
+		li t2, 0x31			#1
+		beq t1, t2, tick_length_two_begin1
+		li t2, 0x2E			#.
+		beq t1, t2, tick_length_two_begindot
+		li t2, 0x32			#2
+		beq t1, t2, tick_length_two_begin2
+		li t2, 0x3E			#>
+		beq t1, t2, tick_length_two_beginGT
+		PUSH t1
+		andi t1, t1, 0x5F		#character based tests all in here
+		li t2, 0x52
+		beq t1, t2, tick_length_two_beginR
+		POP t1
+  tix_up_length_two_finished:
+		j tix_up_finished
+
+
+  tick_length_two_begin1:
+		lbu t1, 1(a0)
+		li t2, 0x2B			#+
+		bne t1, t2, tick_length_two_test_minus1
+		call fix_up_plus1
+		j tix_up_done
+  tick_length_two_test_minus1:
+		li t2, 0x2D			#-
+		bne t1, t2, tick_length_two_plusminus_done
+		call fix_up_minus1
+		j tix_up_done
+  tick_length_two_plusminus_done:
+		j tix_up_length_two_finished
+
+  tick_length_two_begindot:
+		lbu t1, 1(a0)
+		li t2, 0x22			#"
+		bne t1, t2, tick_length_two_begindot_done
+                call fix_up_encsq
+		j tix_up_done
+  tick_length_two_begindot_done:
+		j tix_up_length_two_finished
+		
+  tick_length_two_begin2:
+		lbu t1, 1(a0)
+		li t2, 0x2B			#+
+		bne t1, t2, tick_length_two_testminus2
+		call fix_up_plus2
+		j tix_up_done
+  tick_length_two_testminus2:
+		li t2, 0x2D			#-
+		bne t1, t2, tick_length_two_begin2_done
+		call fix_up_minus2
+		j tix_up_done
+  tick_length_two_begin2_done:
+		j tix_up_length_two_finished
+
+  tick_length_two_beginR:
+		sb t1, 0(a2)
+		addi sp, sp, 8			#drop the pushed character
+		lbu t1, 1(a0)
+		li t2, 0x40			#@
+		bne t1, t2, tick_length_two_test_rfrom
+		call fix_up_rfetch
+		j tix_up_done
+  tick_length_two_test_rfrom:
+		li t2, 0x3E			#>
+		bne t1, t2, tick_length_two_r_done
+		call fix_up_rfrom
+		j tix_up_done
+  tick_length_two_r_done:
+		j tix_up_length_two_finished
+
+  tick_length_two_beginGT:
+		lbu t1, 1(a0)
+		andi t1, t1, 0x5F
+		li t2, 0x52			#R
+		bne t1, t2, tick_length_two_GT_done
+		call fix_up_tor
+		j tix_up_done
+  tick_length_two_GT_done:
+		j tix_up_length_two_finished  
+
+
+  tick_fix_up_length_six:
+		#expand the following
+		# ABORT" --> ABORTCOMM
+		mv a0, t0
+		la a2, EXPANDED_BUFFER
+		mv a3, a2
+		mv a1, t1 
+		mv a5, t2
+		lbu t1, 5(a0)
+		li t2, 0x22		 #"
+		bne t1, t2, tix_up_six_done
+		call fix_up_comma
+		j tix_up_done
+  tix_up_six_done:
+		j tix_up_finished
 
 
 
