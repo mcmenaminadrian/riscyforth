@@ -148,7 +148,7 @@
 		beqz t3, tick_exhausted
 		j tick_next_in_dictionary
   tick_tokens_matched:
-		ld t3, 16(t3)
+		addi t3, t3, 8
 		PUSH t3
 		tail NEXT
   tick_exhausted:
@@ -259,8 +259,8 @@
 
   tix_up_done:
 		mv t0, a3
-		mv t1, a1
-		#j tick_finished_santization
+		mv t1, a2
+		j tick_finished_sanitization
 
   tix_up_finished:
 		mv t0, a0
