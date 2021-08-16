@@ -59,9 +59,32 @@
 		POP s8
 		tail RUN
 
-		CODEHEADER TICK, EXECUTE, 0x01
+		CODEHEADER _TICK, EXECUTE, 0x0
+		#get length
+		ld a0, 0(s7)
+		mv a1, s7
+		addi s7, s7, 8
+		add s7, s7, a0
+		li t0, 7
+		and t1, s7, t0
+		beqz t1, _tick_adjustment_over
+		li t2, 8
+		sub t2, t2, t1
+		add s7, s7, t2
+  _tick_adjustment_over:
+		#now rejoin TICK
+		add t0, a1, 8
+		add t1, a0, t0
+		tail tick_process_found_token
+
+		CODEHEADER TICK, _TICK, 0x01
 		#Parse the input
 		#Sanitize it first
+		call tick_start_looking
+		j tick_process_found_token
+		
+		#code that follows is subroutine to accommodate compiled code too
+  tick_start_looking:
 		la a0, INPUT_START
 		la a1, INPUT_END
 		ld a0, 0(a0)
@@ -93,6 +116,9 @@
 		j tick_advance_search
   tick_end_token:
 		sd t1, INPUT_START, t5
+		ret
+
+  tick_process_found_token:
 		addi t1, t1, -1				#space or CR not part of token
 		mv t2, t0
 		sub a0, t1, t0				# will be 0 if token is of length 1 etc

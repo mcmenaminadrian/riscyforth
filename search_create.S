@@ -48,11 +48,17 @@
   search_encsq:
 		#test for ENCSQ (ie string printing)
 		la t0, WA_ENCSQ
-		bne t3, t0, search_waend
+		bne t3, t0, search_tick
 		#substitute WA__ENCSQ
 		la t3, WA__ENCSQ
 		#jump to code that will count string and embed length and literal
 		tail embed_encsq
+  search_tick:
+		la t0, WA_TICK
+		bne t3, t0, search_waend
+		#substitute WA__TICK
+		la t3, WA__TICK
+		tail embed_tick
   search_waend:
 		#test for END
 		la t0, WA_END
@@ -633,6 +639,61 @@ func_test_octal:
   varin_no_match:
                 j varin_failed
 
+  embed_tick:
+		#embed string - but don't process it in any way
+		la t0, createwritepoint
+		ld t1, 0(t0)
+		sd t3, 0(t1)				#write out word address
+		PUSH t1					# save for later
+		#find length
+		call tick_start_looking
+		#t0 has start of token
+		#t1 has end of token
+		addi t1, t1, -1
+		mv t2, t0
+		mv t3, t1
+		sub a0, t3, t2
+		addi a0, a0, 1
+		POP t1
+		sd a0, 8(t1)				#write out length
+		addi t1, t1, 16				#prepare to embed
+		mv a2, a0
+		mv a3, t0
+		mv a5, t1
+  tick_embed_code:
+		beqz a2, tick_embed_check_alignment
+		lb a4, 0(a3)
+		sb a4, 0(a5)
+		addi a2, a2, -1
+		addi a5, a5, 1
+		j tick_embed_code
+  tick_embed_check_alignment:
+		#need to ensure alignment of output maintained
+		#a1 holds length
+		mv a1, a0
+		li a0, 0x07
+		li a2, 0x08
+		and a3, a1, a0
+		sub a3, a2, a3
+		add a1, a1, a3
+		add t1, t1, a1
+		la a0, createwritepoint
+		sd t1, 0(a0)				#advance writepoint
+		call get_iffmode			#handle conditionals
+		beqz a0, embed_tick_done
+		#increment the conditionals
+		addi a1, a1, 16				#command and length
+		srli a5, a1, 3
+  embed_tick_skiploop:
+		SETUP_CONDITIONAL_CALL
+		call increment_current_skip
+		addi a5, a5, -1
+		beq a5, zero, embed_tick_done
+		j embed_tick_skiploop
+  embed_tick_done:
+		la s7, outer_loop_tokenize
+		fence.i
+		tail NEXT
 
   embed_encsq:
 		#embed string - after we count how long it is
