@@ -1030,7 +1030,7 @@
 		li t3, 0x51
 		sb t3, 4(a2)
 		addi a2, a2, 4
-		j fix_up_done
+		ret
 
   do_fix_up_comment:
 		la t0, INFILELOAD
@@ -1098,7 +1098,6 @@
 		sb t3, 4(a2)
 		addi a2, a2, 4
 		ret
-		#j fix_up_done
 
   fix_up_minus1:
 		li t3, 0x4D
@@ -1115,7 +1114,6 @@
 		sb t3, 5(a2)
 		addi a2, a2, 5
 		ret
-		#j fix_up_done
 
   fix_up_plus2:
 		li t3, 0x50
@@ -1130,7 +1128,6 @@
 		sb t3, 4(a2)
 		addi a2, a2, 4
 		ret
-		#j fix_up_done
 
   fix_up_minus2:
 		li t3, 0x4D
@@ -1147,7 +1144,6 @@
 		sb t3, 5(a2)
 		addi a2, a2, 5
 		ret
-		#j fix_up_done
 
   fix_up_rfetch:
 		li t3, 0x46
@@ -1162,7 +1158,6 @@
 		sb t3, 5(a2)
 		addi a2, a2, 5
 		ret
-		#j fix_up_done
 
   fix_up_rfrom:
 		li t3, 0x46
@@ -1175,7 +1170,6 @@
 		sb t3, 4(a2)
 		addi a2, a2, 4
 		ret
-		#j fix_up_done
 
   fix_up_tor:
 		li t3, 0x54
@@ -1186,7 +1180,6 @@
 		sb t3, 2(a2)
 		addi a2, a2, 2
 		ret
-		#j fix_up_done
 		
 .include "integer.S"
 .include "stackop.S"
