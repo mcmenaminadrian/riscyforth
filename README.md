@@ -20,6 +20,8 @@ We are in the development stage of RISCYFORTH and on this page I aim to keep a l
 
 **EXECUTE**		    Execute the code the word address of which is top of the stack
 
+**TICK**		    Find the word address of the word that follows (**'** expanded to **TICK**)
+
 _Compiling code_
 
 **COLON**		    Enter compiler mode (: is recognised and explanded to COLON)
