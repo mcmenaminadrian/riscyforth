@@ -207,7 +207,18 @@ GETLINE CR ." Echoing... " TIB SWAP TYPE CR ;
 ." Testing BEGIN ... WHILE " 5 spaces
 32 BEGIN DUP space hex . space decimal DUP 100 < IF DUP EMIT 1+ ELSE DUP 32 - EMIT 1+ WHILE DUP 110 = END ."  BEGIN ... WHILE passed " cr ;
 
+\ Testing memory functions
+: ZZ ." ' and C! PASSED " ;
+: TESTINGTICK ." Testing ' and C! " 5 spaces
+hex 0x58 decimal ' ZZ 24 + C! ' XZ execute cr ;
+
 \ Test groupings
+
+\ Memory tests
+: TESTMEMORY
+." Testing memory manipulation words" cr
+TESTINGTICK
+." Testing of memory code complete" cr ;
 
 \ Test loops
 : TESTLOOPS
@@ -281,6 +292,8 @@ TESTCONDITIONALS
 RSTACKTESTS
 ." Press enter to continue " GETLINE
 TESTLOOPS
+." Press enter to continue " GETLINE
+TESTMEMORY
 ." Press enter to continue " GETLINE
  ABORT" Verifying ABORTCOMM and leaving tests with this message "
 ;

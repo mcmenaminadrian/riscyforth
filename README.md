@@ -20,7 +20,7 @@ We are in the development stage of RISCYFORTH and on this page I aim to keep a l
 
 **EXECUTE**		    Execute the code the word address of which is top of the stack
 
-**TICK**		    Find the word address of the word that follows (**'** expanded to **TICK**)
+**TICK**		    Find the word address of the word that follows (**'** expanded to TICK)
 
 _Compiling code_
 
@@ -31,6 +31,8 @@ _Compiling code_
 _Memory_
 
 **EXCLAIM**		    (xa -- ) store x at address a - **!** is recognised and expanded to EXCLAIM
+
+**CSTORE**		    (xa --)  store x (single byte) at address a -  **C!** is expanded to CSTORE
 
 _Text entry_
 

@@ -653,6 +653,8 @@
 		andi t1, t1, 0x5F		#character based tests all in here
 		li t2, 0x52
 		beq t1, t2, length_two_beginR
+		li t2, 0x43
+		beq t1, t2, length_two_beginC
 		POP t1
 		
 		
@@ -711,6 +713,18 @@
 		j fix_up_done
   length_two_r_done:
 		j fix_up_length_two_finished
+
+  length_two_beginC:
+		sb t1, 0(a2)
+		addi sp, sp, 8
+		lbu t1, 1(a0)
+		li t2, 0x21			#!
+		bne t1, t2, tick_length_two_c_done
+		call fix_up_cstore
+		j fix_up_done
+  length_two_c_done:
+		j fix_up_length_two_finished
+
 
   length_two_beginGT:
 		lbu t1, 1(a0)
@@ -1179,6 +1193,20 @@
 		li t3, 0x52
 		sb t3, 2(a2)
 		addi a2, a2, 2
+		ret
+
+  fix_up_cstore:
+		li t3, 0x53
+		sb t3, 1(a2)
+		li t3, 0x54
+		sb t3, 2(a2)
+		li t3, 0x4F
+		sb t3, 3(a2)
+		li t3, 0x52
+		sb t3, 4(a2)
+		li t3, 0x45
+		sb t3, 5(a2)
+		addi a2, a2, 5
 		ret
 		
 .include "integer.S"
