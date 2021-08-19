@@ -208,9 +208,12 @@ GETLINE CR ." Echoing... " TIB SWAP TYPE CR ;
 32 BEGIN DUP space hex . space decimal DUP 100 < IF DUP EMIT 1+ ELSE DUP 32 - EMIT 1+ WHILE DUP 110 = END ."  BEGIN ... WHILE passed " cr ;
 
 \ Testing memory functions
-: ZZ ." ' and C! PASSED " ;
-: TESTINGTICK ." Testing ' and C! " 5 spaces
-hex 0x58 decimal ' ZZ 24 + C! ' XZ execute cr ;
+: ZZ ." ', EXECUTE and C! PASSED " ;
+: TESTINGTICK ." Testing ', EXECUTE and C! " 5 spaces
+hex 0x58 decimal ' ZZ 24 + C! ' XZ execute cr
+\ Change back or else subsequent tests will break
+." Testing one more time " 5 spaces
+hex 0x5A decimal ' xz 24 + C! ' zZ exeCUTE  cr ;
 
 \ Test groupings
 
