@@ -121,17 +121,19 @@
   tick_process_found_token:
 		addi t1, t1, -1				#space or CR not part of token
 		mv t2, t0
-		sub a0, t1, t0				# will be 0 if token is of length 1 etc
+		sub a0, t1, t0				#will be 0 if token is of length 1 etc
 		bnez a0, tick_length_two_or_more
-		j tick_fix_up_single
+		call tick_fix_up_single
+		j tick_prepare_sanity_test		#can skip the other tests for length
   tick_length_two_or_more:
 		li a1, 1
 		bne a0, a1, tick_length_three_or_more
-		j tick_fix_up_length_two
+		call tick_fix_up_length_two
+		j tick_prepare_sanity_test
   tick_length_three_or_more:
 		li a1, 5
 		bne a0, a1, tick_prepare_sanity_test
-		j tick_fix_up_length_six
+		call tick_fix_up_length_six
   tick_prepare_sanity_test:
 		li t3, 0x5F
 		addi t5, zero, 0x61
@@ -389,7 +391,7 @@
 		call fix_up_cstore
 		j tix_up_done
   tick_length_two_c_done:
-		j tix_up_length_two_finished
+	j tix_up_length_two_finished
 
   tick_length_two_beginGT:
 		lbu t1, 1(a0)

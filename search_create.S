@@ -666,6 +666,7 @@ func_test_octal:
 		sb a4, 0(a5)
 		addi a2, a2, -1
 		addi a5, a5, 1
+		addi a3, a3, 1
 		j tick_embed_code
   tick_embed_check_alignment:
 		#need to ensure alignment of output maintained
