@@ -214,13 +214,15 @@ hex 0x58 decimal ' ZZ 24 + C! ' XZ execute cr
 \ Change back or else subsequent tests will break
 ." Testing one more time " 5 spaces
 hex 0x5A decimal ' xz 24 + C! ' zZ exeCUTE  cr ;
+: testcfetch ." Testing C@" 5 spaces
+' XOR 24 + c@ 88 = if ." C@ passed " else ." C@ FAILED " then cr ;
 
 \ Test groupings
 
 \ Memory tests
 : TESTMEMORY
 ." Testing memory manipulation words" cr
-TESTINGTICK
+TESTINGTICK testcfetch
 ." Testing of memory code complete" cr ;
 
 \ Test loops

@@ -34,6 +34,8 @@ _Memory_
 
 **CSTORE**		    (xa --)  store x (single byte) at address a -  **C!** is expanded to CSTORE
 
+**CFETCH**		    (a - c) store c (single byte) read at address a on stack - **C@** is expanded to CFETCH
+
 _Text entry_
 
 **GETSTDIN**                Gets the file pointer for stdin

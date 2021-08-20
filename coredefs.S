@@ -182,7 +182,13 @@
   tick_exhausted:
 		tail search_failed
 
-		CODEHEADER CSTORE, TICK, 0x01
+		CODEHEADER CFETCH, TICK, 0x01
+		ld t0, 0(sp)
+		lb t1, 0(t0)
+		sd t1, 0(sp)
+		tail NEXT
+
+		CODEHEADER CSTORE, CFETCH, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 16
@@ -387,8 +393,13 @@
 		addi sp, sp, 8
 		lbu t1, 1(a0)
 		li t2, 0x21			#!
-		bne t1, t2, tick_length_two_c_done
+		bne t1, t2, tick_length_two_c_fetch
 		call fix_up_cstore
+		j tix_up_done
+  tick_length_two_c_fetch:
+		li t2, 0x40
+		bne t1, t2, tick_length_two_c_done
+		call fix_up_cfetch
 		j tix_up_done
   tick_length_two_c_done:
 	j tix_up_length_two_finished
