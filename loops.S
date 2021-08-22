@@ -10,7 +10,21 @@
 		POP zero
 		tail NEXT
 
-		CODEHEADER PLUSLOOP, EMIT, 0x01
+		CODEHEADER J, EMIT, 0x01
+		ld t0, 24(s10)
+		PUSH t0
+		tail NEXT
+
+		CODEHEADER I, J, 0x01
+		ld t0, 0(s10)
+		PUSH t0
+		tail NEXT
+
+		CODEHEADER UNLOOP, I, 0x01
+		addi s10, s10, 24
+		tail NEXT
+
+		CODEHEADER PLUSLOOP, UNLOOP, 0x01
 		ld t3, 0(sp)
 		addi sp, sp, 8
 		ld t0, 0(s10)
@@ -23,7 +37,7 @@
   loop_plusloop_entry:
 		ld t1, 8(s10)			#limit
 		ld t2, 16(s10)			#return point
-		bgt t0, t1, loop_over
+		bge t0, t1, loop_over
 		sd t0, 0(s10)
 		mv s7, t2
 		tail NEXT

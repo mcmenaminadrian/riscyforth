@@ -675,6 +675,7 @@
 		# >R  --> TOR
 		# C!  --> CSTORE
 		# C@  --> CFETCH
+		# +!  --> PLUSSTORE
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -689,6 +690,8 @@
 		beq t1, t2, length_two_begin2
 		li t2, 0x3E			#>
 		beq t1, t2, length_two_beginGT
+		li t2, 0x2B			#+
+		beq t1, t2, length_two_beginplus
 		PUSH t1
 		andi t1, t1, 0x5F		#character based tests all in here
 		li t2, 0x52
@@ -723,6 +726,12 @@
 		addi a2, a2, 4
 		ret
 		
+
+  length_two_beginplus:
+		lbu t1, 1(a0)
+		li t2, 0x21			#!
+		call do_fix_up_plusstore
+		j fix_up_done
 
   length_two_begin1:
 		lbu t1, 1(a0)
@@ -929,6 +938,28 @@
 		mv t0, a0
 		mv t1, a1
 		mv t2, a5
+		ret
+
+  do_fix_up_plusstore:
+		li t3, 0x50
+		sb t3, 0(a2)
+		li t3, 0x4C
+		sb t3, 1(a2)
+		li t3, 0x55
+		sb t3, 2(a2)
+		li t3, 0x53
+		sb t3, 3(a2)
+		li t3, 0x53
+		sb t3, 4(a2)
+		li t3, 0x54
+		sb t3, 5(a2)
+		li t3, 0x4F
+		sb t3, 6(a2)
+		li t3, 0x52
+		sb t3, 7(a2)
+		li t3, 0x45
+		sb t3, 8(a2)
+		addi a2, a2, 8
 		ret
 
   do_fix_up_plusloop:

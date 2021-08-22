@@ -54,7 +54,16 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADER LSHIFT, ABORTCOMM, 0x01
+		CODEHEADER PLUSSTORE, ABORTCOMM, 0x01
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		addi sp, sp, 16
+		ld t2, 0(t0)
+		add t2, t1, t2
+		sd t2, 0(t0)
+		tail NEXT
+
+		CODEHEADER LSHIFT, PLUSSTORE, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		li t2, 64
@@ -446,6 +455,8 @@
 		beq t1, t2, tick_length_two_begin2
 		li t2, 0x3E			#>
 		beq t1, t2, tick_length_two_beginGT
+		li t2, 0x2B			#+
+		beq t1, t2, tick_length_two_beginplus
 		PUSH t1
 		andi t1, t1, 0x5F		#character based tests all in here
 		li t2, 0x52
@@ -522,6 +533,15 @@
 		call fix_up_minus2
 		j tix_up_done
   tick_length_two_begin2_done:
+		j tix_up_length_two_finished
+
+  tick_length_two_beginplus:
+		lbu t1, 1(a0)
+		li t2, 0x21			#!
+		bne t1, t2, tick_length_two_beginplus_done
+		call do_fix_up_plusstore
+		j tix_up_done
+  tick_length_two_beginplus_done:
 		j tix_up_length_two_finished
 
   tick_length_two_beginR:

@@ -243,11 +243,16 @@ source type cr ;
 
 : TESTDOLOOP
 ." Testing DO ... LOOP " 5 spaces
-1 10 1 DO DUP 1+ LOOP 11 = IF ." DO ... LOOP passed" ELSE ." DO ... LOOP FAILED" THEN CR ;
+1 10 1 DO DUP 1+ LOOP 10 = IF ." DO ... LOOP passed" ELSE ." DO ... LOOP FAILED" THEN CR ;
 
 : TESTPLUSLOOP
 ." Testing DO .... +LOOP" 5 SPACES
 1 100  1 DO DUP 1+ 101 +LOOP 2 = IF ." DO ... +LOOP passed" ELSE ." DO .... +LOOP FAILED" THEN CR ;
+
+: VERIFYIJ
+." Verifying I and J in nested loops" CR
+10 0 DO 10 0 DO ." ( "  J . ." , " I . ." ) " LOOP CR LOOP
+." I and J verified" CR ; 
 
 \ Testing memory functions
 : ZZ ." ', EXECUTE and C! PASSED " ;
@@ -275,19 +280,24 @@ hex 0x5A decimal ' xz 24 + C! ' zZ exeCUTE  cr ;
 : TESTFETCH
 ." Testing FETCH (and BASE)" 5 spaces
 octal base fetch 10 = hex base fetch 0x10 = AND decimal base fetch 10 = AND if ." FETCH and BASE passed" ELSE ." FETCH and BASE FAILED" then cr ;
+
+: TESTPLUSSTORE
+." Testing PLUSSTORE " 5 SPACES ' ZM 24 + -1  SWAP +! 5 5 ' YM EXECUTE 25 = IF ." PLUSSTORE passed " ELSE ." PLUSSTORE FAILED " THEN 2 SPACES
+' YM 24 + 1 SWAP ' +! execute 5 5 ' ZM EXECUTE 25 = INVERT IF ." PLUSSTORE address find FAILED " THEN  CR ;
+
 \ Test groupings
 
 \ Memory tests
 : TESTMEMORY
 ." Testing memory manipulation words" cr
-TESTINGTICK testcfetch testingmove testchar testfetch
+TESTINGTICK testcfetch testingmove testchar testfetch testplusstore
 ." Testing of memory code complete" cr ;
 
 \ Test loops
 : TESTLOOPS
 ." Running tests of looping " cr
 TESTBEGINEND
-testbeginwhile TESTDOLOOP TESTPLUSLOOP
+testbeginwhile TESTDOLOOP TESTPLUSLOOP VERIFYIJ
 ." Testing of loops complete" CR ;
 
 \ Test Rstack
