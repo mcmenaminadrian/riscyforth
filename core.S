@@ -19,6 +19,8 @@
                 WRITECHAR 0x0A
                 WRITECR
                 WRITECHAR 0x0A
+		la t0, STACKTOP
+		sd sp, 0(t0)			  #top of the stack
 
 		la t0, INFILELOAD
 		sd zero, 0(t0)			  #we are not in file load mode

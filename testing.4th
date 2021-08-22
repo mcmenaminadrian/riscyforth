@@ -65,6 +65,13 @@ drop2
 34 45 DUP
 45 = SWAP 45 = AND swap 34 = AND IF ." DUP passed " else ." DUP failed " then cr ;
 
+: TESTBL
+." Testing BL" 5 spaces BL 32 = if ." BL passed " else ." BL FAILED " then cr ;
+
+: TESTDEPTH
+." Testing DEPTH" 5 spaces
+depth dup 0 < IF ." WARNING: Stack in negative territory " THEN 10 20 rot depth swap - 3 = IF ." DEPTH passed " ELSE ." DEPTH FAILED " then cr ;
+
 \ Basic tests
 
 : VERIFYTYPEPROMPT
@@ -299,7 +306,7 @@ TESTOVER2
 testDrop2 testSquare
 testCube
 testNIP2 testDUP2
-testtuck2 testswap2 testrot2 testdup
+testtuck2 testswap2 testrot2 testdup testbl testdepth
 ." stackop tests over " cr
 ;
 

@@ -298,7 +298,20 @@
 		sd t1, 0(sp)
 		tail NEXT
 
-		CODEHEADER ABORT, FETCH, 0x01
+		CODEHEADER BL, FETCH, 0x01
+		li t0, 0x20
+		PUSH t0
+		tail NEXT
+
+		CODEHEADER DEPTH, BL, 0x01
+		la t0, STACKTOP
+		ld t1, 0(t0)
+		sub t2, t1, sp
+		srai t3, t2, 3
+		PUSH t3
+		tail NEXT
+
+		CODEHEADER ABORT, DEPTH, 0x01
 		la s7, outer_loop_ok
 		tail NEXT
 

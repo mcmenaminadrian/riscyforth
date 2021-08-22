@@ -23,6 +23,60 @@
 
 
 
+   .bss
+   .common INPUT_BUFFER, BUFFERLEN, 8
+   .common EXPANDED_BUFFER, BUFFERLEN, 8
+   .common SCRATCH_PAD, SYSTEMAREA, 8
+   .common NEWWORDENTRY, 0x08, 0x08
+   .common CREATEFLAG, 0x08, 0x08
+   .common OKSTATUS, 0x08, 0x08
+   .common TOKEN_START, 0x08, 0x08
+   .common TOKEN_END, 0x08, 0x08
+   .common CURRENT_BASE, 0x08, 0x08
+   .common INPUT_START, 0x08, 0x08
+   .common INPUT_END, 0x08, 0x08
+   .common CALLSTACK, 0x80000, 0x08
+   .common STACK, 0x80000, 0x08
+   .common VARIABLES, BIGSPACE, 0x08
+   .common TOP_VARS, 0x08, 0x08
+   .common BOTTOM_VARS, 0x08, 0x08
+   .common dictionary, 0x08, 0x08 
+   .common newdictionary, 0x08, 0x08
+   .common inputfileptr, 0x08, 0x08
+   .common createwritepoint, 0x08, 0x08
+   .common ifflag, 0x08, 0x08
+   .common DECIDESTACKP, 0x08, 0x08
+   .common DECIDESTACKB, 0x08, 0x08
+   .common VARIABLEFLAG, 0x08, 0x08
+   .common INFILELOAD, 0x08, 0x08
+   .common LOADLINESETUP, 0x08, 0x08
+   .common STACKTOP, 0x08, 0x08
+
+   .data
+   welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
+   riscy_forth0:  .asciz "*******************************************************************************"
+   riscy_forth1:  .asciz "RISCYFORTH is a threaded interpreted language closely based on FORTH."
+   riscy_forth2:  .asciz "Currently we are running in EXECUTE mode and anything you type will"
+   riscy_forth3:  .asciz "be executed as each line is entered."
+   riscy_forth4:  .asciz "RISCYFORTH is licenced under version 2 of the GNU General Public Licence."
+   riscy_forth5:  .asciz "See https://github.com/mcmenaminadrian/riscyforth.git"
+   riscy_forthQ:  .asciz "Exiting RISCYFORTH."
+   Ok_msg:        .asciz "OK"
+   NotOk_msg:     .ascii "Input fails with token: "
+   .equ NOK_LEN,  24
+   bad_colon:	  .asciz "COLON command failed: please use a key word for your new command."
+   zerolen_varin: .asciz "Could not read variable (or command) - zero length?"
+   failed_varin:  .asciz "Failed to read variable"
+   Error_msg:     .asciz "INTERPRETER FAILURE! System may be unstable."
+   String_err:    .asciz "ERROR: bad string."
+   stdinopen:     .asciz "r"
+   stdoutopen:    .asciz "w"
+   decimalout:    .asciz "%lld "
+   hexout:        .asciz "%#llX "
+   octalout:      .asciz "%lloo "
+
+
+
 
   .text
   .align 3
@@ -68,56 +122,3 @@
     .include "load.S"
     .balign 8
     .include "coredefs.S"
-
-   .bss
-   .common INPUT_BUFFER, BUFFERLEN, 8
-   .common EXPANDED_BUFFER, BUFFERLEN, 8
-   .common SCRATCH_PAD, SYSTEMAREA, 8
-   .common NEWWORDENTRY, 0x08, 0x08
-   .common CREATEFLAG, 0x08, 0x08
-   .common OKSTATUS, 0x08, 0x08
-   .common TOKEN_START, 0x08, 0x08
-   .common TOKEN_END, 0x08, 0x08
-   .common CURRENT_BASE, 0x08, 0x08
-   .common INPUT_START, 0x08, 0x08
-   .common INPUT_END, 0x08, 0x08
-   .common CALLSTACK, 0x80000, 0x08
-   .common STACK, 0x80000, 0x08
-   .common VARIABLES, BIGSPACE, 0x08
-   .common TOP_VARS, 0x08, 0x08
-   .common BOTTOM_VARS, 0x08, 0x08
-   .common dictionary, 0x08, 0x08 
-   .common newdictionary, 0x08, 0x08
-   .common inputfileptr, 0x08, 0x08
-   .common createwritepoint, 0x08, 0x08
-   .common ifflag, 0x08, 0x08
-   .common DECIDESTACKP, 0x08, 0x08
-   .common DECIDESTACKB, 0x08, 0x08
-   .common VARIABLEFLAG, 0x08, 0x08
-   .common INFILELOAD, 0x08, 0x08
-   .common LOADLINESETUP, 0x08, 0x08
-
-   .data
-   welcome_msg:   .asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
-   riscy_forth0:  .asciz "*******************************************************************************"
-   riscy_forth1:  .asciz "RISCYFORTH is a threaded interpreted language closely based on FORTH."
-   riscy_forth2:  .asciz "Currently we are running in EXECUTE mode and anything you type will"
-   riscy_forth3:  .asciz "be executed as each line is entered."
-   riscy_forth4:  .asciz "RISCYFORTH is licenced under version 2 of the GNU General Public Licence."
-   riscy_forth5:  .asciz "See https://github.com/mcmenaminadrian/riscyforth.git"
-   riscy_forthQ:  .asciz "Exiting RISCYFORTH."
-   Ok_msg:        .asciz "OK"
-   NotOk_msg:     .ascii "Input fails with token: "
-   .equ NOK_LEN,  24
-   bad_colon:	  .asciz "COLON command failed: please use a key word for your new command."
-   zerolen_varin: .asciz "Could not read variable (or command) - zero length?"
-   failed_varin:  .asciz "Failed to read variable"
-   Error_msg:     .asciz "INTERPRETER FAILURE! System may be unstable."
-   String_err:    .asciz "ERROR: bad string."
-   stdinopen:     .asciz "r"
-   stdoutopen:    .asciz "w"
-   decimalout:    .asciz "%lld "
-   hexout:        .asciz "%#llX "
-   octalout:      .asciz "%lloo "
-
-

@@ -22,6 +22,8 @@ We are in the development stage of RISCYFORTH and on this page I aim to keep a l
 
 **TICK**		    Find the word address of the word that follows (**'** expanded to TICK)
 
+**DEPTH**		    ( - n) Report the depth of the stack _before_ n added
+
 _Compiling code_
 
 **COLON**		    Enter compiler mode (: is recognised and explanded to COLON)
