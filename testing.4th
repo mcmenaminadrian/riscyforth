@@ -241,6 +241,14 @@ source type cr ;
 ." Testing BEGIN ... WHILE " 5 spaces
 32 BEGIN DUP space hex . space decimal DUP 100 < IF DUP EMIT 1+ ELSE DUP 32 - EMIT 1+ WHILE DUP 110 = END ."  BEGIN ... WHILE passed " cr ;
 
+: TESTDOLOOP
+." Testing DO ... LOOP " 5 spaces
+1 10 1 DO DUP 1+ LOOP 11 = IF ." DO ... LOOP passed" ELSE ." DO ... LOOP FAILED" THEN CR ;
+
+: TESTPLUSLOOP
+." Testing DO .... +LOOP" 5 SPACES
+1 100  1 DO DUP 1+ 101 +LOOP 2 = IF ." DO ... +LOOP passed" ELSE ." DO .... +LOOP FAILED" THEN CR ;
+
 \ Testing memory functions
 : ZZ ." ', EXECUTE and C! PASSED " ;
 
@@ -279,7 +287,7 @@ TESTINGTICK testcfetch testingmove testchar testfetch
 : TESTLOOPS
 ." Running tests of looping " cr
 TESTBEGINEND
-testbeginwhile
+testbeginwhile TESTDOLOOP TESTPLUSLOOP
 ." Testing of loops complete" CR ;
 
 \ Test Rstack

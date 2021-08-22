@@ -219,3 +219,9 @@ _Looping_
 
 **WHILE**		    Unconditionally returns to BEGIN in BEGIN ... IF ...(ELSE) .... WHILE (replacing THEN)
 
+**DO**			    (lc - ) Start a loop with c as the current index value and l the linmit
+
+**LOOP**		    End of a DO loop
+
+**PLUSLOOP**		    (i - ) End of a DO loop, with index incremented by i (**+LOOP** is expanded to PLUSLOOP)
+

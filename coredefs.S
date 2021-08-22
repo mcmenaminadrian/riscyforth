@@ -191,6 +191,14 @@
 		call tick_fix_up_length_two
 		j tick_prepare_sanity_test
   tick_length_three_or_more:
+		li a1, 3
+		bne a0, a1, tick_length_five_or_more
+		call tick_fix_up_length_four
+  tick_length_five_or_more:
+		li a1, 4
+		bne a0, a1, tick_length_six_or_more
+		call tick_fix_up_length_five
+  tick_length_six_or_more:
 		li a1, 5
 		bne a0, a1, tick_prepare_sanity_test
 		call tick_fix_up_length_six
@@ -448,11 +456,22 @@
   tix_up_length_two_finished:
 		j tix_up_finished
 
+  tick_fix_up_length_five:
+		mv a0, t0
+		la a2, EXPANDED_BUFFER
+		mv a3, a2
+		mv a1, t1
+		mv a5, t2
+		lbu t1, 0(a0)
+		li t2, 0x2B			#+
+		beq t1, t2, tick_length_five_begin_plus
+		j tix_up_finished
+
   tick_fix_up_length_four:
 		mv a0, t0
 		la a2, EXPANDED_BUFFER
 		mv a3, a2
-		mv a2, t1
+		mv a1, t1
 		mv a5, t2
 		lbu t1, 0(a0)
 		li t2, 0x2F			#/
@@ -460,14 +479,12 @@
 		j tix_up_finished
 
   tick_length_four_begin_slash:
-                PUSH s5
                 call fix_up_slash4
-                bnez s5, tix_four_begin_slash_failed
-                POP s5
                 j tix_up_done
-  tix_four_begin_slash_failed:
-                POP s5
-                j tix_up_finished
+
+  tick_length_five_begin_plus:
+		call do_fix_up_plusloop
+		j tix_up_done
 
 
   tick_length_two_begin1:
@@ -537,7 +554,7 @@
 		call fix_up_cfetch
 		j tix_up_done
   tick_length_two_c_done:
-	j tix_up_length_two_finished
+		j tix_up_length_two_finished
 
   tick_length_two_beginGT:
 		lbu t1, 1(a0)

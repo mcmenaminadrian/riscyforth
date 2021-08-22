@@ -147,9 +147,15 @@
 		j tokenize_prepare_sanity_test
   tokenize_test_length_four:
 		li a1, 3
-		bne a0, a1, tokenize_test_length_six
+		bne a0, a1, tokenize_test_length_five
 		PUSH t0
 		jal fix_up_length_four
+		j tokenize_prepare_sanity_test
+  tokenize_test_length_five:
+		li a1, 4
+		bne a0, a1, tokenize_test_length_six
+		PUSH t0
+		jal fix_up_length_five
 		j tokenize_prepare_sanity_test
   tokenize_test_length_six:	
 		li a1, 5
@@ -614,6 +620,20 @@
                 WRITECHAR 0x20            #space
                 j NEXT
 
+  fix_up_length_five:
+		#expand the following
+		#+LOOP --> PLUSLOOP
+		POP a0
+		la a2, EXPANDED_BUFFER
+		mv a3, a2
+		mv a1, t1
+		mv a5, t2
+		lbu t1, 0(a0)
+		li t2, 0x2B		#+
+		bne t1, t2, fix_up_six_done
+		call do_fix_up_plusloop
+		j fix_up_done	
+
   fix_up_length_six:
 		#expand the following
 		# ABORT" --> ABORTCOMM
@@ -682,31 +702,24 @@
 		j fix_up_finished
 
   length_four_begin_slash:
-		PUSH s5
 		call fix_up_slash4
-		bnez s5, length_four_begin_slash_failed
-		POP s5
 		j fix_up_done
-  length_four_begin_slash_failed:
-		POP s5
-		j fix_up_finished
 
   fix_up_slash4:
-		mv s5, zero			#stays at zero if it all works
 		li t3, 0x53			#S
 		sb t3, 0(a2)
 		li t3, 0x4C			#L
 		sb t3, 1(a2)		
 		#right now we only have /MOD
-		lbu t1, 1(a0)
-		andi t1, t1, 0x5F
-		sb t1, 2(a2)
-		lbu t1, 2(a0)
-		andi t1, t1, 0x5F
-		sb t1, 3(a2)
-		lbu t1, 3(a0)
-		andi t1, t1, 0x5F
-		sb t1, 4(a2)
+		lbu t3, 1(a0)
+		andi t3, t3, 0x5F
+		sb t3, 2(a2)
+		lbu t3, 2(a0)
+		andi t3, t3, 0x5F
+		sb t3, 3(a2)
+		lbu t3, 3(a0)
+		andi t3, t3, 0x5F
+		sb t3, 4(a2)
 		addi a2, a2, 4
 		ret
 		
@@ -918,6 +931,29 @@
 		mv t2, a5
 		ret
 
+  do_fix_up_plusloop:
+		li t3, 0x50
+		sb t3, 0(a2)
+		li t3, 0x4C
+		sb t3, 1(a2)
+		li t3, 0x55
+		sb t3, 2(a2)
+		li t3, 0x53
+		sb t3, 3(a2)
+		lb t3, 1(a0)
+		andi t3, t3, 0x5F
+		sb t3, 4(a2)
+		lb t3, 2(a0)
+		andi t3, t3, 0x5F
+		sb t3, 5(a2)
+		lb t3, 3(a0)
+		andi t3, t3, 0x5F
+		sb t3, 6(a2)
+		lb t3, 4(a0)
+		andi t3, t3, 0x5F
+		sb t3, 7(a2)
+		addi a2, a2, 7
+		ret
 
   fix_up_comma:
 		#copy 0 - 5 then expand "
