@@ -52,6 +52,8 @@ _Text entry_
 
 **TOKENIZE_IMM**            Gets the next valid token from input and executes
 
+**CHAR**		    (ccc"String" u) Places the ascii code of the first character of "String" on top of the stack, ignoring leading spaces ccc
+
 **SEARCH**                  Searches the dictionary to match the token
 
 _Output_
@@ -72,7 +74,9 @@ _Output_
 
 **TIB**			    Return the address of the terminal input buffer on the stack
 
-**TYPE**		    (uuab-uu) Outputs string of length b at address a
+**TYPE**		    (ab --) Outputs string of length b at address a
+
+**SOURCE**		    (-- ab) Puts the address a and length b of the input buffer on the stack
 
 _Integer arithmetic_
 
@@ -83,6 +87,10 @@ _Integer arithmetic_
 **OCTAL**                   Sets input/output to octal
 
 **BINARY**                  Sets output to binary (input yet to be implemented)
+
+**RSHIFT**		    (au  x) shift a u bits to the right, storing x on stack
+
+**LSHIFT**		    (au  x) shift a u bits to the left, storing x on stack
 
 **OLSEMI**                  Internal procedure - don't use
 
@@ -110,7 +118,7 @@ _Integer arithmetic_
 
 **MOD**                     Get the second item in the stack modulo the top item
 
-**SLASH_MOD**               Divide the second item in the stack by the first and then store the remainder and the quotient (quotient at the top of the stack)
+**SLMOD**               Divide the second item in the stack by the first and then store the remainder and the quotient (quotient at the top of the stack) **/MOD** is recognised and expanded to SLMOD
 
 **NEGATE**                  Negate the top of the stack
 

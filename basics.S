@@ -136,8 +136,8 @@
 		bltu a4, a3, tokenize_prepare_sanity_test
 		j tokenize_fix_up_single
   tokenize_test_length_two:
-		li a1, 1			      #test if input is of length 2
-		bne a0, a1, tokenize_test_length_six
+		li a1, 1			      #test if input is of length2
+		bne a0, a1, tokenize_test_length_four
 		PUSH t0
 		jal fix_up_length_two
 		j tokenize_prepare_sanity_test
@@ -145,7 +145,13 @@
 		PUSH t0
 		jal fix_up_input		      #one character token so check for expansion
 		j tokenize_prepare_sanity_test
-  tokenize_test_length_six:
+  tokenize_test_length_four:
+		li a1, 3
+		bne a0, a1, tokenize_test_length_six
+		PUSH t0
+		jal fix_up_length_four
+		j tokenize_prepare_sanity_test
+  tokenize_test_length_six:	
 		li a1, 5
 		bne a0, a1, tokenize_prepare_sanity_test
 		PUSH t0
@@ -625,6 +631,18 @@
 		j fix_up_finished
 		
 
+  fix_up_length_four:
+		# /MOD --> SLMOD
+		POP a0
+		la a2, EXPANDED_BUFFER
+		mv a3, a2
+		mv a1, t1
+		mv a5, t2
+		lbu t1, 0(a0)
+		li t2, 0x2F			#/
+		beq t1, t2, length_four_begin_slash
+		j fix_up_finished
+
   fix_up_length_two:
                 #code to expand, if needed, two character input
                 #SUPPORTED EXPANSIONS
@@ -662,6 +680,36 @@
 		
   fix_up_length_two_finished:
 		j fix_up_finished
+
+  length_four_begin_slash:
+		PUSH s5
+		call fix_up_slash4
+		bnez s5, length_four_begin_slash_failed
+		POP s5
+		j fix_up_done
+  length_four_begin_slash_failed:
+		POP s5
+		j fix_up_finished
+
+  fix_up_slash4:
+		mv s5, zero			#stays at zero if it all works
+		li t3, 0x53			#S
+		sb t3, 0(a2)
+		li t3, 0x4C			#L
+		sb t3, 1(a2)		
+		#right now we only have /MOD
+		lbu t1, 1(a0)
+		andi t1, t1, 0x5F
+		sb t1, 2(a2)
+		lbu t1, 2(a0)
+		andi t1, t1, 0x5F
+		sb t1, 3(a2)
+		lbu t1, 3(a0)
+		andi t1, t1, 0x5F
+		sb t1, 4(a2)
+		addi a2, a2, 4
+		ret
+		
 
   length_two_begin1:
 		lbu t1, 1(a0)

@@ -106,10 +106,12 @@ DECIMAL 20 DUP
 20 = IF ." DECIMAL passed wth output 20 = " DUP . ." = " HEX . DECIMAL ELSE ." DECIMAL failed with output 20 = " DUP . ." = " HEX . DECIMAL THEN CR
 ;
 
-: TESTOCTAL ." Testing OCTAL " 5 SPACES OCTAL 20 DUP DECIMAL 16 = IF ." OCTAL passed with output 20o = " DUP OCTAL . ." = " DECIMAL .
+: TESTOCTAL 
+." Testing OCTAL " 5 SPACES OCTAL 20 DUP DECIMAL 16 = IF ." OCTAL passed with output 20o = " DUP OCTAL . ." = " DECIMAL .
 ELSE ." OCTAL failed with 20o = " DUP OCTAL . ." = " DECIMAL . THEN CR ;
 
-: VERIFYBINARY ." Verifying BINARY  - " 1 2 4 8 16 32 64 128 256 512
+: VERIFYBINARY 
+." Verifying BINARY  - " 1 2 4 8 16 32 64 128 256 512
 BINARY ." powers of 2 from 9 to 0 in binary... " cr
 . cr . cr . cr . cr . cr . cr . cr . cr . cr . cr DECIMAL ;
 
@@ -160,9 +162,9 @@ IF ." DIV passed " else ." DIV failed " then cr ;
 ." Testing MOD" 5 spaces
 13 7 mod 6 = if ." MOD passed" else ." MOD failed" then cr ;
 
-: TESTSLASH_MOD
-." Testing SLASH_MOD" 5 spaces
-13 7 slash_mod 1 = swap 6 = and if ." SLASH_MOD passed " else ." SLASH_MOD failed" then cr ;
+: TESTSLMOD
+." Testing /MOD" 5 spaces
+13 7 /mod 1 = swap 6 = and if ." /MOD passed " else ." /MOD failed" then cr ;
 
 : TESTNEGATE
 ." Testing NEGATE" 5 spaces 13 negate -13 =
@@ -176,23 +178,43 @@ if ." ABS passed" else ." ABS failed" then cr ;
 ." Testing MAX and MIN" 5 spaces
 20 10 dup2 MAX 20 = if ." MAX passed and " else ." MAX failed and " then min 10 = if ." MIN passed." else ." MIN failed." then cr ;
 
-: VERIFYWORDLIST ." Verifying WORDLIST .... " WORDLIST CR ;
+: TESTSHIFTS
+." Testing LSHIFT and RSHIFT" 5 spaces
+10 4 lshift 160 = IF ." LSHIFT passed " ELSE ." LSHIFT FAILED " then 48 2 rshift 12 = if ." RSHIFT passed " ELSE ." RSHIFT FAILED " THEN cr ;
+
+
+: VERIFYWORDLIST 
+." Verifying WORDS .... " WORDS CR ;
+
 : TESTLITERALNUMB ." Testing LITERALNUMB .... " 213 213 = IF ." LITERALNUMB passed " ELSE ." LITERALNUMB failed " THEN CR ;
 
-: TESTVARIABLE ." Testing VARIABLE and VARIN " 5 SPACES
+: TESTVARIABLE 
+." Testing VARIABLE and VARIN " 5 SPACES
 901 VARIABLE OLDGEEZER OLDGEEZER 1 + VARIABLE OLDGEEZER 902 OLDGEEZER =
 IF ." VARIABLE and VARIN passed " ELSE ." VARIABLE and VARIN failed " THEN CR ;
 
-: TESTTYPE ." Verifying GETLINE, TYPE and TIB " CR ." Please enter some text to be echoed back. " CR
+: TESTTYPE 
+." Verifying GETLINE, TYPE and TIB " CR ." Please enter some text to be echoed back. " CR
 GETLINE CR ." Echoing... " TIB SWAP TYPE CR ;
 
+: TESTCHAR
+." Testing CHAR" 5 spaces
+char Z 90 = IF char z 122 = IF ." CHAR passed " else ." CHAR FAILED " then else ." CHAR FAILED " THEN cr ;
+
+: VERIFYSOURCE 
+." Verifying SOURCE" 5 spaces
+source type cr ;
+
 \ Test if else then
-: TESTCONDITIONALS ." Testing IF ... ELSE ... THEN conditionals. " CR
+: TESTCONDITIONALS 
+." Testing IF ... ELSE ... THEN conditionals. " CR
 1 if ." Simple IF passed " else ." Simple IF failed " then cr
 0 1 if ." Testing nested IF... " if ." Nested IF failed " else ." Nested IF passed " then 5 5 * . then ." = 25 " cr
 1 0 if ." Failed a final test of IF " else ." A final test of IF ... " if ." is passed " else ." is failed " then then cr ;
 
+
 \ Test return stack words
+
 : TESTRSTACKBASICS
 ." Testing >R, R@ and R> along with RDROP" cr
 34 35 36 >R >R >R R@ 34 = RDROP R@ 35 = AND RDROP R@ 36 = AND RDROP if ." >R, R@ and RDROP PASSED " else ." >R, R@ and RDROP FAILED" then cr
@@ -209,20 +231,33 @@ GETLINE CR ." Echoing... " TIB SWAP TYPE CR ;
 
 \ Testing memory functions
 : ZZ ." ', EXECUTE and C! PASSED " ;
-: TESTINGTICK ." Testing ', EXECUTE and C! " 5 spaces
+
+: TESTINGTICK 
+." Testing ', EXECUTE and C! " 5 spaces
 hex 0x58 decimal ' ZZ 24 + C! ' XZ execute cr
 \ Change back or else subsequent tests will break
 ." Testing one more time " 5 spaces
 hex 0x5A decimal ' xz 24 + C! ' zZ exeCUTE  cr ;
-: testcfetch ." Testing C@" 5 spaces
+
+: testcfetch 
+." Testing C@" 5 spaces
 ' XOR 24 + c@ 88 = if ." C@ passed " else ." C@ FAILED " then cr ;
+
+\ Dummy words to use in MOVE test
+: ZM * ;
+: ZD / ;
+: reup decimal 68 ' ZM 25 + C! ;
+
+: TESTINGMOVE
+." Testing MOVE " 5 spaces
+10 10 ZM 100 = IF ' ZM 24 + ' ZD 24 + 24 move 100 2 ' ZM execute 50 = IF ." MOVE passed " else ." MOVE FAILED " then cr else ." Test failure " then reup ;
 
 \ Test groupings
 
 \ Memory tests
 : TESTMEMORY
 ." Testing memory manipulation words" cr
-TESTINGTICK testcfetch
+TESTINGTICK testcfetch testingmove testchar
 ." Testing of memory code complete" cr ;
 
 \ Test loops
@@ -242,13 +277,14 @@ testrstackbasics
 : LISTWORDSTESTS
 ." Running 'listwords' group of tests " CR
 VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE TESTTYPE
+VERIFYSOURCE
 ." 'listwords' group of tests complete " CR ;
 
 \ Test integer
 : INTEGERTESTS
 ." Running integer tests " cr
 TESTADD TESTMUL TESTDIV TESTSUB TESTPLUS1 TESTMINUS1
-TESTminus2 testplus2 testunderplus testminmax testmod testslash_mod testabs testnegate
+TESTminus2 testplus2 testunderplus testminmax testmod testslmod testabs testnegate testshifts
 ." Integer tests complete " CR
 ;
 

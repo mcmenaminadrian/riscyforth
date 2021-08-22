@@ -1,6 +1,6 @@
 #Run through the dictionary listing all words flagged for use
 
-                CODEHEADER WORDLIST, DUP, 0x01
+                CODEHEADER WORDS, DUP, 0x01
                 la t0, dictionary
   wordlist_fetch:
                 ld t1, 0(t0)
@@ -24,7 +24,7 @@
   wordlist_finished:
                 tail NEXT
 
-		CODEHEADER LITERALNUMB, WORDLIST, 0x0
+		CODEHEADER LITERALNUMB, WORDS, 0x0
 		#read in a number - next in the secondary
 		#store it on the stack and move on
 		ld t0, 0(s7)

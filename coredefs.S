@@ -54,7 +54,67 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADER EXECUTE, ABORTCOMM, 0x01
+		CODEHEADER LSHIFT, ABORTCOMM, 0x01
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		li t2, 64
+		addi sp, sp, 8
+		bge t0, t2, lshift_set_zero
+		sll t1, t1, t0
+		sd t1, 0(sp)
+		tail NEXT
+  lshift_set_zero:
+		sd zero, 0(sp)
+		tail NEXT
+
+		CODEHEADER RSHIFT, LSHIFT, 0x01
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		li t2, 64
+		addi sp, sp, 8
+		bge t0, t2, lshift_set_zero
+		srl t1, t1, t0
+		sd t1, 0(sp)
+		tail NEXT
+
+		CODEHEADER MOVE, RSHIFT, 0x01
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		ld t2, 16(sp)
+		addi sp, sp, 24
+		bnez t0, move_do
+  move_done:
+		tail NEXT
+  move_do:
+		lb t3, 0(t2)
+		sb t3, 0(t1)
+		addi t0, t0, -1
+		beqz t0, move_done
+		addi t2, t2, 1
+		addi t1, t1, 1
+		j move_do
+
+		CODEHEADER SOURCE, MOVE, 0x01
+		la t0, INPUT_BUFFER
+		mv t1, zero
+		li t2, 0x0A
+		li t6, BUFFERLEN
+		mv t3, zero
+  source_load_next:
+		add t5, t3, t0
+		lb t4, 0(t5)
+		beq t4, t2, source_end_reached
+		beqz t4, source_end_reached
+		addi t3, t3, 1
+		bge t3, t6, source_end_reached
+		j source_load_next
+  source_end_reached:
+		addi sp, sp, -16
+		sd t0, 8(sp)
+		sd t3, 0(sp)
+		tail NEXT
+		
+		CODEHEADER EXECUTE, SOURCE, 0x01
 		#Code will crash system if used badly!
 		POP s8
 		tail RUN
@@ -193,16 +253,42 @@
 		ld t1, 8(sp)
 		addi sp, sp, 16
 		sb t1, 0(t0)
-		tail NEXT	
+		tail NEXT
 	
 		CODEHEADER EXCLAIM, CSTORE, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 16
 		sd t1, 0(t0)
-		tail NEXT	
+		tail NEXT
 
-		CODEHEADER ABORT, EXCLAIM, 0x01
+		CODEHEADER _CHAR, EXCLAIM, 0x0
+		#get length
+		ld a0, 0(s7)
+		mv a1, s7
+		addi s7, s7, 8
+		add s7, s7, a0
+		li t0, 7
+		and t1, s7, t0
+		beqz t1, _char_done_adjustment
+		li t2, 8
+		sub t2, t2, t1
+		add s7, s7, t2
+  _char_done_adjustment:
+		addi a1, a1, 8
+		lb t0, 0(a1)
+		PUSH t0
+		tail NEXT
+
+		CODEHEADER CHAR, _CHAR, 0x01
+		#reuse old code for interpreter mode
+		call tick_start_looking
+		lb t1, 0(t0)
+		PUSH t1
+		tail NEXT
+
+
+		CODEHEADER ABORT, CHAR, 0x01
 		la s7, outer_loop_ok
 		tail NEXT
 
@@ -333,6 +419,27 @@
 		POP t1
   tix_up_length_two_finished:
 		j tix_up_finished
+
+  tick_fix_up_length_four:
+		mv a0, t0
+		la a2, EXPANDED_BUFFER
+		mv a3, a2
+		mv a2, t1
+		mv a5, t2
+		lbu t1, 0(a0)
+		li t2, 0x2F			#/
+		beq t1, t2, tick_length_four_begin_slash
+		j tix_up_finished
+
+  tick_length_four_begin_slash:
+                PUSH s5
+                call fix_up_slash4
+                bnez s5, tix_four_begin_slash_failed
+                POP s5
+                j tix_up_done
+  tix_four_begin_slash_failed:
+                POP s5
+                j tix_up_finished
 
 
   tick_length_two_begin1:
