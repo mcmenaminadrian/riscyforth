@@ -285,12 +285,17 @@ octal base fetch 10 = hex base fetch 0x10 = AND decimal base fetch 10 = AND if .
 ." Testing PLUSSTORE " 5 SPACES ' ZM 24 + -1  SWAP +! 5 5 ' YM EXECUTE 25 = IF ." PLUSSTORE passed " ELSE ." PLUSSTORE FAILED " THEN 2 SPACES
 ' YM 24 + 1 SWAP ' +! execute 5 5 ' ZM EXECUTE 25 = INVERT IF ." PLUSSTORE address find FAILED " THEN  CR ;
 
+: TESTPADFILLERASE
+." Testing PAD, FILL and ERASE " 5 SPACES
+PAD 10 35 FILL PAD 3 + 1 ERASE PAD 2 + C@ 35 = PAD 3 + C@ 0 = AND PAD 4 + C@ 35 = AND IF ." PAD, FILL and ERASE passed" ELSE ." PAD, FILL and ERASE FAILED" THEN CR ;
+
 \ Test groupings
 
 \ Memory tests
 : TESTMEMORY
 ." Testing memory manipulation words" cr
 TESTINGTICK testcfetch testingmove testchar testfetch testplusstore
+TESTPADFILLERASE
 ." Testing of memory code complete" cr ;
 
 \ Test loops

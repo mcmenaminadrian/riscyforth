@@ -54,7 +54,39 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADER PLUSSTORE, ABORTCOMM, 0x01
+		CODEHEADER PAD, ABORTCOMM, 0x01
+		la t0, SCRATCH_PAD
+		PUSH t0
+		tail NEXT
+
+		CODEHEADER FILL, PAD, 0x01
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		beqz t1, fill_done
+		ld t2, 16(sp)
+  fill_fill:
+		sb t0, 0(t2)
+		addi t2, t2, 1
+		addi t1, t1, -1
+		bnez t1, fill_fill
+  fill_done:
+		addi sp, sp, 24
+		tail NEXT
+
+		CODEHEADER ERASE, FILL, 0x01
+		ld t0, 0(sp)
+		beqz t0, erase_done
+		ld t1, 8(sp)
+  erase_erase:
+		sb zero, 0(t1)
+		addi t1, t1, 1
+		addi t0, t0, -1
+		bnez t0, erase_erase
+  erase_done:
+		addi sp, sp, 16
+		tail NEXT
+
+		CODEHEADER PLUSSTORE, ERASE, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 16

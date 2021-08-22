@@ -1,16 +1,16 @@
-Create a FORTH-like language for RISC-V
+Create an assembly-based FORTH for RISC-V SBCs
 Licensed under GPL v2
 
 Riscyforth is compiled and tested on the RVBoards Nezha 64-bit single board Risc-V computer (running Debian Linux with GNU Libc). Other boards will be added as they become
-available.
+available. It also runs on Fedora for RISC-V under QEMU.
 
 To understand your rights and obligations with this code please read (version 2 of) the GNU General Public Licence. Contributions and suggestions are welcome.
 
-We are in the development stage of RISCYFORTH and on this page I aim to keep a list of the implemented functions. You'll need to read the code to see the details though.
+Riscyforth is still under heavy development and on this page I aim to keep a list of the implemented functions. You'll need to read the code to see the details though.
 
 **LOAD**		    Load (and execute) - use like load /path/to/file
 
-**BYE**                     Quit RISCYFORTH
+**BYE**                     Quit Riscyforth
 
 **WORDLIST**                Output (public) keywords
 
@@ -41,6 +41,14 @@ _Memory_
 **BASE**		    (  - a) returns address a of where current base is stored
 
 **FETCH**		    (a   u) returns contents stored at address a (**@** is expanded to FETCH)
+
+**PLUSSTORE**		    (xa -) add x to the value stored at address a (**+!** is expanded to PLUSSTORE)
+
+**PAD**			    ( - a) return address of transient buffer (scratchpad)
+
+**FILL**		    (auc - ) If u != 0 fill u bytes with character c from address a onwards
+
+**ERASE**		    (au - ) If u != 0 fill u bytes with 0 from address a onwards
 
 _Text entry_
 
@@ -183,45 +191,50 @@ _Return stack operations_
 
 _Logic_
 
-**AND**			    Bitwise AND of top two stack entries (cosumes stack)
+**AND**			    (ab - u) Bitwise AND of a and b
 
-**OR**			    Bitwise OR of top two stack entries (consumes stack)
+**OR**			    (ab - u) Bitwise OR of a and b
 
-**XOR**			    Bitwise XOR of top two stack entries (consumes stack)
+**XOR**			    (ab - u) Bitwise XOR of a and b
 
-**NOT**			    Replaces top of stack with logical inversion
+**INVERT**	            (u - u') Replaces u with logical (bitwise) inversion u'
 
-**EQUALS**	 	    Returns -1 (all bits set)  top two stack entries are equal, zero otherwise, = is recognised and expanded to this (consumes entries)
+**EQUALS**	 	    (ab - u) Returns -1 (all bits set)  top two stack entries are equal, zero otherwise, = is recognised and expanded to this (consumes entries)
 
-**TRUE**		    Places -1 (all bits set) on top of stack
+**TRUE**		    ( - u) Places -1 (all bits set) on top of stack
 
-**FALSE**		    Places 0 (no bits set) on top of stack
+**FALSE**		    ( - u) Places 0 (no bits set) on top of stack
 
-**GT**			    Places -1 on stack if s1 > s0, otherwise places 0 on stack, > is recognised and explanded to this (consumes stack)
+**GT**			    (ab - u) Places -1 on stack if a > b, otherwise places 0 on stack, > is recognised and explanded to this
 
-**LT**			    Places -1 on stack if s1 < s0, otherwise places 0 on stack, < is recognised and expanded to this (consumes stack)
+**LT**			    (ab - u) Places -1 on stack if a < b, otherwise places 0 on stack, < is recognised and expanded to this
 
 _Conditionals_
 
 _Note: conditional code's outcome is undefined for immediate execution_
 
-**IF**			    Execute what follows if the top of the stack is non-zero (consumes top of stack)
+**IF**			    (a - )Execute what follows if a is non-zero
 
-**ELSE**		    Alternative path of execution to **IF**, if the top of the stack is zero (consumes top of stack)
+**ELSE**		    ( - ) Alternative path of execution to **IF**, if the top of the stack is zero
 
-**THEN**		    Code path taken once either **IF** and **ELSE** completed - **IF** must be followed by **THEN** though **ELSE** is optional
+**THEN**		    ( - ) Code path taken once either **IF** and **ELSE** completed - **IF** must be followed by **THEN** though **ELSE** is optional
 
 _Looping_
 
-**BEGIN**		    Mark the start of a simple BEGIN ... END loop (may be nested)
+**BEGIN**		    ( - ) Mark the start of a simple BEGIN ... END loop (may be nested)
 
-**END**			    Mark the end of a simple BEGIN ... END loop (NB: BEGIN and END are effectively nops for immediate mode)
+**END**			    (a - ) Mark the end of a simple BEGIN ... END loop (NB: BEGIN and END are effectively nops for immediate mode)
 
 **WHILE**		    Unconditionally returns to BEGIN in BEGIN ... IF ...(ELSE) .... WHILE (replacing THEN)
 
-**DO**			    (lc - ) Start a loop with c as the current index value and l the linmit
+**DO**			    (lc - ) Start a loop with c as the current index value and l the limit
 
 **LOOP**		    End of a DO loop
 
 **PLUSLOOP**		    (i - ) End of a DO loop, with index incremented by i (**+LOOP** is expanded to PLUSLOOP)
 
+**UNLOOP**		    ( - ) Remove loop variables from the loop stack
+
+**I**			    ( - u) Return the value of the inner-most loop variable from loop stack
+
+**J**			    ( - u) Return the value of the outer loop variable from loop stack
