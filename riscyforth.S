@@ -68,7 +68,6 @@
    zerolen_varin: 	.asciz "Could not read variable (or command) - zero length?"
    failed_varin:  	.asciz "Failed to read variable"
    Error_msg:     	.asciz "INTERPRETER FAILURE! System may be unstable."
-   bad_indicies_msg:	.asciz "BAD INDICIES: Upper limit less than initial."
    String_err:    	.asciz "ERROR: bad string."
    stdinopen:     	.asciz "r"
    stdoutopen:    	.asciz "w"
