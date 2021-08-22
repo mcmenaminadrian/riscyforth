@@ -57,13 +57,13 @@
 		addi sp, sp, 8
 		tail NEXT
 
-		CODEHEADER NOT, XOR, 0x01
+		CODEHEADER INVERT, XOR, 0x01
 		ld t0, 0(sp)
 		not t1, t0
 		sd t1, 0(sp)
 		tail NEXT
 
-		CODEHEADER IF, NOT, 0x01
+		CODEHEADER IF, INVERT, 0x01
 		#just a place holder
 		tail NEXT
 

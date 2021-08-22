@@ -72,6 +72,10 @@ drop2
 ." Testing DEPTH" 5 spaces
 depth dup 0 < IF ." WARNING: Stack in negative territory " THEN 10 20 rot depth swap - 3 = IF ." DEPTH passed " ELSE ." DEPTH FAILED " then cr ;
 
+: TESTINVERT
+." Testing INVERT " 5 spaces
+-1 INVERT IF ." INVERT FAILED " ELSE hex 0xF0F0F0F00F0F0F35 INVERT 0xF0F0F0FF0F0F0CA = IF ." INVERT passed " ELSE ." INVERT FAILED " then then decimal cr ;
+
 \ Basic tests
 
 : VERIFYTYPEPROMPT
@@ -307,6 +311,7 @@ testDrop2 testSquare
 testCube
 testNIP2 testDUP2
 testtuck2 testswap2 testrot2 testdup testbl testdepth
+testinvert
 ." stackop tests over " cr
 ;
 
