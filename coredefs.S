@@ -287,8 +287,18 @@
 		PUSH t1
 		tail NEXT
 
+		CODEHEADER BASE, CHAR, 0x01
+		la t0, CURRENT_BASE
+		PUSH t0
+		tail NEXT
 
-		CODEHEADER ABORT, CHAR, 0x01
+		CODEHEADER FETCH, BASE, 0x01
+		ld t0, 0(sp)
+		ld t1, 0(t0)
+		sd t1, 0(sp)
+		tail NEXT
+
+		CODEHEADER ABORT, FETCH, 0x01
 		la s7, outer_loop_ok
 		tail NEXT
 
@@ -332,6 +342,8 @@
 		beq t2, t1, tix_up_exclaim
 		li t2, 0x27
 		beq t2, t1, tix_up_tick
+		li t2, 0x40
+		beq t2, t1, tix_up_fetch
 		j tix_up_finished
   tix_up_colon:
 		call do_fix_up_colon
@@ -380,6 +392,9 @@
 		j tix_up_done
   tix_up_tick:
 		call do_fix_up_tick
+		j tix_up_done
+  tix_up_fetch:
+		call do_fix_up_fetch
 		j tix_up_done
 
   tix_up_done:

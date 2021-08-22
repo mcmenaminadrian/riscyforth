@@ -811,6 +811,7 @@
 		# \  --> COMMENT
 		# !  --> EXCLAIM
 		# '  --> TICK
+		# @  --> FETCH
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -850,6 +851,8 @@
 		beq t2, t1, fix_up_exclaim
 		li t2, 0x27
 		beq t2, t1, fix_up_tick
+		li t2, 0x40
+		beq t2, t1, fix_up_fetch
 		j fix_up_finished
 
   fix_up_colon:
@@ -899,6 +902,9 @@
 		j fix_up_done
   fix_up_tick:
 		call do_fix_up_tick
+		j fix_up_done
+  fix_up_fetch:
+		call do_fix_up_fetch
 		j fix_up_done
 		
   fix_up_done:
@@ -1152,6 +1158,20 @@
 		li t3, 0x4B
 		sb t3, 3(a2)
 		addi a2, a2, 3
+		ret
+
+  do_fix_up_fetch:
+		li t3, 0x46
+		sb t3, 0(a2)
+		li t3, 0x45
+		sb t3, 1(a2)
+		li t3, 0x54
+		sb t3, 2(a2)
+		li t3, 0x43
+		sb t3, 3(a2)
+		li t3, 0x48
+		sb t3, 4(a2)
+		addi a2, a2, 4
 		ret
 
   fix_up_plus1:

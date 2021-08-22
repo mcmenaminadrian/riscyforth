@@ -186,7 +186,8 @@ if ." ABS passed" else ." ABS failed" then cr ;
 : VERIFYWORDLIST 
 ." Verifying WORDS .... " WORDS CR ;
 
-: TESTLITERALNUMB ." Testing LITERALNUMB .... " 213 213 = IF ." LITERALNUMB passed " ELSE ." LITERALNUMB failed " THEN CR ;
+: TESTLITERALNUMB 
+." Testing LITERALNUMB .... " 213 213 = IF ." LITERALNUMB passed " ELSE ." LITERALNUMB failed " THEN CR ;
 
 : TESTVARIABLE 
 ." Testing VARIABLE and VARIN " 5 SPACES
@@ -252,12 +253,15 @@ hex 0x5A decimal ' xz 24 + C! ' zZ exeCUTE  cr ;
 ." Testing MOVE " 5 spaces
 10 10 ZM 100 = IF ' ZM 24 + ' ZD 24 + 24 move 100 2 ' ZM execute 50 = IF ." MOVE passed " else ." MOVE FAILED " then cr else ." Test failure " then reup ;
 
+: TESTFETCH
+." Testing FETCH (and BASE)" 5 spaces
+octal base fetch 10 = hex base fetch 0x10 = AND decimal base fetch 10 = AND if ." FETCH and BASE passed" ELSE ." FETCH and BASE FAILED" then cr ;
 \ Test groupings
 
 \ Memory tests
 : TESTMEMORY
 ." Testing memory manipulation words" cr
-TESTINGTICK testcfetch testingmove testchar
+TESTINGTICK testcfetch testingmove testchar testfetch
 ." Testing of memory code complete" cr ;
 
 \ Test loops

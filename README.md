@@ -36,6 +36,10 @@ _Memory_
 
 **CFETCH**		    (a - c) store c (single byte) read at address a on stack - **C@** is expanded to CFETCH
 
+**BASE**		    (  - a) returns address a of where current base is stored
+
+**FETCH**		    (a   u) returns contents stored at address a (**@** is expanded to FETCH)
+
 _Text entry_
 
 **GETSTDIN**                Gets the file pointer for stdin
