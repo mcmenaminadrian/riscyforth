@@ -10,7 +10,47 @@
 		POP zero
 		tail NEXT
 
-		CODEHEADER BEGIN, EMIT, 0x01
+		CODEHEADER LOOP, EMIT, 0x01
+		ld t0, 0(s10)			#current value
+		ld t1, 8(s10)			#limit
+		ld t2, 16(s10)			#return point
+		addi t0, t0, 1
+		bgt t0, t1, loop_over
+		sd t0, 0(s10)
+		mv s7, t2
+		tail NEXT
+  loop_over:
+		addi s10, s10, 24
+		tail NEXT
+		
+		CODEHEADER DO, LOOP, 0x01
+		ld t0, 0(sp)			#start value
+		ld t1, 8(sp)			#limit
+		addi sp, sp, 16
+		bgt t0, t1, do_bad_indicies
+		addi s10, s10, -24
+		sd s7, 16(s10)
+		sd t1, 8(s10)
+		sd t0, 0(s10)
+		tail NEXT
+  do_bad_indicies:
+		la t0, bad_indicies_msg
+                addi t1, zero, 24                     #error message is 24 chars long 
+                WRITESTRINGR t0, t1
+		li a0, 1
+                la t0, TOKEN_START
+                ld a1, 0(t0)
+                la t1, TOKEN_END
+                ld a2, 0(t1)
+                sub a2, a2, a1
+                addi a2, a2, 1
+                call write                            #output error message
+                addi t0, zero, 1
+                sd t0, OKSTATUS, t1
+                tail NEXT
+		
+
+		CODEHEADER BEGIN, DO, 0x01
 		tail NEXT			#BEGIN and END do nothing in immediate mode
 
 		CODEHEADER END, BEGIN, 0x01
@@ -92,8 +132,8 @@
 		tail NEXT
 
 		CODEHEADER SPACES, STORE, 0x01
-		POP a0		#how many spaces
-		PUSH s0
+		ld a0, 0(sp)	#how many spaces
+		sd s0, 0(sp)
 		mv s0, a0
   spaces_go:
 		beq s0, zero,  spaces_done
