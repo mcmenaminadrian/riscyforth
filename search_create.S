@@ -607,6 +607,7 @@ func_test_octal:
   varin_scan_stack:
 		#come here with t3 pointing to the word with length
 		ld t2, 0(t3)			#t2 holds length
+		mv a5, t3			#store t3
 		mv t0, t3
 		addi t0, t0, 8			#t0 now points to name
 		la t4, BOTTOM_VARS
@@ -616,7 +617,7 @@ func_test_octal:
 		ld t4, 0(t3)
 		li a3, 0xbaadcafe
 		beq t4, a3, varin_next_in_dictionary
-		j varin_failed
+		j varin_no_match
   varin_next_in_dictionary:
 		ld t4, -8(t3)
 		#compare lengths
@@ -644,11 +645,55 @@ func_test_octal:
   varin_tokens_matched:
                 #put variable address on the stack
 		addi t4, t3, -32
-		# old line ld t4, -32(t3)
                 PUSH t4
                 tail NEXT
   varin_no_match:
-                j varin_failed
+  		#now check constants
+		mv t3, a5			#restore t3
+  conin_scan_stack:
+		#come here with t3 pointing to the word with length
+		ld t2, 0(t3)			#t2 holds length
+		mv t0, t3
+		addi t0, t0, 8			#t0 now points to name
+		la t4, BOTTOM_CONS
+		ld t3, 0(t4)
+		addi t3, t3, 48
+  conin_next_check:
+		ld t4, 0(t3)
+		li a3, 0xbaadcafe
+		beq t4, a3, conin_next_in_dictionary
+		j varin_failed
+  conin_next_in_dictionary:
+		ld t4, -8(t3)
+		#compare lengths
+		bne t4, t2, conin_tokens_do_not_match
+                add a0, t3, -9                        #a0 now points into the name in the var stack
+                mv a1, t0                             #a1 points to the name in the buffer
+                mv a2, t2                             #a2 checks how far we've gone 
+
+  conin_loop_through_token:
+                lb t5, 0(a0)
+                lb t6, 0(a1)
+                bne t5, t6, conin_tokens_do_not_match
+                addi a2, a2, -1
+                beq a2, zero, conin_tokens_matched
+                addi a0, a0, -1
+                addi a1, a1, 1
+                j conin_loop_through_token
+  conin_tokens_do_not_match:
+                add t3, t3, 48                        #advance up the var stack
+                la t4, TOP_CONS
+                ld t4, 0(t4)
+                bgt t3, t4, conin_no_match
+                j conin_next_check
+
+  conin_tokens_matched:
+		#put the value on the stack
+		ld t4, -32(t3)
+                PUSH t4
+                tail NEXT
+  conin_no_match:
+		j varin_failed
 
   embed_tick:
 		#embed string - but don't process it in any way

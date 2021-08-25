@@ -205,6 +205,10 @@ if ." ABS passed" else ." ABS FAILED" then cr ;
 VARIABLE OLDGEEZER 901 OLDGEEZER ! OLDGEEZER DUP @ 1+ SWAP ! OLDGEEZER @ 902 =
 IF ." VARIABLE, VARIN, @ and ! passed " ELSE ." VARIABLE, VARIN, @ and ! FAILED " THEN CR ;
 
+: TESTCONSTANT
+." Testing CONSTANT " 5 SPACES
+365 CONSTANT DAYS 7 CONSTANT WEEK DAYS WEEK / 52 = IF -3 CONSTANT NEGNUMB NEGNUMB WEEK + 4 = IF ." CONSTANT passed " ELSE ." CONSTANT FAILED " THEN CR ELSE ." CONSTANT has FAILED " THEN CR ;
+
 : TESTTYPE 
 ." Verifying GETLINE, TYPE and TIB " CR ." Please enter some text to be echoed back. " CR
 GETLINE CR ." Echoing... " TIB SWAP TYPE CR ;
@@ -315,7 +319,7 @@ testrstackbasics
 : LISTWORDSTESTS
 ." Running 'listwords' group of tests " CR
 VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE TESTTYPE
-VERIFYSOURCE
+VERIFYSOURCE TESTCONSTANT
 ." 'listwords' group of tests complete " CR ;
 
 \ Test integer
