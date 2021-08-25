@@ -447,7 +447,8 @@
 
   search_var_tokens_matched:
 		#put variable value on the stack
-		ld t4, -32(t3)
+		#ld t4, -32(t3)
+		addi t4, t3, -32
 		PUSH t4
 		j search_var_reentry
   search_var_no_match:

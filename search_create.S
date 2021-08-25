@@ -637,8 +637,9 @@ func_test_octal:
                 j varin_next_check
 
   varin_tokens_matched:
-                #put variable value on the stack
-                ld t4, -32(t3)
+                #put variable address on the stack
+		addi t4, t3, -32
+		# old line ld t4, -32(t3)
                 PUSH t4
                 tail NEXT
   varin_no_match:

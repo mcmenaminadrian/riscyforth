@@ -324,8 +324,9 @@
 
   variable_search_var_tokens_matched:
 		#update the value
-		POP t0
-		sd t0, -32(t4)
+		POP t0			# TODO: Find and remove!
+		#sd t0, -32(t4)
+		sd zero, -32(t4)	# initialise or reinitialise to zero
 		tail NEXT
   
   variable_backwards_var_no_match:
@@ -355,8 +356,9 @@
 		addi a3, a3, -1
 		bne a3, zero, variable_backwards_write_out_name
 		addi t4, t4, -(NAMEMAXLEN + INSTWIDTH2)
-		POP t0
-		sd t0, 0(t4)
+		POP t0					#TODO: Find and remove!
+		sd zero, 0(t4)
+		#sd t0, 0(t4)
 		#update bottom pointer
 		la t1, BOTTOM_VARS
 		ld t3, 0(t1)
@@ -394,8 +396,9 @@
 		addi a3, a3, -1
 		bne a3, zero, variable_loop_write_out_name
 		addi t4, t4, -(NAMEMAXLEN + INSTWIDTH2)
-		POP t0
-		sd t0, 0(t4)
+		POP t0					#TODO: fix this
+		#sd t0, 0(t4)
+		sd zero, 0(t4)				#set variable to zero on creation
 		#update bottom pointer
 		la t1, BOTTOM_VARS
 		ld t3, 0(t1)
