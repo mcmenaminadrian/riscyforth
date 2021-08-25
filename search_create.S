@@ -73,8 +73,13 @@
 		j search_create_inscribe
   search_create_test_variable:
 		la t0, WA_VARIABLE
-		bne t3, t0, search_create_test_conditionals
+		bne t3, t0, search_create_test_constant
 		la t3, WA__VARIABLE
+		j search_create_inscribe
+  search_create_test_constant:
+		la t0, WA_CONSTANT
+		bne t3, t0, search_create_test_conditionals
+		la t3, WA__CONSTANT
 		j search_create_inscribe
   search_create_test_conditionals:
 		#test for conditionals

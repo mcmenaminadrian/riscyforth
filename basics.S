@@ -419,7 +419,7 @@
 		ld t4, 0(t3)
 		li a3, 0xbaadcafe
 		beq t4, a3, search_var_next_in_dictionary
-		j search_failed
+		j search_var_no_match		      #test constants
   search_var_next_in_dictionary:
                 ld t4, -8(t3)
 		#compare lengths
@@ -452,6 +452,54 @@
 		PUSH t4
 		j search_var_reentry
   search_var_no_match:
+		#search constants now
+  
+  search_scan_constants_stack:
+                #now scan for a constant name
+                ld t0, TOKEN_START                    #token values are valid
+                ld t1, TOKEN_END
+                sub t2, t1, t0
+                addi t2, t2, 1                        #t2 has length of token
+                la t4, BOTTOM_CONS
+                ld t3, 0(t4)
+		li a1, 48
+		add t3, t3, a1
+  search_con_next_check:
+		ld t4, 0(t3)
+		li a3, 0xbaadcafe
+		beq t4, a3, search_con_next_in_dictionary
+		j search_failed
+  search_con_next_in_dictionary:
+                ld t4, -8(t3)
+		#compare lengths
+                bne t4, t2, search_con_tokens_do_not_match
+                add a0, t3, -9                        #a0 now points into the name in the constants stack
+                mv a1, t0                             #a1 points to the name in the buffer
+                mv a2, t2                             #a2 checks how far we've gone 
+
+  search_con_loop_through_token:
+                lb t5, 0(a0)
+                lb t6, 0(a1)
+                bne t5, t6, search_con_tokens_do_not_match
+                addi a2, a2, -1
+                beq a2, zero, search_con_tokens_matched
+                addi a0, a0, -1
+                addi a1, a1, 1
+                j search_con_loop_through_token
+
+  search_con_tokens_do_not_match:
+                add t3, t3, 48                        #advance up the con stack
+		la t4, TOP_CONS
+		ld t4, 0(t4)
+		bgt t3, t4, search_con_no_match
+                j search_var_next_check
+
+  search_con_tokens_matched:
+		#put constnt value on the stack
+		ld t4, -32(t3)
+		PUSH t4
+		j search_var_reentry
+  search_con_no_match:
 		j search_failed
 
 

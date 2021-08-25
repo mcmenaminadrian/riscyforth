@@ -111,7 +111,8 @@
 		WRITESTRINGR t0, t1
 		tail NEXT
 
-		CODEHEADER _VARIABLE, DISPLAY, 0x0
+		CODEHEADER _VARIABLE, CONSTANT, 0x0
+		#CONSTANT in constant.S
 		li t1, 1
 		sd t1, VARIABLEFLAG, t0		      	#we are creating/updating a variable in create mode
 		ld t2, 8(s7)				#length
@@ -324,7 +325,7 @@
 
   variable_search_var_tokens_matched:
 		#update the value
-		POP t0			# TODO: Find and remove!
+		#POP t0			# assign from stack
 		#sd t0, -32(t4)
 		sd zero, -32(t4)	# initialise or reinitialise to zero
 		tail NEXT
@@ -356,7 +357,7 @@
 		addi a3, a3, -1
 		bne a3, zero, variable_backwards_write_out_name
 		addi t4, t4, -(NAMEMAXLEN + INSTWIDTH2)
-		POP t0					#TODO: Find and remove!
+		#POP t0					#assign from stack
 		sd zero, 0(t4)
 		#sd t0, 0(t4)
 		#update bottom pointer
@@ -396,7 +397,7 @@
 		addi a3, a3, -1
 		bne a3, zero, variable_loop_write_out_name
 		addi t4, t4, -(NAMEMAXLEN + INSTWIDTH2)
-		POP t0					#TODO: fix this
+		#POP t0					#assign from stack
 		#sd t0, 0(t4)
 		sd zero, 0(t4)				#set variable to zero on creation
 		#update bottom pointer

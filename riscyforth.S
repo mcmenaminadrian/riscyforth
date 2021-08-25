@@ -38,8 +38,11 @@
    .common CALLSTACK, 0x80000, 0x08
    .common STACK, 0x80000, 0x08
    .common VARIABLES, BIGSPACE, 0x08
+   .common CONSTANTS, BIGSPACE, 0x08
    .common TOP_VARS, 0x08, 0x08
    .common BOTTOM_VARS, 0x08, 0x08
+   .common TOP_CONS, 0x08, 0x08
+   .common BOTTOM_CONS, 0x08, 0x08
    .common dictionary, 0x08, 0x08 
    .common newdictionary, 0x08, 0x08
    .common inputfileptr, 0x08, 0x08
@@ -88,6 +91,11 @@
                 sd t4, 0(t3)
                 la t1, TOP_VARS
                 sd t4, 0(t1)
+		la t4, (CONSTANTS + BIGSPACE - 0x08)
+		la t3, BOTTOM_CONS
+		sd t4, 0(t3)
+		la t1, TOP_CONS
+		sd t4, 0(t1)
                 la s10, STACK + 0x7FFF8
                 la s9, CALLSTACK + 0x7FFF8
                 la a0, riscy_forth0
@@ -122,3 +130,5 @@
     .include "load.S"
     .balign 8
     .include "coredefs.S"
+    .balign 8
+    .include "constant.S"
