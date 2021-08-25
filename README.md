@@ -14,7 +14,9 @@ Riscyforth is still under heavy development and on this page I aim to keep a lis
 
 **WORDLIST**                Output (public) keywords
 
-**VARIABLE**                Put a variable on the variable stack
+**VARIABLE**                ( - ) Put a variable on the variable stack, initially valued as 0
+
+**CONSTANT**		    (u - ) Put a constant on the constant stack, valued as u. NB: a variable and a constant sharing a name will always return the variable.
 
 **ABORT**		    End Forth program - also **ABORT"** (expanded to ABORTCOMM) - abort with message
 

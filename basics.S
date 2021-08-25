@@ -492,7 +492,7 @@
 		la t4, TOP_CONS
 		ld t4, 0(t4)
 		bgt t3, t4, search_con_no_match
-                j search_var_next_check
+                j search_con_next_check
 
   search_con_tokens_matched:
 		#put constnt value on the stack
