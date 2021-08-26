@@ -23,12 +23,23 @@
 		CODEHEADER _LEAVE, _I, 0x0
 		la t0, WA__LOOP
 		la t1, WA__PLUSLOOP
+		la t3, WA__DO
+		mv t4, zero
   leave_load_secondary:
 		ld t2, 0(s7)
-		beq t2, t0, leave_leave
-		beq t2, t1, leave_leave
+		bne t2, t3, leave_test
+		addi t4, t4, 1			#account for nested loops
+		j leave_move_on
+  leave_test:
+		beq t2, t0, leave_maybe_leave
+		beq t2, t1, leave_maybe_leave
+  leave_move_on:
 		addi s7, s7, 8
 		j leave_load_secondary
+  leave_maybe_leave:
+		beqz t4, leave_leave
+		addi t4, t4, -1
+		j leave_move_on
   leave_leave:
 		addi s7, s7, 8			#take us past loop
 		tail NEXT

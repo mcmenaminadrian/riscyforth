@@ -260,7 +260,7 @@ source type cr ;
 
 : VERIFYLEAVE
 ." Verifying LEAVE and UNLOOP " CR
-10 0 DO 10 0 DO J I > J I = OR IF ." ( "  J . ." , " I . ." ) " ELSE UNLOOP LEAVE THEN LOOP CR LOOP
+10 0 DO 10 0 DO J I > J I = OR IF ." ( "  J . ." , " I . ." ) " ELSE UNLOOP LEAVE 3 0 DO LOOP 3 0 DO LOOP 3 0 DO LOOP THEN LOOP CR LOOP
 ." LEAVE and UNLOOP verified" CR ;
 
 
