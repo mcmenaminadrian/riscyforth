@@ -10,28 +10,41 @@
 		POP zero
 		tail NEXT
 
-		CODEHEADER J, EMIT, 0x01
+		CODEHEADER _J, EMIT, 0x0
 		ld t0, 24(s10)
 		PUSH t0
 		tail NEXT
 
-		CODEHEADER I, J, 0x01
+		CODEHEADER _I, _J, 0x0
 		ld t0, 0(s10)
 		PUSH t0
 		tail NEXT
 
-		CODEHEADER UNLOOP, I, 0x01
+		CODEHEADER _LEAVE, _I, 0x0
+		la t0, WA__LOOP
+		la t1, WA__PLUSLOOP
+  leave_load_secondary:
+		ld t2, 0(s7)
+		beq t2, t0, leave_leave
+		beq t2, t1, leave_leave
+		addi s7, s7, 8
+		j leave_load_secondary
+  leave_leave:
+		addi s7, s7, 8			#take us past loop
+		tail NEXT
+
+		CODEHEADER _UNLOOP, _LEAVE, 0x0
 		addi s10, s10, 24
 		tail NEXT
 
-		CODEHEADER PLUSLOOP, UNLOOP, 0x01
+		CODEHEADER _PLUSLOOP, _UNLOOP, 0x0
 		ld t3, 0(sp)
 		addi sp, sp, 8
 		ld t0, 0(s10)
 		add t0, t0, t3
 		j loop_plusloop_entry
 
-		CODEHEADER LOOP, PLUSLOOP, 0x01
+		CODEHEADER _LOOP, _PLUSLOOP, 0x0
 		ld t0, 0(s10)			#current value
 		addi t0, t0, 1
   loop_plusloop_entry:
@@ -45,7 +58,7 @@
 		addi s10, s10, 24
 		tail NEXT
 		
-		CODEHEADER DO, LOOP, 0x01
+		CODEHEADER _DO, _LOOP, 0x0
 		ld t0, 0(sp)			#start value
 		ld t1, 8(sp)			#limit
 		addi sp, sp, 16
@@ -53,6 +66,28 @@
 		sd s7, 16(s10)
 		sd t1, 8(s10)
 		sd t0, 0(s10)
+		tail NEXT
+
+		#loop words that do nothing in immediate mode
+		CODEHEADER J, _DO, 0x01
+		tail NEXT
+
+		CODEHEADER I, J, 0x01
+		tail NEXT
+
+		CODEHEADER LEAVE, I, 0x01
+		tail NEXT
+		
+		CODEHEADER UNLOOP, LEAVE, 0x01
+		tail NEXT
+
+		CODEHEADER PLUSLOOP, UNLOOP, 0x01
+		tail NEXT
+
+		CODEHEADER LOOP, PLUSLOOP, 0x01
+		tail NEXT
+
+		CODEHEADER DO, LOOP, 0x01
 		tail NEXT
 
 		CODEHEADER BEGIN, DO, 0x01

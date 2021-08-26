@@ -237,6 +237,8 @@ _Looping_
 
 **UNLOOP**		    ( - ) Remove loop variables from the loop stack
 
+**LEAVE**		    ( - ) Immediately leave current loop (UNLOOP should be called first)
+
 **I**			    ( - u) Return the value of the inner-most loop variable from loop stack
 
 **J**			    ( - u) Return the value of the outer loop variable from loop stack

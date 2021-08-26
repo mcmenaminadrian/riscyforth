@@ -78,8 +78,43 @@
 		j search_create_inscribe
   search_create_test_constant:
 		la t0, WA_CONSTANT
-		bne t3, t0, search_create_test_conditionals
+		bne t3, t0, search_loop_replace_do
 		la t3, WA__CONSTANT
+		j search_create_inscribe
+  search_loop_replace_do:
+		la t0, WA_DO
+		bne t3, t0, search_loop_replace_loop
+		la t3, WA__DO
+		j search_create_inscribe
+  search_loop_replace_loop:
+		la t0, WA_LOOP
+		bne t3, t0, search_loop_replace_plusloop
+		la t3, WA__LOOP
+		j search_create_inscribe
+  search_loop_replace_plusloop:
+		la t0, WA_PLUSLOOP
+		bne t3, t0, search_loop_replace_unloop
+		la t3, WA__PLUSLOOP
+		j search_create_inscribe
+  search_loop_replace_unloop:
+		la t0, WA_UNLOOP
+		bne t3, t0, search_loop_replace_leave
+		la t3, WA__UNLOOP
+		j search_create_inscribe
+  search_loop_replace_leave:
+		la t0, WA_LEAVE
+		bne t3, t0, search_loop_replace_i
+		la t3, WA__LEAVE
+		j search_create_inscribe
+  search_loop_replace_i:
+		la t0, WA_I
+		bne t3, t0, search_loop_replace_j
+		la t3, WA__I
+		j search_create_inscribe
+  search_loop_replace_j:
+		la t0, WA_J
+		bne t3, t0, search_create_test_conditionals
+		la t3, WA__J
 		j search_create_inscribe
   search_create_test_conditionals:
 		#test for conditionals

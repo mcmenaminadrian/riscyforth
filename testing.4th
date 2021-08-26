@@ -258,6 +258,12 @@ source type cr ;
 10 0 DO 10 0 DO ." ( "  J . ." , " I . ." ) " LOOP CR LOOP
 ." I and J verified" CR ; 
 
+: VERIFYLEAVE
+." Verifying LEAVE and UNLOOP " CR
+10 0 DO 10 0 DO J I > J I = OR IF ." ( "  J . ." , " I . ." ) " ELSE UNLOOP LEAVE THEN LOOP CR LOOP
+." LEAVE and UNLOOP verified" CR ;
+
+
 \ Testing memory functions
 : ZZ ." ', EXECUTE and C! passed " ;
 
@@ -298,15 +304,13 @@ PAD 10 35 FILL PAD 3 + 1 ERASE PAD 2 + C@ 35 = PAD 3 + C@ 0 = AND PAD 4 + C@ 35 
 \ Memory tests
 : TESTMEMORY
 ." Testing memory manipulation words" cr
-TESTINGTICK testcfetch testingmove testchar testfetch testplusstore
-TESTPADFILLERASE
+TESTINGTICK testcfetch testingmove testchar testfetch testplusstore TESTPADFILLERASE
 ." Testing of memory code complete" cr ;
 
 \ Test loops
 : TESTLOOPS
 ." Running tests of looping " cr
-TESTBEGINEND
-testbeginwhile TESTDOLOOP TESTPLUSLOOP VERIFYIJ
+TESTBEGINEND testbeginwhile TESTDOLOOP TESTPLUSLOOP VERIFYIJ VERIFYLEAVE
 ." Testing of loops complete" CR ;
 
 \ Test Rstack
