@@ -228,6 +228,17 @@ source type cr ;
 0 1 if ." Testing nested IF... " if ." Nested IF FAILED " else ." Nested IF passed " then 5 5 * . then ." = 25 " cr
 1 0 if ." Failed a final test of IF " else ." A final test of IF ... " if ." is passed " else ." is FAILED " then then cr ;
 
+\ Stuff to test EXIT
+: EXITTEST1
+EXIT ." If you see this EXIT FAILED " CR ;
+: EXITTEST2
+VARIABLE EXITVAR 200 EXITVAR ! ;
+: EXITTEST3
+EXITVAR DUP @ 1+ SWAP ! EXITVAR DUP @ 1+ SWAP ! EXIT EXITVAR DUP @ 1+ SWAP ! ;
+
+: TESTEXIT
+." Testing EXIT " 5 SPACES EXITTEST1
+EXITTEST2 EXITTEST3 EXITVAR @ 202 = IF ." EXIT passed " ELSE ." EXIT FAILED " THEN CR ;
 
 \ Test return stack words
 
@@ -355,7 +366,7 @@ VERIFYOK
 VERIFYTOKENIZE_IMM 
 VERIFYSEARCH OK
 ." ***Any error message above can almost certainly be ignored*** " CR
-TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY
+TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY TESTEXIT
 ." Verifying ENCSQ with this output " cr
 ." Verifying COMMENT " cr \ ." COMMENT verification FAILED " 
 VERIFYDOT

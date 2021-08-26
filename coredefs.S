@@ -311,7 +311,14 @@
 		sd t1, 0(t0)
 		tail NEXT
 
-		CODEHEADER _CHAR, EXCLAIM, 0x0
+		CODEHEADER _EXIT, EXCLAIM, 0x0
+		# just call SEMI
+		tail SEMI
+
+		CODEHEADER EXIT, _EXIT, 0x01
+		tail NEXT				#do nothing in immediate mode
+
+		CODEHEADER _CHAR, EXIT, 0x0
 		#get length
 		ld a0, 0(s7)
 		mv a1, s7

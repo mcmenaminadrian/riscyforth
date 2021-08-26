@@ -113,8 +113,13 @@
 		j search_create_inscribe
   search_loop_replace_j:
 		la t0, WA_J
-		bne t3, t0, search_create_test_conditionals
+		bne t3, t0, search_replace_exit
 		la t3, WA__J
+		j search_create_inscribe
+  search_replace_exit:
+		la t0, WA_EXIT
+		bne t3, t0, search_create_test_conditionals
+		la t3, WA__EXIT
 		j search_create_inscribe
   search_create_test_conditionals:
 		#test for conditionals
