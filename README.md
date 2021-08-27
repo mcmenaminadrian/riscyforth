@@ -32,6 +32,8 @@ _Compiling code_
 
 **SEMI**                    Procedure to end all secondaries (; is recognised and expanded to SEMI) - DO NOT USE outside a compilation
 
+**EXIT**		    In compiled code will cause an immediate jump to SEMI, returning control to the upper primative/secondary
+
 _Memory_
 
 **EXCLAIM**		    (xa -- ) store x at address a - **!** is recognised and expanded to EXCLAIM
