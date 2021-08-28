@@ -20,6 +20,8 @@
   .equ		BIGSPACE,      	0x100000
   .equ		CONDITIONALBLK, 180		#size of if/else block
   .equ		CONDITIONALSTK, 0x28		#size of conditional stack entry
+  .equ		DATASPACEMAN, 	0x14000		#to manage memory allocation lists
+  .equ		PAGESIZE,	0x1000
 
 
 
@@ -54,6 +56,8 @@
    .common INFILELOAD, 0x08, 0x08
    .common LOADLINESETUP, 0x08, 0x08
    .common STACKTOP, 0x08, 0x08
+   .common datamanagement, 0x08, 0x08
+   .common recycleallot, 0x08, 0x08
 
    .data
    welcome_msg:   	.asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
@@ -132,3 +136,5 @@
     .include "coredefs.S"
     .balign 8
     .include "constant.S"
+    .balign 8
+    .include "memoryallocator.S"

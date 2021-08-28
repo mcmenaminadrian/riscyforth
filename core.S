@@ -29,6 +29,8 @@
 		li t0, 1
 		la t1, ifflag
 		sd t0, 0(t1)			  #ignore ELSE by default
+		#set up memory allocator
+		call initialize_dataspace
 		#allocate space for new definitions
                 mv a0, zero
 		li a1, BIGSPACE

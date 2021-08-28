@@ -54,7 +54,15 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADER PAD, ABORTCOMM, 0x01
+		CODEHEADER ALLOT, ABORTCOMM, 0x01
+		#allocate memory from the allocator
+		ld t0, 0(sp)
+		slli a0, t0, 3				#convert from cells to bytes
+		call get_memory_allocation
+		PUSH a0
+		tail NEXT
+
+		CODEHEADER PAD, ALLOT, 0x01
 		la t0, SCRATCH_PAD
 		PUSH t0
 		tail NEXT
