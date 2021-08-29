@@ -3,7 +3,7 @@
 # Words from the Forth standard core not defined somewhere else
 
 		
-		CODEHEADER _ABORTCOMM, LOAD, 0x0                
+		CODEHEADER _ABORTCOMM, ALLOCATE, 0x0                
 		#compiled ABORTCOMM
                 ld a0, 0(s7)
                 mv a1, s7
@@ -55,11 +55,6 @@
 		tail NEXT
 
 		CODEHEADER ALLOT, ABORTCOMM, 0x01
-		#allocate memory from the allocator
-		ld t0, 0(sp)
-		slli a0, t0, 3				#convert from cells to bytes
-		call get_memory_allocation
-		sd a0, 0(sp)
 		tail NEXT
 
 		CODEHEADER PAD, ALLOT, 0x01

@@ -5,6 +5,26 @@
 	#      |   |
 	#      | NextPtr  | Address
 
+	init_used_chain:
+		#simple code as everything is empty at this point
+		#a0 has the start address
+		#a2 the maximum size of the basic chain
+		mv t0, a0
+		li t1, 8
+		mv t2, a2
+  init_used_chain_write:
+		sd t1, 0(t0)
+		sd zero, 8(t0)
+		addi t3, t0, 24
+		slli t1, t1, 1
+		bgt t1, t2, end_init_used_chain
+		sd t3, 16(t0)
+		mv t0, t3
+		j init_used_chain_write
+  end_init_used_chain:
+		sd zero, 16(t0)
+		ret
+
 	init_free_space:
 		addi sp, sp, -104
 		sd ra, 0(sp)
@@ -124,6 +144,20 @@
 		li a2, PAGESIZE			#max size for free chain
 		li a3, 1			#objects to be allocated
 		call init_free_space
+		#now handle the (currently empty) chain of used segments
+		mv a0, zero
+		li a1, DATASPACEMAN
+		li a2, 0x03			#both read and write
+		li a3, 0x22
+		li a4, -1
+		li a5, 0
+		li a7, 222
+		ecall
+		beqz a0, memory_fail
+		la t0, recycleallot
+		sd a0, 0(t0)
+		li a2, PAGESIZE
+		call init_used_chain
 		POP ra
 		fence
 		ret
@@ -152,6 +186,7 @@
 		ld s0, 0(s0)			#s0 points to start of the chain
   check_chain_size:
 		ld s1, 0(s0)
+		mv s9, s1			#s9 has chain size
 		bge s1, a0, alloc_found_chain
 		addi s0, s0, 16
 		ld s0, 0(s0)
@@ -165,34 +200,31 @@
 		beqz s1, chain_exhausted
 		#chain has at least one entry
   alloc_progress_chain:
-		mv s3, s0			#save for chain rework
+		#take the top entry in the chain
+		ld s3, 8(s1)
+		sd s3, 0(s0)
 		mv s0, s1
-		addi s1, s1, 8
-		ld s2, 0(s1)
-		beqz s2, reached_chain_end
-		j alloc_progress_chain
-  reached_chain_end:
 		ld a0, 0(s0)			#a0 now has the pointer
-  		#now remove the entry from the chain and add to the recycle list
-		ld zero, 0(s3)			#terminate the chain
+  		#now remove the entry from the chain and add to the used list
 		la s4, recycleallot
+		ld s4, 0(s4)
+  test_used_chain_size:
 		ld s5, 0(s4)
-		bnez s5, progress_along_recycle_chain
-  stick_on_recycle_chain:
-		sd s0, 0(s4)
-		sd zero, 0(s0)
+		beqz s5, memory_fail		#should never be null
+		beq s5, s9, found_used_chain
+		addi s6, s4, 16
+		ld s4, 0(s6)
+		beqz s4, memory_fail		#should never be null
+		j test_used_chain_size
+  found_used_chain:
+		ld s7, 8(s4)
+		beqz s7, stick_on_used_chain
+		mv s4, s7
+		j found_used_chain
+  stick_on_used_chain:
+		sd s0, 8(s4)
 		sd zero, 8(s0)			#start a recyclechain
 		j allot_over
-  progress_along_recycle_chain:
-		addi s5, s5, 8
-		ld s6, 0(s5)
-		beqz s6, end_of_recycle_chain
-		mv s5, s6
-		j progress_along_recycle_chain
-  end_of_recycle_chain:
-		mv s4, s5
-		j stick_on_recycle_chain
-
   allot_over:
 		ld s11, 96(sp)
 		ld s10, 88(sp)
@@ -208,6 +240,7 @@
 		ld s0, 8(sp)
 		ld ra, 0(sp)
 		addi sp, sp, 104
+		mv a1, zero
 		ret
 
   get_big_allocation:

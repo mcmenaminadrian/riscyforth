@@ -138,3 +138,5 @@
     .include "constant.S"
     .balign 8
     .include "memoryallocator.S"
+    .balign 8
+    .include "memory.S"
