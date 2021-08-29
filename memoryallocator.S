@@ -247,5 +247,50 @@
   chain_exhausted:
 		ret
 		
-		
+  free_memory_allocation:
+		#a0 comes in with the address of the block
+		la t0, recycleallot
+		ld t0, 0(t0)
+  free_memory_allocation_test_chain:
+		mv t6, t0		#t6 holds the top
+		ld t1, 0(t0)
+		beqz t1, free_memory_allocation_failed
+		mv t3, t1		#store size
+		ld t1, 8(t0)
+  free_memory_allocation_walk_chain:
+		beqz t1, free_memory_allocation_advance
+		ld t2, 0(t1)
+		beq t2, a0, free_memory_allocation_found_block
+		ld t1, 8(t1)
+		j free_memory_allocation_walk_chain
+  free_memory_allocation_advance:
+		ld t0, 16(t0)
+		beqz t0, free_memory_allocation_failed		#end of the line
+		j free_memory_allocation_test_chain
+  free_memory_allocation_failed:
+		li a0, -1
+		ret
+  free_memory_allocation_found_block:
+		#now have to return to the free chain
+		#t3 is the chain we are looking for
+		mv t2, t1
+		#clean the used chain first
+		ld t4, 8(t1)
+		sd t4, 8(t6)
+		la t0, datamanagement
+		ld t0, 0(t0)
+  free_walk_free_chain:
+		ld t1, 0(t0)
+		beqz t1, free_memory_allocation_failed
+		beq t1, t3, free_found_free_chain
+		ld t0, 16(t0)
+		beqz t0, free_memory_allocation_failed
+		j free_walk_free_chain
+  free_found_free_chain:
+		#t0 points to the head of the chain
+		#t2 points to the block to be added back
+		ld t4, 8(t0)
+		sd t2, 8(t0)
+		sd t4, 8(t2)
+		ret
 		
