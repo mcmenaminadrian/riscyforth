@@ -59,7 +59,7 @@
 		ld t0, 0(sp)
 		slli a0, t0, 3				#convert from cells to bytes
 		call get_memory_allocation
-		PUSH a0
+		sd a0, 0(sp)
 		tail NEXT
 
 		CODEHEADER PAD, ALLOT, 0x01

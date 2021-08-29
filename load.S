@@ -1,19 +1,6 @@
-	CODEHEADER NCURSES, ELSE, 0x01
-	li a0, 0
-	call initscr
-	mv a0, sp
-	call addstr
-	li a0, 0
-	call refresh
-	li a0, 0
-	call getch
-	li a0, 0
-	call endwin
-	tail NEXT
-
 	#Load files
 
-	CODEHEADER LOAD, NCURSES, 0x01
+	CODEHEADER LOAD, ELSE, 0x01
 	#Load a file line by line, executing each line as we go
 	addi sp, sp, -72
 	sd s0, 0(sp)
