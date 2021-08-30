@@ -310,12 +310,37 @@ octal base @ 10 = hex base @ 0x10 = AND decimal base @ 10 = AND if ." @ and BASE
 ." Testing PAD, FILL and ERASE " 5 SPACES
 PAD 10 35 FILL PAD 3 + 1 ERASE PAD 2 + C@ 35 = PAD 3 + C@ 0 = AND PAD 4 + C@ 35 = AND IF ." PAD, FILL and ERASE passed" ELSE ." PAD, FILL and ERASE FAILED" THEN CR ;
 
+\ Memory allocator
+: TESTALLOCATOR
+." Testing ALLOCATE and FREE " 5 SPACES
+\ Test 100000 allocations, frees
+VARIABLE allocaddress
+1 ALLOCATE 0 = IF allocaddress ! ELSE ." ALLOCATE FAILED " CR EXIT THEN
+FREE 0 = FALSE AND IF ." ALLOCATE passed but FREE failed " CR EXIT THEN
+99999 1 DO
+1 ALLOCATE 0 = allocaddress @ = AND FALSE AND IF ." ALLOCATE FAIL on pass " I . CR EXIT THEN
+allocaddress @ FREE 0 = FALSE AND IF ." FREE FAIL on pass " I . CR EXIT THEN
+LOOP ." ALLOCATE and FREE passed basic allocate and free test " CR 
+\ Test large allocation - 10000 times
+." Now testing large allocations " 5 SPACES
+1000 ALLOCATE 0 = FALSE AND IF ." Large ALLOCATE FAILED " CR EXIT THEN
+allocaddress ! allocaddress @ free 0 = FALSE AND IF ." Large FREE failed " CR EXIT THEN
+9999 1 DO
+1 ALLOCATE 0 = allocaddress @ = AND FALSE AND IF ." Large ALLOCATE FAIL on pass " I . CR EXIT THEN
+allocaddress @ FREE 0 = FALSE AND IF ." Large FREE FAIL on pass " I . CR EXIT THEN
+LOOP ." Large ALLOCATE and FREE passed." CR ;
+
+
+
+
+
 \ Test groupings
 
 \ Memory tests
 : TESTMEMORY
 ." Testing memory manipulation words" cr
 TESTINGTICK testcfetch testingmove testchar testfetch testplusstore TESTPADFILLERASE
+TESTALLOCATOR
 ." Testing of memory code complete" cr ;
 
 \ Test loops

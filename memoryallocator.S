@@ -227,8 +227,9 @@
   stick_on_used_chain:
 		sd s0, 8(s4)
 		sd zero, 8(s0)			#start a recyclechain
-		j allot_over
   allot_over:
+		li a1, 0
+  allot_over_fail:
 		ld s11, 96(sp)
 		ld s10, 88(sp)
 		ld s9, 80(sp)
@@ -243,18 +244,16 @@
 		ld s0, 8(sp)
 		ld ra, 0(sp)
 		addi sp, sp, 104
-		mv a1, zero
 		ret
 
   allocation_failed:
-		ret
+		li a1, -1
+		j allot_over_fail
   get_big_allocation:
 		#a0 has size
 		mv s1, a0
 		#malloc the size and add to used chain
-		PUSH ra
 		call malloc
-		POP ra
 		beqz a0, allocation_failed
 		#now walk used chain looking for size - if it exists
 		ld t0, recycleallot
@@ -282,8 +281,7 @@
 		addi t4, t3, 16
 		la t0, recyclewatermark
 		sd t4, 0(t0)
-		li a1, 0
-		ret
+		j allot_over
   big_allocation_insert_before:
 		#t6 points to chain point to insert after
 		la t0, recyclewatermark
@@ -305,16 +303,17 @@
 		sd a0, 0(t2)
 		sd t4, 8(t2)
 		addi t2, t2, 16			#push the watermark upstream
-		la t0, recyclewatermark
-		sd t2, 0(t0)
-		li a1, 0
-		ret
-		
+		sd t2, 0(t1)
+		j allot_over
 		
   chain_exhausted:
-		#TODO: FIX ME!
-		ret
-		
+		#allocate straight off the heap
+		mv a0, s9
+		j get_big_allocation
+	
+  free_memory_allocation_failed:
+		li a0, -1
+		ret	
   free_memory_allocation:
 		#a0 comes in with the address of the block
 		la t0, recycleallot
@@ -335,9 +334,6 @@
 		ld t0, 16(t0)
 		beqz t0, free_memory_allocation_failed		#end of the line
 		j free_memory_allocation_test_chain
-  free_memory_allocation_failed:
-		li a0, -1
-		ret
   free_memory_allocation_found_block:
 		#now have to return to the free chain
 		#t3 is the chain we are looking for
