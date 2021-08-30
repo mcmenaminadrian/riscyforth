@@ -54,6 +54,12 @@ _Memory_
 
 **ERASE**		    (au - ) If u != 0 fill u bytes with 0 from address a onwards
 
+**ALLOCATE**		    (u - ai) Allocate u cells (8 bytes) of memory, address returned in a, state in i (0 indicates success)
+
+**FREE**		    (a - i) Free allocated memory at a, state in i (0 indicates success)
+
+**RESIZE**		    (au - bi) Resize memory at a to new block of u cells, return new block address in b, state in i. Existing block is copied to new address.
+
 _Text entry_
 
 **GETSTDIN**                Gets the file pointer for stdin
