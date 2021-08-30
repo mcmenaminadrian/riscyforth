@@ -58,6 +58,7 @@
    .common STACKTOP, 0x08, 0x08
    .common datamanagement, 0x08, 0x08
    .common recycleallot, 0x08, 0x08
+   .common recyclewatermark, 0x08, 0x08
 
    .data
    welcome_msg:   	.asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"

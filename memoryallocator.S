@@ -23,6 +23,9 @@
 		j init_used_chain_write
   end_init_used_chain:
 		sd zero, 16(t0)
+		la t2, recyclewatermark
+		addi t3, t0, 24
+		sd t3, 0(t2)			#point to start writing
 		ret
 
 	init_free_space:
@@ -243,8 +246,73 @@
 		mv a1, zero
 		ret
 
+  allocation_failed:
+		ret
   get_big_allocation:
+		#a0 has size
+		mv s1, a0
+		#malloc the size and add to used chain
+		PUSH ra
+		call malloc
+		POP ra
+		beqz a0, allocation_failed
+		#now walk used chain looking for size - if it exists
+		ld t0, recycleallot
+  big_allocation_walk_chain:
+		ld t1, 0(t0)
+		bgt t1, s1, big_allocation_insert_before
+		beq t1, s1, big_allocation_insert_here
+		mv t6, t0
+		ld t1, 16(t0)
+		beqz t1, big_allocation_insert_next
+		mv t0, t1
+		j big_allocation_walk_chain
+  big_allocation_insert_next:
+		#insert at high water point
+		la t2, recyclewatermark
+		ld t2, 0(t2)
+		sd t2, 16(t0)
+		sd s1, 0(t2)		#size
+		addi t3, t2, 24
+		sd t3, 8(t2)
+		sd zero, 16(t2)
+  big_allocation_tidy_insert:
+		sd a0, 0(t3)
+		sd zero, 8(t3)
+		addi t4, t3, 16
+		la t0, recyclewatermark
+		sd t4, 0(t0)
+		li a1, 0
+		ret
+  big_allocation_insert_before:
+		#t6 points to chain point to insert after
+		la t0, recyclewatermark
+		ld t1, 0(t0)
+		ld t2, 16(t6)			#old pointer
+		sd s1, 0(t1)			#size
+		sd t1, 16(t6)			#add new part of chain
+		addi t3, t1, 24			#downward chain
+		sd t3, 8(t1)
+		sd t2, 16(t1)			#reconnect
+		j big_allocation_tidy_insert	#finish up
+ big_allocation_insert_here:
+		#now insert into the downward chain
+		#t0 holds insertion point here
+		la t1, recyclewatermark
+		ld t2, 0(t1)
+		ld t4, 8(t0)
+		sd t2, 8(t0)
+		sd a0, 0(t2)
+		sd t4, 8(t2)
+		addi t2, t2, 16			#push the watermark upstream
+		la t0, recyclewatermark
+		sd t2, 0(t0)
+		li a1, 0
+		ret
+		
+		
   chain_exhausted:
+		#TODO: FIX ME!
 		ret
 		
   free_memory_allocation:
@@ -277,6 +345,9 @@
 		#clean the used chain first
 		ld t4, 8(t1)
 		sd t4, 8(t6)
+		#check whether we have big allocation
+		li t5, PAGESIZE
+		bgt t3, t5, free_big_allocation
 		la t0, datamanagement
 		ld t0, 0(t0)
   free_walk_free_chain:
@@ -292,5 +363,21 @@
 		ld t4, 8(t0)
 		sd t2, 8(t0)
 		sd t4, 8(t2)
+		li a0, 0
+		ret
+  free_big_allocation:
+		PUSH ra
+		ld a0, 0(t2)
+		call free
+		POP ra
+		sd zero, 0(t2)
+		sd zero, 8(t2)
+		la t0, recyclewatermark
+		ld t1, 0(t0)
+		addi t3, t2, 24
+		bne t3, t1, finish_free_big_allocation
+		sd t2, 0(t0)			#shrink the watermark
+  finish_free_big_allocation:
+		li a0, 0
 		ret
 		
