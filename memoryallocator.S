@@ -165,6 +165,69 @@
 		fence
 		ret
 
+  resize_memory_allocation:
+		addi sp, sp, -104
+		sd ra, 0(sp)
+		sd s0, 8(sp)
+		sd s1, 16(sp)
+		sd s2, 24(sp)
+		sd s3, 32(sp)
+		sd s4, 40(sp)
+		sd s5, 48(sp)
+		sd s6, 56(sp)
+		sd s7, 64(sp)
+		sd s8, 72(sp)
+		sd s9, 80(sp)
+		sd s10, 88(sp)
+		sd s11, 96(sp)
+		#a0 has the new size
+		mv s0, a0
+		#a1 has the block address
+		mv s1, a1
+		#we can just skip anything which is the same size
+		#and we only care about allocated blocks
+		la t0, recycleallot
+		ld t0, 0(t0)
+  resize_memory_allocation_test_chain:
+		mv t6, t0		#t6 holds the top
+		ld t1, 0(t0)
+		beqz t1, resize_memory_allocation_failed
+		beq t1, a0, resize_memory_allocation_advance	#don't care about same size
+		mv t3, t1		#store size
+		ld t1, 8(t0)
+  resize_memory_allocation_walk_chain:
+		beqz t1, resize_memory_allocation_advance
+		ld t2, 0(t1)
+		beq t2, a1, resize_memory_allocation_found_block
+		ld t1, 8(t1)
+		j resize_memory_allocation_walk_chain
+  resize_memory_allocation_advance:
+		ld t0, 16(t0)
+		beqz t0, resize_memory_allocation_failed		#end of the line
+		j resize_memory_allocation_test_chain
+  resize_memory_allocation_found_block:
+		#now need to get a block of the new size
+		#preserve what we need
+		mv s5, t2						#s5 has old memory block address
+		mv s8, t3						#s8 has size of old block
+		#now call for new block
+		call get_memory_allocation
+		#a0 now has address of new block
+		mv s9, a0
+		mv a1, s1
+		mv a2, s8
+		call memcpy						#use library to copy
+		#now free the old block
+		mv a0, s5
+		call free_memory_allocation
+		mv a1, s9
+		li a0, 0
+		j allot_over_fail					#we haven't failed but reuse code
+  resize_memory_allocation_failed:
+		mv a1, s9
+		li a0, -1
+		j allot_over_fail
+
   get_memory_allocation:
 		addi sp, sp, -104
 		sd ra, 0(sp)

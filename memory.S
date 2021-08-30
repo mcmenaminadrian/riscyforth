@@ -11,8 +11,16 @@
 		sd a0, 0(sp)
 		tail NEXT
 
+		CODEHEADER RESIZE, FREE, 0x01
+		ld a0, 0(sp)
+		ld a1, 8(sp)
+		slli a0, a0, 3
+		call resize_memory_allocation
+		sd a1, 8(sp)
+		sd a0, 0(sp)
+		tail NEXT
 		
-		CODEHEADER ALLOCATE, FREE, 0x01
+		CODEHEADER ALLOCATE, RESIZE, 0x01
 		#get memory from the allocator
 		ld t0, 0(sp)
 		slli a0, t0, 3				#convert from cells to bytes
@@ -21,5 +29,4 @@
 		sd a0, 8(sp)
 		sd a1, 0(sp)
 		tail NEXT
-
-		
+	

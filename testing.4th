@@ -330,7 +330,14 @@ allocaddress ! allocaddress @ free 0 = FALSE AND IF ." Large FREE failed " CR EX
 allocaddress @ FREE 0 = FALSE AND IF ." Large FREE FAIL on pass " I . CR EXIT THEN
 LOOP ." Large ALLOCATE and FREE passed." CR ;
 
-
+: TESTRESIZE
+." Testing RESIZE " 5 SPACES
+VARIABLE allocx
+1 ALLOCATE DROP allocx !
+HEX 0xBADCAFEF00D DECIMAL allocx @ !
+allocx @ 40 RESIZE 0 = FALSE AND IF ." RESIZE FAIL - no resize " CR EXIT THEN
+@ HEX 0xBADCAFEF00D DECIMAL = IF ." RESIZE passed " ELSE ." RESIZE FAIL: no copy" CR EXIT THEN
+CR ;
 
 
 
@@ -340,7 +347,7 @@ LOOP ." Large ALLOCATE and FREE passed." CR ;
 : TESTMEMORY
 ." Testing memory manipulation words" cr
 TESTINGTICK testcfetch testingmove testchar testfetch testplusstore TESTPADFILLERASE
-TESTALLOCATOR
+TESTALLOCATOR TESTRESIZE
 ." Testing of memory code complete" cr ;
 
 \ Test loops
