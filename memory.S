@@ -21,14 +21,14 @@
 		la t1, newdictionary
 		ld t3, 0(t1)
 		li t2, 0x01
-		sd t2, 0(t3)				#flag
-		addi t2, t3, 0x38			#word address of new word
+		sd t2, 0(t3)						#flag
+		addi t2, t3, 0x38					#word address of new word (56 bytes offset)
 		sd t2, 8(t3)
 		la t0, dictionary
 		ld t1, 0(t0)
-		sd t1, 16(t3)				#words address of previous word
-		sd zero, 24(t3)				#zero length
-		li t2, 0XFFFFFFFFFFFFFFFF		#now fill in name space
+		sd t1, 16(t3)						#words address of previous word
+		sd zero, 24(t3)						#zero length
+		li t2, 0XFFFFFFFFFFFFFFFF				#now fill in name space
 		sd t2, 32(t3)
 		sd t2, 40(t3)
 		sd t2, 48(t3)
@@ -37,14 +37,14 @@
 
                 ld a1, INPUT_END
                 ld a0, INPUT_START
-                addi t0, a0, 1                        	#account for minimal input
-                bltu t0, a1, create_tokenize_have_data   #buffer has data
+                addi t0, a0, 1                        			#account for minimal input
+                bltu t0, a1, create_tokenize_have_data   		#buffer has data
   create_tokenize_all_over:
                 j colon_fail
   create_tokenize_have_data:
-                mv t0, a0                             	#t0 tracks start of token, t1 the end
-                li t2, 0x20                   		#t2 space
-                li t3, 0x0A                   		#t3 CR
+                mv t0, a0                             			#t0 tracks start of token, t1 the end
+                li t2, 0x20                   				#t2 space
+                li t3, 0x0A                   				#t3 CR
   create_tokenize_look_for_start:
                 lb t4, 0(t0)
                 beq t4, t2, create_tokenize_keep_going
@@ -53,15 +53,15 @@
   create_tokenize_keep_going:
                 addi t0, t0, 1
                 bltu t0, a1, create_tokenize_look_for_start
-                j create_tokenize_all_over                   #got nothing
+                j create_tokenize_all_over                   		#got nothing
   create_tokenize_found_start:
 		li t2, 0x30
 		li t3, 0x39
 		bgt t4, t3, create_not_a_numeral
-		bge t4, t2, create_tokenize_all_over	    #cannot redefine a number
+		bge t4, t2, create_tokenize_all_over	    		#cannot redefine a number
   create_not_a_numeral:
-                mv t1, t0                             #t1 to track end of token
-		li t2, 0x20			#back to checkinging space and CR
+                mv t1, t0                             			#t1 to track end of token
+		li t2, 0x20						#back to checking space and CR
 		li t3, 0x0A
   create_tokenize_advance_search:
                 addi t1, t1, 1
@@ -71,15 +71,11 @@
                 beq t4, t3, create_tokenize_end_token
                 j create_tokenize_advance_search
   create_tokenize_end_token:
-                sd t1, INPUT_START, t5                #update the end point for subsequent searches
-                addi t1, t1, -1                       # space or NL not part of token
+                sd t1, INPUT_START, t5                			#update the end point for subsequent searches
+                addi t1, t1, -1                       			# space or NL not part of token
                 mv t2, t0
-                bne t0, t1, create_tokenize_prepare_sanity_test
-                PUSH t0				      #POPed by fix_up code
-                jal fix_up_input                      #one character token so check for expansion
-  create_tokenize_prepare_sanity_test:
-                li t5, 0x61                   #lowercase a
-                li t6, 0x7B                   #lowercase z + 1
+                li t5, 0x61                   				#lowercase a
+                li t6, 0x7B                   				#lowercase z + 1
   create_tokenize_sanity_test:
                 lb t4, 0(t2)
                 blt t4, t5, create_tokenize_next_sane
@@ -98,8 +94,8 @@
                 sd t1, TOKEN_END, t2
 		POP t3
 		sub t4, t1, t0
-		addi t4, t4, 1				#add 1 to get length
-		sd t4, 24(t3)				#write out length
+		addi t4, t4, 1						#add 1 to get length
+		sd t4, 24(t3)						#write out length
 		addi t1, t3, 32
   create_write_out_name:
 		lb t5, 0(t0)
@@ -112,99 +108,110 @@
   create_name_written:
 		la t0, dataspaceptr
 		ld t1, 0(t0)
-		mv a0, t1		#copy to a0
+		mv a0, t1						#copy to a0
 		#t1 contains the number we need to push to the stack
-		li t2, 0XFF81011B
-		sw t2, 56(t3)		# addi sp, sp, -8
+		li t2, 0XFF810113
+		sw t2, 56(t3)						# addi sp, sp, -8
 		#now get what is in t1 in our space into t0 in the written code
-		srli t1, t1, 32		#eliminate the lower 32 bits
-		slli t1, t1, 20		#in right place for the add
+		srli t1, t1, 32						#eliminate the lower 32 bits
+		slli t1, t1, 20						#in right place for the add
 		li t0, 0x293
 		or t0, t0, t1
-		sw t0, 60(t3)		#addi t0, zero, [upper 32 of NEXT]
+		sw t0, 60(t3)						#addi t0, zero, [upper 32 of NEXT]
 		li t0, 0x2029293
-		sw t0, 64(t3)		#slli t0, t0, 32
+		sw t0, 64(t3)						#slli t0, t0, 32
 		#now deal with lower 32 bits of address
 		mv t1, a0
 		li t2, 0xFFFFF000
-		and t1, t1, t2		#take upper 20 bits of lower 32
+		and t1, t1, t2						#take upper 20 bits of lower 32
 		li t2, 0x337
 		or t0, t1, t2
-		sw t0, 68(t3)		#lui t1, [bits 12 - 31]
+		sw t0, 68(t3)						#lui t1, [bits 12 - 31]
 		li t0, 0x2031313
-		sw t0, 72(t3)		#slli t1, t1, 0x20
+		sw t0, 72(t3)						#slli t1, t1, 0x20
 		li t0, 0x2035313
-		sw t0, 76(t3)		#srli t1, t1, 0x20 (zero out upper 32 bits)
+		sw t0, 76(t3)						#srli t1, t1, 0x20 (zero out upper 32 bits)
 		mv t1, a0
 		li t2, 0xFFF
-		and t0, t1, t2		#lower 12 bits only
-		srli t1, t0, 11		#t1 has twelveth bit only
+		and t0, t1, t2						#lower 12 bits only
+		srli t1, t0, 11						#t1 has twelveth bit only
 		li t2, 0x7FF
-		and t0, t0, t2		#t0 has the lower 11 bits
+		and t0, t0, t2						#t0 has the lower 11 bits
 		li t4, 0x393
 		slli t1, t1, 20
 		or t4, t4, t1
-		sw t4, 80(t3)		#addi t2, zero, [0 or 1]
+		sw t4, 80(t3)						#addi t2, zero, [0 or 1]
 		li t4, 0xB39393
-		sw t4, 84(t3)		#slli t2, t2, 11
+		sw t4, 84(t3)						#slli t2, t2, 11
 		li t4, 0x7282B3
-		sw t4, 88(t3)		#add t0, t0, t2
+		sw t4, 88(t3)						#add t0, t0, t2
 		li t4, 0x393
 		slli t0, t0, 20
 		or t4, t4, t0
-		sw t4, 92(t3)		#addi t2, zero, [lower 11 bits]
+		sw t4, 92(t3)						#addi t2, zero, [lower 11 bits]
 		li t4, 0x7282B3
-		sw t4, 96(t3)		#add t0, t0, t2
+		sw t4, 96(t3)						#add t0, t0, t2
 		li t4, 0x6282B3
-		sw t4, 100(t3)		#add t0, t0, t1
+		sw t4, 100(t3)						#add t0, t0, t1
 		#now t0 has the number, place it on the stack
 		li t4, 0x513023
-		sw t4, 104(t3)		#sd t0, 0(sp)
-		#now execute iequivalent of tail NEXT
-		la t1, NEXT		#t1 has the number
-		srli t1, t1, 32		#eliminate the lower 32 bits
-		slli t1, t1, 20		#in right place for the add
+		sw t4, 104(t3)						#sd t0, 0(sp)
+		#now execute equivalent of tail NEXT
+		la t1, NEXT						#t1 has the number
+		srli t1, t1, 32						#eliminate the lower 32 bits
+		slli t1, t1, 20						#in right place for the add
 		li t0, 0x293
 		or t0, t0, t1
-		sw t0, 110(t3)		#addi t0, zero, [upper 32 of NEXT]
+		sw t0, 108(t3)						#addi t0, zero, [upper 32 of NEXT]
 		li t0, 0x2029293
-		sw t0, 114(t3)		#slli t0, t0, 32
+		sw t0, 112(t3)						#slli t0, t0, 32
 		#now deal with lower 32 bits of NEXT address
 		la t1, NEXT
 		li t2, 0xFFFFF000
-		and t1, t1, t2		#take upper 20 bits of lower 32
+		and t1, t1, t2						#take upper 20 bits of lower 32
 		li t2, 0x337
 		or t0, t1, t2
-		sw t0, 118(t3)		#lui t1, [bits 12 - 31]
+		sw t0, 116(t3)						#lui t1, [bits 12 - 31]
 		li t0, 0x2031313
-		sw t0, 122(t3)		#slli t1, t1, 0x20
+		sw t0, 120(t3)						#slli t1, t1, 0x20
 		li t0, 0x2035313
-		sw t0, 126(t3)		#srli t1, t1, 0x20 (zero out upper 32 bits)
+		sw t0, 124(t3)						#srli t1, t1, 0x20 (zero out upper 32 bits)
 		la t1, NEXT
 		li t2, 0xFFF
-		and t0, t1, t2		#lower 12 bits only
-		srli t1, t0, 11		#t1 has twelveth bit only
+		and t0, t1, t2						#lower 12 bits only
+		srli t1, t0, 11						#t1 has twelveth bit only
 		li t2, 0x7FF
-		and t0, t0, t2		#t0 has the lower 11 bits
+		and t0, t0, t2						#t0 has the lower 11 bits
 		li t4, 0x393
 		slli t1, t1, 20
 		or t4, t4, t1
-		sw t4, 130(t3)		#addi t2, zero, [0 or 1]
+		sw t4, 128(t3)						#addi t2, zero, [0 or 1]
 		li t4, 0xB39393
-		sw t4, 134(t3)		#slli t2, t2, 11
+		sw t4, 132(t3)						#slli t2, t2, 11
 		li t4, 0x7282B3
-		sw t4, 138(t3)		#add t0, t0, t2
+		sw t4, 136(t3)						#add t0, t0, t2
 		li t4, 0x393
 		slli t0, t0, 20
 		or t4, t4, t0
-		sw t4, 142(t3)		#addi t2, zero, [lower 11 bits]
+		sw t4, 140(t3)						#addi t2, zero, [lower 11 bits]
 		li t4, 0x7282B3
-		sw t4, 146(t3)		#add t0, t0, t2
+		sw t4, 144(t3)						#add t0, t0, t2
 		li t4, 0x6282B3
-		sw t4, 150(t3)		#add t0, t0, t1
-		li t0, 0x28067		#jalr zero, 0(t0)
-		sw t0, 154(t3)
-		tail NEXT		#and out
+		sw t4, 148(t3)						#add t0, t0, t1
+		li t0, 0x28067						#jalr zero, 0(t0)
+		sw t0, 152(t3)
+		la t1, newdictionary
+		ld t1, 0(t1)
+		addi t1, t1, CREATEOFFSET
+		la t3, createwritepoint
+		sd t1, 0(t3)
+		la t0, newdictionary
+		la t2, dictionary
+		ld t3, 0(t0)			      #load address of new word
+		sd t3, 0(t2)			      #store address of new word as start for dictionary
+		sd t1, 0(t0)			      #update address we will writenext word to
+		fence.i
+		tail NEXT						#and out
 
 		CODEHEADER ALLOT, CREATE, 0x01
 		#get alignment
@@ -218,6 +225,7 @@
 		la t0, alignmentstate
 		ld t1, 0(t0)
 		bnez t1, allot_aligned
+		sd t5, 0(t2)
 		tail NEXT
   allot_aligned:
 		li a0, 0x07
@@ -227,6 +235,7 @@
 		sub a3, a2, a1
 		add t5, t5, a3
   allot_finished:
+		sd t5, 0(t2)
 		tail NEXT
 
 		CODEHEADER ALIGN, ALLOT, 0x01

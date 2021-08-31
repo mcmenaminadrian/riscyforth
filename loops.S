@@ -260,10 +260,6 @@
                 sd t1, INPUT_START, t5                #update the end point for subsequent searches
                 addi t1, t1, -1                       # space or NL not part of token
                 mv t2, t0
-                bne t0, t1, colon_tokenize_prepare_sanity_test
-                PUSH t0				      #POPed by fix_up code
-                jal fix_up_input                      #one character token so check for expansion
-  colon_tokenize_prepare_sanity_test:
                 li t5, 0x61                   #lowercase a
                 li t6, 0x7B                   #lowercase z + 1
   colon_tokenize_sanity_test:
