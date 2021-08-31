@@ -30,10 +30,23 @@
 		la t1, ifflag
 		sd t0, 0(t1)			  #ignore ELSE by default
 		#set up memory allocator
-		call initialize_dataspace
+		call initialize_memoryspace	  
+		#now create standard dataspace
+                mv a0, zero
+		li a1, BIGGERSPACE
+		li a2, 0x07			  #read and execute
+		li a3, 0x22
+		li a4, -1
+		li a5, 0
+		li a7, 222			  #mmap
+		ecall
+		la t0, dataspace
+		sd a0, 0(t0)
+		la t0, dataspaceptr
+		sd a0, 0(t0)
 		#allocate space for new definitions
                 mv a0, zero
-		li a1, BIGSPACE
+		li a1, BIGGERSPACE
 		li a2, 0x07			  #read and execute
 		li a3, 0x22
 		li a4, -1

@@ -17,7 +17,8 @@
   .equ          INSTWIDTH3,    	0x0C
   .equ          INSTWIDTH4,    	0x10
   .equ          NAMEMAXLEN,    	0x18
-  .equ		BIGSPACE,      	0x100000
+  .equ		BIGSPACE,      	0x100000	#1MB
+  .equ		BIGGERSPACE,    0x200000	#2MB
   .equ		CONDITIONALBLK, 180		#size of if/else block
   .equ		CONDITIONALSTK, 0x28		#size of conditional stack entry
   .equ		DATASPACEMAN, 	0x14000		#to manage memory allocation lists
@@ -59,6 +60,9 @@
    .common datamanagement, 0x08, 0x08
    .common recycleallot, 0x08, 0x08
    .common recyclewatermark, 0x08, 0x08
+   .common dataspace, 0x08, 0x08
+   .common dataspaceptr, 0x08, 0x08
+   .common alignmentstate, 0x08, 0x08
 
    .data
    welcome_msg:   	.asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"

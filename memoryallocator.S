@@ -5,7 +5,7 @@
 	#      |   |
 	#      | NextPtr  | Address
 
-	init_used_chain:
+  init_used_chain:
 		#simple code as everything is empty at this point
 		#a0 has the start address
 		#a2 the maximum size of the basic chain
@@ -28,7 +28,7 @@
 		sd t3, 0(t2)			#point to start writing
 		ret
 
-	init_free_space:
+  init_free_space:
 		addi sp, sp, -104
 		sd ra, 0(sp)
 		sd s0, 8(sp)
@@ -118,7 +118,7 @@
 
   memory_fail:
 		tail BYE
-  initialize_dataspace:
+  initialize_memoryspace:
 		PUSH ra
 		mv a0, zero
 		li a1, DATASPACEMAN
