@@ -428,5 +428,3 @@ TESTMEMORY
 ." Press enter to continue " GETLINE CR
  ABORT" Verifying ABORTCOMM and leaving tests with this message "  ." ABORTCOMM has FAILED"
 ;
-
-
