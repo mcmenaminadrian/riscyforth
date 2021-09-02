@@ -54,7 +54,12 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADER PAD, ABORTCOMM, 0x01
+		CODEHEADER RECURSE, ABORTCOMM, 0x01
+		#does nothing on interpretation
+		#compilation handled in search_create
+		tail NEXT
+
+		CODEHEADER PAD, RECURSE, 0x01
 		la t0, SCRATCH_PAD
 		PUSH t0
 		tail NEXT

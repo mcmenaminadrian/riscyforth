@@ -103,9 +103,16 @@
 		j search_create_inscribe
   search_loop_replace_leave:
 		la t0, WA_LEAVE
-		bne t3, t0, search_loop_replace_i
+		bne t3, t0, search_loop_replace_recurse
 		la t3, WA__LEAVE
 		j search_create_inscribe
+  search_loop_replace_recurse:
+		la t0, WA_RECURSE
+		bne t3, t0, search_loop_replace_i
+		la t0, newdictionary
+		ld t1, 0(t0)
+		addi t3, t1, 0x8
+		j search_create_inscribe				#t3 has address of word to drop in	
   search_loop_replace_i:
 		la t0, WA_I
 		bne t3, t0, search_loop_replace_j
