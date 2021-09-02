@@ -339,6 +339,23 @@ allocx @ 40 RESIZE 0 = FALSE AND IF ." RESIZE FAIL - no resize " CR EXIT THEN
 @ HEX 0xBADCAFEF00D DECIMAL = IF ." RESIZE passed " ELSE ." RESIZE FAIL: no copy" CR EXIT THEN
 CR ;
 
+\ In immediate mode
+CREATE X 199 ALLOT CREATE Y
+
+: TESTCREATE
+." Testing CREATE, HERE and ALLOT " 5 SPACES
+Y X - 199 = Y HERE = AND IF ." CREATE, ALLOT and HERE passed " ELSE ." CREATE, HERE and ALLOT FAILED " THEN CR ;  
+
+: TESTCELLS
+." Testing CELLS " 5 SPACES
+10 CELLS 80 = IF ." CELLS passed " ELSE ." CELLS FAILED " THEN CR ;
+
+: TESTALIGN
+." Testing ALIGN " 5 SPACES
+HERE 7 AND 0 = IF 1 ALLOT THEN ALIGN HERE 7 AND 0 = IF ." ALIGN passed " ELSE ." ALIGN FAILED " EXIT THEN
+CR ." Now testing ALIGNED... " 5 SPACES 1 ALLOT HERE ALIGNED HERE - 7 = 
+IF ." ALIGNED passed " ELSE ." ALIGNED FAILED " THEN CR ;
+
 
 
 \ Test groupings
@@ -347,7 +364,7 @@ CR ;
 : TESTMEMORY
 ." Testing memory manipulation words" cr
 TESTINGTICK testcfetch testingmove testchar testfetch testplusstore TESTPADFILLERASE
-TESTALLOCATOR TESTRESIZE
+TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN
 ." Testing of memory code complete" cr ;
 
 \ Test loops

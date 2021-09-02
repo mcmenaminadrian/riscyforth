@@ -54,10 +54,7 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADER ALLOT, ABORTCOMM, 0x01
-		tail NEXT
-
-		CODEHEADER PAD, ALLOT, 0x01
+		CODEHEADER PAD, ABORTCOMM, 0x01
 		la t0, SCRATCH_PAD
 		PUSH t0
 		tail NEXT
