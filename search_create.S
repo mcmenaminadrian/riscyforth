@@ -55,10 +55,14 @@
 		tail embed_encsq
   search_tick:
 		la t0, WA_TICK
-		bne t3, t0, search_char
+		bne t3, t0, search_repeat
 		#substitute WA__TICK
 		la t3, WA__TICK
 		tail embed_tick
+  searcgh_repeat:
+		la t0, WA_REPEAT
+		bne t3, t0, search_char
+		tail embed_repeat
   search_char:
 		la t0, WA_CHAR
 		bne t3, t0, search_waend
@@ -742,8 +746,101 @@ func_test_octal:
   conin_no_match:
 		j varin_failed
 
+  embed_repeat:
+		#get the token
+		la a5, repeat_finished_santization	#return address
+		call tick_start_looking
+		add t1, t1, -1				#space or CR not part of token
+		mv t2, t0
+		sub a0, t1, t0				#will be 0 if token is of length 1 etc
+		bnez a0, tick_length_two_or_more
+		call tick_fix_up_single
+		j tick_prepare_sanity_test		#can skip the other tests for length
+  repeat_length_two_or_more:
+		li a1, 1
+		bne a0, a1, repeat_length_three_or_more
+		call tick_fix_up_length_two
+		j repeat_prepare_sanity_test
+  repeat_length_three_or_more:
+		li a1, 3
+		bne a0, a1, repeat_length_five_or_more
+		call tick_fix_up_length_four
+  repeat_length_five_or_more:
+		li a1, 4
+		bne a0, a1, repeat_length_six_or_more
+		call tick_fix_up_length_five
+  repeat_length_six_or_more:
+		li a1, 5
+		bne a0, a1, repeat_prepare_sanity_test
+		call tick_fix_up_length_six
+  repeat_prepare_sanity_test:
+		li t3, 0x5F
+		addi t5, zero, 0x61
+		addi t6, zero, 0x7B
+  repeat_sanity_test:
+		lb t4, 0(t2)
+		blt t4, t5, tick_next_sane
+		blt t4, t6, tick_sanitize
+		j tick_next_sane
+  repeat_sanitize:
+		and t4, t4, t3
+		sb t4, 0(t2)
+  repeat_next_sane:
+		addi t2, t2, 1
+		blt t1, t2, tick_finished_sanitization
+		j tick_sanity_test
+  repeat_finished_sanitization:
+		#look up the command
+		sub t2, t1, t0
+		addi t2, t2, 1
+		la t4, dictionary
+		ld t3, 0(t4)
+  repeat_next_in_dictionary:
+		lb t4, 24(t3)
+		bne t4, t2, repeat_tokens_do_not_match
+		add a0, t3, 32
+		mv a1, t0
+		mv a2, t2
+  repeat_loop_through_token:
+		lb t5, 0(a0)
+                lb t6, 0(a1)
+                bne t5, t6, repeat_tokens_do_not_match
+                addi a2, a2, -1
+                beq a2, zero, repeat_tokens_matched
+                addi a0, a0, 1
+                addi a1, a1, 1
+                j repeat_loop_through_token
+  repeat_tokens_do_not_match:
+		ld t3, 16(t3)
+		beqz t3, repeat_exhausted
+		j repeat_next_in_dictionary
+  repeat_tokens_matched:
+		addi t0, t3, 8
+		#t0 has word address
+		mv t1, s7
+		li t2, -1
+  repeat_look_for_match:
+		add t4, t1, t2
+		ld t5, 0(t4)
+		beq t0, t5, repeat_drop_in_repeat
+		addi t2, t2, -1
+		j repeat_look_for_match
+  repeat_drop_in_repeat:
+		#use memory area to create an anonymous secondary word
+		#t4 has address we need to wrap into secondary
+		la t0, dataspaceptr
+		ld t1, 0(t0)
+		addi t2, t1, 8
+		sd t2, 0(t0)
+		sd t4, 0(t1)
+		mv t3, t1
+		tail search_create_inscribe
+  repeat_exhausted:
+		tail search_failed
+
   embed_tick:
 		#embed string - but don't process it in any way
+		la a5, tick_finished_santization
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)				#write out word address

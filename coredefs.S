@@ -64,7 +64,12 @@
 		PUSH t0
 		tail NEXT
 
-		CODEHEADER FILL, PAD, 0x01
+		CODEHEADER REPEAT, PAD, 0x01
+		#do nothing in interpreter mode
+		#compile handled in search_create
+		tail NEXT
+
+		CODEHEADER FILL, _REPEAT, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		beqz t1, fill_done
@@ -474,7 +479,7 @@
   tix_up_done:
 		mv t0, a3
 		mv t1, a2
-		j tick_finished_sanitization
+		jr a5
 
   tix_up_finished:
 		mv t0, a0
