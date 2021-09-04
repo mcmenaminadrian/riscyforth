@@ -64,12 +64,7 @@
 		PUSH t0
 		tail NEXT
 
-		CODEHEADER REPEAT, PAD, 0x01
-		#do nothing in interpreter mode
-		#compile handled in search_create
-		tail NEXT
-
-		CODEHEADER FILL, REPEAT, 0x01
+		CODEHEADER FILL, PAD, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		beqz t1, fill_done
@@ -128,7 +123,11 @@
 		sd t1, 0(sp)
 		tail NEXT
 
-		CODEHEADER MOVE, RSHIFT, 0x01
+		CODEHEADER WHILE, RSHIFT, 0x01
+		#Do nothing in immediate mode
+		tail NEXT
+		
+		CODEHEADER MOVE, WHILE, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		ld t2, 16(sp)

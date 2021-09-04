@@ -231,11 +231,15 @@ _Note: conditional code's outcome is undefined for immediate execution_
 
 _Looping_
 
-**BEGIN**		    ( - ) Mark the start of a simple BEGIN ... END loop (may be nested)
+**BEGIN**		    ( - ) Mark the start of a simple BEGIN ... UNTIL loop (may be nested)
 
-**END**			    (a - ) Mark the end of a simple BEGIN ... END loop (NB: BEGIN and END are effectively nops for immediate mode)
+**UNTIL**		    (a - ) Mark the end of a simple BEGIN ... UNTIL loop (NB: BEGIN and UNTIL are effectively nops for immediate mode)
 
-**WHILE**		    Unconditionally returns to BEGIN in BEGIN ... IF ...(ELSE) .... WHILE (replacing THEN)
+**WHILE**		    (u - ) If u is 0 then control passes to beyond the next REPEAT statement in BEGIN ... WHILE ... REPEAT
+
+**REPEAT**		    ( - ) Returns to BEGIN
+
+**RECURSE**		    ( - ) Recall the current word
 
 **DO**			    (lc - ) Start a loop with c as the current index value and l the limit
 

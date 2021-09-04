@@ -259,8 +259,8 @@
 		tail transition_output_else
 
 
-  transition_if_while:
-		call output_while
+  transition_if_repeat:
+		call output_repeat
 	
   transition_if_then:
 		#standard then
@@ -297,8 +297,8 @@
 		TRANSITION_EPILOGUE
 		tail search_create_inscribe
 
-  transition_then_while:
-		call output_while
+  transition_then_repeat:
+		call output_repeat
 
   transition_then_then:
 		TRANSITION_PROLOGUE
@@ -370,8 +370,8 @@
 		tail search_create_inscribe
 
 
-  output_while:
-		#a0 has WA__WHILE
+  output_repeat:
+		#a0 has WA__REPEAT
                 addi sp, sp, -88
                 sd ra, 80(sp)
 		sd s9, 72(sp)
@@ -387,7 +387,7 @@
 
                 la s3, createwritepoint
                 ld s3, 0(s3)
-                sd a0, 0(s3)				#write out WA__WHILE
+                sd a0, 0(s3)				#write out WA__REPEAT
 
 
                 #now search for WA_BEGIN
@@ -397,42 +397,42 @@
                 la s5, WA_BEGIN
                 mv s6, s3
                 mv s7, zero
-                la s8, WA__WHILE
+                la s8, WA__REPEAT
 		la s9, WA__UNTIL
-  while_check_begin:
+  repeat_check_begin:
                 addi s3, s3, -8
                 ld s4, 0(s3)
-		beq s4, s9, while_skip_loop
-                bne s4, s8, while_keep_checking
-  while_skip_loop:
+		beq s4, s9, repeat_skip_loop
+                bne s4, s8, repeat_keep_checking
+  repeat_skip_loop:
                 addi s7, s7, 1
-                j while_check_next
-  while_keep_checking:
-                beq s5, s4, while_found_begin
-  while_check_next:
+                j repeat_check_next
+  repeat_keep_checking:
+                beq s5, s4, repeat_found_begin
+  repeat_check_next:
                 add s1, s1, -8
                 add s2, s2, 8
-                blt s2, s0, while_check_begin
+                blt s2, s0, repeat_check_begin
                 #we have failed
                 mv a0, zero
-                j real_end_of_while
-  while_found_begin:
-                beqz s7, while_correct_begin
+                j real_end_of_repeat
+  repeat_found_begin:
+                beqz s7, repeat_correct_begin
                 addi s7, s7, -1                         #skip an inner loop
-                j while_check_next
-  while_correct_begin:
+                j repeat_check_next
+  repeat_correct_begin:
                 sd s1, 8(s6)                            #write out offset
                 la s0, createwritepoint
                 addi s6, s6, 16
                 sd s6, 0(s0)
                 #now - are we in a conditional?
                 call get_iffmode
-                beqz a0, almost_end_of_while
+                beqz a0, almost_end_of_repeat
                 SETUP_CONDITIONAL_CALL
                 call increment_current_skip             #we have to account for the literal (skip) if in a conditional
-  almost_end_of_while:
+  almost_end_of_repeat:
                 li a0, 1
-  real_end_of_while:
+  real_end_of_repeat:
                 ld s0, 0(sp)
                 ld s1, 8(sp)
                 ld s2, 16(sp)
