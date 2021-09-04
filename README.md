@@ -60,6 +60,12 @@ _Memory_
 
 **RESIZE**		    (au - bi) Resize memory at a to new block of u cells, return new block address in b, state in i. Existing block is copied to new address.
 
+**CREATE**		    Create a word in dictionary (with no body)
+
+**ALLOT**
+
+**ALIGN**
+
 _Text entry_
 
 **GETSTDIN**                Gets the file pointer for stdin
