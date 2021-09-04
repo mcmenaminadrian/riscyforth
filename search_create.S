@@ -59,21 +59,21 @@
 		#substitute WA__TICK
 		la t3, WA__TICK
 		tail embed_tick
-  searcgh_repeat:
+  search_repeat:
 		la t0, WA_REPEAT
 		bne t3, t0, search_char
 		tail embed_repeat
   search_char:
 		la t0, WA_CHAR
-		bne t3, t0, search_waend
+		bne t3, t0, search_wa_until
 		la t3, WA__CHAR
 		tail embed_tick
-  search_waend:
-		#test for END
-		la t0, WA_END
+  search_wa_until:
+		#test for UNTIL
+		la t0, WA_UNTIL
 		bne t3, t0, search_create_test_variable
 		#insert three instruction simple loop back
-		la t3, WA__END				#substitute
+		la t3, WA__UNTIL			#substitute
 		j search_create_inscribe
   search_create_test_variable:
 		la t0, WA_VARIABLE
@@ -219,16 +219,16 @@
   search_create_inscribe:
 		#update the depth of the current skip if needed
 		call get_iffmode
-		beqz a0, search_create_continue_test_end
+		beqz a0, search_create_continue_test_until
 		SETUP_CONDITIONAL_CALL
 		call increment_current_skip
-  search_create_continue_test_end:
+  search_create_continue_test_until:
 		#test for special case
-		la t0, WA__END
+		la t0, WA__UNTIL
 		bne t0, t3, search_create_continue_inscription
-		#setup call to write additional WA__END stuff
+		#setup call to write additional WA__UNTIL stuff
 		mv a0, t3
-		call compile_in_end
+		call compile_in_until
 		bnez a0, search_create_leave
 		j search_create_bad_ifmode
   search_create_continue_inscription:
@@ -748,7 +748,7 @@ func_test_octal:
 
   embed_repeat:
 		#get the token
-		la a5, repeat_finished_santization	#return address
+		la a7, repeat_finished_sanitization	#return address
 		call tick_start_looking
 		add t1, t1, -1				#space or CR not part of token
 		mv t2, t0
@@ -840,7 +840,6 @@ func_test_octal:
 
   embed_tick:
 		#embed string - but don't process it in any way
-		la a5, tick_finished_santization
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)				#write out word address

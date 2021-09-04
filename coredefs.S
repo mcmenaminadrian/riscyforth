@@ -69,7 +69,7 @@
 		#compile handled in search_create
 		tail NEXT
 
-		CODEHEADER FILL, _REPEAT, 0x01
+		CODEHEADER FILL, REPEAT, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		beqz t1, fill_done
@@ -230,6 +230,7 @@
 		ret
 
   tick_process_found_token:
+		la a7, tick_finished_sanitization
 		addi t1, t1, -1				#space or CR not part of token
 		mv t2, t0
 		sub a0, t1, t0				#will be 0 if token is of length 1 etc
@@ -479,7 +480,7 @@
   tix_up_done:
 		mv t0, a3
 		mv t1, a2
-		jr a5
+		jr a7
 
   tix_up_finished:
 		mv t0, a0

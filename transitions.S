@@ -398,7 +398,7 @@
                 mv s6, s3
                 mv s7, zero
                 la s8, WA__WHILE
-		la s9, WA__END
+		la s9, WA__UNTIL
   while_check_begin:
                 addi s3, s3, -8
                 ld s4, 0(s3)

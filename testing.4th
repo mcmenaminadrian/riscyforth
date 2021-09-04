@@ -248,13 +248,13 @@ EXITTEST2 EXITTEST3 EXITVAR @ 202 = IF ." EXIT passed " ELSE ." EXIT FAILED " TH
 99 >R R> 99 = if ." R> passed " else ." R> FAILED " then cr ;
 
 \ loop
-: TESTBEGINEND
-." Testing BEGIN ... END loop " 5 SPACES
-32 BEGIN DUP EMIT 1+ DUP 127 > END ."  BEGIN ... END passed " CR ;
+: TESTBEGINUNTIL
+." Testing BEGIN ... UNTIL loop " 5 SPACES
+32 BEGIN DUP EMIT 1+ DUP 127 > UNTIL ."  BEGIN ... UNTIL passed " CR ;
 
 : TESTBEGINWHILE
 ." Testing BEGIN ... WHILE " 5 spaces
-32 BEGIN DUP space hex . space decimal DUP 100 < IF DUP EMIT 1+ ELSE DUP 32 - EMIT 1+ WHILE DUP 110 = END ."  BEGIN ... WHILE passed " cr ;
+32 BEGIN DUP space hex . space decimal DUP 100 < IF DUP EMIT 1+ ELSE DUP 32 - EMIT 1+ WHILE DUP 110 = UNTIL ."  BEGIN ... WHILE passed " cr ;
 
 : TESTDOLOOP
 ." Testing DO ... LOOP " 5 spaces
@@ -378,7 +378,7 @@ TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN
 \ Test loops
 : TESTLOOPS
 ." Running tests of looping " cr
-TESTBEGINEND testbeginwhile TESTDOLOOP TESTPLUSLOOP VERIFYIJ VERIFYLEAVE VERIFYRECURSE
+TESTBEGINUNTIL testbeginwhile TESTDOLOOP TESTPLUSLOOP VERIFYIJ VERIFYLEAVE VERIFYRECURSE
 ." Testing of loops complete" CR ;
 
 \ Test Rstack

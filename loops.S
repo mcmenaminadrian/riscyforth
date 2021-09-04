@@ -102,26 +102,26 @@
 		tail NEXT
 
 		CODEHEADER BEGIN, DO, 0x01
-		tail NEXT			#BEGIN and END do nothing in immediate mode
+		tail NEXT			#BEGIN and UNTIL do nothing in immediate mode
 
-		CODEHEADER END, BEGIN, 0x01
+		CODEHEADER UNTIL, BEGIN, 0x01
 		tail NEXT
 
-		CODEHEADER _END, END, 0x0	#subsitituted in compiled
+		CODEHEADER _UNTIL, UNTIL, 0x0	#subsitituted in compiled
 		POP t0
-		bnez t0, end_of_end
+		bnez t0, end_of_until
 		ld t0, 0(s7)
 		add s7, s7, t0
 		tail NEXT
-  end_of_end:
+  end_of_until:
 		add s7, s7, 8
 		tail NEXT
 
-		CODEHEADER WHILE, _END, 0x01
+		CODEHEADER WHILE, _UNTIL, 0x01
 		tail NEXT
 
 		CODEHEADER _WHILE, WHILE, 0x0
-		ld t0, 0(s7)			#similar to _END but jump back is unconditional
+		ld t0, 0(s7)			#similar to _UNTIL but jump back is unconditional
 		add s7, s7, t0
 		tail NEXT
 
@@ -400,7 +400,7 @@
 		tail NEXT
 		
 		
-  compile_in_end:					#a0 has old s7 value
+  compile_in_until:					#a0 has old s7 value
 		addi sp, sp, -80
 		sd ra, 72(sp)
 		sd s8, 64(sp)
@@ -424,7 +424,7 @@
 		la s5, WA_BEGIN
 		mv s6, s3
 		mv s7, zero
-		la s8, WA__END
+		la s8, WA__UNTIL
   end_check_begin:
 		addi s3, s3, -8
 		ld s4, 0(s3)
