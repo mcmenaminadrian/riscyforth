@@ -25,7 +25,28 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADER ABORTCOMM, _ABORTCOMM, 0x01
+		CODEHEADER CLEARSCREEN, _ABORTCOMM, 0x01
+		#Clear the screen go home, reset all settings
+		# \e[2J\ec
+		add sp, sp, -56
+		li t0, 0x63
+		sd t0, 40(sp)
+		li t0, 0x1B
+		sd t0, 32(sp)
+		li t0, 0x4A
+		sd t0, 24(sp)
+		li t0, 0x32
+		sd t0, 16(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x90
+		sd t0, 48(sp)
+		j DISPLAY
+		
+
+		CODEHEADER ABORTCOMM, CLEARSCREEN, 0x01
 		#Print in a string
 		#first of all, get the address and length of the string
 		la t5, INPUT_END

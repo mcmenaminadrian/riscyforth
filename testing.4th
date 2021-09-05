@@ -441,8 +441,9 @@ VERIFYDOT
 
 \ Run all the tests
 : UTS
+CLEARSCREEN	\ Verifies CLEARSCREEN
 DECIMAL
-." Running unit tests " cr
+." Running unit tests (cleared screen verifies CLEARSCREEN)" cr
 STACKOPTESTS
 ." Press enter to continue " GETLINE CR
 BASICSTESTS

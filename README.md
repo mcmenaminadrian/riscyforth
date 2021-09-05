@@ -8,6 +8,8 @@ To understand your rights and obligations with this code please read (version 2 
 
 Riscyforth is still under heavy development and on this page I aim to keep a list of the implemented functions. You'll need to read the code to see the details though.
 
+**CLEARSCREEN**		    Use ANSI terminal codes to clear screen
+
 **LOAD**		    Load (and execute) - use like load /path/to/file
 
 **BYE**                     Quit Riscyforth
