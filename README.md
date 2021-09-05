@@ -160,6 +160,8 @@ _Integer arithmetic_
 
 **MAX**                     Get the maximum of the same
 
+**WITHIN**		    (tlb t) Tests if t is in the range l - b (signed) t is TRUE if yes, FALSE if no
+
 
 _Stack operations are show in diagrammatic form (before -> after). Top of the stack is to the right_
 

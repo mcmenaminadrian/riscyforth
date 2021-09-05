@@ -93,7 +93,32 @@
 		sd t2, 0(sp)
                 tail NEXT
 
-                CODEHEADER NEGATE, SLMOD, 0x01
+		CODEHEADER WITHIN, SLMOD, 0x01
+		#test, low, high
+		ld t2, 0(sp)
+		ld t1, 8(sp)
+		ld t0, 16(sp)		#number being tested
+		addi sp, sp, 16
+		beq t1, t2, within_fail
+		beq t0, t1, within_fail
+		beq t0, t2, within_fail
+		blt t1, t2, within_continue
+		mv t3, t2
+		mv t2, t1
+		mv t1, t3
+  within_continue:
+		blt t0, t1, within_fail
+		bgt t2, t0, within_true
+  within_fail:
+		sd zero, 0(sp)
+		tail NEXT
+  within_true:
+		li a0, -1
+		sd a0, 0(sp)
+		tail NEXT	
+		
+
+                CODEHEADER NEGATE, WITHIN, 0x01
 		ld t0, 0(sp)
                 li t1, -1
                 xor t0, t0, t1
