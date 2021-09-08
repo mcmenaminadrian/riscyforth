@@ -262,7 +262,7 @@ BEGIN DUP 2 > WHILE DUP 5 < WHILE DUP 1+ REPEAT 123 ELSE 345 THEN ;
 ." Testing BEGIN ... WHILE ... REPEAT " 5 spaces
 4 FACTORAL 24 = 6 FACTORAL 3 FACTORAL / 6 5 4 * * = AND IF ." BEGIN ... WHILE ... REPEAT passed easier test "
 ELSE ." BEGIN ... WHILE ... REPEAT FAILED " THEN CR
-." Trying harder test... " 5 SPACES 2 HARDREPEATTEST 345 = 2 = AND IF ." passed " ELSE ." FAILED " THEN CR ;
+." Trying harder test... " 5 SPACES 2 HARDREPEATTEST 345 = 2 = AND IF ." passed " ELSE BRIGHT RED ." FAILED "  RESET THEN CR ;
 
 : TESTDOLOOP
 ." Testing DO ... LOOP " 5 spaces
@@ -372,7 +372,12 @@ DUP BACKROT + DUP . DUP 5000000 < IF RECURSE THEN ;
 ." Verifying RECURSE " 5 SPACES
 ." Fibonacci series: " 0 1 FIBONACCI CR ;
 
-
+\ Colours
+: VERIFYCOLOURS
+BLACK BWHITE ." Verifying colours " CR
+YELLOW BBLUE ." Yellow on blue " 3 spaces GREEN BRED ." Green on red " 3 SPACES CYAN BYELLOW ." Cyan on yellow " CR
+MAGENTA BBLACK BRIGHT ." Going bright... Magenta on black" 3 spaces WHITE BCYAN ." White on cyan" 3 spaces RED BMAGENTA ." Red on magenta " CR
+RESET ." And back to normal..." CR ;
 
 \ Test groupings
 
@@ -444,21 +449,23 @@ VERIFYDOT
 CLEARSCREEN	\ Verifies CLEARSCREEN
 DECIMAL
 ." Running unit tests (cleared screen verifies CLEARSCREEN)" cr
+VERIFYCOLOURS CR
 STACKOPTESTS
-." Press enter to continue " GETLINE CR
-BASICSTESTS
-." Press enter to continue " GETLINE CR
-INTEGERTESTS
-." Press enter to continue " GETLINE CR
-LISTWORDSTESTS
-." Press enter to continue " GETLINE CR
-TESTCONDITIONALS
-." Press enter to continue " GETLINE CR
-RSTACKTESTS
-." Press enter to continue " GETLINE CR
-TESTLOOPS
-." Press enter to continue " GETLINE CR
-TESTMEMORY
-." Press enter to continue " GETLINE CR
+YELLOW BRIGHT
+." Press enter to continue " RESET GETLINE CR
+BASICSTESTS YELLOW BRIGHT
+." Press enter to continue " RESET GETLINE CR
+INTEGERTESTS YELLOW BRIGHT
+." Press enter to continue " RESET GETLINE CR
+LISTWORDSTESTS YELLOW BRIGHT
+." Press enter to continue " RESET GETLINE CR
+TESTCONDITIONALS YELLOW BRIGHT
+." Press enter to continue " RESET GETLINE CR
+RSTACKTESTS YELLOW BRIGHT
+." Press enter to continue " RESET GETLINE CR
+TESTLOOPS YELLOW BRIGHT
+." Press enter to continue " RESET GETLINE CR
+TESTMEMORY YELLOW BRIGHT
+." Press enter to continue " RESET GETLINE CR
  ABORT" Verifying ABORTCOMM and leaving tests with this message "  ." ABORTCOMM has FAILED"
 ;
