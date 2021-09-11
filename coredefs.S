@@ -28,7 +28,7 @@
 		CODEHEADER CLEARSCREEN, _ABORTCOMM, 0x01
 		#Clear the screen go home, reset all settings
 		# \e[2J\ec
-		add sp, sp, -56
+		addi sp, sp, -56
 		li t0, 0x63
 		sd t0, 40(sp)
 		li t0, 0x1B
@@ -44,9 +44,332 @@
 		li t0, 0x90
 		sd t0, 48(sp)
 		j DISPLAY
+
+		CODEHEADER YELLOW, CLEARSCREEN, 0x01
+		#Yellow foreground text
+		#\e[33m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x33
+		sd t0, 16(sp)
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+		CODEHEADER WHITE, YELLOW, 0x01
+		#Normal white on black text
+		#\e[37m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x33
+		sd t0, 16(sp)
+		li t0, 0x37
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
 		
 
-		CODEHEADER ABORTCOMM, CLEARSCREEN, 0x01
+		CODEHEADER RED, WHITE, 0x01
+		#red text
+		#\e[31m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x33
+		sd t0, 16(sp)
+		li t0, 0x31
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+
+		CODEHEADER GREEN, RED, 0x01
+		#green text
+		#\e[32m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x33
+		sd t0, 16(sp)
+		li t0, 0x32
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+		CODEHEADER BLUE, GREEN, 0x01
+		#blue text
+		#\e[34m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x33
+		sd t0, 16(sp)
+		li t0, 0x34
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+		CODEHEADER MAGENTA, BLUE, 0x01
+		#magenta text
+		#\e[35m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x33
+		sd t0, 16(sp)
+		li t0, 0x35
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+		CODEHEADER CYAN, MAGENTA, 0x01
+		#cyan text
+		#\e[36m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x33
+		sd t0, 16(sp)
+		li t0, 0x36
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+		CODEHEADER BYELLOW, CYAN, 0x01
+		#Yellow background
+		#\e[43m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x34
+		sd t0, 16(sp)
+		li t0, 0x33
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+		CODEHEADER BWHITE, BYELLOW, 0x01
+		#white background
+		#\e[47m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x34
+		sd t0, 16(sp)
+		li t0, 0x37
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+		
+
+		CODEHEADER BRED, BWHITE, 0x01
+		#red background
+		#\e[41m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x34
+		sd t0, 16(sp)
+		li t0, 0x31
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+
+		CODEHEADER BGREEN, BRED, 0x01
+		#green background
+		#\e[42m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x34
+		sd t0, 16(sp)
+		li t0, 0x32
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+		CODEHEADER BBLUE, BGREEN, 0x01
+		#blue background
+		#\e[44m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x34
+		sd t0, 16(sp)
+		li t0, 0x34
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+		CODEHEADER BMAGENTA, BBLUE, 0x01
+		#magenta background
+		#\e[45m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x34
+		sd t0, 16(sp)
+		li t0, 0x35
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+		CODEHEADER BCYAN, BMAGENTA, 0x01
+		#cyan background
+		#\e[46m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x34
+		sd t0, 16(sp)
+		li t0, 0x36
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+		CODEHEADER BLACK, BCYAN, 0x01
+		#black text
+		#\e[30m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x33
+		sd t0, 16(sp)
+		li t0, 0x30
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+
+		CODEHEADER BBLACK, BLACK, 0x01
+		#black background
+		#\e[40m
+		addi sp, sp, -48
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x34
+		sd t0, 16(sp)
+		li t0, 0x30
+		sd t0, 24(sp)
+		li t0, 0x6D
+		sd t0, 32(sp)
+		li t0, 0x90
+		sd t0, 40(sp)
+		j DISPLAY
+
+		CODEHEADER BRIGHT, BBLACK, 0x01
+		#bright
+		#\e[1m
+		addi sp, sp, -40
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x31
+		sd t0, 16(sp)
+		li t0, 0x6D
+		sd t0, 24(sp)
+		li t0, 0x90
+		sd t0, 32(sp)
+		j DISPLAY
+
+		CODEHEADER RESET, BRIGHT, 0x01
+		#reset display attributes
+		#\e[0m
+		addi sp, sp, -40
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x30
+		sd t0, 16(sp)
+		li t0, 0x6D
+		sd t0, 24(sp)
+		li t0, 0x90
+		sd t0, 32(sp)
+		j DISPLAY
+
+		CODEHEADER ABORTCOMM, RESET, 0x01
 		#Print in a string
 		#first of all, get the address and length of the string
 		la t5, INPUT_END
