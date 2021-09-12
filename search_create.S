@@ -67,14 +67,9 @@
   search_wa_until:
 		#test for UNTIL
 		la t0, WA_UNTIL
-		bne t3, t0, search_create_test_variable
+		bne t3, t0, search_create_test_constant
 		#insert three instruction simple loop back
 		la t3, WA__UNTIL			#substitute
-		j search_create_inscribe
-  search_create_test_variable:
-		la t0, WA_VARIABLE
-		bne t3, t0, search_create_test_constant
-		la t3, WA__VARIABLE
 		j search_create_inscribe
   search_create_test_constant:
 		la t0, WA_CONSTANT

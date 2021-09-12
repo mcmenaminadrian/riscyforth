@@ -64,6 +64,19 @@
 		li a5, 0
 		li a7, 222
 		ecall
+		#sapce for the create dictionary words
+		mv a0, zero
+		li a1, BIGGERSPACE
+		li a2, 0x07
+		li a3, 0x22
+		li a4, -1
+		li a5, 0
+		li a7, 222
+		ecall
+		la t0, createdictionaryhead
+		la t1, createdictionarybase
+		sd a0, 0(t0)
+		sd a0, 0(t1)
 		#set up the simple stack pointer for the decision creation
 		mv t0, a0
 		add t0, t0, a1

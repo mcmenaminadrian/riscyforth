@@ -111,45 +111,32 @@
 		WRITESTRINGR t0, t1
 		tail NEXT
 
-		CODEHEADER _VARIABLE, CONSTANT, 0x0
-		#CONSTANT in constant.S
-		li t1, 1
-		sd t1, VARIABLEFLAG, t0		      	#we are creating/updating a variable in create mode
-		ld t2, 8(s7)				#length
-		addi a1, s7, 16				#points to name
-		j variable_create_mode			#search for match
-		
-                CODEHEADER VARIABLE, _VARIABLE, 0x01
-                #create a variable in the variable dictionary
-                #first get the name and check it's not already present
-		#variable stack grows downwards but each entry in forwards direction
-		#
-              	ld a1, INPUT_END
-                ld a0, INPUT_START
-                addi t0, a0, 1                        #account for minimal input
-                bltu t0, a1, variable_have_data       #buffer has data
-  variable_all_over:
-                tail NEXT
+                CODEHEADER VARIABLE, DISPLAY, 0x01
+		ld a1, INPUT_END
+		ld a0, INPUT_START
+		addi t0, a0, 1
+		bltu t0, a1, variable_have_data
+		tail NEXT				#nothing to parse
   variable_have_data:
-                mv t0, a0                             #t0 tracks start of token, t1 the end
-                addi t2, zero, 0x20                   #t2 space
-                addi t3, zero, 0x0A                   #t3 CR
-  variable_look_for_start:
-                lbu t4, 0(t0)
-                beq t4, t2, variable_keep_going
-                bne t4, t3, variable_found_start
-                j variable_all_over
-  variable_keep_going:
-                addi t0, t0, 1
-                bltu t0, a1, variable_look_for_start
-                j variable_all_over                   #got nothing
-  variable_found_start:
-		#variable name must start with a letter
-		li a3, 0x41									  #A
-		bge t4, a3, variable_good_start
-		#start with a bad character - report error
+		call utility_find_string
+		beqz a0, variable_gone_bad
+		#now have a0 with start, a1 with end, a2 with length
+		mv t0, a1
+		add t0, t0, 1
+		sd t1, INPUT_START, t5			#update read in point
+		call utility_sanitize_string		
+  variable_finished_sanitization:
+                sd a0, TOKEN_START, t2
+                sd a1, TOKEN_END, t2
+		#now check this is not a keyword or a number
+		call utility_check_dictionary_match
+		bnez a3, variable_gone_bad
+  variable_create_name:
+		#write out a word with the variable name that will return the address
+
+		
   variable_gone_bad:
-            	la t0, NotOk_msg
+		la t0, NotOk_msg
                 addi t1, zero, 24                     #error message is 24 chars long 
                 WRITESTRINGR t0, t1
                 li a0, 1
@@ -163,247 +150,3 @@
                 addi t0, zero, 1
                 sd t0, OKSTATUS, t1
                 tail NEXT
-  variable_good_start:
-                mv t1, t0                             #t1 to track end of token
-  variable_advance_search:
-                addi t1, t1, 1
-                bgeu t1, a1, variable_end_token
-                lbu t4, 0(t1)
-                beq t4, t2, variable_end_token
-                beq t4, t3, variable_end_token
-                j variable_advance_search
-  variable_end_token:
-                sd t1, INPUT_START, t5                #update the end point for subsequent searches
-                addi t1, t1, -1                       # space or NL not part of token
-                mv t2, t0
-                li t5, 0x61                   #lowercase a
-                li t6, 0x7B                   #lowercase z + 1
-  variable_sanity_test:
-                lbu t4, 0(t2)
-                blt t4, t5, variable_next_sane
-                blt t4, t6, variable_sanitize
-                j variable_next_sane
-  variable_sanitize:
-                addi t3, zero, 0x20
-                xor t4, t4, t3
-                sb t4, 0(t2)
-  variable_next_sane:
-                addi t2, t2, 1
-                blt t1, t2, variable_finished_sanitization
-                j variable_sanity_test
-  variable_finished_sanitization:
-                sd t0, TOKEN_START, t2
-                sd t1, TOKEN_END, t2
-		#now check this is not a keyword or a number
-                sub t2, t1, t0
-                addi t2, t2, 1                        #t2 has length of token
-		li t3, NAMEMAXLEN
-		bge t3, t2, variable_length_good
-		j variable_gone_bad
-  variable_length_good:
-                la t4, dictionary
-                ld t3, 0(t4)
-  variable_next_in_dictionary:
-                ld t4, 24(t3)
-                bne t4, t2, variable_tokens_do_not_match
-                add a0, t3, 32                        #a0 now points into the name in the dictionary
-                mv a1, t0                             #a1 points to the name in the buffer
-                mv a2, t2                             #a2 checks how far we've gone 
-  variable_loop_through_token:
-                lbu t5, 0(a0)
-                lbu t6, 0(a1)
-                bne t5, t6, variable_tokens_do_not_match
-                addi a2, a2, -1
-                beq a2, zero, variable_tokens_matched
-                addi a0, a0, 1
-                addi a1, a1, 1
-                j variable_loop_through_token
-  variable_tokens_do_not_match:
-                ld t3, 16(t3)                          #read the pointer to the next TIL command
-                beq t3, zero, variable_search_scan_variable_stack        #at the end of the dictionary
-                j variable_next_in_dictionary
-
-  variable_tokens_matched:
-		#cannot have variable with same name as word
-		j variable_gone_bad
-
-  variable_create_mode:
-                #now scan for a variable name
-		sd a1, TOKEN_START, t0
-		add a1, a1, t2
-		addi a1, a1, -1
-		sd a1, TOKEN_END, t0		
-		la t4, BOTTOM_VARS
-		la t0, TOP_VARS
-                ld t2, 0(t4)
-		ld t3, 0(t0)
-		bne t2, t3, variable_consider_update_backwards
-		j variable_backwards_var_no_match
-
- #enable update of existing variable
-  variable_search_scan_variable_stack:
-                #now scan for a variable name
-		la t4, BOTTOM_VARS
-		la t0, TOP_VARS
-                ld t2, 0(t4)
-		ld t3, 0(t0)
-		bne t2, t3, variable_consider_update
-		j variable_search_var_no_match	      #no variables have been defined yet
-  variable_consider_update:
-		bne zero, a5, variable_consider_update_backwards
-                ld t0, TOKEN_START                    #token values are valid
-                ld t1, TOKEN_END
-                sub t2, t1, t0
-                addi t2, t2, 1                        #t2 has length of token
-		ld t4, 0(t4)
-		addi t4, t4, 48
-                ld t3, 0(t4)			      #check value at first flag
-		j variable_search_var_next_check
-
-  variable_consider_update_backwards:
-                ld t0, TOKEN_END
-		ld t1, TOKEN_START
-		sub t2, t0, t1
-		add t2, t2, 1
-		ld t4, 0(t4)
-  variable_backwards_keep_going:
-		add t4, t4, 48
-		la t3, TOP_VARS
-		ld t3, 0(t3)
-		bgt t4, t3, variable_backwards_var_no_match
-		ld t3, 0(t4)
-		li a3, 0xbaadcafe
-		beq t3, a3, variable_search_var_next_backwards_in_dictionary
-		j variable_gone_bad
-  variable_search_var_next_backwards_in_dictionary:
-		ld t3, -8(t4)
-		bne t3, t2, variable_search_backwards_tokens_do_not_match
-		addi a0, t4, -9
-		mv a1, t1
-		mv a2, t2			#how far
-  variable_search_backwards_loop:
-  		lbu t5, 0(a0)
-		lbu t6, 0(a1)
-		bne t5, t6, variable_search_backwards_tokens_do_not_match
-		addi a2, a2, -1			#countdown size
-		beq a2, zero, variable_search_var_tokens_matched
-		addi a0, a0, -1
-		addi a1, a1, 1
-		j variable_search_backwards_loop
-  variable_search_backwards_tokens_do_not_match:
-		j variable_backwards_keep_going
-
-  variable_search_var_next_check:
-		li a3, 0xbaadcafe
-		beq t3, a3, variable_search_var_next_in_dictionary
-		j variable_gone_bad
-  variable_search_var_next_in_dictionary:
-                ld t3, -8(t4)
-		#compare lengths
-                bne t3, t2, variable_search_var_tokens_do_not_match
-                addi a0, t4, -9                        #a0 now points into the name in the var stack
-                mv a1, t0                             #a1 points to the name in the buffer
-                mv a2, t2                             #a2 checks how far we've gone 
-
-  variable_search_var_loop_through_token:
-                lbu t5, 0(a0)
-                lbu t6, 0(a1)
-                bne t5, t6, variable_search_var_tokens_do_not_match
-                addi a2, a2, -1
-                beq a2, zero, variable_search_var_tokens_matched
-                addi a0, a0, -1
-                addi a1, a1, 1
-                j variable_search_var_loop_through_token
-
-  variable_search_var_tokens_do_not_match:
-                add t4, t4, 48                        #advance up the var stack
-		la t3, TOP_VARS
-		ld t3, 0(t3)
-		bgt t4, t3, variable_search_var_no_match
-		ld t3, 0(t4)
-                j variable_search_var_next_check
-
-  variable_search_var_tokens_matched:
-		#update the value
-		#POP t0			# assign from stack
-		#sd t0, -32(t4)
-		sd zero, -32(t4)	# initialise or reinitialise to zero
-		tail NEXT
-  
-  variable_backwards_var_no_match:
-                ld t1, TOKEN_START                    #reset t2
-                ld t0, TOKEN_END
-                sub t2, t0, t1
-                addi t2, t2, 1                        #t2 has length of token
-		la t1, BOTTOM_VARS
-		ld t3, 0(t1)
-		ld t4, 0(t3)
-		beq zero, t4, variable_backwards_empty_space
-		j variable_gone_bad			#error in var stack
-  variable_backwards_empty_space:
-		li t1, 0xbaadcafe			#mark in use
-		sd t1, 0(t3)
-		sd t2, -ADDRWIDTH(t3)			#length - stack grows down
-		mv t4, t3
-		addi t3, t3, -(ADDRWIDTH + 1)
-		mv a3, t2
-		#reset a1
-		ld a1, TOKEN_START
-  variable_backwards_write_out_name:
-		lbu t5, 0(a1)
-		sb t5, 0(t3)
-		addi t3, t3, -1
-		addi a1, a1, 1
-		addi a3, a3, -1
-		bne a3, zero, variable_backwards_write_out_name
-		addi t4, t4, -(NAMEMAXLEN + INSTWIDTH2)
-		#POP t0					#assign from stack
-		sd zero, 0(t4)
-		#sd t0, 0(t4)
-		#update bottom pointer
-		la t1, BOTTOM_VARS
-		ld t3, 0(t1)
-		addi t3, t3, -48
-		sd t3, 0(t1)
-		tail NEXT
-		
-		
-  variable_search_var_no_match:
-                ld t0, TOKEN_START                    #reset t2
-                ld t1, TOKEN_END
-                sub t2, t1, t0
-                addi t2, t2, 1                        #t2 has length of token
-  variable_varin_entry_point:
-		la t1, BOTTOM_VARS
-		ld t3, 0(t1)
-		ld t4, 0(t3)
-		beq zero, t4, variable_empty_space
-		j variable_gone_bad			#error in var stack
-  variable_empty_space:
-		li t1, 0xbaadcafe			#mark in use
-		sd t1, 0(t3)
-		sd t2, -ADDRWIDTH(t3)			#length - stack grows down
-		mv t4, t3
-		addi t3, t3, -(ADDRWIDTH + 1)
-		mv a3, t2
-  variable_write_out_name:
-		#reset a1
-                mv a1, t0
-  variable_loop_write_out_name:
-		lbu t5, 0(a1)
-		sb t5, 0(t3)
-		addi t3, t3, -1
-		addi a1, a1, 1
-		addi a3, a3, -1
-		bne a3, zero, variable_loop_write_out_name
-		addi t4, t4, -(NAMEMAXLEN + INSTWIDTH2)
-		#POP t0					#assign from stack
-		#sd t0, 0(t4)
-		sd zero, 0(t4)				#set variable to zero on creation
-		#update bottom pointer
-		la t1, BOTTOM_VARS
-		ld t3, 0(t1)
-		addi t3, t3, -48
-		sd t3, 0(t1)
-		tail NEXT
-
