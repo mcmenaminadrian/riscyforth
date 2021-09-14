@@ -133,6 +133,24 @@
 		bnez a3, variable_gone_bad
   variable_create_name:
 		#write out a word with the variable name that will return the address
+		#get the address we'll return
+		call utility_write_function_header
+		la a1, dataspaceptr
+		li a1, 0(t0)
+		call utility_write_number_to_stack
+		#and get out
+		la a1, NEXT
+		call utility_write_out_call_function
+		#now check if we are 8 bit aligned on writing address
+		li t0, 0x07
+		and t1, a0, t0
+		beqz t1, variable_done
+		li t2, 0x08
+		sub t3, t2, t1
+		add a0, a0, t3
+		la t4, createwritepoint
+		sd a0, 0(t4)
+		
 
 		
   variable_gone_bad:
