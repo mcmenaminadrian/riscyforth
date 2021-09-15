@@ -148,3 +148,5 @@
     .include "memoryallocator.S"
     .balign 8
     .include "memory.S"
+    .balign 8
+    .include "utilities.S"

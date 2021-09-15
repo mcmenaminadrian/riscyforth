@@ -2,7 +2,7 @@
 .equ CREATEOFFSET,	160
 
 
-		CODEHEADER EMIT, VARIABLE, 0x01
+		CODEHEADER EMIT, CONSTANT, 0x01
 		li a0, 1
 		mv a1, sp
 		li a2, 1

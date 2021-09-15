@@ -135,21 +135,37 @@
 		#write out a word with the variable name that will return the address
 		#get the address we'll return
 		call utility_write_function_header
-		la a1, dataspaceptr
-		li a1, 0(t0)
+		la a3, dataspaceptr
+		ld a1, 0(a3)
+		#check alignment
+		li t0, 0x07
+		li t2, 0x08
+		and t1, a1, t0
+		beqz t1, variable_advance_alloc
+		sub t3, t2, t1
+		add a1, a1, t3
+  variable_advance_alloc:
+		add a4, a1, t2
+		sd a4, 0(a3)
 		call utility_write_number_to_stack
 		#and get out
 		la a1, NEXT
 		call utility_write_out_call_function
 		#now check if we are 8 bit aligned on writing address
-		li t0, 0x07
 		and t1, a0, t0
 		beqz t1, variable_done
-		li t2, 0x08
 		sub t3, t2, t1
 		add a0, a0, t3
+  variable_done:
 		la t4, createwritepoint
 		sd a0, 0(t4)
+		la t0, newdictionary
+		la t2, dictionary
+		ld t3, 0(t0)			      #load address of new word
+		sd t3, 0(t2)			      #store address of new word as start for dictionary
+		sd a0, 0(t0)			      #update address we will writenext word to
+		fence.i
+		tail NEXT						#and out
 		
 
 		

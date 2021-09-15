@@ -1,4 +1,4 @@
-		CODEHEADER _CONSTANT, DISPLAY, 0x0
+		CODEHEADER _CONSTANT, VARIABLE, 0x0
                 li t1, 1
                 sd t1, VARIABLEFLAG, t0                 #we are creating/updating a constant in create mode
                 ld t2, 8(s7)                            #length

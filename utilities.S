@@ -51,7 +51,7 @@
 			ld ra, 0(sp)
 			addi sp, sp, 40
 			ret
-  utility_found_string_failed:
+  utility_find_string_failed:
 			mv a0, zero
 			mv a1, zero
 			mv a2, zero
