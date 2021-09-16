@@ -91,6 +91,7 @@
 			ld s1, 16(sp)
 			ld s0, 8(sp)
 			ld ra, 0(sp)
+			addi sp, sp, 48
 			ret
 
   #a0 has start
