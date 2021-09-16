@@ -220,9 +220,6 @@
 			sd s3, 32(sp)
 			sd s4, 40(sp)
 			sd s5, 48(sp)
-			la s0, CREATEFLAG
-			li s1, 0x01
-			sd s1, 0(s0)				#set MODE to 1 (compile)
 			la s1, newdictionary
 			ld s3, 0(s1)
 			li s2, 0x01
@@ -232,7 +229,7 @@
 			la s0, dictionary
 			ld s1, 0(s0)
 			sd s1, 16(s3)				#words address of previous word
-			sd zero, 24(s3)				#zero length
+			sd a1, 24(s3)				#length
 			li s2, 0XFFFFFFFFFFFFFFFF		#now fill in name space
 			sd s2, 32(s3)
 			sd s2, 40(s3)
@@ -248,13 +245,13 @@
 			j utility_write_header_write_out_name
   utility_write_header_name_written:
 			add a0, s3, 56
-			sd ra, 0(sp)
-			sd s0, 8(sp)
-			sd s1, 16(sp)
-			sd s2, 24(sp)
-			sd s3, 32(sp)
-			sd s4, 40(sp)
-			sd s5, 48(sp)
+			ld ra, 0(sp)
+			ld s0, 8(sp)
+			ld s1, 16(sp)
+			ld s2, 24(sp)
+			ld s3, 32(sp)
+			ld s4, 40(sp)
+			ld s5, 48(sp)
 			addi sp, sp, 56
 			ret
 			

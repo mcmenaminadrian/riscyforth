@@ -126,14 +126,16 @@
 		sd t1, INPUT_START, t5			#update read in point
 		call utility_sanitize_string		
   variable_finished_sanitization:
-                sd a0, TOKEN_START, t2
-                sd a1, TOKEN_END, t2
+		la t4, INPUT_START
+		addi t5, a1, 1
+		sd t5, 0(t4)
 		#now check this is not a keyword or a number
 		call utility_check_dictionary_match
 		bnez a3, variable_gone_bad
   variable_create_name:
 		#write out a word with the variable name that will return the address
 		#get the address we'll return
+		mv a1, a2
 		call utility_write_function_header
 		la a3, dataspaceptr
 		ld a1, 0(a3)
@@ -160,9 +162,9 @@
 		la t4, createwritepoint
 		sd a0, 0(t4)
 		la t0, newdictionary
-		la t2, dictionary
-		ld t3, 0(t0)			      #load address of new word
-		sd t3, 0(t2)			      #store address of new word as start for dictionary
+		la t1, dictionary
+		ld t2, 0(t0)
+		sd t2, 0(t1)
 		sd a0, 0(t0)			      #update address we will writenext word to
 		fence.i
 		tail NEXT						#and out
