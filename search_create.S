@@ -284,9 +284,10 @@
 		#test for address #
 		beq t4, a5, search_create_read_address
 		li a5, 0x3A 				#:
-		# have to treat as a variable
-		bge t4, a5, search_create_assign_variable
-		#assume we have a number
+		#if not a number then a fail 
+		bleu t4, a5, search_create_handle_number
+		j variable_gone_bad
+  search_create_handle_number:
 		ld t2, CURRENT_BASE
 		li t3, 16
 		beq t2, t3, search_create_check_hex
@@ -321,61 +322,6 @@
 		mv a3, t1
 		call func_test_octal
 		j search_create_test_func_result
-
-  search_create_assign_variable:
-		#word address for VARIN function
-		#then write out would-be variable name (up to 24 chars)
-		la t3, WA__VARIN
-		la a0, createwritepoint
-		ld a1, 0(a0)
-		sd t3, 0(a1)			      #write out word address in definition
-		addi a1, a1, 8
-		sd a1, 0(a0)
-		#write out var name
-		#t0 holds start
-		#t1 holds end
-		#t2 holds length
-		mv a2, t2
-		mv a3, t0
-		#write out length
-		sd a2, 0(a1)
-		addi a1, a1, 8
-  search_create_raw_var_name:
-		lb t5, 0(a3)
-		sb t5, 0(a1)
-		addi a1, a1, 1
-		addi a3, a3, 1
-		addi a2, a2, -1
-		bne a2, zero, search_create_raw_var_name
-		li a2, 24
-		sub a2, a2, t2
-		li t5, 0x0A
-  search_create_ff_var_name:
-		sb t5, 0(a1)
-		addi a1, a1, 1
-		addi a2, a2, -1
-		bne a2, zero, search_create_ff_var_name
-		#update createwritepoint and bail
-		la t0, createwritepoint
-		sd a1, 0(t0)
-		la s7, outer_loop_tokenize
-		#update the depth of the current skip if needed
-		call get_iffmode
-		beqz a0, search_create_varin_go
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip
-
-  search_create_varin_go:
-		fence.i
-		tail NEXT
 
   search_create_read_address:
 		#hash at first address
@@ -645,97 +591,6 @@ func_test_octal:
 		mv a2, s7
 		j func_return_hex		#success
 
-
-  varin_scan_stack:
-		#come here with t3 pointing to the word with length
-		ld t2, 0(t3)			#t2 holds length
-		mv a5, t3			#store t3
-		mv t0, t3
-		addi t0, t0, 8			#t0 now points to name
-		la t4, BOTTOM_VARS
-		ld t3, 0(t4)
-		addi t3, t3, 48
-  varin_next_check:
-		ld t4, 0(t3)
-		li a3, 0xbaadcafe
-		beq t4, a3, varin_next_in_dictionary
-		j varin_no_match
-  varin_next_in_dictionary:
-		ld t4, -8(t3)
-		#compare lengths
-		bne t4, t2, varin_tokens_do_not_match
-                add a0, t3, -9                        #a0 now points into the name in the var stack
-                mv a1, t0                             #a1 points to the name in the buffer
-                mv a2, t2                             #a2 checks how far we've gone 
-
-  varin_loop_through_token:
-                lb t5, 0(a0)
-                lb t6, 0(a1)
-                bne t5, t6, varin_tokens_do_not_match
-                addi a2, a2, -1
-                beq a2, zero, varin_tokens_matched
-                addi a0, a0, -1
-                addi a1, a1, 1
-                j varin_loop_through_token
-  varin_tokens_do_not_match:
-                add t3, t3, 48                        #advance up the var stack
-                la t4, TOP_VARS
-                ld t4, 0(t4)
-                bgt t3, t4, varin_no_match
-                j varin_next_check
-
-  varin_tokens_matched:
-                #put variable address on the stack
-		addi t4, t3, -32
-                PUSH t4
-                tail NEXT
-  varin_no_match:
-  		#now check constants
-		mv t3, a5			#restore t3
-  conin_scan_stack:
-		#come here with t3 pointing to the word with length
-		ld t2, 0(t3)			#t2 holds length
-		mv t0, t3
-		addi t0, t0, 8			#t0 now points to name
-		la t4, BOTTOM_CONS
-		ld t3, 0(t4)
-		addi t3, t3, 48
-  conin_next_check:
-		ld t4, 0(t3)
-		li a3, 0xbaadcafe
-		beq t4, a3, conin_next_in_dictionary
-		j varin_failed
-  conin_next_in_dictionary:
-		ld t4, -8(t3)
-		#compare lengths
-		bne t4, t2, conin_tokens_do_not_match
-                add a0, t3, -9                        #a0 now points into the name in the var stack
-                mv a1, t0                             #a1 points to the name in the buffer
-                mv a2, t2                             #a2 checks how far we've gone 
-
-  conin_loop_through_token:
-                lb t5, 0(a0)
-                lb t6, 0(a1)
-                bne t5, t6, conin_tokens_do_not_match
-                addi a2, a2, -1
-                beq a2, zero, conin_tokens_matched
-                addi a0, a0, -1
-                addi a1, a1, 1
-                j conin_loop_through_token
-  conin_tokens_do_not_match:
-                add t3, t3, 48                        #advance up the var stack
-                la t4, TOP_CONS
-                ld t4, 0(t4)
-                bgt t3, t4, conin_no_match
-                j conin_next_check
-
-  conin_tokens_matched:
-		#put the value on the stack
-		ld t4, -32(t3)
-                PUSH t4
-                tail NEXT
-  conin_no_match:
-		j varin_failed
 
   embed_tick:
 		#embed string - but don't process it in any way

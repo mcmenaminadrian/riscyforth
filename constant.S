@@ -9,19 +9,12 @@
   constant_have_data:
 		call utility_find_string
 		beqz a0, constant_gone_bad
-		#now have a0 with start, a1 with end, a2 with length
-		mv t0, a1
-		add t0, t0, 1
-		sd t1, INPUT_START, t5			#update read in point
+		#now have a0 with start, a1 with end + 1, a2 with length
+		sd a1, INPUT_START, t5			#update read in point
 		call utility_sanitize_string		
-  constant_finished_sanitization:
-		la t4, INPUT_START
-		addi t5, a1, 1
-		sd t5, 0(t4)
 		#now check this is not a keyword or a number
 		call utility_check_dictionary_match
 		bnez a3, constant_gone_bad
-  constant_create_name:
 		#write out a word with the constant name that will return the constant
 		mv a1, a2
 		call utility_write_function_header

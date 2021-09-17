@@ -44,39 +44,7 @@
 		addi s7, s7, ADDRWIDTH
 		tail NEXT
 
-		CODEHEADER _VARIN, LITERALADDR, 0x0
-		ld t0, VARIABLEFLAG
-		beq zero, t0, varin_normal_start
-		sd zero, VARIABLEFLAG, t0
-		addi s7, s7, 32
-		tail NEXT
-
-		CODEHEADER VARIN, _VARIN, 0x0
-		#Look for a variable
-		#and place its value on the stack if it exists
-		#also handle variable creation update in create mode
-		
-  varin_normal_start:
-		mv t3, s7
-		ld t0, 0(s7)				#t0 nw holds the length
-		beq t0, zero, varin_failed_zero_length
-		addi s7, s7, 32				#name length and name itself
-		j varin_scan_stack
-  varin_failed_zero_length:
-		PRINT zerolen_varin
-		WRITECR
-		tail NEXT
-  varin_failed:
-		mv t0, s7
-		addi t0, t0, -32
-		ld t1, 0(t0)
-		addi t0, t0, 1
-		WRITESTRINGR t0, t1
-		WRITECR
-		PRINT failed_varin
-		tail NEXT
-
-		CODEHEADER TYPE, VARIN, 0x01
+		CODEHEADER TYPE, LITERALADDR, 0x01
 		ld t0, 0(sp)
 		bnez t0, type_continue
 		tail NEXT
@@ -120,19 +88,12 @@
   variable_have_data:
 		call utility_find_string
 		beqz a0, variable_gone_bad
-		#now have a0 with start, a1 with end, a2 with length
-		mv t0, a1
-		add t0, t0, 1
-		sd t1, INPUT_START, t5			#update read in point
+		#now have a0 with start, a1 with end+1, a2 with length
+		sd a1, INPUT_START, t5			#update read in point
 		call utility_sanitize_string		
-  variable_finished_sanitization:
-		la t4, INPUT_START
-		addi t5, a1, 1
-		sd t5, 0(t4)
 		#now check this is not a keyword or a number
 		call utility_check_dictionary_match
 		bnez a3, variable_gone_bad
-  variable_create_name:
 		#write out a word with the variable name that will return the address
 		#get the address we'll return
 		mv a1, a2
