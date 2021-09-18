@@ -97,6 +97,7 @@
 		#write out a word with the variable name that will return the address
 		#get the address we'll return
 		mv a1, a2
+		li a5, 0x08				#8 for a variable
 		call utility_write_function_header
 		la a3, dataspaceptr
 		ld a1, 0(a3)
@@ -127,7 +128,6 @@
 		ld t2, 0(t0)
 		sd t2, 0(t1)
 		sd a0, 0(t0)			      #update address we will writenext word to
-		fence.i
 		tail NEXT						#and out
 		
 

@@ -98,6 +98,7 @@
   #a1 has end
   #a2 has length
   #a3 returns 0 on success
+  #a4 holds address
   utility_check_dictionary_match:
 			addi sp, sp, -56
 			sd ra, 0(sp)
@@ -115,6 +116,7 @@
 			la s0, dictionary
 			ld s1, 0(s0)
   utility_check_dictionary_match_check_word:
+			mv a4, s1
 			ld s2, 24(s1)		#check length
 			bne s2, a2, utility_check_dictionary_match_nomatch
 			addi s3, s1, 32		#s3 now points at name in dictionary
@@ -206,11 +208,13 @@
 			ld s4, 40(sp)
 			ld s5, 48(sp)
 			addi sp, sp, 56
+			fence.i
 			ret
 			
 				
   #a0 holds start of name
   #a1 holds length of name
+  #a5 holds value of header
   #a0 returns write point
   utility_write_function_header:
 			addi sp, sp, -56
@@ -223,7 +227,7 @@
 			sd s5, 48(sp)
 			la s1, newdictionary
 			ld s3, 0(s1)
-			li s2, 0x01
+			mv s2, a5
 			sd s2, 0(s3)				#flag
 			addi s2, s3, 0x38			#word address of new word
 			sd s2, 8(s3)
@@ -254,6 +258,7 @@
 			ld s4, 40(sp)
 			ld s5, 48(sp)
 			addi sp, sp, 56
+			fence.i
 			ret
 			
 			
@@ -323,4 +328,5 @@
 			ld s4, 40(sp)
 			ld s5, 48(sp)
 			addi sp, sp, 56
+			fence.i
 			ret

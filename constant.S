@@ -1,4 +1,44 @@
-		CODEHEADER CONSTANT, VARIABLE, 0x01
+#riscyforth is copyright (c) Adrian McMenamin, 2021
+#code is licenced for resuse under the terms of version 2 of the GNU GPL
+
+		CODEHEADER TO, VARIABLE, 0x01
+		#get the word
+		#does it exist and is it a constant
+		ld t6, 0(sp)
+		addi sp, sp, 8
+		ld a1, INPUT_END
+		ld a0, INPUT_START
+		addi t0, a0, 1
+		bltu t0, a1, value_have_data
+		tail NEXT				#nothing to parse
+  value_have_data:
+		call utility_find_string
+		beqz a0, constant_gone_bad
+		#now have a0 with start, a1 with end + 1, a2 with length
+		sd a1, INPUT_START, t5			#update read in point
+		call utility_sanitize_string		
+		#now check this exists
+		call utility_check_dictionary_match
+		beqz a3, constant_gone_bad
+		ld t0, 0(a4)
+		li t1, 0x04
+		bne t0, t1, constant_gone_bad
+		#now over-write code
+		ld a0, 8(a4)
+		mv a1, t6
+		call utility_write_number_to_stack
+		tail NEXT
+		
+		CODEHEADER VALUE, TO, 0x01
+		#exactly as constant except for header
+		#TO then overwrites code
+		li a5, 0x04				#4 for a value
+		j constant_common_code
+
+
+		CODEHEADER CONSTANT, VALUE, 0x01
+		li a5, 0x02				#2 for a constant
+  constant_common_code:
 		ld t6, 0(sp)
 		addi sp, sp, 8
 		ld a1, INPUT_END
@@ -38,7 +78,6 @@
 		ld t2, 0(t0)
 		sd t2, 0(t1)
 		sd a0, 0(t0)			      #update address we will writenext word to
-		fence.i
 		tail NEXT			      #and out
 constant_gone_bad:
 		la t0, NotOk_msg
