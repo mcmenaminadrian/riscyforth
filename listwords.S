@@ -98,7 +98,7 @@
 		#get the address we'll return
 		mv a1, a2
 		li a5, 0x08				#8 for a variable
-		call utility_write_function_header
+		call utility_write_create_header
 		la a3, dataspaceptr
 		ld a1, 0(a3)
 		#check alignment

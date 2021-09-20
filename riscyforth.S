@@ -50,6 +50,7 @@
    .common newdictionary, 0x08, 0x08
    .common inputfileptr, 0x08, 0x08
    .common createwritepoint, 0x08, 0x08
+   .common alternativewritepoint, 0x08, 0x08
    .common ifflag, 0x08, 0x08
    .common DECIDESTACKP, 0x08, 0x08
    .common DECIDESTACKB, 0x08, 0x08
@@ -63,9 +64,9 @@
    .common dataspace, 0x08, 0x08
    .common dataspaceptr, 0x08, 0x08
    .common alignmentstate, 0x08, 0x08
-   .common createdictionarybase, 0x08, 0x08
-   .common createdictionaryhead, 0x08, 0x08
-   .common topofstandartdcitionary, 0x08, 0x08
+   .common createdictionary, 0x08, 0x08
+   .common createnewdictionary, 0x08, 0x08
+   .common topofstandartdictionary, 0x08, 0x08
 
    .data
    welcome_msg:   	.asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
@@ -98,16 +99,6 @@
   .globl main
   _start:
   main:
-                la t4, (VARIABLES + BIGSPACE - 0x08)
-                la t3, BOTTOM_VARS
-                sd t4, 0(t3)
-                la t1, TOP_VARS
-                sd t4, 0(t1)
-		la t4, (CONSTANTS + BIGSPACE - 0x08)
-		la t3, BOTTOM_CONS
-		sd t4, 0(t3)
-		la t1, TOP_CONS
-		sd t4, 0(t1)
                 la s10, STACK + 0x7FFF8
                 la s9, CALLSTACK + 0x7FFF8
                 la a0, riscy_forth0
