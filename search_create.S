@@ -55,10 +55,15 @@
 		tail embed_encsq
   search_tick:
 		la t0, WA_TICK
-		bne t3, t0, search_char
+		bne t3, t0, search_to
 		#substitute WA__TICK
 		la t3, WA__TICK
 		tail embed_tick
+  search_to:
+	 	la t0, WA_TO
+		bne t3, t0, search_char
+		la t3, WA__TO
+		tail embed_to
   search_char:
 		la t0, WA_CHAR
 		bne t3, t0, search_wa_until
@@ -590,8 +595,7 @@ func_test_octal:
 		li a1, 1
 		mv a2, s7
 		j func_return_hex		#success
-
-
+  embed_to:
   embed_tick:
 		#embed string - but don't process it in any way
 		la t0, createwritepoint

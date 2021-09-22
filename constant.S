@@ -15,8 +15,9 @@
 		call utility_find_string
 		beqz a0, constant_gone_bad
 		#now have a0 with start, a1 with end + 1, a2 with length
-		sd a1, INPUT_START, t5			#update read in point
-		call utility_sanitize_string		
+		sd a1, INPUT_START, t5			#update read in pointa
+  _to_join:
+		call utility_sanitize_string
 		#now check this exists
 		call utility_check_dictionary_match
 		beqz a3, constant_gone_bad
@@ -28,8 +29,19 @@
 		mv a1, t6
 		call utility_write_number_to_stack
 		tail NEXT
+
+		CODEHEADER _TO, TO, 0x0
+		#we are compiled into a word
+		#so we look ahead for the token
+		mv a0, s7
+		add t0, s7, 48
+		mv a1, t0
+		call utility_find_string
+		beqz a0, constant_gone_bad
+		call _to_join	
 		
-		CODEHEADER VALUE, TO, 0x01
+
+		CODEHEADER VALUE, _TO, 0x01
 		#exactly as constant except for header
 		#TO then overwrites code
 		li a5, 0x04				#4 for a value

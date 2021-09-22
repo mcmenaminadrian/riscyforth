@@ -73,10 +73,8 @@
 		li a5, 0
 		li a7, 222
 		ecall
-		la t0, createdictionaryhead
-		la t1, createdictionarybase
+		la t0, createdictionary
 		sd a0, 0(t0)
-		sd a0, 0(t1)
 		#set up the simple stack pointer for the decision creation
 		mv t0, a0
 		add t0, t0, a1
