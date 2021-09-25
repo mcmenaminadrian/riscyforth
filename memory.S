@@ -22,7 +22,7 @@
 		sd t0, 0(t2)
 		tail NEXT
 
-		CODEHEADER CCOMMA, COMMA
+		CODEHEADER CCOMMA, COMMA, 0x01
 		#(char --)
 		#reserve one character space of data space and store character at TOS in that space
 		lb t0, 0(sp)

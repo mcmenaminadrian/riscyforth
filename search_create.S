@@ -62,6 +62,7 @@
   search_to:
 	 	la t0, WA_TO
 		bne t3, t0, search_char
+		#substitute WA__TO
 		la t3, WA__TO
 		tail embed_to
   search_char:

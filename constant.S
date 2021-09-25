@@ -4,8 +4,6 @@
 		CODEHEADER TO, VARIABLE, 0x01
 		#get the word
 		#does it exist and is it a constant
-		ld t6, 0(sp)
-		addi sp, sp, 8
 		ld a1, INPUT_END
 		ld a0, INPUT_START
 		addi t0, a0, 1
@@ -20,7 +18,7 @@
 		call utility_sanitize_string
 		#now check this exists
 		call utility_check_dictionary_match
-		beqz a3, constant_gone_bad
+		beqz a3, constant_gone_bad		#in this case we need a match
 		ld t0, 0(a4)
 		li t1, 0x04
 		bne t0, t1, constant_gone_bad
@@ -31,13 +29,21 @@
 		tail NEXT
 
 		CODEHEADER _TO, TO, 0x0
+		ld t6, 0(sp)
+		addi sp, sp, 8
 		#we are compiled into a word
-		#so we look ahead for the token
+		#so we pull the token
 		mv a0, s7
-		add t0, s7, 48
-		mv a1, t0
-		call utility_find_string
-		beqz a0, constant_gone_bad
+		lb a2, 0(a0)
+		addi a0, a0, 8
+		add a1, a0, a2
+		#update s7 to stay aligned
+		li t0, 7
+		li t1, 8
+		and t2, t0, a2
+		sub t3, t1, t2
+		mv s7, a1
+		add s7, s7, t3
 		call _to_join	
 		
 
