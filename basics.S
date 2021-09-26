@@ -585,6 +585,11 @@
 		li t2, 0x2B		#+
 		bne t1, t2, fix_up_six_done
 		call do_fix_up_plusloop
+		#DOES> --> DOES_
+		lbu t1, 4(a0)
+		li t2, 0x3E		#>
+		bne t1, t2, fix_up_six_done
+		call do_fix_up_does
 		j fix_up_done	
 
   fix_up_length_six:
@@ -948,6 +953,14 @@
 		andi t3, t3, 0x5F
 		sb t3, 7(a2)
 		addi a2, a2, 7
+		ret
+
+  do_fix_up_does:
+		#just replace > with _
+		#search see if it matches
+		li t3, 0x5F
+		sb t3, 4(a2)
+		addi a2, a2, 4
 		ret
 
   fix_up_acomma:

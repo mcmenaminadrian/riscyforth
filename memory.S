@@ -5,6 +5,7 @@
 #Licenced for reuse under version 2 of the GNU General Public License					#
 #########################################################################################################
 		CODEHEADER CELLS, LOAD, 0x01
+		#(x - x)
 		ld t0, 0(sp)
 		slli t0, t0, 3
 		sd t0, 0(sp)
@@ -34,7 +35,10 @@
 		sb t0, 0(t2)
 		tail NEXT
 
-		CODEHEADER CREATE, CCOMMA, 0x01
+		CODEHEADER DOES_, CCOMMA, 0x01
+		tail NEXT
+
+		CODEHEADER CREATE, DOES_, 0x01
 		#read in name
 		#create shell in dictionary that returns start address
 		ld a1, INPUT_END
@@ -58,14 +62,6 @@
 		call utility_write_function_header
 		la a3, dataspaceptr
 		ld a1, 0(a3)
-		#check alignment
-		li t0, 0x07
-		li t2, 0x08
-		and t1, a1, t0
-		beqz t1, create_advance_alloc
-		sub t3, t2, t1
-		add a1, a1, t3
-  create_advance_alloc:
 		call utility_write_number_to_stack
 		#and get out
 		la a1, NEXT
@@ -76,7 +72,7 @@
 		sub t3, t2, t1
 		add a0, a0, t3
   create_done:
-		la t4, alternativewritepoint
+		la t4, createwritepoint
 		sd a0, 0(t4)
 		la t0, newdictionary
 		la t1, dictionary
@@ -104,27 +100,11 @@
                 tail NEXT
 
 		CODEHEADER ALLOT, CREATE, 0x01
-		#get alignment
-		#if character (not aligned) just move pointer ahead
-		#if aligned ensure alignment is maintained
 		la t2, dataspaceptr
 		ld t3, 0(t2)
 		ld t4, 0(sp)
 		addi sp, sp, 8
 		add t5, t3, t4
-		la t0, alignmentstate
-		ld t1, 0(t0)
-		bnez t1, allot_aligned
-		sd t5, 0(t2)
-		tail NEXT
-  allot_aligned:
-		li a0, 0x07
-		and a1, t5, a0
-		beqz a1, allot_finished
-		li a2, 0x08
-		sub a3, a2, a1
-		add t5, t5, a3
-  allot_finished:
 		sd t5, 0(t2)
 		tail NEXT
 

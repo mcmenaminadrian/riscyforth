@@ -874,6 +874,9 @@
 		lbu t1, 0(a0)
 		li t2, 0x2B			#+
 		beq t1, t2, tick_length_five_begin_plus
+		li t2, 0x3E			#>
+		lbu t1, 4(a0)
+		beq t1, t2, tick_length_five_end_gt
 		j tix_up_finished
 
   tick_fix_up_length_four:
@@ -893,6 +896,9 @@
 
   tick_length_five_begin_plus:
 		call do_fix_up_plusloop
+		j tix_up_done
+  tick_length_five_end_gt:
+		call do_fix_up_does
 		j tix_up_done
 
 

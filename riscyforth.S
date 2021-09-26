@@ -50,7 +50,6 @@
    .common newdictionary, 0x08, 0x08
    .common inputfileptr, 0x08, 0x08
    .common createwritepoint, 0x08, 0x08
-   .common alternativewritepoint, 0x08, 0x08
    .common ifflag, 0x08, 0x08
    .common DECIDESTACKP, 0x08, 0x08
    .common DECIDESTACKB, 0x08, 0x08

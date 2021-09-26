@@ -366,6 +366,12 @@ CREATE X 199 ALLOT CREATE Y
 Y X - 199 = Y IF BLUE ." CREATE and  ALLOT passed " ELSE RED ." CREATE and ALLOT FAILED " THEN RESET
 HERE 3 ALLOT HERE - -3 = IF BLUE ." and HERE passed" ELSE RED ." and HERE FAILED " THEN RESET CR ;  
 
+CREATE XC 64 C, CREATE XN 1024 ,
+: TESTCOMMA
+." Testing , and C, " 5 SPACES
+XC @ 64 = IF BLUE ." C, passed " ELSE RED ." C, FAILED " THEN RESET 5 SPACES
+XN @ 1024 IF BLUE ." , passed " ELSE RED ." , FAILED " THEN RESET CR ;
+
 : TESTCELLS
 ." Testing CELLS " 5 SPACES
 BLUE 10 CELLS 80 = IF ." CELLS passed " ELSE RED ." CELLS FAILED " THEN RESET CR ;
@@ -397,7 +403,7 @@ RESET ." And back to normal..." CR ;
 : TESTMEMORY
 ." Testing memory manipulation words" cr
 TESTINGTICK testcfetch testingmove testchar testfetch testplusstore TESTPADFILLERASE
-TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN
+TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN TESTCOMMA
 ." Testing of memory code complete" cr ;
 
 \ Test loops
