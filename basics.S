@@ -583,8 +583,10 @@
 		mv a5, t2
 		lbu t1, 0(a0)
 		li t2, 0x2B		#+
-		bne t1, t2, fix_up_six_done
+		bne t1, t2, fix_up_length_five_does
 		call do_fix_up_plusloop
+		j fix_up_done
+  fix_up_length_five_does:
 		#DOES> --> DOES_
 		lbu t1, 4(a0)
 		li t2, 0x3E		#>

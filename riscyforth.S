@@ -62,7 +62,6 @@
    .common recyclewatermark, 0x08, 0x08
    .common dataspace, 0x08, 0x08
    .common dataspaceptr, 0x08, 0x08
-   .common alignmentstate, 0x08, 0x08
 
    .data
    welcome_msg:   	.asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
