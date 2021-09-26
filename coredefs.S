@@ -767,6 +767,8 @@
 		beq t2, t1, tix_up_tick
 		li t2, 0x40
 		beq t2, t1, tix_up_fetch
+		li t2, 0x2C
+		beq t2, t1, tix_up_comma
 		j tix_up_finished
   tix_up_colon:
 		call do_fix_up_colon
@@ -818,6 +820,9 @@
 		j tix_up_done
   tix_up_fetch:
 		call do_fix_up_fetch
+		j tix_up_done
+  tix_up_comma:
+		call do_fix_up_comma
 		j tix_up_done
 
   tix_up_done:
@@ -962,9 +967,14 @@
 		call fix_up_cstore
 		j tix_up_done
   tick_length_two_c_fetch:
-		li t2, 0x40
-		bne t1, t2, tick_length_two_c_done
+		li t2, 0x40			#@
+		bne t1, t2, tick_length_two_c_comma
 		call fix_up_cfetch
+		j tix_up_done
+  tick_length_two_c_comma:
+		li t2, 0x2C
+		bne t1, t2, tick_length_two_c_done
+		call fix_up_ccomma		#,
 		j tix_up_done
   tick_length_two_c_done:
 		j tix_up_length_two_finished
@@ -991,7 +1001,7 @@
 		lbu t1, 5(a0)
 		li t2, 0x22		 #"
 		bne t1, t2, tix_up_six_done
-		call fix_up_comma
+		call fix_up_acomma
 		j tix_up_done
   tix_up_six_done:
 		j tix_up_finished

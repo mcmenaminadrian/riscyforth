@@ -598,7 +598,7 @@
 		lbu t1, 5(a0)
 		li t2, 0x22		 #"
 		bne t1, t2, fix_up_six_done
-		call fix_up_comma
+		call fix_up_acomma
 		j fix_up_done
   fix_up_six_done:
 		j fix_up_finished
@@ -749,8 +749,13 @@
 		j fix_up_done
   length_two_c_fetch:
 		li t2, 0x40			#@
-		bne t1, t2, length_two_c_done
+		bne t1, t2, length_two_c_comma
 		call fix_up_cfetch
+		j fix_up_done
+  length_two_c_comma:
+		li t2, 0x2C			#,
+		bne t1, t2, length_two_c_done
+		call fix_up_ccomma
 		j fix_up_done
   length_two_c_done:
 		j fix_up_length_two_finished
@@ -787,6 +792,7 @@
 		# !  --> EXCLAIM
 		# '  --> TICK
 		# @  --> FETCH
+		# ,  --> COMMA
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -828,6 +834,8 @@
 		beq t2, t1, fix_up_tick
 		li t2, 0x40
 		beq t2, t1, fix_up_fetch
+		li t2, 0x2C
+		beq t2, t1, fix_up_comma
 		j fix_up_finished
 
   fix_up_colon:
@@ -880,6 +888,9 @@
 		j fix_up_done
   fix_up_fetch:
 		call do_fix_up_fetch
+		j fix_up_done
+  fix_up_comma:
+		call do_fix_up_comma
 		j fix_up_done
 		
   fix_up_done:
@@ -939,7 +950,7 @@
 		addi a2, a2, 7
 		ret
 
-  fix_up_comma:
+  fix_up_acomma:
 		#copy 0 - 5 then expand "
 		lb t3, 0(a0)
 		andi t3, t3, 0x5F
@@ -1194,6 +1205,19 @@
 		addi a2, a2, 4
 		ret
 
+  do_fix_up_comma:
+		li t3, 0x43
+		sb t3, 0(a2)
+		li t3, 0x4F
+		sb t3, 1(a2)
+		li t3, 0x4D
+		sb t3, 2(a2)
+		sb t3, 3(a2)
+		li t3, 0x41
+		sb t3, 4(a2)
+		addi a2, a2, 4
+		ret
+
   fix_up_plus1:
 		li t3, 0x50
 		sb t3, 0(a2)
@@ -1314,6 +1338,20 @@
 		li t3, 0x43
 		sb t3, 4(a2)
 		li t3, 0x48
+		sb t3, 5(a2)
+		addi a2, a2, 5
+		ret
+  
+  fix_up_ccomma:
+		li t3, 0x43
+		sb t3, 0(a2)
+		sb t3, 1(a2)
+		li t3, 0x4F
+		sb t3, 2(a2)
+		li t3, 0x4D
+		sb t3, 3(a2)
+		sb t3, 4(a2)
+		li t3, 0x41
 		sb t3, 5(a2)
 		addi a2, a2, 5
 		ret
