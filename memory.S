@@ -67,6 +67,8 @@
 		la a1, NEXT
 		call utility_write_out_call_function
 		#now check if we are 8 bit aligned on writing address
+		li t0, 7
+		li t2, 8
 		and t1, a0, t0
 		beqz t1, create_done
 		sub t3, t2, t1
