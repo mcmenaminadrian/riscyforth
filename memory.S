@@ -151,7 +151,7 @@
 		sw t0, 94(t3)
 		#now update the previously created function
 		mv a0, s0
-		addi a0, a0, 0x6C
+		addi a0, a0, 0x34
 		mv s1, t3
 		mv a1, t3
 		call utility_write_out_call_function
@@ -165,6 +165,13 @@
 		ld s1, 8(sp)
 		ld s0, 0(sp)
 		addi sp, sp, -24
+		#now try to tokenize the line
+		la t0, INPUT_START
+		sd s7, 0(t0)
+		addi t1, s7, 0x200
+		la t2, INPUT_END
+		sd t1, 0(t2)
+		la s7, outer_loop_tokenize
 		fence.i
 		tail NEXT
   does__not_created_word:

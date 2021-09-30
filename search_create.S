@@ -34,7 +34,7 @@
                 addi t3, t3, 8                        #address that points to the code
 		#now check it is allowed
 		la t0, WA_COLON			      #cannot nest definitions
-		bne t3, t0, search_create_allowed
+		bne t3, t0, search_create_does_
 		la t0, CREATEFLAG
 		sd zero, 0(t0)
   search_create_report_error:
@@ -48,37 +48,44 @@
 		ld t1, 0(t0)
 		sd t3, 0(t1)			      #write out word address in definition
 		addi t1, t1, 8
+		#now copy out the following text until we hit semi
+		la a0, INPUT_START
+		ld a1, 0(a0)
+		la t5, INPUT_END
+		ld t6, 0(t5)
+		li a2, 59				#;
+  search_create_does_copy:
+		lb a3, 0(a1)
+		sb a3, 0(t1)
+		addi t1, t1, 1
+		addi a1, a1, 1
+		beq a3, a2, search_create_does_copy_done		
+		bgt a1, t6, search_create_report_error
+		j search_create_does_copy
+  search_create_does_copy_done:
+		li a3, 0x0A
+		sb a3, 0(t1)
+		addi t1, t1, 1
+		sd a1, 0(a0)
+		#check alignment for writing
+		li t5, 0x07
+		and t6, t1, t5
+		beqz t6, search_create_does_update_wp
+		li t4, 0x08
+		sub t5, t4, t6
+		add t1, t1, t5
+  search_create_does_update_wp:
 		sd t1, 0(t0)
 		la t0, CREATEFLAG
 		sd zero, 0(t0)			      #back to immediate execution
-		li t0, 0x07
-		and t0, t0, t1
-		beq t0, zero, search_create_does_aligned  #already aligned
-		li t2, 0x08
-		sub t3, t2, t0
-		add t1, t1, t3				#ensure aligned
-  search_create_does_aligned:
 		la t0, newdictionary
 		la t2, dictionary
 		ld t3, 0(t0)			      #load address of new word
 		sd t3, 0(t2)			      #store address of new word as start for dictionary
 		sd t1, 0(t0)			      #update address we will writenext word to
-  		#now have to advance beyond the next semi
-		la t0, INPUT_START
-		ld t1, 0(t0)
-		la t5, INPUT_END
-		ld t6, 0(t5)
-		li t2, 59				#;
-  search_create_does_search_semi:
-		lb t3, 0(t1)
-		addi t1, t1, 1
-		beq t2, t3, search_create_does_semi
-		bgt t1, t6, search_create_report_error
-		j search_create_does_search_semi
-  search_create_does_semi:
-		sd t1, 0(t0)	
 		la s7, outer_loop_tokenize
 		fence.i 				      #ensure cache coherency
+		tail NEXT
 	
   search_create_allowed:
 		#handle in the same way as printed strings generally
