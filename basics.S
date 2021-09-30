@@ -300,6 +300,7 @@
                 j search_failed
   search_test_X:
                 lb t4, 1(t0)
+		andi t4, t4, 0x5F
                 li t6, 88                             #X
                 beq t4, t6, search_build_hex
                 j search_failed
@@ -960,6 +961,18 @@
   do_fix_up_does:
 		#just replace > with _
 		#search see if it matches
+		lb t3, 0(a0)
+		andi t3, t3, 0x5F
+		sb t3, 0(a2)
+		lb t3, 1(a0)
+		andi t3, t3, 0x5F
+		sb t3, 1(a2)
+		lb t3, 2(a0)
+		andi t3, t3, 0x5F
+		sb t3, 2(a2)
+		lb t3, 3(a0)
+		andi t3, t3, 0x5F
+		sb t3, 3(a2)
 		li t3, 0x5F
 		sb t3, 4(a2)
 		addi a2, a2, 4

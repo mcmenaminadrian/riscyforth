@@ -37,7 +37,49 @@
 		bne t3, t0, search_create_allowed
 		la t0, CREATEFLAG
 		sd zero, 0(t0)
+  search_create_report_error:
 		tail search_failed		      #report error
+  search_create_does_:
+		la t0, WA_DOES_
+		bne t3, t0, search_create_allowed
+		#write out DOES_ word address and tidy up
+		#emulating SEMI	
+		la t0, createwritepoint
+		ld t1, 0(t0)
+		sd t3, 0(t1)			      #write out word address in definition
+		addi t1, t1, 8
+		sd t1, 0(t0)
+		la t0, CREATEFLAG
+		sd zero, 0(t0)			      #back to immediate execution
+		li t0, 0x07
+		and t0, t0, t1
+		beq t0, zero, search_create_does_aligned  #already aligned
+		li t2, 0x08
+		sub t3, t2, t0
+		add t1, t1, t3				#ensure aligned
+  search_create_does_aligned:
+		la t0, newdictionary
+		la t2, dictionary
+		ld t3, 0(t0)			      #load address of new word
+		sd t3, 0(t2)			      #store address of new word as start for dictionary
+		sd t1, 0(t0)			      #update address we will writenext word to
+  		#now have to advance beyond the next semi
+		la t0, INPUT_START
+		ld t1, 0(t0)
+		la t5, INPUT_END
+		ld t6, 0(t5)
+		li t2, 59				#;
+  search_create_does_search_semi:
+		lb t3, 0(t1)
+		addi t1, t1, 1
+		beq t2, t3, search_create_does_semi
+		bgt t1, t6, search_create_report_error
+		j search_create_does_search_semi
+  search_create_does_semi:
+		sd t1, 0(t0)	
+		la s7, outer_loop_tokenize
+		fence.i 				      #ensure cache coherency
+	
   search_create_allowed:
 		#handle in the same way as printed strings generally
 		la t0, WA_ABORTCOMM
@@ -424,6 +466,7 @@
                 j func_return_hex					#failed
   func_test_X:
                 lb s4, 1(a0)
+		and s4, s4, 0x5F
                 li s6, 88                             #X
                 beq s4, s6, func_build_hex
                 j func_return_hex
