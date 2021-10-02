@@ -50,6 +50,9 @@
 		la t0, dictionary
 		ld t1, 0(t0)
 		ld t2, 0(t1)
+		#reset newdictionary
+		la t3, newdictionary
+		sd t1, 0(t3)
 		li t3, 0x11
 		bne t3, t2, does__not_created_word
 		ld s0, 8(t1)				#s0 has WA for created word
