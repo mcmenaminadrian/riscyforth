@@ -56,7 +56,7 @@
 		la t0, CREATEFLAG
 		li t1, 0x01
 		sd t1, 0(t0)				#set MODE to 1 (compile)
-		la t1, newdictionary
+		la t1, createwritepoint
 		ld t3, 0(t1)
 		li t0, 0xFF8C8C93
 		sw t0, 0(t3)		#addi s9, s9, -8,
@@ -156,11 +156,10 @@
 		mv a1, t3
 		call utility_write_out_call_function
 		#now update the writing point
-		la t1, newdictionary
-		ld t1, 0(t1)
-		addi t1, t1, DOESOFFSET
-		la t3, createwritepoint
-		sd t1, 0(t3)
+		la t1, createwritepoint
+		ld t3, 0(t1)
+		addi t3, t3, DOESOFFSET
+		sd t3, 0(t1)
 		ld s2, 16(sp)
 		ld s1, 8(sp)
 		ld s0, 0(sp)
@@ -219,14 +218,18 @@
   create_done:
 		la t4, createwritepoint
 		sd a0, 0(t4)
-		la t0, newdictionary
-		la t1, dictionary
-		ld t2, 0(t0)
-		sd t2, 0(t1)
-		sd a0, 0(t0)				#update address we will writenext word to
+		la t0, CREATEFLAG
+		ld t1, 0(t0)
+		bnez t1, create_leave
+		#'naked' CREATE so update dictionary
+		la t0, dictionary
+		la t1, newdictionary
+		ld t2, 0(t1)
+		sd t2, 0(t0)
+		sd a0, 0(t1)
+ create_leave:
+		sd a0, 0(t4)
 		tail NEXT
-		
-
 		
   create_gone_bad:
 		la t0, NotOk_msg
