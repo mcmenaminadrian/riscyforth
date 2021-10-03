@@ -19,6 +19,8 @@
                 WRITECHAR 0x0A
                 WRITECR
                 WRITECHAR 0x0A
+		la t0, LOADINGFILE
+		sd zero, 0(t0)			#ensure filehandle is NULL
 		la t0, STACKTOP
 		sd sp, 0(t0)			  #top of the stack
 

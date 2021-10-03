@@ -2,7 +2,7 @@
 
 	CODEHEADER LOAD, ELSE, 0x01
 	#Load a file line by line, executing each line as we go
-	addi sp, sp, -72
+	addi sp, sp, -80
 	sd s0, 0(sp)
 	sd s1, 8(sp)
 	sd s2, 16(sp)
@@ -13,6 +13,20 @@
 	sd s10, 56(sp)
 	sd s11, 64(sp)
 
+	#have we got an already openfile
+	la s0, LOADINGFILE
+	ld a0, 0(s0)
+	beqz a0, load_check_memory
+	call fclose			#close file
+	sd zero, 0(s0)
+  load_check_memory:
+	la s1, FILEMEMORYADDR
+	ld a0, 0(s1)
+	beqz a0, load_parse_name
+	call free
+	sd zero, 0(s1)
+
+  load_parse_name:
 	#parse the file name
 	la s0, INPUT_START
 	ld s1, 0(s0)
@@ -47,13 +61,13 @@
 	addi s10, s10, 1
 	sd s10, 0(s0)
 	bgeu zero, a0, load_failed_nopath
-	#create an area on the stack to store some values
-	add sp, sp, -24
-	sd a0, 0(sp)		#file pointer
+	la s4, LOADINGFILE	#file stream
+	sd a0, 0(s4)
 	li a0, 512		#get 512 bytes from malloc
 	call malloc
 	beqz a0, load_malloc_failed
-	sd a0, 8(sp)		#pointer to allocated memory
+	la s5, FILEMEMORYADDR	#hold address of allocated memory
+	sd a0, 0(s5)
 	#now rig the outerloop
 	la s7, outer_loop_tokenize
 	la t2, INFILELOAD
@@ -61,43 +75,77 @@
 	li t1, 1
 	sd t1, 0(t2)
 	sd zero, 0(t0)
+	ld s11, 64(sp)
+	ld s10, 56(sp)
+	ld s6, 48(sp)
+	ld s5, 40(sp)
+	ld s4, 32(sp)
+	ld s3, 24(sp)
+	ld s2, 16(sp)
+	ld s1, 8(sp)
+	ld s0, 0(sp)
+	addi sp, sp, 72
 	tail NEXT
+  
+
   load_get_next_line:
 	#setup to pull a line in
+	addi sp, sp, -8
+	sd ra, 0(sp)
 	la t0, LOADLINESETUP
 	li t1, 1
 	sd t1, 0(t0)
-	ld a0, 8(sp)
+	la t1, FILEMEMORYADDR
+	ld a0, 0(t1)
 	li a1, 512
-	ld a2, 0(sp)
-	PUSH ra
+	la t1, LOADINGFILE
+	ld a2, 0(t1)
 	call fgets
-	POP ra
-	fence
 	beqz a0, load_free_malloc #nothing returned
-	sd a0, 16(sp)
+	PUSH a0
 	#output the read in line
-	PUSH ra
 	call puts
-	POP ra
 	#now process the line
 	#start by looking for tokens
 	la t0, INPUT_START
-	ld t1, 16(sp)
+	POP t1
 	sd t1, 0(t0)
 	addi t1, t1, 512
 	la t0, INPUT_END
 	sd t1, 0(t0)
+	fence.i
+	ld ra, 0(sp)
+	addi sp, sp, 8
 	ret		#go back
        	 
 
   load_free_malloc:
-	ld a0, 8(sp)
+	la t0, LOADINGFILE
+	ld a0, 0(t0)
+	beqz a0, load_check_out_memory
+	call fclose			#close file
+	la t0, LOADINGFILE
+	sd zero, 0(t0)
+  load_check_out_memory:
+	la t1, FILEMEMORYADDR
+	ld a0, 0(t1)
+	beqz a0, load_finish_free
 	call free
+	la t1, FILEMEMORYADDR
+	sd zero, 0(t1)
+  load_finish_free:
+	fence.i
+	la t0, INFILELOAD
+	sd zero, 0(t0)
+	la t0, LOADLINESETUP
+	sd zero, 0(t0)
+	la s7, outer_loop_ok
+	ld ra, 0(sp)
+	addi sp, sp, 8
+	ret				
+
 
   load_malloc_failed:
-#	ld a0, 0(sp)
-#	call fclose
 	add sp, sp, 24
 	la t0, INFILELOAD
 	sd zero, 0(t0)

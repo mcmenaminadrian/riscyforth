@@ -358,6 +358,7 @@ allocx @ 40 RESIZE 0 = FALSE AND IF RED ." RESIZE FAIL - no resize " RESET CR EX
 @ HEX 0xBADCAFEF00D DECIMAL = IF BLUE ." RESIZE passed " RESET ELSE RED ." RESIZE FAIL: no copy" RESET CR EXIT THEN
 CR ;
 
+
 \ In immediate mode
 CREATE X 199 ALLOT CREATE Y
 
@@ -365,6 +366,16 @@ CREATE X 199 ALLOT CREATE Y
 ." Testing CREATE, HERE and ALLOT " 5 SPACES
 Y X - 199 = Y IF BLUE ." CREATE and  ALLOT passed " ELSE RED ." CREATE and ALLOT FAILED " THEN RESET
 HERE 3 ALLOT HERE - -3 = IF BLUE ." and HERE passed" ELSE RED ." and HERE FAILED " THEN RESET CR ;  
+
+\ Test CREATE, DOES>
+: INDEXED-ARRAY CREATE CELLS ALLOT DOES> SWAP CELLS + ;
+
+100 INDEXED-ARRAY FOO
+
+: TESTDOES>
+." Testing DOES> " 5 SPACES
+99 FOO 0 FOO - 792 = IF BLUE ." DOES> passed " ELSE RED ." DOES> FAILED " THEN RESET CR ;
+
 
 64 C, CREATE XC ALIGN 1024 ,  CREATE XN
 : TESTCOMMA
@@ -403,7 +414,7 @@ RESET ." And back to normal..." CR ;
 : TESTMEMORY
 ." Testing memory manipulation words" cr
 TESTINGTICK testcfetch testingmove testchar testfetch testplusstore TESTPADFILLERASE
-TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN TESTCOMMA
+TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN TESTCOMMA TESTDOES>
 ." Testing of memory code complete" cr ;
 
 \ Test loops
@@ -485,5 +496,4 @@ TESTLOOPS YELLOW BRIGHT
 ." Press enter to continue " RESET GETLINE CR
 TESTMEMORY YELLOW BRIGHT
 ." Press enter to continue " RESET GETLINE CR
- ABORT" Verifying ABORTCOMM and leaving tests with this message "  ." ABORTCOMM has FAILED"
-;
+ ABORT" Verifying ABORTCOMM and leaving tests with this message "  ." ABORTCOMM has FAILED" ;
