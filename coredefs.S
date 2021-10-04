@@ -25,7 +25,44 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADER CLEARSCREEN, _ABORTCOMM, 0x01
+		CODEHEADER TIMESDIV, _ABORTCOMM, 0x01
+		#(n1 n2 n3 -- n4)
+		ld a0, 16(sp)
+		ld a1, 8(sp)
+		ld a2, 0(sp)
+		mul t0, a0, a1
+		div t1, t0, a2
+		sd t1, 16(sp)
+		addi sp, sp, 16
+		tail NEXT
+
+		CODEHEADER ZEROLESS, TIMESDIV, 0x01
+		#(n -- flag)
+		ld t0, 0(sp)
+		bltz t0, zeroless_true
+		sd zero, 0(sp)
+		tail NEXT
+  zeroless_true:
+		li t1, -1
+		sd t1, 0(sp)
+		tail NEXT
+
+		CODEHEADER TIMESDIVMOD, ZEROLESS, 0x01
+		#(n1 n2 n3 -- n4 n5)
+		ld a0, 16(sp)
+		ld a1, 8(sp)
+		ld a0, 0(sp)
+		addi sp, sp, 8
+		mul t0, a0, a1
+		div t1, t0, a2
+		#calculate the remainder
+		mul t3, t1, a2
+		sub t4, t0, t3
+		sd t4, 8(sp)
+		sd t1, 0(sp)
+		tail NEXT
+
+		CODEHEADER CLEARSCREEN, TIMESDIVMOD, 0x01
 		#Clear the screen go home, reset all settings
 		# \e[2J\ec
 		addi sp, sp, -56
