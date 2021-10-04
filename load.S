@@ -2,7 +2,7 @@
 
 	CODEHEADER LOAD, ELSE, 0x01
 	#Load a file line by line, executing each line as we go
-	addi sp, sp, -80
+	addi sp, sp, -72
 	sd s0, 0(sp)
 	sd s1, 8(sp)
 	sd s2, 16(sp)
