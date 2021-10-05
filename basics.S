@@ -593,7 +593,30 @@
 		li t2, 0x3E		#>
 		bne t1, t2, fix_up_six_done
 		call do_fix_up_does
-		j fix_up_done	
+		j fix_up_done
+  fix_up_length_five_timesdivmod:
+		#*/MOD --> TIMESDIVMOD
+		lbu t1, 0(a0)
+		li t2, 0x2A
+		bne t1, t2, fix_up_six_done
+		lbu t1, 1(a0)
+		li t2, 0x2F
+		bne t1, t2,fix_up_six_done
+		lbu t1, 2(a0)
+		li t2, 0x4D
+		bne t1, t2,fix_up_six_done
+		lbu t1, 3(a0)
+		li t2, 0x4F
+		bne t1, t2,fix_up_six_done
+		lbu t1, 4(a0)
+		li t2, 0x44
+		bne t1, t2,fix_up_six_done
+		lbu t1, 5(a0)
+		li t2, 0x4D
+		bne t1, t2,fix_up_six_done
+		call do_fix_up_timesdivmod
+		j fix_up_done
+		 	
 
   fix_up_length_six:
 		#expand the following
@@ -637,12 +660,17 @@
 		# C!  --> CSTORE
 		# C@  --> CFETCH
 		# +!  --> PLUSSTORE
+		# */  --> TIMESDIV
+		# 0<  --> ZEROLESS
+		# 0=  --> ZEROEQUAL
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
 		mv a1, t1
 		mv a5, t2
 		lbu t1, 0(a0)
+		li t2, 0x30			#0
+		beq t1, t2, length_two_begin0
 		li t2, 0x31			#1
 		beq t1, t2, length_two_begin1
 		li t2, 0x2E			#.
@@ -653,6 +681,8 @@
 		beq t1, t2, length_two_beginGT
 		li t2, 0x2B			#+
 		beq t1, t2, length_two_beginplus
+		li t2, 0x2A			#*
+		beq t1, t2, length_two_beginstar
 		PUSH t1
 		andi t1, t1, 0x5F		#character based tests all in here
 		li t2, 0x52
@@ -694,6 +724,20 @@
 		call do_fix_up_plusstore
 		j fix_up_done
 
+  length_two_begin0:
+		lbu t1, 1(a0)
+		li t2, 0x3C			#<
+		bne t1, t2, length_two_test_zeroequal
+		call fix_up_zeroless
+		j fix_up_done
+  length_two_test_zeroequal:
+		li t2, 0x3D
+		bne t1, t2, length_two_zero_done
+ 		call fix_up_zeroequal
+		j fix_up_done
+  length_two_zero_done:
+		j fix_up_length_two_finished
+
   length_two_begin1:
 		lbu t1, 1(a0)
 		li t2, 0x2B			#+
@@ -716,7 +760,13 @@
 		j fix_up_done
   length_two_begindot_done:
 		j fix_up_length_two_finished
-		
+
+  length_two_beginstar:
+		lbu t1, 1(a0)
+		li t2, 0x2F
+		bne t1, t2, length_two_begin2
+		call fix_up_timesdiv
+		j fix_up_done		
   length_two_begin2:
 		lbu t1, 1(a0)
 		li t2, 0x2B			#+
@@ -1276,6 +1326,93 @@
 		addi a2, a2, 5
 		ret
 
+  fix_up_timesdiv:
+		li t3, 0x54
+		sb t3, 0(a2)
+		li t3, 0x49
+		sb t3, 1(a2)
+		li t3, 0x4D
+		sb t3, 2(a3)
+		li t3, 0x45
+		sb t3, 3(a3)
+		li t3, 0x53
+		sb t3, 4(a3)
+		li t3, 0x44
+		sb t3, 5(a3)
+		li t3, 0x49
+		sb t3, 6(a3)
+		li t3, 0x56
+		sb t3, 7(a3)
+		addi a2, a2, 7
+		ret
+
+  do_fix_up_timesdivmod:
+		li t3, 0x54
+		sb t3, 0(a2)
+		li t3, 0x49
+		sb t3, 1(a2)
+		li t3, 0x4D
+		sb t3, 2(a3)
+		li t3, 0x45
+		sb t3, 3(a3)
+		li t3, 0x53
+		sb t3, 4(a3)
+		li t3, 0x44
+		sb t3, 5(a3)
+		li t3, 0x49
+		sb t3, 6(a3)
+		li t3, 0x56
+		sb t3, 7(a3)
+		li t3, 0x4D
+		sb t3, 8(a3)
+		li t3, 0x4F
+		sb t3, 9(a3)
+		li t3, 0x44
+		sb t3, 10(a3)
+		addi a2, a2, 10
+		ret
+
+  fix_up_zeroless:
+		li t3, 0x5A
+		sb t3, 0(a2)
+		li t3, 0x45
+		sb t3, 1(a2)
+		li t3, 0x52
+		sb t3, 2(a3)
+		li t3, 0x4F
+		sb t3, 3(a3)
+		li t3, 0x4C
+		sb t3, 4(a3)
+		li t3, 0x45
+		sb t3, 5(a3)
+		li t3, 0x53
+		sb t3, 6(a3)
+		sb t3, 7(a3)
+		addi a2, a2, 7
+		ret
+
+  fix_up_zeroequal:
+		li t3, 0x5A
+		sb t3, 0(a2)
+		li t3, 0x45
+		sb t3, 1(a2)
+		li t3, 0x52
+		sb t3, 2(a3)
+		li t3, 0x4F
+		sb t3, 3(a3)
+		li t3, 0x45
+		sb t3, 4(a3)
+		li t3, 0x51
+		sb t3, 5(a3)
+		li t3, 0x55
+		sb t3, 6(a3)
+		li t3, 0x41
+		sb t3, 7(a3)
+		li t3, 0x4C
+		sb t3, 8(a3)
+		addi a2, a2, 8
+		ret
+		
   fix_up_plus2:
 		li t3, 0x50
 		sb t3, 0(a2)

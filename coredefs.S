@@ -47,7 +47,14 @@
 		sd t1, 0(sp)
 		tail NEXT
 
-		CODEHEADER TIMESDIVMOD, ZEROLESS, 0x01
+		CODEHEADER ZEROEQUAL, ZEROLESS, 0x01
+		#(n -- flag)
+		ld t0, 0(sp)
+		beqz t0, zeroless_true
+		sd zero, 0(sp)
+		tail NEXT
+
+		CODEHEADER TIMESDIVMOD, ZEROEQUAL, 0x01
 		#(n1 n2 n3 -- n4 n5)
 		ld a0, 16(sp)
 		ld a1, 8(sp)
@@ -882,6 +889,8 @@
 		mv a1, t1
 		mv a5, t2
 		lbu t1, 0(a0)
+		li t2, 0x30			#0
+		beq t1, t2, tick_length_two_begin0
 		li t2, 0x31			#1
 		beq t1, t2, tick_length_two_begin1
 		li t2, 0x2E			#.
@@ -892,6 +901,8 @@
 		beq t1, t2, tick_length_two_beginGT
 		li t2, 0x2B			#+
 		beq t1, t2, tick_length_two_beginplus
+		li t2, 0x2A			#*
+		beq t1, t2, tick_length_two_beginstar
 		PUSH t1
 		andi t1, t1, 0x5F		#character based tests all in here
 		li t2, 0x52
@@ -914,6 +925,27 @@
 		li t2, 0x3E			#>
 		lbu t1, 4(a0)
 		beq t1, t2, tick_length_five_end_gt
+		#*/MOD --> TIMESDIVMOD
+                lbu t1, 0(a0)
+                li t2, 0x2A
+                bne t1, t2, tix_up_five_done
+                lbu t1, 1(a0)
+                li t2, 0x2F
+                bne t1, t2, tix_up_five_done
+                lbu t1, 2(a0)
+                li t2, 0x4D
+                bne t1, t2, tix_up_five_done
+                lbu t1, 3(a0)
+                li t2, 0x4F
+                bne t1, t2, tix_up_five_done
+                lbu t1, 4(a0)
+                li t2, 0x44
+                bne t1, t2, tix_up_five_done
+                lbu t1, 5(a0)
+                li t2, 0x4D
+                bne t1, t2, tix_up_five_done
+                j tick_length_five_timesdivmod
+ tix_up_five_done:
 		j tix_up_finished
 
   tick_fix_up_length_four:
@@ -934,10 +966,26 @@
   tick_length_five_begin_plus:
 		call do_fix_up_plusloop
 		j tix_up_done
+
   tick_length_five_end_gt:
 		call do_fix_up_does
 		j tix_up_done
 
+  tick_length_five_timesdivmod:
+		call do_fix_up_timesdivmod
+		j tix_up_done
+
+  tick_length_two_begin0:
+		lbu t1, 1(a0)
+		li t2, 0x3C			#<
+		bne t1, t2, tick_length_two_test_equal0
+		call fix_up_zeroless
+		j tix_up_done
+  tick_length_two_test_equal0:
+		li t2, 0x3D			#=
+		bne t1, t2, tick_length_two_plusminus_done
+		call fix_up_zeroequal
+		j tix_up_done
 
   tick_length_two_begin1:
 		lbu t1, 1(a0)
@@ -951,6 +999,15 @@
 		call fix_up_minus1
 		j tix_up_done
   tick_length_two_plusminus_done:
+		j tix_up_length_two_finished
+
+  tick_length_two_beginstar:
+		lbu t1, 1(a0)
+		li t2, 0x2F			#/
+		bne t1, t2, tick_length_two_beginstar_done
+		call fix_up_timesdiv
+		j tix_up_done
+  tick_length_two_beginstar_done:
 		j tix_up_length_two_finished
 
   tick_length_two_begindot:
