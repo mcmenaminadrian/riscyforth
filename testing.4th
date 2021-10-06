@@ -365,6 +365,16 @@ allocaddress ! allocaddress @ free 0 = FALSE AND IF RED ." Large FREE failed " R
 allocaddress @ FREE 0 = FALSE AND IF RED ." Large FREE FAIL on pass " RESET I . CR EXIT THEN
 LOOP BLUE ." Large ALLOCATE and FREE passed." RESET CR ;
 
+\ 2! test
+VARIABLE 2!STORE
+: TEST2!
+." Testing 2!" 5 SPACES
+100 ALLOCATE DROP 2!STORE !
+55 56 2!STORE @ 2!
+2!STORE @ @ 56 = 2!STORE @ 1 CELLS + @ 55 = AND IF BLUE ." 2! passed" ELSE RED ." 2! FAILED" THEN RESET 
+2!STORE @ FREE CR ;
+
+
 VARIABLE allocx
 : TESTRESIZE
 ." Testing RESIZE " 5 SPACES
@@ -430,7 +440,7 @@ RESET ." And back to normal..." CR ;
 : TESTMEMORY
 ." Testing memory manipulation words" cr
 TESTINGTICK testcfetch testingmove testchar testfetch testplusstore TESTPADFILLERASE
-TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN TESTCOMMA TESTDOES>
+TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN TESTCOMMA TESTDOES> TEST2!
 ." Testing of memory code complete" cr ;
 
 \ Test loops

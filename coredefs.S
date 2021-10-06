@@ -54,7 +54,16 @@
 		sd zero, 0(sp)
 		tail NEXT
 
-		CODEHEADER TIMESDIVMOD, ZEROEQUAL, 0x01
+		CODEHEADER TWOSTORE, ZEROEQUAL, 0x01
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		ld t2, 16(sp)
+		addi sp, sp, 24
+		sd t1, 0(t0)
+		sd t2, 8(t0)
+		tail NEXT
+
+		CODEHEADER TIMESDIVMOD, TWOSTORE, 0x01
 		#(n1 n2 n3 -- n4 n5)
 		ld a0, 16(sp)
 		ld a1, 8(sp)
@@ -1028,8 +1037,13 @@
 		j tix_up_done
   tick_length_two_testminus2:
 		li t2, 0x2D			#-
-		bne t1, t2, tick_length_two_begin2_done
+		bne t1, t2, tick_length_two_twostore
 		call fix_up_minus2
+		j tix_up_done
+  tick_length_two_twostore:
+		li t2, 0x21			#!
+		bne t1, t2, tick_length_two_begin2_done
+		call fix_up_twostore
 		j tix_up_done
   tick_length_two_begin2_done:
 		j tix_up_length_two_finished
