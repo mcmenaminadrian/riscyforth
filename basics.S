@@ -591,28 +591,29 @@
 		#DOES> --> DOES_
 		lbu t1, 4(a0)
 		li t2, 0x3E		#>
-		bne t1, t2, fix_up_six_done
+		bne t1, t2, fix_up_length_five_timesdivmod
 		call do_fix_up_does
 		j fix_up_done
   fix_up_length_five_timesdivmod:
 		#*/MOD --> TIMESDIVMOD
 		lbu t1, 0(a0)
+		li t3, 0x5F
 		li t2, 0x2A
 		bne t1, t2, fix_up_six_done
 		lbu t1, 1(a0)
 		li t2, 0x2F
 		bne t1, t2,fix_up_six_done
 		lbu t1, 2(a0)
+		and t1, t1, t3
 		li t2, 0x4D
 		bne t1, t2,fix_up_six_done
 		lbu t1, 3(a0)
+		and t1, t1, t3
 		li t2, 0x4F
 		bne t1, t2,fix_up_six_done
 		lbu t1, 4(a0)
+		and t1, t1, t3
 		li t2, 0x44
-		bne t1, t2,fix_up_six_done
-		lbu t1, 5(a0)
-		li t2, 0x4D
 		bne t1, t2,fix_up_six_done
 		call do_fix_up_timesdivmod
 		j fix_up_done

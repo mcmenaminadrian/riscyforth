@@ -58,7 +58,7 @@
 		#(n1 n2 n3 -- n4 n5)
 		ld a0, 16(sp)
 		ld a1, 8(sp)
-		ld a0, 0(sp)
+		ld a2, 0(sp)
 		addi sp, sp, 8
 		mul t0, a0, a1
 		div t1, t0, a2
@@ -934,15 +934,16 @@
                 bne t1, t2, tix_up_five_done
                 lbu t1, 2(a0)
                 li t2, 0x4D
+		li t3, 0x5F
+		and t1, t1, t3
                 bne t1, t2, tix_up_five_done
                 lbu t1, 3(a0)
+		and t1, t1, t3
                 li t2, 0x4F
                 bne t1, t2, tix_up_five_done
                 lbu t1, 4(a0)
+		and t1, t1, t3
                 li t2, 0x44
-                bne t1, t2, tix_up_five_done
-                lbu t1, 5(a0)
-                li t2, 0x4D
                 bne t1, t2, tix_up_five_done
                 j tick_length_five_timesdivmod
  tix_up_five_done:

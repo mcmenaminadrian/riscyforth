@@ -132,23 +132,31 @@ BINARY ." powers of 2 from 9 to 0 in binary... " cr
 ." ... should see countdown from 5 to 0: " . . . . . . CR ;
 
 : TESTADD
-." Testing ADD " 5 SPACES 900 -899 +
-BLUE IF ." ADD passed " ELSE RED ." ADD FAILED " THEN RESET CR ;
+." Testing + " 5 SPACES 900 -899 +
+BLUE IF ." + passed " ELSE RED ." + FAILED " THEN RESET CR ;
 
 : testMUL
-." Testing MUL " 5 spaces
+." Testing * " 5 spaces
 5 5 5 * *
 5 cube
-BLUE = if ." MUL passed " else RED ." MUL FAILED " then RESET cr
+BLUE = if ." * passed " else RED ." * FAILED " then RESET cr
 ;
 
 : TESTDIV
-." Testing DIV " 5 SPACES 99 11 / 101 11 / * 81 =
-BLUE IF ." DIV passed " else RED ." DIV FAILED " then RESET cr ;
+." Testing / " 5 SPACES 99 11 / 101 11 / * 81 =
+BLUE IF ." / passed " else RED ." / FAILED " then RESET cr ;
 
 : TESTSUB
-." Testing SUB " 5 spaces 
-BLUE 75 22 - 53 = IF ." SUB passed " else RED ." SUB FAILED " then RESET cr ;
+." Testing - " 5 spaces 
+BLUE 75 22 - 53 = IF ." - passed " else RED ." - FAILED " then RESET cr ;
+
+: TEST0<
+." Testing 0< " 5 SPACES
+-3 0< TRUE = 3 0< FALSE = AND IF BLUE ." 0< passed" ELSE RED ." 0< FAILED" THEN CR RESET ;
+
+: TEST0=
+." Testing 0= " 5 SPACES
+0 0= TRUE = 1 0= FALSE = AND IF BLUE ." 0= passed" ELSE RED ." 0= FAILED" THEN CR RESET ; 
 
 : TESTPLUS1
 ." Testing 1+ " 5 SPACES
@@ -177,6 +185,14 @@ BLUE 13 7 mod 6 = if ." MOD passed" else RED ." MOD FAILED" then RESET cr ;
 : TESTSLMOD
 ." Testing /MOD" 5 spaces
 BLUE 13 7 /mod 1 = swap 6 = and if ." /MOD passed " else RED ." /MOD FAILED" then RESET cr ;
+
+: TEST*/
+." Testing */" 5 SPACES
+5 7 3 */ 11 = IF BLUE ." */ passed" ELSE RED ." */ FAILED" THEN RESET CR ;
+
+: TEST*/MOD
+." Testing */MOD" 5 SPACES
+5 7 3  */MOD 11 = SWAP 2 = AND IF BLUE ." */MOD passed" ELSE RED ." */MOD FAILED" THEN RESET CR ;
 
 : TESTNEGATE
 ." Testing NEGATE" 5 spaces 13 negate -13 =
@@ -439,8 +455,9 @@ VERIFYSOURCE TESTCONSTANTVALUE
 \ Test integer
 : INTEGERTESTS
 ." Running integer tests " cr
-TESTADD TESTMUL TESTDIV TESTSUB TESTPLUS1 TESTMINUS1
+TESTADD TESTMUL TESTDIV TESTSUB TESTPLUS1 TESTMINUS1 TEST0< TEST0=
 TESTminus2 testplus2 testunderplus testminmax testmod testslmod testabs testnegate testshifts
+TESTMOD TESTSLMOD TEST*/ TEST*/MOD
 ." Integer tests complete " CR
 ;
 
