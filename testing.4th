@@ -456,7 +456,7 @@ VERIFYSOURCE TESTCONSTANTVALUE
 : INTEGERTESTS
 ." Running integer tests " cr
 TESTADD TESTMUL TESTDIV TESTSUB TESTPLUS1 TESTMINUS1 TEST0< TEST0=
-TESTminus2 testplus2 testunderplus testminmax testmod testslmod testabs testnegate testshifts
+TESTminus2 testplus2 testunderplus testminmax testabs testnegate testshifts
 TESTMOD TESTSLMOD TEST*/ TEST*/MOD
 ." Integer tests complete " CR
 ;
