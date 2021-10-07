@@ -666,6 +666,7 @@
 		# 0=  --> ZEROEQUAL
 		# 2!  --> TWOSTORE
 		# 2/  --> TWODIV
+		# 2*  --> TWOTIMES
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -784,11 +785,16 @@
 		j fix_up_done
   length_two_test2store:
 		li t2, 0x21			#!
-		bne t1, t2, length_two_test2div
+		bne t1, t2, length_two_test2times
 		call fix_up_twostore
 		j fix_up_done
+  length_two_test2times:
+		li t2, 0x2A			#*
+		bne t1, t2, length_two_test2div
+		call fix_up_twotimes
+		j fix_up_done
   length_two_test2div:
-		li t2, 0x2F
+		li t2, 0x2F			#/
 		bne t1, t2, length_two_begin2_done
 		call fix_up_twodiv
 		j fix_up_done
@@ -1377,8 +1383,27 @@
 		addi a2, a2, 5
 		ret
 
-		
-		
+
+  fix_up_twotimes:
+		li t3, 0x54 
+		sb t3, 0(a2)
+		li t3, 0x57
+		sb t3, 1(a2)
+		li t3, 0x4F
+		sb t3, 2(a2)
+		li t3, 0x54
+		sb t3, 3(a2)
+		li t3, 0x49
+		sb t3, 4(a2)
+		li t3, 0x4D
+		sb t3, 5(a2)
+		li t3, 0x45
+		sb t3, 6(a2)
+		li t3, 0x53
+		sb t3, 7(a2)
+		addi a2, a2, 7
+		ret
+
 
   fix_up_timesdiv:
 		li t3, 0x54

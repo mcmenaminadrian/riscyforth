@@ -54,7 +54,15 @@
 		sd zero, 0(sp)
 		tail NEXT
 
-		CODEHEADER TWODIV, ZEROEQUAL, 0x01
+		CODEHEADER TWOTIMES, ZEROEQUAL, 0x01
+		#(x -- x)
+		li t0, 2
+		ld t1, 0(sp)
+		mul t2, t1, t0
+		sd t2, 0(sp)
+		tail NEXT
+
+		CODEHEADER TWODIV, TWOTIMES, 0x01
 		#(x -- x)
 		ld t0, 0(sp)
 		srai t1, t0, 1
@@ -1054,8 +1062,13 @@
 		j tix_up_done
   tick_length_two_twodiv:
 		li t2, 0x2F			#/
-		bne t1, t2, tick_length_two_begin2_done
+		bne t1, t2, tick_length_two_twotimes
 		call fix_up_twodiv
+		j tix_up_done	
+  tick_length_two_twotimes:
+		li t2, 0x2A			#*
+		bne t1, t2, tick_length_two_begin2_done
+		call fix_up_twotimes
 		j tix_up_done	
   tick_length_two_begin2_done:
 		j tix_up_length_two_finished

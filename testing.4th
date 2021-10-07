@@ -198,6 +198,10 @@ BLUE 13 7 /mod 1 = swap 6 = and if ." /MOD passed " else RED ." /MOD FAILED" the
 ." Testing 2/" 5 SPACES
 35 2/ 17 = 34 2/ 17 = AND IF BLUE ." 2/ passed" ELSE RED ." 2/ FAILED" THEN RESET CR ;
 
+: TEST2*
+." Testing 2*" 5 SPACES
+35 2* 70 = 34 2* 68 = AND IF BLUE ." 2* passed" ELSE RED ." 2* FAILED" THEN RESET CR ;
+
 : TESTNEGATE
 ." Testing NEGATE" 5 spaces 13 negate -13 =
 BLUE if ." NEGATE passed" else RED ." NEGATE FAILED" then RESET cr ;
@@ -471,7 +475,7 @@ VERIFYSOURCE TESTCONSTANTVALUE
 ." Running integer tests " cr
 TESTADD TESTMUL TESTDIV TESTSUB TESTPLUS1 TESTMINUS1 TEST0< TEST0=
 TESTminus2 testplus2 testunderplus testminmax testabs testnegate testshifts
-TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/
+TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2*
 ." Integer tests complete " CR
 ;
 
