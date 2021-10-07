@@ -194,6 +194,10 @@ BLUE 13 7 /mod 1 = swap 6 = and if ." /MOD passed " else RED ." /MOD FAILED" the
 ." Testing */MOD" 5 SPACES
 5 7 3  */MOD 11 = SWAP 2 = AND IF BLUE ." */MOD passed" ELSE RED ." */MOD FAILED" THEN RESET CR ;
 
+: TEST2/
+." Testing 2/" 5 SPACES
+35 2/ 17 = 34 2/ 17 = AND IF BLUE ." 2/ passed" ELSE RED ." 2/ FAILED" THEN RESET CR ;
+
 : TESTNEGATE
 ." Testing NEGATE" 5 spaces 13 negate -13 =
 BLUE if ." NEGATE passed" else RED ." NEGATE FAILED" then RESET cr ;
@@ -467,7 +471,7 @@ VERIFYSOURCE TESTCONSTANTVALUE
 ." Running integer tests " cr
 TESTADD TESTMUL TESTDIV TESTSUB TESTPLUS1 TESTMINUS1 TEST0< TEST0=
 TESTminus2 testplus2 testunderplus testminmax testabs testnegate testshifts
-TESTMOD TESTSLMOD TEST*/ TEST*/MOD
+TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/
 ." Integer tests complete " CR
 ;
 
@@ -499,6 +503,9 @@ VERIFYDOT
 ." Basics tests and verifications over " cr
 ;
 
+: ENTERCONTINUE
+YELLOW BRIGHT 
+." Press enter to continue " RESET GETLINE CR ;
 
 \ Run all the tests
 : UTS
@@ -507,20 +514,19 @@ DECIMAL
 ." Running unit tests (cleared screen verifies CLEARSCREEN)" cr
 VERIFYCOLOURS CR
 STACKOPTESTS
-YELLOW BRIGHT
-." Press enter to continue " RESET GETLINE CR
-BASICSTESTS YELLOW BRIGHT
-." Press enter to continue " RESET GETLINE CR
-INTEGERTESTS YELLOW BRIGHT
-." Press enter to continue " RESET GETLINE CR
-LISTWORDSTESTS YELLOW BRIGHT
-." Press enter to continue " RESET GETLINE CR
-TESTCONDITIONALS YELLOW BRIGHT
-." Press enter to continue " RESET GETLINE CR
-RSTACKTESTS YELLOW BRIGHT
-." Press enter to continue " RESET GETLINE CR
-TESTLOOPS YELLOW BRIGHT
-." Press enter to continue " RESET GETLINE CR
-TESTMEMORY YELLOW BRIGHT
-." Press enter to continue " RESET GETLINE CR
+ENTERCONTINUE
+BASICSTESTS
+ENTERCONTINUE
+INTEGERTESTS
+ENTERCONTINUE
+LISTWORDSTESTS
+ENTERCONTINUE
+TESTCONDITIONALS
+ENTERCONTINUE
+RSTACKTESTS
+ENTERCONTINUE
+TESTLOOPS
+ENTERCONTINUE
+TESTMEMORY
+ENTERCONTINUE
  ABORT" Verifying ABORTCOMM and leaving tests with this message "  ." ABORTCOMM has FAILED" ;
