@@ -21,6 +21,7 @@
 		tail NEXT
 
 		CODEHEADER _LEAVE, _I, 0x0
+		addi s10, s10, 24		#unloop first
 		la t0, WA__LOOP
 		la t1, WA__PLUSLOOP
 		la t3, WA__DO
@@ -53,7 +54,14 @@
 		addi sp, sp, 8
 		ld t0, 0(s10)
 		add t0, t0, t3
-		j loop_plusloop_entry
+		bgt t3, zero, loop_plusloop_entry
+		# decrement on this path
+		ld t1, 8(s10)
+		ld t2, 16(s10)
+		bge t1, t0, loop_over		#reverse check
+		sd t0, 0(s10)
+		mv s7, t2
+		tail NEXT
 
 		CODEHEADER _LOOP, _PLUSLOOP, 0x0
 		ld t0, 0(s10)			#current value
