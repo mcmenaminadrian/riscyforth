@@ -5,6 +5,8 @@
   wordlist_fetch:
                 ld t1, 0(t0)
 		ld t2, 0(t1)
+		li t3, 1
+		and t2, t2, t3
                 beq t2, zero, wordlist_get_next 	       	#flag is zero, not for printing
                 ld t2, 24(t1)		                       	#length of name
                 addi t1, t1, 32		                     	#address of characters for name

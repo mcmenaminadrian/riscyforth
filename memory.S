@@ -37,7 +37,139 @@
 		sb t0, 0(t2)
 		tail NEXT
 
-		CODEHEADER DOES_, CCOMMA, 0x01
+		CODEHEADER NOP, CCOMMA, 0x0
+		#do nothing
+		tail NEXT
+
+		CODEHEADER DEFER, NOP, 0x01
+		#Write out COLON
+		#Insert NOP
+		#Insert SEMI
+		ld a1, INPUT_END
+		ld a0, INPUT_START
+		addi t0, a0, 1
+		bltu t0, a1, defer_have_data
+		tail NEXT
+  defer_have_data:
+		call utility_find_string
+		beqz a0, defer_gone_bad
+		#now have a0 with start, a1 with end+1, a2 with length
+		sd a1, INPUT_START, t5			#update read in point
+		call utility_sanitize_string		
+		#now check this is not a keyword or a number
+		call utility_check_dictionary_match
+		bnez a3, defer_gone_bad
+		#write out a word with the variable name that will return the address
+		#get the address we'll return
+		mv a1, a2
+		li a5, 0x21				#33 for a deferred word
+		call utility_write_function_header
+		#write out colon
+		la t1, createwritepoint
+		ld t3, 0(t1)
+		li t0, 0xFF8C8C93
+		sw t0, 0(t3)		#addi s9, s9, -8,
+		li t0, 0x017cb023	
+		sw t0, 4(t3)		#sd s7, 0(s9)
+		#calculate the address we need to jump to for 64 bits
+		mv t2, t3
+		addi t2, t2, DOESOFFSET
+		srli t2, t2, 32
+		slli t2, t2, 20
+		li t1, 0xC13
+		or t2, t2, t1
+		sw t2, 8(t3)		#addi s8, zero, [upper 32 bits >> 32]
+		li t2, 0x20C1C13
+		sw t2, 12(t3)		#slli s8, s8, 32
+		li t1, 0xFFFFF000
+		addi t4, t3, DOESOFFSET
+		and t0, t4, t1
+		li t1, 0x2B7
+		or t0, t0, t1
+		sw t0, 16(t3)		#lui t0, [bits 12 - 31]
+		li t2, 0x2029293
+		sw t2, 20(t3)		#slli t0 32
+		li t2, 0x202D293
+		sw t2, 24(t3)		#srli t0 32	(zero out upper 32 bits)
+		li t1, 0xFFF
+		and t0, t4, t1		#t0 now has lower 12 bits
+		mv t1, t0		#t1 has same lower 12 bits
+		srli t1, t1, 11		#t1 now just top bit
+		slli t1, t1, 20
+		
+		li t2, 0x313
+		or t2, t1, t2
+		sw t2, 28(t3)		#either addi t1, zero, 1 or addi t1, zero, 0
+		li t1, 0xB31313
+		sw t1, 32(t3)		#slli t1, t1, 11
+		andi t0, t0, 0x7FF	#lower eleven bits
+		slli t0, t0, 20
+		li t1, 0x30313
+		or t1, t0, t1
+		sw t1, 36(t3)		#add bottom 11 bits to t1
+		li t1, 0x6282B3
+		sw t1, 40(t3)		#add t0, t0, t1
+		li t0, 0x5C6C33
+		sw t0, 44(t3)		#or s8, s8, t0
+		li t0, 0x8be2
+		sh t0, 48(t3)		#mv s7, s8
+		#register based jump to NEXT
+		#make this fully portable even at cost of unneeded code
+		la t1, NEXT		#t1 has the number
+		srli t1, t1, 32		#eliminate the lower 32 bits
+		slli t1, t1, 20		#in right place for the add
+		li t0, 0x293
+		or t0, t0, t1
+		sw t0, 50(t3)		#addi t0, zero, [upper 32 of NEXT]
+		li t0, 0x2029293
+		sw t0, 54(t3)		#slli t0, t0, 32
+		#now deal with lower 32 bits of NEXT address
+		la t1, NEXT
+		li t2, 0xFFFFF000
+		and t1, t1, t2		#take upper 20 bits of lower 32
+		li t2, 0x337
+		or t0, t1, t2
+		sw t0, 58(t3)		#lui t1, [bits 12 - 31]
+		li t0, 0x2031313
+		sw t0, 62(t3)		#slli t1, t1, 0x20
+		li t0, 0x2035313
+		sw t0, 66(t3)		#srli t1, t1, 0x20 (zero out upper 32 bits)
+		la t1, NEXT
+		li t2, 0xFFF
+		and t0, t1, t2		#lower 12 bits only
+		srli t1, t0, 11		#t1 has twelveth bit only
+		li t2, 0x7FF
+		and t0, t0, t2		#t0 has the lower 11 bits
+		li t4, 0x393
+		slli t1, t1, 20
+		or t4, t4, t1
+		sw t4, 70(t3)		#addi t2, zero, [0 or 1]
+		li t4, 0xB39393
+		sw t4, 74(t3)		#slli t2, t2, 11
+		li t4, 0x7282B3
+		sw t4, 78(t3)		#add t0, t0, t2
+		li t4, 0x393
+		slli t0, t0, 20
+		or t4, t4, t0
+		sw t4, 82(t3)		#addi t2, zero, [lower 11 bits]
+		li t4, 0x7282B3
+		sw t4, 86(t3)		#add t0, t0, t2
+		li t4, 0x6282B3
+		sw t4, 90(t3)		#add t0, t0, t1
+		li t0, 0x28067		#jalr zero, 0(t0)
+		sw t0, 94(t3)
+		sw zero, 98(t3)		#padding
+		sh zero, 102(t3)
+		la t0, WA_NOP
+		sd t0, 104(t3)
+		la t0, WA_SEMI
+		sd t0, 112(t3)
+		tail NEXT
+
+  defer_gone_bad:
+		j create_gone_bad
+
+		CODEHEADER DOES_, DEFER, 0x01
 		#write out a new colon at current address
 		#replace the tail NEXT with a jump to the colon
 		#now write out the colon code
