@@ -41,7 +41,15 @@
 		#do nothing
 		tail NEXT
 
-		CODEHEADER DEFER, NOP, 0x01
+		CODEHEADER IS, NOP, 0x01
+		#(xt -)
+		#Also parses ahead for word created with DEFER
+		#Parse input and take xt off stack
+		#and use it to replace NOP (or previously replaced word)
+		tail NEXT	
+
+		CODEHEADER DEFER, IS, 0x01
+		#Parsing word - no stack action
 		#Write out COLON
 		#Insert NOP
 		#Insert SEMI
@@ -51,6 +59,9 @@
 		bltu t0, a1, defer_have_data
 		tail NEXT
   defer_have_data:
+		#small stack
+		addi sp, sp, -8
+		sd s0, 0(sp)
 		call utility_find_string
 		beqz a0, defer_gone_bad
 		#now have a0 with start, a1 with end+1, a2 with length
@@ -64,9 +75,10 @@
 		mv a1, a2
 		li a5, 0x21				#33 for a deferred word
 		call utility_write_function_header
+		mv s0, a0
+		addi s0, s0, -56
 		#write out colon
-		la t1, createwritepoint
-		ld t3, 0(t1)
+		mv t3, a0
 		li t0, 0xFF8C8C93
 		sw t0, 0(t3)		#addi s9, s9, -8,
 		li t0, 0x017cb023	
@@ -114,59 +126,29 @@
 		li t0, 0x8be2
 		sh t0, 48(t3)		#mv s7, s8
 		#register based jump to NEXT
-		#make this fully portable even at cost of unneeded code
-		la t1, NEXT		#t1 has the number
-		srli t1, t1, 32		#eliminate the lower 32 bits
-		slli t1, t1, 20		#in right place for the add
-		li t0, 0x293
-		or t0, t0, t1
-		sw t0, 50(t3)		#addi t0, zero, [upper 32 of NEXT]
-		li t0, 0x2029293
-		sw t0, 54(t3)		#slli t0, t0, 32
-		#now deal with lower 32 bits of NEXT address
-		la t1, NEXT
-		li t2, 0xFFFFF000
-		and t1, t1, t2		#take upper 20 bits of lower 32
-		li t2, 0x337
-		or t0, t1, t2
-		sw t0, 58(t3)		#lui t1, [bits 12 - 31]
-		li t0, 0x2031313
-		sw t0, 62(t3)		#slli t1, t1, 0x20
-		li t0, 0x2035313
-		sw t0, 66(t3)		#srli t1, t1, 0x20 (zero out upper 32 bits)
-		la t1, NEXT
-		li t2, 0xFFF
-		and t0, t1, t2		#lower 12 bits only
-		srli t1, t0, 11		#t1 has twelveth bit only
-		li t2, 0x7FF
-		and t0, t0, t2		#t0 has the lower 11 bits
-		li t4, 0x393
-		slli t1, t1, 20
-		or t4, t4, t1
-		sw t4, 70(t3)		#addi t2, zero, [0 or 1]
-		li t4, 0xB39393
-		sw t4, 74(t3)		#slli t2, t2, 11
-		li t4, 0x7282B3
-		sw t4, 78(t3)		#add t0, t0, t2
-		li t4, 0x393
-		slli t0, t0, 20
-		or t4, t4, t0
-		sw t4, 82(t3)		#addi t2, zero, [lower 11 bits]
-		li t4, 0x7282B3
-		sw t4, 86(t3)		#add t0, t0, t2
-		li t4, 0x6282B3
-		sw t4, 90(t3)		#add t0, t0, t1
-		li t0, 0x28067		#jalr zero, 0(t0)
-		sw t0, 94(t3)
-		sw zero, 98(t3)		#padding
-		sh zero, 102(t3)
-		la t0, WA_NOP
-		sd t0, 104(t3)
+		mv a0, t3
+		addi a0, a0, 50
+		la a1, NEXT
+		call utility_write_out_call_function
+		sw zero, 0(a0)		#padding
+		sh zero, 4(a0)
+		la t0, WA_NOP		#will be overwritten by IS
+		sd t0, 6(a0)
 		la t0, WA_SEMI
-		sd t0, 112(t3)
+		sd t0, 14(a0)
+		#update dictionary etc
+		addi a0, a0, 22
+		la t0, newdictionary
+		sd a0, 0(t0)
+		la t0, dictionary
+		sd s0, 0(t0)
+		ld s0, 0(sp)
+		addi sp, sp, 8
 		tail NEXT
 
   defer_gone_bad:
+		ld s0, 0(sp)
+		addi sp, sp, 8
 		j create_gone_bad
 
 		CODEHEADER DOES_, DEFER, 0x01
