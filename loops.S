@@ -214,7 +214,7 @@
 		sd t1, 0(t0)				#set MODE to 1 (compile)
 		la t1, newdictionary
 		ld t3, 0(t1)
-		li t2, 0x01
+		li t2, 0x31				#49 for COLON word
 		sd t2, 0(t3)				#flag
 		addi t2, t3, 0x38			#word address of new word
 		sd t2, 8(t3)

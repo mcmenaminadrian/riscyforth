@@ -41,12 +41,109 @@
 		#do nothing
 		tail NEXT
 
-		CODEHEADER IS, NOP, 0x01
+		CODEHEADER _IS, NOP, 0x0
+		#get length
+		ld a0, 0(s7)
+		mv a1, s7
+		addi s7, s7, 8
+		add s7, s7, a0
+		li t0, 7
+		and t1, s7, t0
+		beqz t1, _is_adjustment_over
+		li t2, 8
+		sub t2, t2, t1
+		add s7, s7, t2
+  _is_adjustment_over:
+		#now rejoin IS
+		add t0, a1, 8
+		add t1, a0, t0
+		tail is_process_found_token
+
+		CODEHEADER IS, _IS, 0x01
 		#(xt -)
 		#Also parses ahead for word created with DEFER
 		#Parse input and take xt off stack
 		#and use it to replace NOP (or previously replaced word)
-		tail NEXT	
+		ld a1, INPUT_END
+		ld a0, INPUT_START
+		addi t0, a0, 1
+		bltu t0, a1, is_have_data
+		tail NEXT
+
+  is_have_data:
+		call utility_find_string
+		beqz a0, is_exhausted
+
+		#code essentially copied from TICK word
+  is_process_found_token:
+		la a7, is_finished_sanitization
+		mv t1, a1
+		addi t1, t1, -1
+		mv t0, a0
+		mv a0, a2
+		add a0, a0, -1
+		bnez a0, is_length_two_or_more
+		call tick_fix_up_single
+		j is_prepare_sanity_test		#can skip the other tests for length
+  is_length_two_or_more:
+		li a1, 1
+		bne a0, a1, is_length_three_or_more
+		call tick_fix_up_length_two
+		j is_prepare_sanity_test
+  is_length_three_or_more:
+		li a1, 3
+		bne a0, a1, is_length_five_or_more
+		call tick_fix_up_length_four
+		j is_prepare_sanity_test
+  is_length_five_or_more:
+		li a1, 4
+		bne a0, a1, is_length_six_or_more
+		call tick_fix_up_length_five
+		j is_prepare_sanity_test
+  is_length_six_or_more:
+		li a1, 5
+		bne a0, a1, is_prepare_sanity_test
+		call tick_fix_up_length_six
+  is_prepare_sanity_test:
+		mv a0, t0
+		mv a1, t1
+		call utility_sanitize_string
+  is_finished_sanitization:
+		#look up the command
+		sub t2, t1, t0
+		addi t2, t2, 1
+		la t4, dictionary
+		ld t3, 0(t4)
+  is_next_in_dictionary:
+		lb t4, 24(t3)
+		bne t4, t2, is_tokens_do_not_match
+		add a0, t3, 32
+		mv a1, t0
+		mv a2, t2
+  is_loop_through_token:
+		lb t5, 0(a0)
+                lb t6, 0(a1)
+                bne t5, t6, is_tokens_do_not_match
+                addi a2, a2, -1
+                beq a2, zero, is_tokens_matched
+                addi a0, a0, 1
+                addi a1, a1, 1
+                j is_loop_through_token
+  is_tokens_do_not_match:
+		ld t3, 16(t3)
+		beqz t3, is_exhausted
+		j is_next_in_dictionary
+  is_tokens_matched:
+		addi t3, t3, 8
+		ld t3, 0(t3)
+		#t3 now had address we need
+		addi t3, t3, DOESOFFSET
+		ld t0, 0(sp)
+		sd t0, 0(t3)
+		addi sp, sp, 8
+		tail NEXT
+  is_exhausted:
+		tail search_failed
 
 		CODEHEADER DEFER, IS, 0x01
 		#Parsing word - no stack action
