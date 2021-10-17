@@ -104,9 +104,15 @@
 		tail embed_encsq
   search_tick:
 		la t0, WA_TICK
-		bne t3, t0, search_to
+		bne t3, t0, search_is
 		#substitute WA__TICK
 		la t3, WA__TICK
+		tail embed_tick
+  search_is:
+		la t0, WA_IS
+		bne t3, t0, search_to
+		#subsitute WA__IS
+		la t3, WA__IS
 		tail embed_tick
   search_to:
 	 	la t0, WA_TO

@@ -445,6 +445,14 @@ DUP BACKROT + DUP . DUP 5000000 < IF RECURSE THEN ;
 ." Verifying RECURSE " 5 SPACES
 ." Fibonacci series: " 0 1 FIBONACCI CR ;
 
+DEFER TESTDEFER
+: VERIFYDEFERIS
+." Verifying DEFER and IS " CR
+." Print ASCII characters..." ' EMIT IS TESTDEFER 128 32 DO I TESTDEFER LOOP CR
+." Now print numbers..." ' . IS TESTDEFER 128 32 DO I TESTDEFER LOOP CR
+' NOP IS TESTDEFER \ Restore default state
+BLUE ." DEFER and IS verified" RESET CR ;
+
 \ Colours
 : VERIFYCOLOURS
 BLACK BWHITE ." Verifying colours " CR
@@ -459,6 +467,7 @@ RESET ." And back to normal..." CR ;
 ." Testing memory manipulation words" cr
 TESTINGTICK testcfetch testingmove testchar testfetch testplusstore TESTPADFILLERASE
 TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN TESTCOMMA TESTDOES> TEST2!
+VERIFYDEFERIS
 ." Testing of memory code complete" cr ;
 
 \ Test loops

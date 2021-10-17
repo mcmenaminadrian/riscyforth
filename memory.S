@@ -57,7 +57,8 @@
 		#now rejoin IS
 		add t0, a1, 8
 		add t1, a0, t0
-		tail is_process_found_token
+		call is_process_found_token
+		tail NEXT
 
 		CODEHEADER IS, _IS, 0x01
 		#(xt -)
@@ -73,14 +74,25 @@
   is_have_data:
 		call utility_find_string
 		beqz a0, is_exhausted
+		mv t0, a0
+		mv t1, a1
+		mv a0, a2
+		call is_process_found_token
+		#now suppress the word being called!
+		la t0, INPUT_START
+		ld t1, 0(t0)
+		add t1, t1, a0
+		addi t1, t1, 1
+		sd t1, 0(t0)
+		tail NEXT
 
 		#code essentially copied from TICK word
   is_process_found_token:
+		addi sp, sp, -16
+		sd ra, 0(sp)
+		sd a0, 8(sp)				#store length
 		la a7, is_finished_sanitization
-		mv t1, a1
 		addi t1, t1, -1
-		mv t0, a0
-		mv a0, a2
 		add a0, a0, -1
 		bnez a0, is_length_two_or_more
 		call tick_fix_up_single
@@ -138,11 +150,14 @@
 		ld t3, 0(t3)
 		#t3 now had address we need
 		addi t3, t3, DOESOFFSET
-		ld t0, 0(sp)
+		ld t0, 16(sp)
 		sd t0, 0(t3)
-		addi sp, sp, 8
-		tail NEXT
+		ld ra, 0(sp)
+		ld a0, 8(sp)			#a0 returns with length
+		addi sp, sp, 24
+		ret
   is_exhausted:
+		addi sp, sp, 16
 		tail search_failed
 
 		CODEHEADER DEFER, IS, 0x01
