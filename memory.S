@@ -41,7 +41,16 @@
 		#do nothing
 		tail NEXT
 
-		CODEHEADER _IS, NOP, 0x0
+		CODEHEADER DEFERFETCH, NOP, 0x01
+		#(xt - xt)
+		ld t0, 0(sp)
+		ld t1, 0(t0)
+		addi t2, t1, DOESOFFSET
+		ld t3, 0(t2)
+		sd t3, 0(sp)
+		tail NEXT
+
+		CODEHEADER _IS, DEFERFETCH, 0x0
 		#get length
 		ld a0, 0(s7)
 		mv a1, s7
