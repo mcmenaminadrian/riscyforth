@@ -453,6 +453,11 @@ DEFER TESTDEFER
 ' NOP IS TESTDEFER \ Restore default state
 BLUE ." DEFER and IS verified" RESET CR ;
 
+: TESTDEFER@
+." Testing DEFER@ and DEFER!" CR
+' EMIT IS TESTDEFER ' TESTDEFER DEFER@ ' EMIT = IF BLUE ." DEFER@ passed" ELSE RED ." DEFER@ FAILED" THEN RESET CR
+' . ' TESTDEFER DEFER! ' TESTDEFER DEFER@ ' . = IF BLUE ." DEFER! passed" ELSE RED ." DEFER! FAILED" THEN RESET CR ' NOP IS TESTDEFER ;
+
 \ Colours
 : VERIFYCOLOURS
 BLACK BWHITE ." Verifying colours " CR
@@ -467,7 +472,7 @@ RESET ." And back to normal..." CR ;
 ." Testing memory manipulation words" cr
 TESTINGTICK testcfetch testingmove testchar testfetch testplusstore TESTPADFILLERASE
 TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN TESTCOMMA TESTDOES> TEST2!
-VERIFYDEFERIS
+VERIFYDEFERIS TESTDEFER@
 ." Testing of memory code complete" cr ;
 
 \ Test loops
