@@ -1,6 +1,5 @@
 \ Unit tests
 
-
 \ Stack operations tests
 
 : testOVER2
@@ -538,7 +537,7 @@ YELLOW BRIGHT
 
 \ Run all the tests
 : UTS
-CLEARSCREEN	\ Verifies CLEARSCREEN
+CLEARSCREEN   \ Verifies CLEARSCREEN
 DECIMAL
 ." Running unit tests (cleared screen verifies CLEARSCREEN)" cr
 VERIFYCOLOURS CR
