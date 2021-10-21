@@ -7,7 +7,7 @@
 		ld t2, 0(t1)
 		li t3, 1
 		and t2, t2, t3
-                beq t2, zero, wordlist_get_next 	       	#flag is zero, not for printing
+                beqz t2, wordlist_get_next	 	       	#flag is zero, not for printing
                 ld t2, 24(t1)		                       	#length of name
                 addi t1, t1, 32		                     	#address of characters for name
                 PUSH t0
@@ -81,7 +81,43 @@
 		WRITESTRINGR t0, t1
 		tail NEXT
 
-                CODEHEADER VARIABLE, DISPLAY, 0x01
+		CODEHEADER BUFFERCOLON, DISPLAY, 0x01
+		#(u "<spaces>name" --)
+		ld a1, INPUT_END
+		ld a0, INPUT_START
+		addi t0, a0, 1
+		bltu t0, a1, buffercolon_have_data
+		tail NEXT				#nothing to parse
+  buffercolon_have_data:
+		#now test we are aligned
+		call utility_find_string
+		beqz a0, variable_gone_bad
+		#now have a0 with start, a1 with end+1, a2 with length
+		sd a1, INPUT_START, t5			#update read in point
+		call utility_sanitize_string		
+		#now check this is not a keyword or a number
+		call utility_check_dictionary_match
+		bnez a3, variable_gone_bad
+		#write out a word with the variable name that will return the address
+		#get the address we'll return
+		mv a1, a2
+		li a5, 0x08				#8 for a variable
+		call utility_write_function_header
+		la a3, dataspaceptr
+		ld a1, 0(a3)
+		#check alignment
+		li t0, 0x07
+		li t2, 0x08
+		and t1, a1, t0
+		beqz t1, buffercolon_advance_alloc
+		sub t3, t2, t1
+		add a1, a1, t3
+  buffercolon_advance_alloc:
+		ld t2, 0(sp)
+		addi sp, sp, 8
+		j variable_advance_alloc
+
+                CODEHEADER VARIABLE, BUFFERCOLON, 0x01
 		ld a1, INPUT_END
 		ld a0, INPUT_START
 		addi t0, a0, 1
