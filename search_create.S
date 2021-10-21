@@ -122,9 +122,16 @@
 		tail embed_to
   search_char:
 		la t0, WA_CHAR
-		bne t3, t0, search_wa_until
+		bne t3, t0, search_wa_again
 		la t3, WA__CHAR
 		tail embed_tick
+  search_wa_again:
+		#test for AGAIN
+		la t0, WA_AGAIN
+		bne t3, t0, search_wa_until
+		#insert three instruction simple loop back
+		la t3, WA__AGAIN			#substitute
+		j search_create_inscribe
   search_wa_until:
 		#test for UNTIL
 		la t0, WA_UNTIL
@@ -228,25 +235,6 @@
   search_create_setup_else:
 		tail transition_if_else
 
-  search_create_test_again:
-		la t0, WA_AGAIN
-		bne t0, t3, search_create_test_repeat
-		call get iff_mode
-		beqz a0, search_create_bad_ifmode
-		call get_flag_mode
-		bnez a0, search_create_test_again_state
-		la a0, WA__AGAIN				#write out _AGAIN
-		tail transition_if_again
-  search_create_test_again_state:
-		#test for then->again
-		beqz a1, search_create_test_else_again
-		la a0, WA__AGAIN
-		tail transition_then_again
-  search_create_test_else_repeat:
-		beqz a2, search_create_bad_ifmode
-		tail transition_else_then
-		
-
   search_create_test_repeat:
 		la t0, WA_REPEAT
 		bne t0, t3, search_create_test_then
@@ -296,7 +284,10 @@
   search_create_continue_test_until:
 		#test for special case
 		la t0, WA__UNTIL
+		beq t0, t3, search_create_add_until_backcount
+		la t0, WA__AGAIN
 		bne t0, t3, search_create_continue_inscription
+  search_create_add_until_backcount:
 		#setup call to write additional WA__UNTIL stuff
 		mv a0, t3
 		call compile_in_until
