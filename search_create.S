@@ -228,6 +228,25 @@
   search_create_setup_else:
 		tail transition_if_else
 
+  search_create_test_again:
+		la t0, WA_AGAIN
+		bne t0, t3, search_create_test_repeat
+		call get iff_mode
+		beqz a0, search_create_bad_ifmode
+		call get_flag_mode
+		bnez a0, search_create_test_again_state
+		la a0, WA__AGAIN				#write out _AGAIN
+		tail transition_if_again
+  search_create_test_again_state:
+		#test for then->again
+		beqz a1, search_create_test_else_again
+		la a0, WA__AGAIN
+		tail transition_then_again
+  search_create_test_else_repeat:
+		beqz a2, search_create_bad_ifmode
+		tail transition_else_then
+		
+
   search_create_test_repeat:
 		la t0, WA_REPEAT
 		bne t0, t3, search_create_test_then

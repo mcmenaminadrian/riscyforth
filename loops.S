@@ -125,7 +125,15 @@
 		add s7, s7, 8
 		tail NEXT
 
-		CODEHEADER REPEAT, _UNTIL, 0x01
+		CODEHEADER AGAIN, _UNTIL, 0x01
+		tail NEXT			#do nothing in immediatre mode
+
+		CODEHEADER _AGAIN, AGAIN, 0x0
+		ld t0, 0(s7)
+		add s7, s7, t0			#unconditional return to BEGIN
+		tail NEXT
+
+		CODEHEADER REPEAT, _AGAIN, 0x01
 		tail NEXT
 
 		CODEHEADER _REPEAT, REPEAT, 0x0
