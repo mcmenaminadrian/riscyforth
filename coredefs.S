@@ -503,7 +503,7 @@
 		addi sp, sp, 16
 		tail NEXT
 
-		CODEHEADER PLUSSTORE, ERASE, 0x01
+		CODEHEADERZ PLUSSTORE, +!, ERASE, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 16
@@ -925,8 +925,6 @@
 		beq t1, t2, tick_length_two_begin2
 		li t2, 0x3E			#>
 		beq t1, t2, tick_length_two_beginGT
-		li t2, 0x2B			#+
-		beq t1, t2, tick_length_two_beginplus
 		li t2, 0x2A			#*
 		beq t1, t2, tick_length_two_beginstar
 		PUSH t1
@@ -1073,15 +1071,6 @@
 		call fix_up_twotimes
 		j tix_up_done	
   tick_length_two_begin2_done:
-		j tix_up_length_two_finished
-
-  tick_length_two_beginplus:
-		lbu t1, 1(a0)
-		li t2, 0x21			#!
-		bne t1, t2, tick_length_two_beginplus_done
-		call do_fix_up_plusstore
-		j tix_up_done
-  tick_length_two_beginplus_done:
 		j tix_up_length_two_finished
 
   tick_length_two_beginR:

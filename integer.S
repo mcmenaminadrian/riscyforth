@@ -24,7 +24,7 @@
 		addi sp, sp, 8
                 tail NEXT
 
-                CODEHEADER SUB, DIV, 0x01
+                CODEHEADERZ SUB, -, DIV, 0x01
 		ld a1, 0(sp)
 		ld a0, 8(sp)
                 sub t0, a0, a1
@@ -32,7 +32,7 @@
 		addi sp, sp, 8
                 tail NEXT
 
-                CODEHEADER PLUS1, SUB, 0x01
+                CODEHEADER PLUSONE, 1+, -, 0x01
 		ld t0, 0(sp)
                 addi t0, t0, 1
 		sd t0, 0(sp)

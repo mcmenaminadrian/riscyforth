@@ -752,7 +752,6 @@
 		# >R  --> TOR
 		# C!  --> CSTORE
 		# C@  --> CFETCH
-		# +!  --> PLUSSTORE
 		# */  --> TIMESDIV
 		# 0<  --> ZEROLESS
 		# 0=  --> ZEROEQUAL
@@ -775,8 +774,6 @@
 		beq t1, t2, length_two_begin2
 		li t2, 0x3E			#>
 		beq t1, t2, length_two_beginGT
-		li t2, 0x2B			#+
-		beq t1, t2, length_two_beginplus
 		li t2, 0x2A			#*
 		beq t1, t2, length_two_beginstar
 		PUSH t1
@@ -813,13 +810,6 @@
 		addi a2, a2, 4
 		ret
 		
-
-  length_two_beginplus:
-		lbu t1, 1(a0)
-		li t2, 0x21			#!
-		call do_fix_up_plusstore
-		j fix_up_done
-
   length_two_begin0:
 		lbu t1, 1(a0)
 		li t2, 0x3C			#<
