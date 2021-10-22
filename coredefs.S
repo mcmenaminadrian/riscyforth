@@ -36,7 +36,7 @@
 		addi sp, sp, 16
 		tail NEXT
 
-		CODEHEADER ZEROLESS, TIMESDIV, 0x01
+		CODEHEADERZ ZEROLESS, 0<, TIMESDIV, 0x01
 		#(n -- flag)
 		ld t0, 0(sp)
 		bltz t0, zeroless_true
@@ -54,7 +54,7 @@
 		sd zero, 0(sp)
 		tail NEXT
 
-		CODEHEADER TWOTIMES, ZEROEQUAL, 0x01
+		CODEHEADERZ TWOTIMES, 2*, ZEROEQUAL, 0x01
 		#(x -- x)
 		li t0, 2
 		ld t1, 0(sp)
@@ -62,14 +62,14 @@
 		sd t2, 0(sp)
 		tail NEXT
 
-		CODEHEADER TWODIV, TWOTIMES, 0x01
+		CODEHEADERZ TWODIV, 2/, TWOTIMES, 0x01
 		#(x -- x)
 		ld t0, 0(sp)
 		srai t1, t0, 1
 		sd t1, 0(sp)
 		tail NEXT
 
-		CODEHEADER TWOSTORE, TWODIV, 0x01
+		CODEHEADERZ TWOSTORE, 2!, TWODIV, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		ld t2, 16(sp)
@@ -742,6 +742,8 @@
 		CODEHEADER EXIT, _EXIT, 0x01
 		tail NEXT				#do nothing in immediate mode
 
+		tail NEXT				#do nothing in immediate mode
+
 		CODEHEADER _CHAR, EXIT, 0x0
 		#get length
 		ld a0, 0(s7)
@@ -809,14 +811,6 @@
 		beq t2, t1, tix_up_dot
 		li t2, 0x3B
 		beq t2, t1, tix_up_semi
-		li t2, 0x2B
-		beq t2, t1, tix_up_add
-		li t2, 0x2D
-		beq t2, t1, tix_up_sub
-		li t2, 0x2A
-		beq t2, t1, tix_up_mul
-		li t2, 0x2F
-		beq t2, t1, tix_up_div
 		li t2, 0x21
 		beq t2, t1, tix_up_store
 		li t2, 0x3E
@@ -848,18 +842,6 @@
 		j tix_up_done
   tix_up_semi:
 		call do_fix_up_semi
-		j tix_up_done
-  tix_up_add:
-		call do_fix_up_add
-		j tix_up_done
-  tix_up_sub:
-		call do_fix_up_sub
-		j tix_up_done
-  tix_up_mul:
-		call do_fix_up_mul
-		j tix_up_done
-  tix_up_div:
-		call do_fix_up_div
 		j tix_up_done
   tix_up_store:
 		call do_fix_up_store
@@ -915,14 +897,8 @@
 		mv a1, t1
 		mv a5, t2
 		lbu t1, 0(a0)
-		li t2, 0x30			#0
-		beq t1, t2, tick_length_two_begin0
-		li t2, 0x31			#1
-		beq t1, t2, tick_length_two_begin1
 		li t2, 0x2E			#.
 		beq t1, t2, tick_length_two_begindot
-		li t2, 0x32			#2
-		beq t1, t2, tick_length_two_begin2
 		li t2, 0x3E			#>
 		beq t1, t2, tick_length_two_beginGT
 		li t2, 0x2A			#*
@@ -1000,31 +976,6 @@
 		call do_fix_up_timesdivmod
 		j tix_up_done
 
-  tick_length_two_begin0:
-		lbu t1, 1(a0)
-		li t2, 0x3C			#<
-		bne t1, t2, tick_length_two_test_equal0
-		call fix_up_zeroless
-		j tix_up_done
-  tick_length_two_test_equal0:
-		li t2, 0x3D			#=
-		bne t1, t2, tick_length_two_plusminus_done
-		call fix_up_zeroequal
-		j tix_up_done
-
-  tick_length_two_begin1:
-		lbu t1, 1(a0)
-		li t2, 0x2B			#+
-		bne t1, t2, tick_length_two_test_minus1
-		call fix_up_plus1
-		j tix_up_done
-  tick_length_two_test_minus1:
-		li t2, 0x2D			#-
-		bne t1, t2, tick_length_two_plusminus_done
-		call fix_up_minus1
-		j tix_up_done
-  tick_length_two_plusminus_done:
-		j tix_up_length_two_finished
 
   tick_length_two_beginstar:
 		lbu t1, 1(a0)
@@ -1044,33 +995,13 @@
   tick_length_two_begindot_done:
 		j tix_up_length_two_finished
 		
-  tick_length_two_begin2:
+  tick_length_two_beginplus:
 		lbu t1, 1(a0)
-		li t2, 0x2B			#+
-		bne t1, t2, tick_length_two_testminus2
-		call fix_up_plus2
-		j tix_up_done
-  tick_length_two_testminus2:
-		li t2, 0x2D			#-
-		bne t1, t2, tick_length_two_twostore
-		call fix_up_minus2
-		j tix_up_done
-  tick_length_two_twostore:
 		li t2, 0x21			#!
-		bne t1, t2, tick_length_two_twodiv
-		call fix_up_twostore
+		bne t1, t2, tick_length_two_beginplus_done
+		call do_fix_up_plusstore
 		j tix_up_done
-  tick_length_two_twodiv:
-		li t2, 0x2F			#/
-		bne t1, t2, tick_length_two_twotimes
-		call fix_up_twodiv
-		j tix_up_done	
-  tick_length_two_twotimes:
-		li t2, 0x2A			#*
-		bne t1, t2, tick_length_two_begin2_done
-		call fix_up_twotimes
-		j tix_up_done	
-  tick_length_two_begin2_done:
+  tick_length_two_beginplus_done:
 		j tix_up_length_two_finished
 
   tick_length_two_beginR:
@@ -1129,63 +1060,13 @@
 		mv a3, a2
 		mv a1, t1 
 		mv a5, t2
-		li t2, 0x41
-		lb t1, 0(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, tix_up_six_defer
-		li t2, 0x42
-		lb t1, 1(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, tix_up_six_done 
-		li t2, 0x4F
-		lb t1, 2(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, tix_up_six_done 
-		li t2, 0x52
-		lb t1, 3(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, tix_up_six_done 
-		li t2, 0x54
-		lb t1, 4(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, tix_up_six_done 
 		lbu t1, 5(a0)
 		li t2, 0x22		 #"
 		bne t1, t2, tix_up_six_done
 		call fix_up_acomma
-		j fix_up_done
-  tix_up_six_defer:
-		li t2, 0x44
-		lb t1, 0(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, tix_up_six_done 
-		li t2, 0x45
-		lb t1, 1(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, tix_up_six_done 
-		li t2, 0x46
-		lb t1, 2(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, tix_up_six_done 
-		li t2, 0x45
-		lb t1, 3(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, tix_up_six_done 
-		li t2, 0x52
-		lb t1, 4(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, tix_up_six_done 
-		li t2, 0x40				#@
-		lb t1, 5(a0)
-		bne t1, t2, tix_up_six_defer_store
-		call fix_up_defer
-		call fix_up_defer_fetch
-		j tix_up_done
-  tix_up_six_defer_store:
-		li t2, 0x21				#!
-		bne t1, t2, tix_up_six_done
-		call fix_up_defer
-		call fix_up_defer_store
 		j tix_up_done
   tix_up_six_done:
 		j tix_up_finished
+
+
+

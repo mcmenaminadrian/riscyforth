@@ -743,21 +743,13 @@
   fix_up_length_two:
                 #code to expand, if needed, two character input
                 #SUPPORTED EXPANSIONS
-		# 1+  --> PLUS1
-		# 1-  --> MINUS1
-		# 2+  --> PLUS2
-		# 2-  --> MINUS2
 		# ."  --> ENCSQ
 		# R@  --> RFETCH
 		# >R  --> TOR
 		# C!  --> CSTORE
 		# C@  --> CFETCH
 		# */  --> TIMESDIV
-		# 0<  --> ZEROLESS
 		# 0=  --> ZEROEQUAL
-		# 2!  --> TWOSTORE
-		# 2/  --> TWODIV
-		# 2*  --> TWOTIMES
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -766,12 +758,8 @@
 		lbu t1, 0(a0)
 		li t2, 0x30			#0
 		beq t1, t2, length_two_begin0
-		li t2, 0x31			#1
-		beq t1, t2, length_two_begin1
 		li t2, 0x2E			#.
 		beq t1, t2, length_two_begindot
-		li t2, 0x32			#2
-		beq t1, t2, length_two_begin2
 		li t2, 0x3E			#>
 		beq t1, t2, length_two_beginGT
 		li t2, 0x2A			#*
@@ -809,37 +797,15 @@
 		sb t3, 4(a2)
 		addi a2, a2, 4
 		ret
-		
+
   length_two_begin0:
-		lbu t1, 1(a0)
-		li t2, 0x3C			#<
-		bne t1, t2, length_two_test_zeroequal
-		call fix_up_zeroless
-		j fix_up_done
-  length_two_test_zeroequal:
-		li t2, 0x3D
-		bne t1, t2, length_two_zero_done
+		lb t1, 1(a0)
+		li t2, 0x3D			#=
+		bne t1, t2, length_two_begindot_done
  		call fix_up_zeroequal
-		j fix_up_done
-  length_two_zero_done:
-		j fix_up_length_two_finished
-
-  length_two_begin1:
-		lbu t1, 1(a0)
-		li t2, 0x2B			#+
-		bne t1, t2, length_two_test_minus1
-		call fix_up_plus1
-		j fix_up_done
-  length_two_test_minus1:
-		li t2, 0x2D			#-
-		bne t1, t2, length_two_plusminus_done
-		call fix_up_minus1
-		j fix_up_done
-  length_two_plusminus_done:
-		j fix_up_length_two_finished
-
+		j fix_up_done	
   length_two_begindot:
-		lbu t1, 1(a0)
+		lb t1, 1(a0)
 		li t2, 0x22			#"
 		bne t1, t2, length_two_begindot_done
                 call fix_up_encsq
@@ -850,39 +816,9 @@
   length_two_beginstar:
 		lbu t1, 1(a0)
 		li t2, 0x2F
-		bne t1, t2, length_two_begin2_done
+		bne t1, t2, length_two_r_done
 		call fix_up_timesdiv
 		j fix_up_done		
-
-  length_two_begin2:
-		lbu t1, 1(a0)
-		li t2, 0x2B			#+
-		bne t1, t2, length_two_testminus2
-		call fix_up_plus2
-		j fix_up_done
-  length_two_testminus2:
-		li t2, 0x2D			#-
-		bne t1, t2, length_two_test2store
-		call fix_up_minus2
-		j fix_up_done
-  length_two_test2store:
-		li t2, 0x21			#!
-		bne t1, t2, length_two_test2times
-		call fix_up_twostore
-		j fix_up_done
-  length_two_test2times:
-		li t2, 0x2A			#*
-		bne t1, t2, length_two_test2div
-		call fix_up_twotimes
-		j fix_up_done
-  length_two_test2div:
-		li t2, 0x2F			#/
-		bne t1, t2, length_two_begin2_done
-		call fix_up_twodiv
-		j fix_up_done
-		
-  length_two_begin2_done:
-		j fix_up_length_two_finished
 
   length_two_beginR:
 		sb t1, 0(a2)
@@ -938,10 +874,6 @@
 		#CURRENT EXPANSIONS
 		# .  --> DOT
 		# ;  --> SEMI
-		# +  --> ADD
-		# -  --> SUB
-		# *  --> MUL
-		# /  --> DIV
 		# :  --> COLON
 		# !  --> STORE
 		# >  --> GT
@@ -967,14 +899,6 @@
 		beq t2, t1, fix_up_dot
 		li t2, 0x3B
 		beq t2, t1, fix_up_semi
-		li t2, 0x2B
-		beq t2, t1, fix_up_add
-		li t2, 0x2D
-		beq t2, t1, fix_up_sub
-		li t2, 0x2A
-		beq t2, t1, fix_up_mul
-		li t2, 0x2F
-		beq t2, t1, fix_up_div
 		li t2, 0x21
 		beq t2, t1, fix_up_store
 		li t2, 0x3E
@@ -1007,18 +931,6 @@
 		j fix_up_done
   fix_up_semi:
 		call do_fix_up_semi
-		j fix_up_done
-  fix_up_add:
-		call do_fix_up_add
-		j fix_up_done
-  fix_up_sub:
-		call do_fix_up_sub
-		j fix_up_done
-  fix_up_mul:
-		call do_fix_up_mul
-		j fix_up_done
-  fix_up_div:
-		call do_fix_up_div
 		j fix_up_done
   fix_up_store:
 		call do_fix_up_store
@@ -1191,46 +1103,6 @@
 		li t3, 0x49
 		sb t3, 3(a2)
 		addi a2, a2, 3
-		ret
-
-  do_fix_up_add:
-		li t3, 0x41
-		sb t3, 0(a2)
-		li t3, 0x44
-		sb t3, 1(a2)
-		li t3, 0x44
-		sb t3, 2(a2)
-		addi a2, a2, 2
-		ret
-	
-  do_fix_up_sub:
-		li t3, 0x53
-		sb t3, 0(a2)
-		li t3, 0x55
-		sb t3, 1(a2)
-		li t3, 0x42
-		sb t3, 2(a2)
-		addi a2, a2, 2
-		ret
-	
-  do_fix_up_mul:
-		li t3, 0x4D
-		sb t3, 0(a2)
-		li t3, 0x55
-		sb t3, 1(a2)
-		li t3, 0x4C
-		sb t3, 2(a2)
-		addi a2, a2, 2
-		ret
-	
-  do_fix_up_div:
-		li t3, 0x44
-		sb t3, 0(a2)
-		li t3, 0x49
-		sb t3, 1(a2)
-		li t3, 0x56
-		sb t3, 2(a2)
-		addi a2, a2, 2
 		ret
 
   do_fix_up_store:

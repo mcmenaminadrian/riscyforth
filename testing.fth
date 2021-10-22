@@ -157,7 +157,7 @@ BLUE 75 22 - 53 = IF ." - passed " else RED ." - FAILED " then RESET cr ;
 ." Testing 0= " 5 SPACES
 0 0= TRUE = 1 0= FALSE = AND IF BLUE ." 0= passed" ELSE RED ." 0= FAILED" THEN CR RESET ; 
 
-: TESTPLUS1
+: TEST1+
 ." Testing 1+ " 5 SPACES
 BLUE 10 1+ 11 = IF ." 1+ passed " ELSE RED ." 1+ FAILED " THEN RESET CR ;
 
@@ -507,7 +507,7 @@ VERIFYSOURCE TESTCONSTANTVALUE
 \ Test integer
 : INTEGERTESTS
 ." Running integer tests " cr
-TESTADD TESTMUL TESTDIV TESTSUB TESTPLUS1 TESTMINUS1 TEST0< TEST0=
+TESTADD TESTMUL TESTDIV TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0=
 TESTminus2 testplus2 testunderplus testminmax testabs testnegate testshifts
 TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2*
 ." Integer tests complete " CR

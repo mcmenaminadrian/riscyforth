@@ -1,6 +1,6 @@
 #Simple integer calculations
 
-                CODEHEADER ADD, DOT, 0x01
+                CODEHEADERZ ADD, +, DOT, 0x01
 		ld a0, 0(sp)
 		ld a1, 8(sp)
                 add t0, a0, a1
@@ -8,7 +8,7 @@
 		addi sp, sp, 8
                 tail NEXT
 
-                CODEHEADER MUL, ADD, 0x01
+                CODEHEADERZ MUL, *, ADD, 0x01
 		ld a0, 0(sp)
 		ld a1, 8(sp)
                 mul t0, a0, a1
@@ -16,7 +16,7 @@
 		addi sp, sp, 8
                 tail NEXT
 
-                CODEHEADER DIV, MUL, 0x01
+                CODEHEADERZ DIV, /, MUL, 0x01
 		ld a1, 0(sp)
 		ld a0, 8(sp)
                 div t0, a0, a1
@@ -32,25 +32,25 @@
 		addi sp, sp, 8
                 tail NEXT
 
-                CODEHEADER PLUSONE, 1+, -, 0x01
+                CODEHEADERZ PLUS1, 1+, SUB, 0x01
 		ld t0, 0(sp)
                 addi t0, t0, 1
 		sd t0, 0(sp)
                 tail NEXT
 
-                CODEHEADER PLUS2, PLUS1, 0x01
+                CODEHEADERZ PLUS2, 2+, PLUS1, 0x01
 		ld t0, 0(sp)
                 addi t0, t0, 2
 		sd t0, 0(sp)
                 tail NEXT
 
-                CODEHEADER MINUS1, PLUS2, 0x01
+                CODEHEADERZ MINUS1, 1-, PLUS2, 0x01
 		ld t0, 0(sp)
                 addi t0, t0, -1
 		sd t0, 0(sp)
                 tail NEXT
 
-                CODEHEADER MINUS2, MINUS1, 0x01
+                CODEHEADERZ MINUS2, 2-, MINUS1, 0x01
 		ld t0, 0(sp)
                 addi t0, t0, -2
 		sd t0, 0(sp)
