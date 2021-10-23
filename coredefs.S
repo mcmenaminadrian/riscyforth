@@ -728,14 +728,7 @@
 		sb t1, 0(t0)
 		tail NEXT
 	
-		CODEHEADER EXCLAIM, CSTORE, 0x01
-		ld t0, 0(sp)
-		ld t1, 8(sp)
-		addi sp, sp, 16
-		sd t1, 0(t0)
-		tail NEXT
-
-		CODEHEADER _EXIT, EXCLAIM, 0x0
+		CODEHEADER _EXIT, CSTORE, 0x0
 		# just call SEMI
 		tail SEMI
 
