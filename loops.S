@@ -191,7 +191,7 @@
 		addi s9, s9, STACKOFFSET
 		tail NEXT
 
-		CODEHEADER STORE, RFROM, 0x01		#!
+		CODEHEADERZ STORE, !, RFROM, 0x01		#!
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 16
@@ -211,7 +211,7 @@
 		POP s0		#honour ABI
 		tail NEXT
 
-		CODEHEADER COLON, SPACES, 0x01
+		CODEHEADERZ COLON, :, SPACES, 0x01
 		#SHIFT TO COMPILE MODE
 		#WRITE OUT FLAGS
 		#WRITE OUT PTR

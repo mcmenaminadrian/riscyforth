@@ -805,12 +805,8 @@
 		mv a1, t1
 		mv a5, t2
 		lbu t1, 0(a0)
-		li t2, 0x3A
-		beq t2, t1, tix_up_colon
 		li t2, 0x3B
 		beq t2, t1, tix_up_semi
-		li t2, 0x21
-		beq t2, t1, tix_up_store
 		li t2, 0x3D
 		beq t2, t1, tix_up_equals
 		li t2, 0x28
@@ -822,14 +818,8 @@
 		li t2, 0x2C
 		beq t2, t1, tix_up_comma
 		j tix_up_finished
-  tix_up_colon:
-		call do_fix_up_colon
-		j tix_up_done
   tix_up_semi:
 		call do_fix_up_semi
-		j tix_up_done
-  tix_up_store:
-		call do_fix_up_store
 		j tix_up_done
   tix_up_equals:
 		call do_fix_up_equals

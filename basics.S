@@ -873,8 +873,6 @@
 		#to things we can use in RISC-V assembly
 		#CURRENT EXPANSIONS
 		# ;  --> SEMI
-		# :  --> COLON
-		# !  --> STORE
                 # =  --> EQUALS
 		# (  --> OBRACKET
 		# )  --> CBRACKET
@@ -887,12 +885,8 @@
 		mv a1, t1
 		mv a5, t2
 		lbu t1, 0(a0)
-		li t2, 0x3A
-		beq t2, t1, fix_up_colon
 		li t2, 0x3B
 		beq t2, t1, fix_up_semi
-		li t2, 0x21
-		beq t2, t1, fix_up_store
 		li t2, 0x3D
 		beq t2, t1, fix_up_equals
 		li t2, 0x28
@@ -907,14 +901,8 @@
 		beq t2, t1, fix_up_comment
 		j fix_up_finished
 
-  fix_up_colon:
-		call do_fix_up_colon
-		j fix_up_done
   fix_up_semi:
 		call do_fix_up_semi
-		j fix_up_done
-  fix_up_store:
-		call do_fix_up_store
 		j fix_up_done
   fix_up_equals:
 		call do_fix_up_equals
@@ -1038,20 +1026,6 @@
 		addi a2, a2, 8
 		ret
 
-  do_fix_up_colon:
-		li t3, 0x43
-		sb t3, 0(a2)
-		li t3, 0x4F
-		sb t3, 1(a2)
-		li t3, 0x4C
-		sb t3, 2(a2)
-		li t3, 0x4F
-		sb t3, 3(a2)
-		li t3, 0x4E
-		sb t3, 4(a2)
-		addi a2, a2, 4
-		ret
-
   do_fix_up_semi:
 		li t3, 0x53
 		sb t3, 0(a2)
@@ -1062,20 +1036,6 @@
 		li t3, 0x49
 		sb t3, 3(a2)
 		addi a2, a2, 3
-		ret
-
-  do_fix_up_store:
-		li t3, 0x53
-		sb t3, 0(a2)
-		li t3, 0x54
-		sb t3, 1(a2)
-		li t3, 0x4F
-		sb t3, 2(a2)
-		li t3, 0x52
-		sb t3, 3(a2)
-		li t3, 0x45
-		sb t3, 4(a2)
-		addi a2, a2, 4
 		ret
 
   do_fix_up_equals:
