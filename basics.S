@@ -744,7 +744,6 @@
                 #code to expand, if needed, two character input
                 #SUPPORTED EXPANSIONS
 		# ."  --> ENCSQ
-		# R@  --> RFETCH
 		# >R  --> TOR
 		# C!  --> CSTORE
 		# C@  --> CFETCH
@@ -766,8 +765,6 @@
 		beq t1, t2, length_two_beginstar
 		PUSH t1
 		andi t1, t1, 0x5F		#character based tests all in here
-		li t2, 0x52
-		beq t1, t2, length_two_beginR
 		li t2, 0x43
 		beq t1, t2, length_two_beginC
 		POP t1
@@ -816,25 +813,9 @@
   length_two_beginstar:
 		lbu t1, 1(a0)
 		li t2, 0x2F
-		bne t1, t2, length_two_r_done
+		bne t1, t2, length_two_c_done
 		call fix_up_timesdiv
 		j fix_up_done		
-
-  length_two_beginR:
-		sb t1, 0(a2)
-		addi sp, sp, 8			#drop the pushed character
-		lbu t1, 1(a0)
-		li t2, 0x40			#@
-		bne t1, t2, length_two_test_rfrom
-		call fix_up_rfetch
-		j fix_up_done
-  length_two_test_rfrom:
-		li t2, 0x3E			#>
-		bne t1, t2, length_two_r_done
-		call fix_up_rfrom
-		j fix_up_done
-  length_two_r_done:
-		j fix_up_length_two_finished
 
   length_two_beginC:
 		sb t1, 0(a2)

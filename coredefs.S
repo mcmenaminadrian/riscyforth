@@ -865,8 +865,6 @@
 		beq t1, t2, tick_length_two_beginstar
 		PUSH t1
 		andi t1, t1, 0x5F		#character based tests all in here
-		li t2, 0x52
-		beq t1, t2, tick_length_two_beginR
 		li t2, 0x43
 		beq t1, t2, tick_length_two_beginC
 		POP t1
@@ -964,21 +962,6 @@
   tick_length_two_beginplus_done:
 		j tix_up_length_two_finished
 
-  tick_length_two_beginR:
-		sb t1, 0(a2)
-		addi sp, sp, 8			#drop the pushed character
-		lbu t1, 1(a0)
-		li t2, 0x40			#@
-		bne t1, t2, tick_length_two_test_rfrom
-		call fix_up_rfetch
-		j tix_up_done
-  tick_length_two_test_rfrom:
-		li t2, 0x3E			#>
-		bne t1, t2, tick_length_two_r_done
-		call fix_up_rfrom
-		j tix_up_done
-  tick_length_two_r_done:
-		j tix_up_length_two_finished
 
   tick_length_two_beginC:
 		sb t1, 0(a2)
