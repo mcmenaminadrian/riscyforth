@@ -493,7 +493,7 @@
 		WRITESTRINGR t4, t3
 		tail NEXT
 
-		CODEHEADER COMMENT, ENCSQ, 0x01
+		CODEHEADERZ COMMENT, \\, ENCSQ, 0x01
 		#the line is now done
 		la t0, INPUT_START
 		la t1, INPUT_END
@@ -501,7 +501,7 @@
 		sd t2, 0(t0)
 		tail NEXT
 		
-                CODEHEADER DOT, COMMENT, 0x01
+                CODEHEADERZ DOT, ., COMMENT, 0x01
                 ld t0, CURRENT_BASE
                 POP a2                            #get item on stack
                 la a0, SCRATCH_PAD                #sprintf uses this
@@ -872,14 +872,12 @@
 		#code to expand standard FORTH commands
 		#to things we can use in RISC-V assembly
 		#CURRENT EXPANSIONS
-		# .  --> DOT
 		# ;  --> SEMI
 		# :  --> COLON
 		# !  --> STORE
                 # =  --> EQUALS
 		# (  --> OBRACKET
 		# )  --> CBRACKET
-		# \  --> COMMENT
 		# '  --> TICK
 		# ,  --> COMMA
 		POP a0				#unexpanded token address
@@ -891,8 +889,6 @@
 		lbu t1, 0(a0)
 		li t2, 0x3A
 		beq t2, t1, fix_up_colon
-		li t2, 0x2E
-		beq t2, t1, fix_up_dot
 		li t2, 0x3B
 		beq t2, t1, fix_up_semi
 		li t2, 0x21
@@ -903,19 +899,16 @@
 		beq t2, t1, fix_up_obracket
 		li t2, 0x29
 		beq t2, t1, fix_up_cbracket
-		li t2, 0x5C
-		beq t2, t1, fix_up_comment
 		li t2, 0x27
 		beq t2, t1, fix_up_tick
 		li t2, 0x2C
 		beq t2, t1, fix_up_comma
+		li t2, 0x5C
+		beq t2, t1, fix_up_comment
 		j fix_up_finished
 
   fix_up_colon:
 		call do_fix_up_colon
-		j fix_up_done
-  fix_up_dot:
-		call do_fix_up_dot
 		j fix_up_done
   fix_up_semi:
 		call do_fix_up_semi
@@ -1059,16 +1052,6 @@
 		addi a2, a2, 4
 		ret
 
-  do_fix_up_dot:
-		li t3, 0x44
-		sb t3, 0(a2)
-		li t3, 0x4F
-		sb t3, 1(a2)
-		li t3, 0x54
-		sb t3, 2(a2)
-		addi a2, a2, 2
-		ret
-
   do_fix_up_semi:
 		li t3, 0x53
 		sb t3, 0(a2)
@@ -1155,21 +1138,6 @@
 		beqz t0, keep_fixing_up_comment
 		j pull_in_another		      #suck in a line
   keep_fixing_up_comment:
-		li t3, 0x43
-		sb t3, 0(a2)	
-		li t3, 0x4F
-		sb t3, 1(a2)	
-		li t3, 0x4D
-		sb t3, 2(a2)	
-		li t3, 0x4D
-		sb t3, 3(a2)	
-		li t3, 0x45
-		sb t3, 4(a2)	
-		li t3, 0x4E
-		sb t3, 5(a2)	
-		li t3, 0x54
-		sb t3, 6(a2)
-		addi a2, a2, 6
 		ret
 
   do_fix_up_tick:
@@ -1284,36 +1252,6 @@
 		addi a2, a2, 8
 		ret
 		
-  fix_up_plus2:
-		li t3, 0x50
-		sb t3, 0(a2)
-		li t3, 0x4C
-		sb t3, 1(a2)
-		li t3, 0x55
-		sb t3, 2(a2)
-		li t3, 0x53
-		sb t3, 3(a2)
-		li t3, 0x32
-		sb t3, 4(a2)
-		addi a2, a2, 4
-		ret
-
-  fix_up_minus2:
-		li t3, 0x4D
-		sb t3, 0(a2)
-		li t3, 0x49
-		sb t3, 1(a2)
-		li t3, 0x4E
-		sb t3, 2(a2)
-		li t3, 0x55
-		sb t3, 3(a2)
-		li t3, 0x53
-		sb t3, 4(a2)
-		li t3, 0x32
-		sb t3, 5(a2)
-		addi a2, a2, 5
-		ret
-
   fix_up_rfetch:
 		li t3, 0x46
 		sb t3, 1(a2)

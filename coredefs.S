@@ -807,8 +807,6 @@
 		lbu t1, 0(a0)
 		li t2, 0x3A
 		beq t2, t1, tix_up_colon
-		li t2, 0x2E
-		beq t2, t1, tix_up_dot
 		li t2, 0x3B
 		beq t2, t1, tix_up_semi
 		li t2, 0x21
@@ -819,8 +817,6 @@
 		beq t2, t1, tix_up_obracket
 		li t2, 0x29
 		beq t2, t1, tix_up_cbracket
-		li t2, 0x5C
-		beq t2, t1, tix_up_comment
 		li t2, 0x27
 		beq t2, t1, tix_up_tick
 		li t2, 0x2C
@@ -828,9 +824,6 @@
 		j tix_up_finished
   tix_up_colon:
 		call do_fix_up_colon
-		j tix_up_done
-  tix_up_dot:
-		call do_fix_up_dot
 		j tix_up_done
   tix_up_semi:
 		call do_fix_up_semi
@@ -846,9 +839,6 @@
 		j tix_up_done
   tix_up_cbracket:
 		call do_fix_up_cbracket
-		j tix_up_done
-  tix_up_comment:
-		call do_fix_up_comment
 		j tix_up_done
   tix_up_tick:
 		call do_fix_up_tick
