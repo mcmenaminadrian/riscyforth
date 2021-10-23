@@ -774,7 +774,7 @@
 		PUSH t0
 		tail NEXT
 
-		CODEHEADER FETCH, BASE, 0x01
+		CODEHEADERZ FETCH, @,  BASE, 0x01
 		ld t0, 0(sp)
 		ld t1, 0(t0)
 		sd t1, 0(sp)
@@ -813,10 +813,6 @@
 		beq t2, t1, tix_up_semi
 		li t2, 0x21
 		beq t2, t1, tix_up_store
-		li t2, 0x3E
-		beq t2, t1, tix_up_gt
-		li t2, 0x3C
-		beq t2, t1, tix_up_lt
 		li t2, 0x3D
 		beq t2, t1, tix_up_equals
 		li t2, 0x28
@@ -825,12 +821,8 @@
 		beq t2, t1, tix_up_cbracket
 		li t2, 0x5C
 		beq t2, t1, tix_up_comment
-		li t2, 0x21
-		beq t2, t1, tix_up_exclaim
 		li t2, 0x27
 		beq t2, t1, tix_up_tick
-		li t2, 0x40
-		beq t2, t1, tix_up_fetch
 		li t2, 0x2C
 		beq t2, t1, tix_up_comma
 		j tix_up_finished
@@ -846,12 +838,6 @@
   tix_up_store:
 		call do_fix_up_store
 		j tix_up_done
-  tix_up_gt:
-		call do_fix_up_gt
-		j tix_up_done
-  tix_up_lt:
-		call do_fix_up_lt
-		j tix_up_done
   tix_up_equals:
 		call do_fix_up_equals
 		j tix_up_done
@@ -864,14 +850,8 @@
   tix_up_comment:
 		call do_fix_up_comment
 		j tix_up_done
-  tix_up_exclaim:
-		call do_fix_up_exclaim
-		j tix_up_done
   tix_up_tick:
 		call do_fix_up_tick
-		j tix_up_done
-  tix_up_fetch:
-		call do_fix_up_fetch
 		j tix_up_done
   tix_up_comma:
 		call do_fix_up_comma

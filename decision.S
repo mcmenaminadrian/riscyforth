@@ -3,7 +3,7 @@
 		CODEHEADER TRUE, COLON, 0x01
 		j gt_true
 
-		CODEHEADER GT, TRUE, 0x01
+		CODEHEADERZ GT, >, TRUE, 0x01
 		ld t1, 0(sp)
 		ld t0, 8(sp)
 		addi sp, sp, 16
@@ -17,7 +17,7 @@
 		PUSH t0
 		tail NEXT
 
-		CODEHEADER LT, GT, 0x01
+		CODEHEADERZ LT, <, GT, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 16
@@ -26,14 +26,14 @@
 		CODEHEADER FALSE, LT, 0x01
 		j gt_false
 
-		CODEHEADER EQUALS, FALSE, 0x01
+		CODEHEADER EQUAL, FALSE, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 16
 		bne t0, t1, gt_false
 		j gt_true
 
-		CODEHEADER AND, EQUALS, 0x01
+		CODEHEADER AND, EQUAL, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		and t3, t0, t1

@@ -876,15 +876,11 @@
 		# ;  --> SEMI
 		# :  --> COLON
 		# !  --> STORE
-		# >  --> GT
-                # <  --> LT
                 # =  --> EQUALS
 		# (  --> OBRACKET
 		# )  --> CBRACKET
 		# \  --> COMMENT
-		# !  --> EXCLAIM
 		# '  --> TICK
-		# @  --> FETCH
 		# ,  --> COMMA
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
@@ -901,10 +897,6 @@
 		beq t2, t1, fix_up_semi
 		li t2, 0x21
 		beq t2, t1, fix_up_store
-		li t2, 0x3E
-		beq t2, t1, fix_up_gt
-		li t2, 0x3C
-		beq t2, t1, fix_up_lt
 		li t2, 0x3D
 		beq t2, t1, fix_up_equals
 		li t2, 0x28
@@ -913,12 +905,8 @@
 		beq t2, t1, fix_up_cbracket
 		li t2, 0x5C
 		beq t2, t1, fix_up_comment
-		li t2, 0x21
-		beq t2, t1, fix_up_exclaim
 		li t2, 0x27
 		beq t2, t1, fix_up_tick
-		li t2, 0x40
-		beq t2, t1, fix_up_fetch
 		li t2, 0x2C
 		beq t2, t1, fix_up_comma
 		j fix_up_finished
@@ -935,12 +923,6 @@
   fix_up_store:
 		call do_fix_up_store
 		j fix_up_done
-  fix_up_gt:
-		call do_fix_up_gt
-		j fix_up_done
-  fix_up_lt:
-		call do_fix_up_lt
-		j fix_up_done
   fix_up_equals:
 		call do_fix_up_equals
 		j fix_up_done
@@ -953,14 +935,8 @@
   fix_up_comment:
 		call do_fix_up_comment
 		j fix_up_done
-  fix_up_exclaim:
-		call do_fix_up_exclaim
-		j fix_up_done
   fix_up_tick:
 		call do_fix_up_tick
-		j fix_up_done
-  fix_up_fetch:
-		call do_fix_up_fetch
 		j fix_up_done
   fix_up_comma:
 		call do_fix_up_comma
@@ -1119,22 +1095,6 @@
 		addi a2, a2, 4
 		ret
 
-  do_fix_up_gt:
-		li t3, 0x47
-		sb t3, 0(a2)
-		li t3, 0x54
-		sb t3, 1(a2)
-		addi a2, a2, 1
-		ret
-
-  do_fix_up_lt:
-		li t3, 0x4C
-		sb t3, 0(a2)
-		li t3, 0x54
-		sb t3, 1(a2)
-		addi a2, a2, 1
-		ret
-
   do_fix_up_equals:
 		li t3, 0x45
 		sb t3, 0(a2)
@@ -1146,9 +1106,7 @@
 		sb t3, 3(a2)
 		li t3, 0x4C
 		sb t3, 4(a2)
-		li t3, 0x53
-		sb t3, 5(a2)
-		addi a2, a2, 5
+		addi a2, a2, 4
 		ret
 
   do_fix_up_obracket:
@@ -1214,24 +1172,6 @@
 		addi a2, a2, 6
 		ret
 
-  do_fix_up_exclaim:
-		li t3, 0x45
-		sb t3, 0(a2)
-		li t3, 0x58
-		sb t3, 1(a2)
-		li t3, 0x43
-		sb t3, 2(a2)
-		li t3, 0x4C
-		sb t3, 3(a2)
-		li t3, 0x41
-		sb t3, 4(a2)
-		li t3, 0x49
-		sb t3, 5(a2)
-		li t3, 0x4D
-		sb t3, 6(a2)
-		addi a2, a2, 6
-		ret
- 
   do_fix_up_tick:
   		li t3, 0x54
 		sb t3, 0(a2)
@@ -1242,20 +1182,6 @@
 		li t3, 0x4B
 		sb t3, 3(a2)
 		addi a2, a2, 3
-		ret
-
-  do_fix_up_fetch:
-		li t3, 0x46
-		sb t3, 0(a2)
-		li t3, 0x45
-		sb t3, 1(a2)
-		li t3, 0x54
-		sb t3, 2(a2)
-		li t3, 0x43
-		sb t3, 3(a2)
-		li t3, 0x48
-		sb t3, 4(a2)
-		addi a2, a2, 4
 		ret
 
   do_fix_up_comma:

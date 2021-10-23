@@ -77,6 +77,22 @@ end_\Name:
 \Name: 
 .endm
 
+.macro CODEHEADERZX Name, ExtName, PrevName, flags
+.balign 8
+TIL_\Name:
+        .8byte  \flags
+WA_\Name:
+        .8byte  \Name
+ptr_\PrevName:
+        .8byte TIL_\PrevName
+length_ASCII_\Name:
+        .8byte (end_\Name - beg_\Name)
+beg_\Name:
+        .ascii \ExtName
+end_\Name:
+        .fill (24 - (end_\Name - beg_\Name)), 1, 0xFF
+\Name: 
+.endm
 
 .macro CODEEND Name, flags
 .balign 8
