@@ -77,7 +77,7 @@
                 sd t1, 0(sp)
                 tail NEXT
 
-                CODEHEADER DROP2, ROLL, 0x01
+                CODEHEADERZ DROP2, 2DROP, ROLL, 0x01
                 COLON DROP2
                 .8byte WA_DROP
                 .8byte WA_DROP
@@ -96,7 +96,7 @@
 		sd t1, 0(sp)
 		tail NEXT
 
-                CODEHEADER NIP2, CUBE, 0x01
+                CODEHEADERZ NIP2, 2NIP, CUBE, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		sd t1, 24(sp)
@@ -104,7 +104,7 @@
 		addi sp, sp, 16
                 tail NEXT
 
-                CODEHEADER DUP2, NIP2, 0x01
+                CODEHEADERZ DUP2,  2DUP, NIP2, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, -16
@@ -112,7 +112,7 @@
 		sd t0, 0(sp)
                 tail NEXT
 
-                CODEHEADER OVER2, DUP2, 0x01
+                CODEHEADERZ OVER2, 2OVER, DUP2, 0x01
 		ld t2, 16(sp)
 		ld t3, 24(sp)
 		addi sp, sp, -16
@@ -120,7 +120,7 @@
 		sd t2, 0(sp)
                 tail NEXT
 
-                CODEHEADER TUCK2, OVER2, 0x01
+                CODEHEADERZ TUCK2, 2TUCK, OVER2, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		ld t2, 16(sp)
@@ -134,7 +134,7 @@
 		sd t0, 0(sp)
                 tail NEXT
 
-                CODEHEADER SWAP2, TUCK2, 0x01
+                CODEHEADERZ SWAP2, 2SWAP, TUCK2, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		ld t2, 16(sp)
@@ -145,7 +145,7 @@
 		sd t2, 0(sp)
                 tail NEXT
 
-                CODEHEADER ROT2, SWAP2, 0x01
+                CODEHEADERZ ROT2, 2ROT, SWAP2, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		ld t2, 16(sp)

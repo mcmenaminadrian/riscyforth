@@ -3,16 +3,16 @@
 \ Stack operations tests
 
 : testOVER2
-." Testing OVER2 " 5 SPACES
-10 30 50 90 70 OVER2
-BLUE 50 = SWAP 30 = AND IF ." OVER2 passed " else ." RED OVER2 FAILED " then RESET cr
+." Testing 2OVER " 5 SPACES
+10 30 50 90 70 2OVER
+BLUE 50 = SWAP 30 = AND IF ." 2OVER passed " else RED ." 2OVER FAILED " then RESET cr
 ;
 
 : testDrop2
-." Testing DROP2 " 5 spaces
+." Testing 2DROP " 5 spaces
 99 2 3 4
-drop2
-BLUE 2 = if ." DROP2 passed " else ." RED DROP2 FAILED " then RESET cr
+2drop
+BLUE 2 = if ." 2DROP passed " else RED ." 2DROP FAILED " then RESET cr
 ;
 
 : testSquare
@@ -30,33 +30,33 @@ BLUE 125 = if ." CUBE passed " else RED ." CUBE FAILED " then RESET 5 spaces
 ;
 
 : testNIP2
-." Testing NIP2 " 5 spaces
-10 20 30 40 50 NIP2
-BLUE 50 = SWAP 40 = AND SWAP 10 = AND if ." NIP2 passed " else RED ." NIP2 FAILED " then RESET cr 
+." Testing 2NIP " 5 spaces
+10 20 30 40 50 2NIP
+BLUE 50 = SWAP 40 = AND SWAP 10 = AND if ." 2NIP passed " else RED ." 2NIP FAILED " then RESET cr 
 ;
 
 : testDUP2
-." Testing DUP2 " 5 SPACES
-900 800 700 DUP2
-BLUE 700 = SWAP 800 = AND SWAP 700 = AND SWAP 800 = AND if ." DUP2 passed" else RED ." DUP2 FAILED " then RESET cr
+." Testing 2DUP " 5 SPACES
+900 800 700 2DUP
+BLUE 700 = SWAP 800 = AND SWAP 700 = AND SWAP 800 = AND if ." 2DUP passed" else RED ." 2DUP FAILED " then RESET cr
 ;
 
 : testtuck2
-." Testing TUCK2 " 5 spaces
-1 2 3 4 5 6 TUCK2
-6 = swap 5 = and swap 4 = and swap 3 = and swap 6 = and swap 5 = and if BLUE ." TUCK2 passed" else RED ." TUCK2 FAILED " then RESET cr
+." Testing 2TUCK " 5 spaces
+1 2 3 4 5 6 2TUCK
+6 = swap 5 = and swap 4 = and swap 3 = and swap 6 = and swap 5 = and if BLUE ." 2TUCK passed" else RED ." 2TUCK FAILED " then RESET cr
 ;
 
 : testswap2
-." Testing SWAP2 " 5 spaces
-1 2 3 4 5 6 7 8 SWAP2
-BLUE 6 = swap 5 = and swap 8 = and if ." SWAP2 passed " else RED ." SWAP2 FAILED " then RESET cr
+." Testing 2SWAP " 5 spaces
+1 2 3 4 5 6 7 8 2SWAP
+BLUE 6 = swap 5 = and swap 8 = and if ." 2SWAP passed " else RED ." 2SWAP FAILED " then RESET cr
 ;
 
 : testrot2
-." Testing ROT2 " 5 spaces
-99 2 3 4 5 6 ROT2
-BLUE 2 = swap 99 = and swap 6 = and if ." ROT2 passed " else RED ." ROT2 FAILED " then RESET cr
+." Testing 2ROT " 5 spaces
+99 2 3 4 5 6 2ROT
+BLUE 2 = swap 99 = and swap 6 = and if ." 2ROT passed " else RED ." 2ROT FAILED " then RESET cr
 ;
 
 : TESTDUP
@@ -211,7 +211,7 @@ BLUE if ." ABS passed" else RED ." ABS FAILED" then RESET cr ;
 
 : TESTMINMAX
 ." Testing MAX and MIN" 5 spaces
-BLUE 20 10 dup2 MAX 20 = if ." MAX passed and " else RED ." MAX FAILED and " then min 10 = if BLUE ." MIN passed." else RED ." MIN FAILED." then RESET cr ;
+BLUE 20 10 2dup MAX 20 = if ." MAX passed and " else RED ." MAX FAILED and " then min 10 = if BLUE ." MIN passed." else RED ." MIN FAILED." then RESET cr ;
 
 : TESTSHIFTS
 ." Testing LSHIFT and RSHIFT" 5 spaces
