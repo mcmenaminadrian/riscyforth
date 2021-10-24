@@ -623,7 +623,7 @@
 		li t2, 0x41
 		lb t1, 0(a0)
 		andi t1, t1, 0x5F
-		bne t2, t1, fix_up_six_defer
+		bne t2, t1, fix_up_six_done
 		li t2, 0x42
 		lb t1, 1(a0)
 		andi t1, t1, 0x5F
@@ -645,82 +645,9 @@
 		bne t1, t2, fix_up_six_done
 		call fix_up_acomma
 		j fix_up_done
-  fix_up_six_defer:
-		li t2, 0x44
-		lb t1, 0(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, fix_up_six_done 
-		li t2, 0x45
-		lb t1, 1(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, fix_up_six_done 
-		li t2, 0x46
-		lb t1, 2(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, fix_up_six_done 
-		li t2, 0x45
-		lb t1, 3(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, fix_up_six_done 
-		li t2, 0x52
-		lb t1, 4(a0)
-		andi t1, t1, 0x5F
-		bne t2, t1, fix_up_six_done 
-		li t2, 0x40				#@
-		lb t1, 5(a0)
-		bne t1, t2, fix_up_six_defer_store
-		call fix_up_defer
-		call fix_up_defer_fetch
-		j fix_up_done
-  fix_up_six_defer_store:
-		li t2, 0x21				#!
-		bne t1, t2, fix_up_six_done
-		call fix_up_defer
-		call fix_up_defer_store
-		j fix_up_done
   fix_up_six_done:
 		j fix_up_finished
 		
-
-  fix_up_defer:
-		li t0, 0x44
-		sb t0, 0(a2)
-		li t0, 0x45
-		sb t0, 1(a2)
-		sb t0, 3(a2)
-		li t0, 0x46
-		sb t0, 2(a2)
-		li t0, 0x52
-		sb t0, 4(a2)
-		ret
- fix_up_defer_fetch:
-		li t0, 0x46
-		sb t0, 5(a2)
-		li t0, 0x45
-		sb t0, 6(a2)
-		li t0, 0x54
-		sb t0, 7(a2)
-		li t0, 0x43
-		sb t0, 8(a2)
-		li t0, 0x48
-		sb t0, 9(a2)
-		addi a2, a2, 9
-		ret
-  fix_up_defer_store:
-		li t0, 0x53
-		sb t0, 5(a2)
-		li t0, 0x54
-		sb t0, 6(a2)
-		li t0, 0x4F
-		sb t0, 7(a2)
-		li t0, 0x52
-		sb t0, 8(a2)
-		li t0, 0x45
-		sb t0, 9(a2)
-		addi a2, a2, 9
-		ret
-		
-
   fix_up_length_four:
 		# /MOD --> SLMOD
 		POP a0

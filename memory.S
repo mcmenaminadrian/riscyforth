@@ -41,7 +41,7 @@
 		#do nothing
 		tail NEXT
 
-		CODEHEADER DEFERSTORE, NOP, 0x0
+		CODEHEADERZ DEFERSTORE, DEFER!, NOP, 0x0
 		#(x2 x1 --) x1 executes x2
 		ld t0, 0(sp)
 		ld t1, 8(sp)
@@ -51,7 +51,7 @@
 		sd t1, 0(t3)
 		tail NEXT
 
-		CODEHEADER DEFERFETCH, DEFERSTORE, 0x01
+		CODEHEADERZ DEFERFETCH, DEFER@, DEFERSTORE, 0x01
 		#(xt - xt)
 		ld t0, 0(sp)
 		ld t1, 0(t0)
