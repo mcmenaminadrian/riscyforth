@@ -95,11 +95,11 @@
 		add a5, a5, 4			      #clear the command
 		tail embed_encsq
   search_encsq:
-		#test for ENCSQ (ie string printing)
-		la t0, WA_ENCSQ
+		#test for DOTQ (ie string printing)
+		la t0, WA_DOTQ
 		bne t3, t0, search_tick
-		#substitute WA__ENCSQ
-		la t3, WA__ENCSQ
+		#substitute WA__DOTQ
+		la t3, WA__DOTQ
 		#jump to code that will count string and embed length and literal
 		tail embed_encsq
   search_tick:

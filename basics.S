@@ -434,8 +434,8 @@
                 addi s9, s9, STACKOFFSET
                 tail NEXT
 
-		CODEHEADER _ENCSQ, SEMI, 0x00
-		#compiled ENCSQ
+		CODEHEADER _DOTQ, SEMI, 0x00
+		#compiled DOTQ
 		ld a0, 0(s7)
 		mv a1, s7
 		add s7, s7, a0
@@ -454,7 +454,7 @@
 		ecall			#make system call
 		tail NEXT
 
-		CODEHEADER ENCSQ, _ENCSQ, 0x01
+		CODEHEADER DOTQ, _DOTQ, 0x01
 		#Print in a string
 		#first of all, get the address and length of the string
 		la t5, INPUT_END
@@ -481,7 +481,7 @@
 		WRITESTRINGR t4, t3
 		tail NEXT
 
-		CODEHEADERZ COMMENT, \\, ENCSQ, 0x01
+		CODEHEADERZ COMMENT, \\, DOTQ, 0x01
 		#the line is now done
 		la t0, INPUT_START
 		la t1, INPUT_END
@@ -795,18 +795,16 @@
 		sb t3, 0(a2)
 		j fix_up_bracket
 
-  fix_up_encsq:
-		li t3, 0x45
+  fix_up_encsq:				#DOTQ called encsq for historical (!) reasons
+		li t3, 0x44
 		sb t3, 0(a2)
-		li t3, 0x4E
+		li t3, 0x4F
 		sb t3, 1(a2)
-		li t3, 0x43
+		li t3, 0x54
 		sb t3, 2(a2)
-		li t3, 0x53
-		sb t3, 3(a2)
 		li t3, 0x51
-		sb t3, 4(a2)
-		addi a2, a2, 4
+		sb t3, 3(a2)
+		addi a2, a2, 3
 		ret
 
   do_fix_up_comment:
