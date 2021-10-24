@@ -650,13 +650,8 @@
 		j tick_prepare_sanity_test		#can skip the other tests for length
   tick_length_two_or_more:
 		li a1, 1
-		bne a0, a1, tick_length_three_or_more
-		call tick_fix_up_length_two
-		j tick_prepare_sanity_test
-  tick_length_three_or_more:
-		li a1, 3
 		bne a0, a1, tick_length_six_or_more
-		call tick_fix_up_length_four
+		call tick_fix_up_length_two
 		j tick_prepare_sanity_test
   tick_length_six_or_more:
 		li a1, 5
@@ -854,21 +849,6 @@
 		POP t1
   tix_up_length_two_finished:
 		j tix_up_finished
-
-  tick_fix_up_length_four:
-		mv a0, t0
-		la a2, EXPANDED_BUFFER
-		mv a3, a2
-		mv a1, t1
-		mv a5, t2
-		lbu t1, 0(a0)
-		li t2, 0x2F			#/
-		beq t1, t2, tick_length_four_begin_slash
-		j tix_up_finished
-
-  tick_length_four_begin_slash:
-                call fix_up_slash4
-                j tix_up_done
 
   tick_length_two_begindot:
 		lbu t1, 1(a0)

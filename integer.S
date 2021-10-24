@@ -78,7 +78,7 @@
 		addi sp, sp, 8
                 tail NEXT
 
-                CODEHEADER SLMOD, MOD, 0x01
+                CODEHEADERZ SLMOD, /MOD, MOD, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		bnez t0, slash_mod_continue

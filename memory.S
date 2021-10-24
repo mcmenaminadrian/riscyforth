@@ -118,13 +118,8 @@
 		j is_prepare_sanity_test		#can skip the other tests for length
   is_length_two_or_more:
 		li a1, 1
-		bne a0, a1, is_length_three_or_more
-		call tick_fix_up_length_two
-		j is_prepare_sanity_test
-  is_length_three_or_more:
-		li a1, 3
 		bne a0, a1, is_length_six_or_more
-		call tick_fix_up_length_four
+		call tick_fix_up_length_two
 		j is_prepare_sanity_test
   is_length_six_or_more:
 		li a1, 5
