@@ -147,15 +147,9 @@
 		j tokenize_prepare_sanity_test
   tokenize_test_length_four:
 		li a1, 3
-		bne a0, a1, tokenize_test_length_five
-		PUSH t0
-		jal fix_up_length_four
-		j tokenize_prepare_sanity_test
-  tokenize_test_length_five:
-		li a1, 4
 		bne a0, a1, tokenize_test_length_six
 		PUSH t0
-		jal fix_up_length_five
+		jal fix_up_length_four
 		j tokenize_prepare_sanity_test
   tokenize_test_length_six:	
 		li a1, 5
@@ -574,44 +568,6 @@
                 WRITECHAR 0x20            #space
                 j NEXT
 
-  fix_up_length_five:
-		#expand the following
-		#+LOOP --> PLUSLOOP
-		POP a0
-		la a2, EXPANDED_BUFFER
-		mv a3, a2
-		mv a1, t1
-		mv a5, t2
-		lbu t1, 0(a0)
-		li t2, 0x2B		#+
-		bne t1, t2, fix_up_length_five_timesdivmod
-		call do_fix_up_plusloop
-		j fix_up_done
-  fix_up_length_five_timesdivmod:
-		#*/MOD --> TIMESDIVMOD
-		lbu t1, 0(a0)
-		li t3, 0x5F
-		li t2, 0x2A
-		bne t1, t2, fix_up_six_done
-		lbu t1, 1(a0)
-		li t2, 0x2F
-		bne t1, t2,fix_up_six_done
-		lbu t1, 2(a0)
-		and t1, t1, t3
-		li t2, 0x4D
-		bne t1, t2,fix_up_six_done
-		lbu t1, 3(a0)
-		and t1, t1, t3
-		li t2, 0x4F
-		bne t1, t2,fix_up_six_done
-		lbu t1, 4(a0)
-		and t1, t1, t3
-		li t2, 0x44
-		bne t1, t2,fix_up_six_done
-		call do_fix_up_timesdivmod
-		j fix_up_done
-		 	
-
   fix_up_length_six:
 		#expand the following
 		# ABORT" --> ABORTCOMM
@@ -665,7 +621,6 @@
                 #SUPPORTED EXPANSIONS
 		# ."  --> ENCSQ
 		# C,  --> CCOMMA
-		# */  --> TIMESDIV
 		# 0=  --> ZEROEQUAL
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
@@ -677,8 +632,6 @@
 		beq t1, t2, length_two_begin0
 		li t2, 0x2E			#.
 		beq t1, t2, length_two_begindot
-		li t2, 0x2A			#*
-		beq t1, t2, length_two_beginstar
 		PUSH t1
 		andi t1, t1, 0x5F		#character based tests all in here
 		li t2, 0x43			#C
@@ -725,13 +678,6 @@
 		j fix_up_done
   length_two_begindot_done:
 		j fix_up_length_two_finished
-
-  length_two_beginstar:
-		lbu t1, 1(a0)
-		li t2, 0x2F
-		bne t1, t2, length_two_c_done
-		call fix_up_timesdiv
-		j fix_up_done		
 
   length_two_beginC:
 		lb t1, 1(a0)
@@ -809,52 +755,6 @@
 		mv t0, a0
 		mv t1, a1
 		mv t2, a5
-		ret
-
-  do_fix_up_plusstore:
-		li t3, 0x50
-		sb t3, 0(a2)
-		li t3, 0x4C
-		sb t3, 1(a2)
-		li t3, 0x55
-		sb t3, 2(a2)
-		li t3, 0x53
-		sb t3, 3(a2)
-		li t3, 0x53
-		sb t3, 4(a2)
-		li t3, 0x54
-		sb t3, 5(a2)
-		li t3, 0x4F
-		sb t3, 6(a2)
-		li t3, 0x52
-		sb t3, 7(a2)
-		li t3, 0x45
-		sb t3, 8(a2)
-		addi a2, a2, 8
-		ret
-
-  do_fix_up_plusloop:
-		li t3, 0x50
-		sb t3, 0(a2)
-		li t3, 0x4C
-		sb t3, 1(a2)
-		li t3, 0x55
-		sb t3, 2(a2)
-		li t3, 0x53
-		sb t3, 3(a2)
-		lb t3, 1(a0)
-		andi t3, t3, 0x5F
-		sb t3, 4(a2)
-		lb t3, 2(a0)
-		andi t3, t3, 0x5F
-		sb t3, 5(a2)
-		lb t3, 3(a0)
-		andi t3, t3, 0x5F
-		sb t3, 6(a2)
-		lb t3, 4(a0)
-		andi t3, t3, 0x5F
-		sb t3, 7(a2)
-		addi a2, a2, 7
 		ret
 
   fix_up_acomma:
@@ -980,52 +880,6 @@
 		li t3, 0x41
 		sb t3, 4(a2)
 		addi a2, a2, 4
-		ret
-
-  fix_up_timesdiv:
-		li t3, 0x54
-		sb t3, 0(a2)
-		li t3, 0x49
-		sb t3, 1(a2)
-		li t3, 0x4D
-		sb t3, 2(a3)
-		li t3, 0x45
-		sb t3, 3(a3)
-		li t3, 0x53
-		sb t3, 4(a3)
-		li t3, 0x44
-		sb t3, 5(a3)
-		li t3, 0x49
-		sb t3, 6(a3)
-		li t3, 0x56
-		sb t3, 7(a3)
-		addi a2, a2, 7
-		ret
-
-  do_fix_up_timesdivmod:
-		li t3, 0x54
-		sb t3, 0(a2)
-		li t3, 0x49
-		sb t3, 1(a2)
-		li t3, 0x4D
-		sb t3, 2(a3)
-		li t3, 0x45
-		sb t3, 3(a3)
-		li t3, 0x53
-		sb t3, 4(a3)
-		li t3, 0x44
-		sb t3, 5(a3)
-		li t3, 0x49
-		sb t3, 6(a3)
-		li t3, 0x56
-		sb t3, 7(a3)
-		li t3, 0x4D
-		sb t3, 8(a3)
-		li t3, 0x4F
-		sb t3, 9(a3)
-		li t3, 0x44
-		sb t3, 10(a3)
-		addi a2, a2, 10
 		ret
 
   fix_up_zeroless:

@@ -25,7 +25,7 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADER TIMESDIV, _ABORTCOMM, 0x01
+		CODEHEADERZ TIMESDIV, */,  _ABORTCOMM, 0x01
 		#(n1 n2 n3 -- n4)
 		ld a0, 16(sp)
 		ld a1, 8(sp)
@@ -78,7 +78,7 @@
 		sd t2, 8(t0)
 		tail NEXT
 
-		CODEHEADER TIMESDIVMOD, TWOSTORE, 0x01
+		CODEHEADERZ TIMESDIVMOD, */MOD, TWOSTORE, 0x01
 		#(n1 n2 n3 -- n4 n5)
 		ld a0, 16(sp)
 		ld a1, 8(sp)
@@ -655,13 +655,8 @@
 		j tick_prepare_sanity_test
   tick_length_three_or_more:
 		li a1, 3
-		bne a0, a1, tick_length_five_or_more
-		call tick_fix_up_length_four
-		j tick_prepare_sanity_test
-  tick_length_five_or_more:
-		li a1, 4
 		bne a0, a1, tick_length_six_or_more
-		call tick_fix_up_length_five
+		call tick_fix_up_length_four
 		j tick_prepare_sanity_test
   tick_length_six_or_more:
 		li a1, 5
@@ -852,47 +847,12 @@
 		lbu t1, 0(a0)
 		li t2, 0x2E			#.
 		beq t1, t2, tick_length_two_begindot
-		li t2, 0x2A			#*
-		beq t1, t2, tick_length_two_beginstar
 		PUSH t1
 		andi t1, t1, 0x5F		#character based tests all in here
 		li t2, 0x43
 		beq t1, t2, tick_length_two_beginC
 		POP t1
   tix_up_length_two_finished:
-		j tix_up_finished
-
-  tick_fix_up_length_five:
-		mv a0, t0
-		la a2, EXPANDED_BUFFER
-		mv a3, a2
-		mv a1, t1
-		mv a5, t2
-		lbu t1, 0(a0)
-		li t2, 0x2B			#+
-		beq t1, t2, tick_length_five_begin_plus
-		#*/MOD --> TIMESDIVMOD
-                lbu t1, 0(a0)
-                li t2, 0x2A
-                bne t1, t2, tix_up_five_done
-                lbu t1, 1(a0)
-                li t2, 0x2F
-                bne t1, t2, tix_up_five_done
-                lbu t1, 2(a0)
-                li t2, 0x4D
-		li t3, 0x5F
-		and t1, t1, t3
-                bne t1, t2, tix_up_five_done
-                lbu t1, 3(a0)
-		and t1, t1, t3
-                li t2, 0x4F
-                bne t1, t2, tix_up_five_done
-                lbu t1, 4(a0)
-		and t1, t1, t3
-                li t2, 0x44
-                bne t1, t2, tix_up_five_done
-                j tick_length_five_timesdivmod
- tix_up_five_done:
 		j tix_up_finished
 
   tick_fix_up_length_four:
@@ -910,24 +870,6 @@
                 call fix_up_slash4
                 j tix_up_done
 
-  tick_length_five_begin_plus:
-		call do_fix_up_plusloop
-		j tix_up_done
-
-  tick_length_five_timesdivmod:
-		call do_fix_up_timesdivmod
-		j tix_up_done
-
-
-  tick_length_two_beginstar:
-		lbu t1, 1(a0)
-		li t2, 0x2F			#/
-		bne t1, t2, tick_length_two_beginstar_done
-		call fix_up_timesdiv
-		j tix_up_done
-  tick_length_two_beginstar_done:
-		j tix_up_length_two_finished
-
   tick_length_two_begindot:
 		lbu t1, 1(a0)
 		li t2, 0x22			#"
@@ -937,16 +879,6 @@
   tick_length_two_begindot_done:
 		j tix_up_length_two_finished
 		
-  tick_length_two_beginplus:
-		lbu t1, 1(a0)
-		li t2, 0x21			#!
-		bne t1, t2, tick_length_two_beginplus_done
-		call do_fix_up_plusstore
-		j tix_up_done
-  tick_length_two_beginplus_done:
-		j tix_up_length_two_finished
-
-
   tick_length_two_beginC:
 		sb t1, 0(a2)
 		addi sp, sp, 8

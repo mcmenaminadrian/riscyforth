@@ -123,13 +123,8 @@
 		j is_prepare_sanity_test
   is_length_three_or_more:
 		li a1, 3
-		bne a0, a1, is_length_five_or_more
-		call tick_fix_up_length_four
-		j is_prepare_sanity_test
-  is_length_five_or_more:
-		li a1, 4
 		bne a0, a1, is_length_six_or_more
-		call tick_fix_up_length_five
+		call tick_fix_up_length_four
 		j is_prepare_sanity_test
   is_length_six_or_more:
 		li a1, 5
