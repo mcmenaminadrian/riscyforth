@@ -162,7 +162,7 @@
 		PUSH t0
 		tail NEXT
 
-		CODEHEADER TWORFETCH, RFETCH, 0x01	#2R@
+		CODEHEADERZ TWORFETCH, 2R@, RFETCH, 0x01	#2R@
 		ld t0, 0(s9)
 		ld t1, STACKOFFSET(s9)
 		addi sp, sp, -16
@@ -170,7 +170,7 @@
 		sd t0, 0(sp) 
 		tail NEXT
 
-		CODEHEADER TOR2, TWORFETCH, 0x01  #2>R
+		CODEHEADERZ TOR2, 2>R, TWORFETCH, 0x01  #2>R
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 16
@@ -179,7 +179,7 @@
 		sd t0, 0(s9)
 		tail NEXT
 
-		CODEHEADER TOR, TOR2, 0x01 #>R
+		CODEHEADERZ TOR, >R, TOR2, 0x01 #>R
 		POP t0
 		addi s9, s9, -STACKOFFSET
 		sd t0, 0(s9)

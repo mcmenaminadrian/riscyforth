@@ -547,7 +547,7 @@ VERIFYGETNEXTLINE_IMM
 VERIFYOK
 VERIFYTOKENIZE_IMM 
 VERIFYSEARCH OK
-." ***Any error message above can almost certainly be ignored*** " CR
+CYAN ." ***Any error message above can almost certainly be ignored*** " RESET CR
 TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY TESTEXIT
 ." Verifying ENCSQ with this output " cr
 ." Verifying COMMENT " cr \ ." COMMENT verification FAILED " 

@@ -852,8 +852,6 @@
 		lbu t1, 0(a0)
 		li t2, 0x2E			#.
 		beq t1, t2, tick_length_two_begindot
-		li t2, 0x3E			#>
-		beq t1, t2, tick_length_two_beginGT
 		li t2, 0x2A			#*
 		beq t1, t2, tick_length_two_beginstar
 		PUSH t1
@@ -959,17 +957,6 @@
 		j tix_up_done
   tick_length_two_c_done:
 		j tix_up_length_two_finished
-
-  tick_length_two_beginGT:
-		lbu t1, 1(a0)
-		andi t1, t1, 0x5F
-		li t2, 0x52			#R
-		bne t1, t2, tick_length_two_GT_done
-		call fix_up_tor
-		j tix_up_done
-  tick_length_two_GT_done:
-		j tix_up_length_two_finished  
-
 
   tick_fix_up_length_six:
 		#expand the following

@@ -664,7 +664,6 @@
                 #code to expand, if needed, two character input
                 #SUPPORTED EXPANSIONS
 		# ."  --> ENCSQ
-		# >R  --> TOR
 		# C,  --> CCOMMA
 		# */  --> TIMESDIV
 		# 0=  --> ZEROEQUAL
@@ -678,8 +677,6 @@
 		beq t1, t2, length_two_begin0
 		li t2, 0x2E			#.
 		beq t1, t2, length_two_begindot
-		li t2, 0x3E			#>
-		beq t1, t2, length_two_beginGT
 		li t2, 0x2A			#*
 		beq t1, t2, length_two_beginstar
 		PUSH t1
@@ -747,16 +744,6 @@
   length_two_c_done:
 		j fix_up_length_two_finished
 
-
-  length_two_beginGT:
-		lbu t1, 1(a0)
-		andi t1, t1, 0x5F
-		li t2, 0x52			#R
-		bne t1, t2, length_two_GT_done
-		call fix_up_tor
-		j fix_up_done
-  length_two_GT_done:
-		j fix_up_length_two_finished  
 
   fix_up_input:
 		#code to expand standard FORTH commands
@@ -1082,70 +1069,6 @@
 		addi a2, a2, 8
 		ret
 		
-  fix_up_rfetch:
-		li t3, 0x46
-		sb t3, 1(a2)
-		li t3, 0x45
-		sb t3, 2(a2)
-		li t3, 0x54
-		sb t3, 3(a2)
-		li t3, 0x43
-		sb t3, 4(a2)
-		li t3, 0x48
-		sb t3, 5(a2)
-		addi a2, a2, 5
-		ret
-
-  fix_up_rfrom:
-		li t3, 0x46
-		sb t3, 1(a2)
-		li t3, 0x52
-		sb t3, 2(a2)
-		li t3, 0x4F
-		sb t3, 3(a2)
-		li t3, 0x4D
-		sb t3, 4(a2)
-		addi a2, a2, 4
-		ret
-
-  fix_up_tor:
-		li t3, 0x54
-		sb t3, 0(a2)
-		li t3, 0x4F
-		sb t3, 1(a2)
-		li t3, 0x52
-		sb t3, 2(a2)
-		addi a2, a2, 2
-		ret
-
-  fix_up_cstore:
-		li t3, 0x53
-		sb t3, 1(a2)
-		li t3, 0x54
-		sb t3, 2(a2)
-		li t3, 0x4F
-		sb t3, 3(a2)
-		li t3, 0x52
-		sb t3, 4(a2)
-		li t3, 0x45
-		sb t3, 5(a2)
-		addi a2, a2, 5
-		ret
-
-  fix_up_cfetch:
-		li t3, 0x46
-		sb t3, 1(a2)
-		li t3, 0x45
-		sb t3, 2(a2)
-		li t3, 0x54
-		sb t3, 3(a2)
-		li t3, 0x43
-		sb t3, 4(a2)
-		li t3, 0x48
-		sb t3, 5(a2)
-		addi a2, a2, 5
-		ret
-  
   fix_up_ccomma:
 		li t3, 0x43
 		sb t3, 0(a2)
