@@ -738,8 +738,7 @@
                 #SUPPORTED EXPANSIONS
 		# ."  --> ENCSQ
 		# >R  --> TOR
-		# C!  --> CSTORE
-		# C@  --> CFETCH
+		# C,  --> CCOMMA
 		# */  --> TIMESDIV
 		# 0=  --> ZEROEQUAL
 		POP a0				#unexpanded token address
@@ -758,7 +757,7 @@
 		beq t1, t2, length_two_beginstar
 		PUSH t1
 		andi t1, t1, 0x5F		#character based tests all in here
-		li t2, 0x43
+		li t2, 0x43			#C
 		beq t1, t2, length_two_beginC
 		POP t1
 		
@@ -811,21 +810,11 @@
 		j fix_up_done		
 
   length_two_beginC:
-		sb t1, 0(a2)
-		addi sp, sp, 8
-		lbu t1, 1(a0)
-		li t2, 0x21			#!
-		bne t1, t2, length_two_c_fetch
-		call fix_up_cstore
-		j fix_up_done
-  length_two_c_fetch:
-		li t2, 0x40			#@
-		bne t1, t2, length_two_c_comma
-		call fix_up_cfetch
-		j fix_up_done
-  length_two_c_comma:
+		lb t1, 1(a0)
 		li t2, 0x2C			#,
 		bne t1, t2, length_two_c_done
+		sb t1, 0(a2)
+		addi sp, sp, 8
 		call fix_up_ccomma
 		j fix_up_done
   length_two_c_done:
