@@ -584,15 +584,8 @@
 		mv a5, t2
 		lbu t1, 0(a0)
 		li t2, 0x2B		#+
-		bne t1, t2, fix_up_length_five_does
-		call do_fix_up_plusloop
-		j fix_up_done
-  fix_up_length_five_does:
-		#DOES> --> DOES_
-		lbu t1, 4(a0)
-		li t2, 0x3E		#>
 		bne t1, t2, fix_up_length_five_timesdivmod
-		call do_fix_up_does
+		call do_fix_up_plusloop
 		j fix_up_done
   fix_up_length_five_timesdivmod:
 		#*/MOD --> TIMESDIVMOD
@@ -959,26 +952,6 @@
 		andi t3, t3, 0x5F
 		sb t3, 7(a2)
 		addi a2, a2, 7
-		ret
-
-  do_fix_up_does:
-		#just replace > with _
-		#search see if it matches
-		lb t3, 0(a0)
-		andi t3, t3, 0x5F
-		sb t3, 0(a2)
-		lb t3, 1(a0)
-		andi t3, t3, 0x5F
-		sb t3, 1(a2)
-		lb t3, 2(a0)
-		andi t3, t3, 0x5F
-		sb t3, 2(a2)
-		lb t3, 3(a0)
-		andi t3, t3, 0x5F
-		sb t3, 3(a2)
-		li t3, 0x5F
-		sb t3, 4(a2)
-		addi a2, a2, 4
 		ret
 
   fix_up_acomma:

@@ -282,7 +282,7 @@
 		addi sp, sp, 8
 		j create_gone_bad
 
-		CODEHEADER DOES_, DEFER, 0x01
+		CODEHEADERZ DOES_, DOES>,  DEFER, 0x01
 		#write out a new colon at current address
 		#replace the tail NEXT with a jump to the colon
 		#now write out the colon code
