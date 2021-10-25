@@ -1,5 +1,7 @@
 \ Unit tests
 
+DECIMAL
+
 \ Stack operations tests
 
 : testOVER2
