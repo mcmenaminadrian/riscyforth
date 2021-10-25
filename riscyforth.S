@@ -69,7 +69,7 @@
    welcome_msg:   	.asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
    riscy_forth0:  	.asciz "*******************************************************************************"
    riscy_forth1:  	.asciz "RISCYFORTH is a threaded interpreted language closely based on FORTH."
-   riscy_forth2:  	.asciz "Currently we are running in EXECUTE mode and anything you type will"
+   riscy_forth2:  	.asciz "Currently you are running in IMMEDIATE mode and anything you type will"
    riscy_forth3:  	.asciz "be executed as each line is entered."
    riscy_forth4:  	.asciz "RISCYFORTH is licenced under version 2 of the GNU General Public Licence."
    riscy_forth5:  	.asciz "See https://github.com/mcmenaminadrian/riscyforth.git"
