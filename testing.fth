@@ -149,6 +149,14 @@ BLUE IF ." / passed " else RED ." / FAILED " then RESET cr ;
 ." Testing - " 5 spaces 
 BLUE 75 22 - 53 = IF ." - passed " else RED ." - FAILED " then RESET cr ;
 
+: TEST0<>
+." Testing 0<>" 5 SPACES
+0 0<> INVERT 1 0<> AND IF BLUE ." 0<> passed" ELSE RED ." 0<> FAILED" THEN RESET CR ;
+
+: TEST0>
+." Testing 0>" 5 spaces
+-3 0> FALSE = 3 0> TRUE = AND IF BLUE ." 0> passed" ELSE RED ." 0> FAILED" THEN CR RESET ;
+
 : TEST0<
 ." Testing 0< " 5 SPACES
 -3 0< TRUE = 3 0< FALSE = AND IF BLUE ." 0< passed" ELSE RED ." 0< FAILED" THEN CR RESET ;
@@ -359,9 +367,18 @@ hex 0x5A decimal ' xz 24 + C! ' zZ exeCUTE  cr ;
 ." Testing MOVE " 5 spaces
 10 10 ZM 100 = IF ' ZM 24 + ' ZD 24 + 24 move 100 2 ' ZM execute 50 = IF BLUE ." MOVE passed " else RED ." MOVE FAILED " then cr else RED ." Test failure " then reup RESET ;
 
-: TESTFETCH
+: TEST@
 ." Testing @ (and BASE)" 5 spaces
 octal base @ 10 = hex base @ 0x10 = AND decimal base @ 10 = AND if BLUE ." @ and BASE passed" ELSE RED ." @ and BASE FAILED" then RESET cr ;
+
+1 CELLS ALLOT
+CREATE SPEAKLIKEACHILD
+1 CELLS ALLOT
+: TEST2@
+." Testing 2@" 5 spaces
+100 SPEAKLIKEACHILD ! 101 SPEAKLIKEACHILD 1 CELLS + ! SPEAKLIKEACHILD 2@
+100 = swap 101 = AND IF BLUE ." 2@ passed" ELSE RED ." 2@ FAILED" THEN RESET CR ;
+
 
 : TESTPLUSSTORE
 ." Testing +! " 5 SPACES ' ZM 24 + -1  SWAP +! 5 5 ' YM EXECUTE 25 = IF BLUE ." +! passed " ELSE RED ." +! FAILED " THEN RESET 2 SPACES
@@ -493,7 +510,7 @@ RESET ." And back to normal..." CR ;
 \ Memory tests
 : TESTMEMORY
 ." Testing memory manipulation words" cr
-TESTINGTICK testcfetch testingmove testchar testfetch testplusstore TESTPADFILLERASE
+TESTINGTICK testcfetch testingmove testchar test@ TEST2@ testplusstore TESTPADFILLERASE
 TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN TESTCOMMA TESTDOES> TEST2!
 VERIFYDEFERIS TESTDEFER@ TESTBUFFER:
 ." Testing of memory code complete" cr ;
@@ -521,7 +538,7 @@ VERIFYSOURCE TESTCONSTANTVALUE
 \ Test integer
 : INTEGERTESTS
 ." Running integer tests " cr
-TESTADD TESTMUL TESTDIV TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0=
+TESTADD TESTMUL TESTDIV TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST0<> TEST0>
 TESTminus2 testplus2 testunderplus testminmax testabs testnegate testshifts
 TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2*
 ." Integer tests complete " CR

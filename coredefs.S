@@ -25,7 +25,35 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADERZ TIMESDIV, */,  _ABORTCOMM, 0x01
+		CODEHEADERZ ZERONE, 0<>, _ABORTCOMM, 0x01
+		#(x -- flag)
+		ld t0, 0(sp)
+		bnez t0, zerone_not_zero
+		sd zero, 0(sp)
+		tail NEXT
+  zerone_not_zero:
+		li t0, -1
+		sd t0, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ ZEROMORE, 0>, ZERONE, 0x01
+		#(n -- flag)
+		ld t0, 0(sp)
+		bgt t0, zero, zerone_not_zero		#see above
+		sd zero, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ TWOFETCH, 2@, ZEROMORE, 0x01
+		#(addr -- x1 x2)
+		ld t0, 0(sp)
+		ld t1, 0(t0)
+		ld t2, 8(t0)
+		sd t2, 0(sp)
+		addi sp, sp, -8
+		sd t1, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ TIMESDIV, */,  TWOFETCH, 0x01
 		#(n1 n2 n3 -- n4)
 		ld a0, 16(sp)
 		ld a1, 8(sp)
