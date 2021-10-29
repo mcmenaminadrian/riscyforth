@@ -272,7 +272,46 @@
 		addi sp, sp, 8
 		j create_gone_bad
 
-		CODEHEADERZ DOES_, DOES>,  DEFER, 0x01
+		CODEHEADERZ BODY_, >BODY, DEFER, 0x01
+		#(xt - addr)
+		ld t0, 0(sp)
+		#pull together address from four different locations in code!
+		#first of all - check the address in t0 is of word created by CREATE
+		mv t1, t0
+		addi t1, t1, -8
+		ld t2, 0(t1)
+		li t3, 0x11
+		beq t2, t3, body_continue
+		#not a word created via CREATE
+		#return zero
+		sd zero, 0(sp)
+		tail NEXT
+  body_continue:
+		mv a0, zero
+		#Bits 32 - 51
+		add t1, t0, 0x30		#t1 has base of code
+		lwu t2, 0(t1)
+		srli a0, t2, 20
+		slli a0, a0, 32
+		#Bits 12 - 31
+		lwu t2, 8(t1)
+		srli t2, t2, 12
+		slli t2, t2, 12
+		or a0, a0, t2
+		#bit 11
+		lwu t2, 20(t1)
+		li t3, 0x100000
+		and t2, t2, t3
+		srli t2, t2, 9
+		or a0, a0, t2
+		#bits 0 - 10
+		lwu t2, 32(t1)
+		srli t2, t2, 20
+		or a0, a0, t2
+		sd a0, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ DOES_, DOES>,  BODY_, 0x01
 		#write out a new colon at current address
 		#replace the tail NEXT with a jump to the colon
 		#now write out the colon code
