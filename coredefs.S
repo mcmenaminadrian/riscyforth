@@ -771,23 +771,36 @@
 		PUSH t0
 		tail NEXT
 
-		CODEHEADERZ P, (, _CHAR, 0x01
+		CODEHEADERZ BRACKET, [, _CHAR, 0x01
+		#no stack action - go into immediate mode
+  bracket_go:
+		la t0, CREATEFLAG
+		sd zero, 0(t0)
+		tail NEXT
+
+		CODEHEADERZ RIGHTBRACKET, ], BRACKET, 0x01
+		la t0, CREATEFLAG
+		li t1, 1
+		sd t1, 0(t0)
+		tail NEXT
+
+		CODEHEADERZ P, (, RIGHTBRACKET, 0x01
 		# look for the closing bracket - this is an immediate word
-  bracket_go:				#called in compile mode to get out
+  paren_go:				#called in compile mode to get out
 		la t0, INPUT_START
 		la t1, INPUT_END
 		ld t2, 0(t0)
 		ld t3, 0(t1)
 		li t4, 0x29		#)
-  bracket_look:
+  paren_look:
 		lbu t5, 0(t2)
-		beq t4, t5, bracket_closed
+		beq t4, t5, paren_closed
 		addi t2, t2, 1
-		bgt t2, t3, bracket_ended
-		j bracket_look
-  bracket_closed:
+		bgt t2, t3, paren_ended
+		j paren_look
+  paren_closed:
 		addi t2, t2, 1
-  bracket_ended:
+  paren_ended:
 		sd t2, 0(t0)
 		tail NEXT
   

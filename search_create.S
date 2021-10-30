@@ -32,11 +32,15 @@
 
   search_create_tokens_matched:
                 addi t3, t3, 8                        #address that points to the code
+		la t0, WA_BRACKET
+		bne t3, t0, search_create_check_paren
+		tail bracket_go	
+  search_create_check_paren:
 		la t0, WA_P				#open bracket
 		bne t3, t0, search_create_check_colon
 		la s7, outer_loop_tokenize
-		#read ahead until we hit a closing backet
-		tail bracket_go	
+		#read ahead until we hit a closing parenthesis
+		tail paren_go	
   search_create_check_colon:
 		#now check it is allowed
 		la t0, WA_COLON			      #cannot nest definitions
