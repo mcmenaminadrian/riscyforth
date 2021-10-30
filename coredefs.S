@@ -773,13 +773,14 @@
 
 		CODEHEADERZ P, (, _CHAR, 0x01
 		# look for the closing bracket - this is an immediate word
+  bracket_go:				#called in compile mode to get out
 		la t0, INPUT_START
 		la t1, INPUT_END
 		ld t2, 0(t0)
 		ld t3, 0(t1)
 		li t4, 0x29		#)
   bracket_look:
-		ld t5, 0(t2)
+		lbu t5, 0(t2)
 		beq t4, t5, bracket_closed
 		addi t2, t2, 1
 		bgt t2, t3, bracket_ended

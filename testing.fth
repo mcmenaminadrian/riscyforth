@@ -1,7 +1,7 @@
 \ Unit tests
 
 DECIMAL
-
+( Verify brackets in immediate code )
 \ Stack operations tests
 
 : testOVER2
@@ -592,6 +592,7 @@ YELLOW BRIGHT
 CLEARSCREEN   \ Verifies CLEARSCREEN
 DECIMAL
 ." Running unit tests (cleared screen verifies CLEARSCREEN)" cr
+( Verify brackets in compiled code )
 VERIFYCOLOURS CR
 STACKOPTESTS
 ENTERCONTINUE
