@@ -648,6 +648,7 @@
 		call fix_up_ccomma
 		j fix_up_done
   length_two_c_done:
+		POP zero			#clear stack
 		j fix_up_length_two_finished
 
 
