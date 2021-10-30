@@ -657,8 +657,6 @@
 		#CURRENT EXPANSIONS
 		# ;  --> SEMI
                 # =  --> EQUALS
-		# (  --> OBRACKET
-		# )  --> CBRACKET
 		# '  --> TICK
 		# ,  --> COMMA
 		POP a0				#unexpanded token address
@@ -672,10 +670,6 @@
 		beq t2, t1, fix_up_semi
 		li t2, 0x3D
 		beq t2, t1, fix_up_equals
-		li t2, 0x28
-		beq t2, t1, fix_up_obracket
-		li t2, 0x29
-		beq t2, t1, fix_up_cbracket
 		li t2, 0x27
 		beq t2, t1, fix_up_tick
 		li t2, 0x2C
@@ -689,12 +683,6 @@
 		j fix_up_done
   fix_up_equals:
 		call do_fix_up_equals
-		j fix_up_done
-  fix_up_obracket:
-		call do_fix_up_obracket
-		j fix_up_done
-  fix_up_cbracket:
-		call do_fix_up_cbracket
 		j fix_up_done
   fix_up_comment:
 		call do_fix_up_comment
@@ -768,32 +756,6 @@
 		sb t3, 4(a2)
 		addi a2, a2, 4
 		ret
-
-  do_fix_up_obracket:
-		li t3, 0x4F
-		sb t3, 0(a2)
-  fix_up_bracket:
-		li t3, 0x42
-		sb t3, 1(a2)
-		li t3, 0x52
-		sb t3, 2(a2)
-		li t3, 0x41
-		sb t3, 3(a2)
-		li t3, 0x43
-		sb t3, 4(a2)
-		li t3, 0x4B
-		sb t3, 5(a2)
-		li t3, 0x45
-		sb t3, 6(a2)
-		li t3, 0x54
-		sb t3, 7(a2)
-		addi a2, a2, 7
-		ret
-
-  do_fix_up_cbracket:
-		li t3, 0x43
-		sb t3, 0(a2)
-		j fix_up_bracket
 
   fix_up_encsq:				#DOTQ called encsq for historical (!) reasons
 		li t3, 0x44

@@ -773,7 +773,10 @@
 		PUSH t0
 		tail NEXT
 
-		CODEHEADER CHAR, _CHAR, 0x01
+		CODEHEADERZ P, (, _CHAR, 0x01
+		tail NEXT
+
+		CODEHEADER CHAR, P, 0x01
 		#reuse old code for interpreter mode
 		call tick_start_looking
 		lbu t1, 0(t0)
@@ -820,10 +823,6 @@
 		beq t2, t1, tix_up_semi
 		li t2, 0x3D
 		beq t2, t1, tix_up_equals
-		li t2, 0x28
-		beq t2, t1, tix_up_obracket
-		li t2, 0x29
-		beq t2, t1, tix_up_cbracket
 		li t2, 0x27
 		beq t2, t1, tix_up_tick
 		li t2, 0x2C
@@ -834,12 +833,6 @@
 		j tix_up_done
   tix_up_equals:
 		call do_fix_up_equals
-		j tix_up_done
-  tix_up_obracket:
-		call do_fix_up_obracket
-		j tix_up_done
-  tix_up_cbracket:
-		call do_fix_up_cbracket
 		j tix_up_done
   tix_up_tick:
 		call do_fix_up_tick
