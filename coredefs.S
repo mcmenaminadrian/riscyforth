@@ -917,6 +917,7 @@
 		call fix_up_ccomma		#,
 		j tix_up_done
   tick_length_two_c_done:
+		POP zero			#clear stack
 		j tix_up_length_two_finished
 
   tick_fix_up_length_six:
