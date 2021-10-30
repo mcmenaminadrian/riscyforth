@@ -248,7 +248,6 @@
                 j search_check_octal                  #go to octal code
   search_assume_decimal:
                 j search_setup_decimal
-                nop
   search_check_octal:
                 li t2, 8
                 li t5, 48
@@ -346,7 +345,6 @@
                 la t0, WA_TOKENIZE_IMM                #keep tokenizing
                 PUSH t0
                 tail EXE
-                nop
   search_literal:
                 bltu t6, t4, search_literal_fail      #digit above max range
                 bge t4, t5, search_octdec_continue    #digit in range
