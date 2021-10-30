@@ -435,7 +435,7 @@
 		sd s3, 24(sp)
 		mv s0, a0
 		add s0, s0, -24
-		lw s1, 0(a1)
+		lwu s1, 0(a1)
 		li s2, -CONDITIONALSTK
 		add s1, s1, -1
 		mul s3, s2, s1

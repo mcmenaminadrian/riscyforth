@@ -387,6 +387,10 @@ CREATE STRANGETOWN
 ." Testing >BODY" 5 SPACES
 ' STRANGETOWN >BODY STRANGETOWN = IF BLUE ." >BODY passed" ELSE RED ." >BODY FAILED" THEN RESET CR ;
 
+: TEST>BODY2
+." Testing >BODY against ineligible function" 5 SPACES
+' TEST>BODY >BODY 0= IF BLUE ." >BODY passed" ELSE RED ." >BODY FAILED" THEN RESET CR ;
+
 : TESTPLUSSTORE
 ." Testing +! " 5 SPACES ' ZM 24 + -1  SWAP +! 5 5 ' YM EXECUTE 25 = IF BLUE ." +! passed " ELSE RED ." +! FAILED " THEN RESET 2 SPACES
 ' YM 24 + 1 SWAP ' +! execute 5 5 ' ZM EXECUTE 25 = INVERT IF RED ." +! address find FAILED " THEN  RESET CR ;
@@ -519,7 +523,7 @@ RESET ." And back to normal..." CR ;
 ." Testing memory manipulation words" cr
 TESTINGTICK testcfetch testingmove testchar test@ TEST2@ testplusstore TESTPADFILLERASE
 TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN TESTCOMMA TESTDOES> TEST2!
-VERIFYDEFERIS TESTDEFER@ TESTBUFFER: TEST>BODY
+VERIFYDEFERIS TESTDEFER@ TESTBUFFER: TEST>BODY TEST>BODY2
 ." Testing of memory code complete" cr ;
 
 \ Test loops
