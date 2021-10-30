@@ -753,8 +753,6 @@
 		CODEHEADER EXIT, _EXIT, 0x01
 		tail NEXT				#do nothing in immediate mode
 
-		tail NEXT				#do nothing in immediate mode
-
 		CODEHEADER _CHAR, EXIT, 0x0
 		#get length
 		ld a0, 0(s7)
@@ -774,8 +772,24 @@
 		tail NEXT
 
 		CODEHEADERZ P, (, _CHAR, 0x01
+		# look for the closing bracket - this is an immediate word
+		la t0, INPUT_START
+		la t1, INPUT_END
+		ld t2, 0(t0)
+		ld t3, 0(t1)
+		li t4, 0x29		#)
+  bracket_look:
+		ld t5, 0(t2)
+		beq t4, t5, bracket_closed
+		addi t2, t2, 1
+		bgt t2, t3, bracket_ended
+		j bracket_look
+  bracket_closed:
+		addi t2, t2, 1
+  bracket_ended:
+		sd t2, 0(t0)
 		tail NEXT
-
+  
 		CODEHEADER CHAR, P, 0x01
 		#reuse old code for interpreter mode
 		call tick_start_looking
@@ -906,6 +920,4 @@
 		j tix_up_done
   tix_up_six_done:
 		j tix_up_finished
-
-
 
