@@ -9,15 +9,15 @@
                 la t4, dictionary
                 ld t3, 0(t4)
   search_create_next_in_dictionary:
-                lb t4, 24(t3)
+                lbu t4, 24(t3)
                 bne t4, t2, search_create_tokens_do_not_match
                 add a0, t3, 32                        #a0 now points into the name in the dictionary
                 mv a1, t0                             #a1 points to the name in the buffer
                 mv a2, t2                             #a2 checks how far we've gone 
 
   search_create_loop_through_token:
-                lb t5, 0(a0)
-                lb t6, 0(a1)
+                lbu t5, 0(a0)
+                lbu t6, 0(a1)
                 bne t5, t6, search_create_tokens_do_not_match
                 addi a2, a2, -1
                 beq a2, zero, search_create_tokens_matched
@@ -55,7 +55,7 @@
 		ld t6, 0(t5)
 		li a2, 59				#;
   search_create_does_copy:
-		lb a3, 0(a1)
+		lbu a3, 0(a1)
 		sb a3, 0(t1)
 		addi t1, t1, 1
 		addi a1, a1, 1
@@ -350,7 +350,7 @@
   search_create_exhausted:
 		#test for variable etc
 		mv a4, t0
-		lb t4, 0(a4)
+		lbu t4, 0(a4)
 		li a5, 0x23
 		#test for address #
 		beq t4, a5, search_create_read_address
@@ -483,12 +483,12 @@
 		li a4, 16
 		
   func_check_hex:
-                lb s4, 0(a0)
+                lbu s4, 0(a0)
                 li s5, 48                             #check number begins with 0X
                 beq s4, s5, func_test_X
                 j func_return_hex					#failed
   func_test_X:
-                lb s4, 1(a0)
+                lbu s4, 1(a0)
 		and s4, s4, 0x5F
                 li s6, 88                             #X
                 beq s4, s6, func_build_hex
@@ -506,7 +506,7 @@
                 li s2, 71                             #G
                 mv s7, zero                           #total goes in a7
   func_leading_zero_hex:
-                lb s10, 0(s4)
+                lbu s10, 0(s4)
                 beq s3, zero, func_hex
                 beq s10, s5, func_increment_hex      #looking for end of trailing zeros
                 j func_hex
@@ -541,7 +541,7 @@
                 beq s3, zero, func_hex_push_it
                 add s3, s3, -1
                 add s4, s4, 1
-                lb s10, 0(s4)
+                lbu s10, 0(s4)
                 j func_hex
   func_hex_push_it:
 		li a1, 1
@@ -615,7 +615,7 @@ func_test_octal:
 		mv s11, zero
 		sub s3, a3, a0
 		mv s4, a0
-		lb s9, 0(s4)
+		lbu s9, 0(s4)
 		li s8, 45
 		bne s9, s8, func_octdec_leading_zero_check
 		bne s3, zero, func_minus_more_than_nothing
@@ -625,7 +625,7 @@ func_test_octal:
 		addi s3, s3, -1
 		addi s4, s4, 1
   func_octdec_leading_zero_check:
-		lb s9, 0(s4)
+		lbu s9, 0(s4)
 		beq s9, s5, func_increment_octdec
 		j func_literal
   func_increment_octdec:
@@ -652,7 +652,7 @@ func_test_octal:
 		beq s3, zero, func_push_octdec
 		addi s3, s3, -1
 		addi s4, s4, 1
-		lb s9, 0(s4)
+		lbu s9, 0(s4)
 		j func_literal
   func_push_octdec:
 		beq s10, zero, func_not_minus
@@ -686,7 +686,7 @@ func_test_octal:
 		mv a5, t1
   tick_embed_code:
 		beqz a2, tick_embed_check_alignment
-		lb a4, 0(a3)
+		lbu a4, 0(a3)
 		sb a4, 0(a5)
 		addi a2, a2, -1
 		addi a5, a5, 1
@@ -733,7 +733,7 @@ func_test_octal:
 		li a2, 0x201				#max length
 		li t2, 0x22				#"
   embed_encsq_check_next:
-		lb a3, 0(a0)
+		lbu a3, 0(a0)
 		beq a3, t2, embed_encsq_gotlength
 		addi a0, a0, 1
 		addi a1, a1, 1
@@ -754,7 +754,7 @@ func_test_octal:
 		mv a3, t0
   embed_encsq_embed:
 		beqz a2, embed_encsq_checkalignment
-		lb a4, 0(a3)
+		lbu a4, 0(a3)
 		sb a4, 0(t1)
 		addi a2, a2, -1
 		addi a3, a3, 1

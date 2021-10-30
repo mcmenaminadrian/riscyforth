@@ -241,7 +241,7 @@
 			sd s2, 48(s3)
 			addi s4, s3, 32
   utility_write_header_write_out_name:
-			lb s5, 0(a0)
+			lbu s5, 0(a0)
 			sb s5, 0(s4)
 			addi a1, a1, -1
 			beqz a1, utility_write_header_name_written

@@ -475,7 +475,7 @@
 		ld t4, 0(t6)
 		li t1, 0x22		#"
   abort_check_next:
-		lb t0, 0(t4)
+		lbu t0, 0(t4)
 		beq t0, t1, abort_prep_imm_syscall
 		addi t3, t3, 1
 		add t4, t4, 1
@@ -576,7 +576,7 @@
   move_done:
 		tail NEXT
   move_do:
-		lb t3, 0(t2)
+		lbu t3, 0(t2)
 		sb t3, 0(t1)
 		addi t0, t0, -1
 		beqz t0, move_done
@@ -592,7 +592,7 @@
 		mv t3, zero
   source_load_next:
 		add t5, t3, t0
-		lb t4, 0(t5)
+		lbu t4, 0(t5)
 		beq t4, t2, source_end_reached
 		beqz t4, source_end_reached
 		addi t3, t3, 1
@@ -647,7 +647,7 @@
 		li t2, 0x020
 		li t3, 0x0A
   tick_look_for_start:
-		lb t4, 0(t0)
+		lbu t4, 0(t0)
 		beq t4, t2, tick_keep_going
 		bne t4, t3, tick_found_start
 		tail search_failed
@@ -660,7 +660,7 @@
   tick_advance_search:
 		addi t1, t1, 1
 		bgeu t1, a1, tick_end_token
-		lb t4, 0(t1)
+		lbu t4, 0(t1)
 		beq t4, t2, tick_end_token
 		beq t4, t3, tick_end_token
 		j tick_advance_search
@@ -690,7 +690,7 @@
 		addi t5, zero, 0x61
 		addi t6, zero, 0x7B
   tick_sanity_test:
-		lb t4, 0(t2)
+		lbu t4, 0(t2)
 		blt t4, t5, tick_next_sane
 		blt t4, t6, tick_sanitize
 		j tick_next_sane
@@ -708,14 +708,14 @@
 		la t4, dictionary
 		ld t3, 0(t4)
   tick_next_in_dictionary:
-		lb t4, 24(t3)
+		lbu t4, 24(t3)
 		bne t4, t2, tick_tokens_do_not_match
 		add a0, t3, 32
 		mv a1, t0
 		mv a2, t2
   tick_loop_through_token:
-		lb t5, 0(a0)
-                lb t6, 0(a1)
+		lbu t5, 0(a0)
+                lbu t6, 0(a1)
                 bne t5, t6, tick_tokens_do_not_match
                 addi a2, a2, -1
                 beq a2, zero, tick_tokens_matched
@@ -735,7 +735,7 @@
 
 		CODEHEADERZ CFETCH, C@, TICK, 0x01
 		ld t0, 0(sp)
-		lb t1, 0(t0)
+		lbu t1, 0(t0)
 		sd t1, 0(sp)
 		tail NEXT
 
@@ -769,14 +769,14 @@
 		add s7, s7, t2
   _char_done_adjustment:
 		addi a1, a1, 8
-		lb t0, 0(a1)
+		lbu t0, 0(a1)
 		PUSH t0
 		tail NEXT
 
 		CODEHEADER CHAR, _CHAR, 0x01
 		#reuse old code for interpreter mode
 		call tick_start_looking
-		lb t1, 0(t0)
+		lbu t1, 0(t0)
 		PUSH t1
 		tail NEXT
 
