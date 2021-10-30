@@ -34,6 +34,7 @@
                 addi t3, t3, 8                        #address that points to the code
 		la t0, WA_BRACKET
 		bne t3, t0, search_create_check_paren
+		la s7, outer_loop_tokenize
 		tail bracket_go	
   search_create_check_paren:
 		la t0, WA_P				#open bracket
