@@ -333,13 +333,13 @@ ELSE RED ." BEGIN ... WHILE ... REPEAT FAILED " THEN RESET CR
 
 : VERIFYIJ
 ." Verifying I and J in nested loops" CR
-10 0 DO 10 0 DO ." ( "  J . ." , " I . ." ) " LOOP CR LOOP
-." I and J verified" CR ; 
+CYAN 10 0 DO 10 0 DO ." ( "  J . ." , " I . ." ) " LOOP CR LOOP RESET
+BLUE ." I and J verified" RESET CR ; 
 
 : VERIFYLEAVE
 ." Verifying LEAVE " CR
-10 0 DO 10 0 DO J I > J I = OR IF ." ( "  J . ." , " I . ." ) " ELSE LEAVE 3 0 DO LOOP 3 0 DO LOOP 3 0 DO LOOP THEN LOOP CR LOOP
-." LEAVE verified" CR ;
+CYAN 10 0 DO 10 0 DO J I > J I = OR IF ." ( "  J . ." , " I . ." ) " ELSE LEAVE 3 0 DO LOOP 3 0 DO LOOP 3 0 DO LOOP THEN LOOP CR LOOP  RESET
+BLUE ." LEAVE verified" CR RESET ;
 
 VARIABLE TESTUNLOOPV
 : TESTUNLOOP ." Testing UNLOOP " 5 SPACES
@@ -491,8 +491,8 @@ CYAN DUP -ROT + DUP . DUP 5000000 < IF RECURSE THEN RESET ;
 DEFER TESTDEFER
 : VERIFYDEFERIS
 ." Verifying DEFER and IS " CR
-." Print ASCII characters..." ' EMIT IS TESTDEFER 128 32 DO I TESTDEFER LOOP CR
-." Now print numbers..." ' . IS TESTDEFER 128 32 DO I TESTDEFER LOOP CR
+." Print ASCII characters..." ' EMIT IS TESTDEFER CYAN 128 32 DO I TESTDEFER LOOP RESET CR
+." Now print numbers..." ' . IS TESTDEFER CYAN 128 32 DO I TESTDEFER LOOP RESET CR
 ' NOP IS TESTDEFER \ Restore default state
 BLUE ." DEFER and IS verified" RESET CR ;
 
