@@ -61,23 +61,28 @@
 		bne t3, t0, search_create_allowed
 		#write out DOES_ word address and tidy up
 		#emulating SEMI
-		#set mode
-		la t0, INDOES
-		li t1, 1
-		sd t1, 0(t0)
   search_create_keep_does_:				#rejoin here	
 		la t0, createwritepoint
 		ld t1, 0(t0)
+		la t5, INDOES
+		ld t6, 0(t5)
+		bnez t6, search_create_continue_indoes
 		sd t3, 0(t1)			      #write out word address in definition
 		addi t1, t1, 8
+		#set INDOES to 1
+		li t6, 1
+		sd t6, 0(t5)
+  search_create_continue_indoes:
 		#now copy out the following text until we hit semi
 		la a0, INPUT_START
 		ld a1, 0(a0)
 		la t5, INPUT_END
 		ld t6, 0(t5)
 		li a2, 59				#;
+		li a7, 10				#\n	- don't want this
   search_create_does_copy:
 		lbu a3, 0(a1)
+		beq a3, a7, search_create_does_keep_on
 		sb a3, 0(t1)
 		addi t1, t1, 1
 		addi a1, a1, 1
