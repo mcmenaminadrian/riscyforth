@@ -82,6 +82,11 @@
   pull_in_another:
 		jal load_get_next_line		      #suck in a line
   tokenize_normal:
+		la t3, INDOES				#check if we are still doing DOES>
+		ld t4, 0(t3)
+		beqz t4, tokenize_not_does_
+		tail search_create_keep_does_
+  tokenize_not_does_:
                 la a1, INPUT_END
 		ld a1, 0(a1)
                 la a0, INPUT_START
