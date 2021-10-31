@@ -28,7 +28,44 @@
 		call utility_write_number_to_stack
 		tail NEXT
 
-		CODEHEADER _TO, TO, 0x0
+		CODEHEADER CSET, TO, 0x01
+		#(mask adr --)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		addi sp, sp, 16
+		lbu t2, 0(t0)
+		li t3, 0xFF
+		and t1, t1, t3
+		or t2, t1, t2
+		sb t2, 0(t0)
+		tail NEXT
+
+		CODEHEADER CRESET, CSET, 0x01
+		#(mask adr --)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		addi sp, sp, 16
+		not t1, t1
+		li t3, 0xFF
+		and t1, t1, t3
+		lbu t2, 0(t0)
+		and t2, t2, t1
+		sb t2, 0(t0)
+		tail NEXT
+
+		CODEHEADER CTOGGLE, CRESET, 0x01
+		#(mask addr --)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		addi sp, sp, 16
+		lbu t2, 0(t0)
+		li t3, 0xFF
+		and t1, t1, t3
+		xor t2, t1, t2
+		sb t2, 0(t0)
+		tail NEXT
+
+		CODEHEADER _TO, CTOGGLE, 0x0
 		ld t6, 0(sp)
 		addi sp, sp, 8
 		#we are compiled into a word
