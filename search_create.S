@@ -118,6 +118,14 @@
   search_create_does_keep_on:
 		#update write point
 		sd t1, 0(t0)
+		la t3, INFILELOAD
+		ld t4, 0(t3)
+		beqz t4, search_create_does_outer_loop
+		la s7, outer_loop_tokenize		#pull in next line from file
+		la t0, LOADLINESETUP
+		sd zero, 0(t0)
+		tail NEXT
+  search_create_does_outer_loop:
 		la s7, outer_loop			#not done with does so require more input
 		tail NEXT
 	
