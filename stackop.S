@@ -42,7 +42,7 @@
 		sd t0, 0(sp)
                 tail NEXT
 
-                CODEHEADER BACKROT, TUCK, 0x01
+                CODEHEADERZ BACKROT, -ROT, TUCK, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		ld t2, 16(sp)
