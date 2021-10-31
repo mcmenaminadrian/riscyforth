@@ -269,6 +269,12 @@ source CYAN type RESET cr ;
 0 1 if ." Testing nested IF... " if RED ." Nested IF FAILED " else BLUE ." Nested IF passed " then 5 5 * . then ." = 25 " RESET cr
 1 0 if RED ." FAILED a final test of IF " RESET else ." A final test of IF ... " if BLUE ." is passed " else RED ." is FAILED " then then RESET cr ;
 
+\ Test [ ] and LITERAL
+: TEST[]
+." Testing [, ] and LITERAL " 5 SPACES
+[ 10 5 - ] LITERAL [ 5 1 * ] LITERAL - 0= IF [ 8 4 / ] LITERAL 2 = IF BLUE ." [ ] and LITERAL passed " ELSE RED ." [ ] and LITERAL FAILED" THEN RESET ELSE RED ." [ ] and LITERAL FAILED" THEN
+RESET CR ;
+
 \ Stuff to test EXIT
 : EXITTEST1
 EXIT RED ." If you see this EXIT FAILED " RESET CR ;
@@ -564,6 +570,7 @@ testCube
 testNIP2 testDUP2
 testtuck2 testswap2 testrot2 testdup testbl testdepth
 testinvert
+TEST[]
 ." stackop tests over " cr
 ;
 

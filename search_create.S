@@ -45,11 +45,17 @@
   search_create_check_colon:
 		#now check it is allowed
 		la t0, WA_COLON			      #cannot nest definitions
-		bne t3, t0, search_create_does_
+		bne t3, t0, search_create_literal
 		la t0, CREATEFLAG
 		sd zero, 0(t0)
   search_create_report_error:
 		tail search_failed		      #report error
+  search_create_literal:
+		la t0, WA_LITERAL
+		bne t3, t0, search_create_does_
+		ld a2, 0(sp)
+		addi sp, sp, 8
+		tail search_create_number_on_stack   #write out a literal
   search_create_does_:
 		la t0, WA_DOES_
 		bne t3, t0, search_create_allowed

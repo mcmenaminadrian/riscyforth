@@ -26,7 +26,12 @@
   wordlist_finished:
                 tail NEXT
 
-		CODEHEADER LITERALNUMB, WORDS, 0x0
+		CODEHEADER LITERAL, WORDS, 0x01
+		#does nothing in interpretation mode
+		#(x --) : compile time - compiler will take number from stack via literalnumb
+		tail NEXT
+
+		CODEHEADER LITERALNUMB, LITERAL, 0x0
 		#read in a number - next in the secondary
 		#store it on the stack and move on
 		ld t0, 0(s7)
