@@ -4,8 +4,23 @@
 
 
   search_create_continue:
-                sub t2, t1, t0
+	        sub t2, t1, t0
                 addi t2, t2, 1                        #t2 has length of token
+		la t5, INDOES
+		ld t6, 0(t5)
+		beqz t6, search_create_normal
+		POP t5					#restore writing address from before
+		#write out current token
+  search_create_current_token_out:
+		lbu t3, 0(t0)
+		sb t3, 0(t5)
+		addi t0, t0, 1
+		addi t5, t5, 1
+		addi t2, t2, -1
+		bnez t2, search_create_current_token_out
+		mv t1, t5				#change write address back to t1
+		tail search_create_write_out_does_	#handle continuing DOES>
+  search_create_normal:
                 la t4, dictionary
                 ld t3, 0(t4)
   search_create_next_in_dictionary:
@@ -60,11 +75,16 @@
 		la t0, WA_DOES_
 		bne t3, t0, search_create_allowed
 		#write out DOES_ word address and tidy up
-		#emulating SEMI	
+		#emulating SEMI
+		#set mode
+		la t0, INDOES
+		li t1, 1
+		sd t1, 0(t0)	
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)			      #write out word address in definition
 		addi t1, t1, 8
+  search_create_write_out_does_:
 		#now copy out the following text until we hit semi
 		la a0, INPUT_START
 		ld a1, 0(a0)
@@ -77,7 +97,7 @@
 		addi t1, t1, 1
 		addi a1, a1, 1
 		beq a3, a2, search_create_does_copy_done		
-		bgt a1, t6, search_create_report_error
+		bgt a1, t6, search_create_does_keep_on
 		j search_create_does_copy
   search_create_does_copy_done:
 		li a3, 0x0A
@@ -102,6 +122,13 @@
 		sd t1, 0(t0)			      #update address we will writenext word to
 		la s7, outer_loop_tokenize
 		fence.i 				      #ensure cache coherency
+		la t0, INDOES
+		sd zero, 0(t0)				#we're done with DOES so reset flag
+		tail NEXT
+  search_create_does_keep_on:
+		#store register value
+		PUSH t1
+		la s7, outer_loop_tokenize		#not done with does so plough on
 		tail NEXT
 	
   search_create_allowed:
