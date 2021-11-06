@@ -82,7 +82,9 @@
 		li a7, 10				#\n	- don't want this
   search_create_does_copy:
 		lbu a3, 0(a1)
-		beq a3, a7, search_create_does_keep_on
+		bne a3, a7, search_create_does_write_byte
+		li a3, 0				#write out \0 instead of CR
+  search_create_does_write_byte:
 		sb a3, 0(t1)
 		addi t1, t1, 1
 		addi a1, a1, 1

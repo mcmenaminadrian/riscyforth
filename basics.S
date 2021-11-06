@@ -485,11 +485,26 @@
 		tail NEXT
 
 		CODEHEADERZ COMMENT, \\, DOTQ, 0x01
-		#the line is now done
+		#the line is now done - but special case for DOES>
 		la t0, INPUT_START
-		la t1, INPUT_END
-		ld t2, 0(t1)
-		sd t2, 0(t0)
+		ld t1, 0(t0)
+		la t2, INPUT_END
+		ld t3, 0(t2)
+		li t4, 10		#\n
+		li t5, 0		#\0
+  comment_loop:
+		bgt t1, t3, comment_done
+		lbu t6, 0(t1)
+		beq t4, t6, comment_done
+		beq t5, t6, comment_break
+		addi t1, t1, 1
+		j comment_loop
+  comment_done:
+		sd t3, 0(t0)
+		tail NEXT
+  comment_break:
+		addi t1, t1, 1
+		sd t1, 0(t0)
 		tail NEXT
 		
                 CODEHEADERZ DOT, ., COMMENT, 0x01

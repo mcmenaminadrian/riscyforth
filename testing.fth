@@ -126,11 +126,11 @@ ELSE RED ." OCTAL FAILED with 20o = " DUP OCTAL . ." = " DECIMAL . THEN RESET CR
 : VERIFYBINARY 
 ." Verifying BINARY  - " 1 2 4 8 16 32 64 128 256 512
 BINARY ." powers of 2 from 9 to 0 in binary... " cr
-. cr . cr . cr . cr . cr . cr . cr . cr . cr . cr DECIMAL ;
+CYAN . cr . cr . cr . cr . cr . cr . cr . cr . cr . cr RESET DECIMAL ;
 
 : VERIFYDOT
 ." Verifying DOT " 5 spaces 0 1 2 3 4 5
-." ... should see countdown from 5 to 0: " . . . . . . CR ;
+." ... should see countdown from 5 to 0: " CYAN . . . . . . RESET CR ;
 
 : TESTADD
 ." Testing + " 5 SPACES 900 -899 +
@@ -299,7 +299,7 @@ RED ." >R, R@ and RDROP FAILED" then RESET cr
 \ loop
 : TESTBEGINUNTIL
 ." Testing BEGIN ... UNTIL loop " 5 SPACES
-32 BEGIN DUP EMIT 1+ DUP 127 > UNTIL BLUE ."  BEGIN ... UNTIL passed " RESET CR ;
+32 BEGIN CYAN DUP EMIT 1+ DUP 127 > UNTIL BLUE ."  BEGIN ... UNTIL passed " RESET CR ;
 
 
 VARIABLE BAXX
