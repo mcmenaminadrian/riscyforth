@@ -437,6 +437,9 @@
 		ld t3, 0(t1)
 		addi t3, t3, DOESOFFSET
 		sd t3, 0(t1)
+		la s0, PROCESSDOES
+		li s1, 1
+		sd s1, 0(s0)
 		ld s2, 16(sp)
 		ld s1, 8(sp)
 		ld s0, 0(sp)

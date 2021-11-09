@@ -109,6 +109,14 @@
                 lb t4, 0(t0)
                 beq t4, t2, tokenize_keep_going
                 bne t4, t3, tokenize_found_start
+		la t5, PROCESSDOES
+		ld t6, 0(t5)
+		bnez t6, tokenize_call_all_over
+		#handle special DOES> case
+		addi t0, t0, 1
+		sd t0, INPUT_START, t5
+		j tokenize_not_does_
+  tokenize_call_all_over:
                 j tokenize_all_over
   tokenize_keep_going:
                 addi t0, t0, 1

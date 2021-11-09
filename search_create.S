@@ -79,15 +79,13 @@
 		la t5, INPUT_END
 		ld t6, 0(t5)
 		li a2, 59				#;
-		li a7, 10				#\n	- don't want this
+		li a7, 10				#\n
   search_create_does_copy:
 		lbu a3, 0(a1)
-		bne a3, a7, search_create_does_write_byte
-		li a3, 0				#write out \0 instead of CR
-  search_create_does_write_byte:
 		sb a3, 0(t1)
 		addi t1, t1, 1
 		addi a1, a1, 1
+		beq a3, a7, search_create_does_keep_on
 		beq a3, a2, search_create_does_copy_done		
 		bgt a1, t6, search_create_does_keep_on
 		j search_create_does_copy
@@ -113,7 +111,7 @@
 		sd t3, 0(t2)			      #store address of new word as start for dictionary
 		sd t1, 0(t0)			      #update address we will writenext word to
 		la s7, outer_loop_tokenize
-		fence.i 				      #ensure cache coherency
+		fence.i 				#ensure cache coherency
 		la t0, INDOES
 		sd zero, 0(t0)				#we're done with DOES so reset flag
 		tail NEXT
@@ -370,6 +368,7 @@
 		j search_create_leave
   search_create_test_semi:
 		la t0, WA_SEMI			      #are we finished with create?
+		sd zero, PROCESSDOES, a0
 		bne t3, t0, search_create_leave
 		#tidy up create as we are done
 		la t0, CREATEFLAG
