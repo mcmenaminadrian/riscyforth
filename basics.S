@@ -111,7 +111,7 @@
                 bne t4, t3, tokenize_found_start
 		la t5, MULTILINE
 		ld t6, 0(t5)
-		bnez t6, tokenize_call_all_over
+		beqz t6, tokenize_call_all_over
 		#handle special DOES> case
 		addi t0, t0, 1
 		sd t0, INPUT_START, t5
