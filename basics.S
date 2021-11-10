@@ -109,7 +109,7 @@
                 lb t4, 0(t0)
                 beq t4, t2, tokenize_keep_going
                 bne t4, t3, tokenize_found_start
-		la t5, PROCESSDOES
+		la t5, MULTILINE
 		ld t6, 0(t5)
 		bnez t6, tokenize_call_all_over
 		#handle special DOES> case
@@ -494,23 +494,24 @@
 
 		CODEHEADERZ COMMENT, \\, DOTQ, 0x01
 		#the line is now done - but special case for DOES>
-		la t5, PROCESSDOES
+		la t5, MULTILINE
 		ld t5, 0(t5)
 		la t0, INPUT_START
 		ld t1, 0(t0)
 		la t2, INPUT_END
 		ld t3, 0(t2)
+		beqz t5, comment_done
 		li t4, 10		#\n
+		j comment_loop
+  comment_done:
+		sd t3, 0(t0)
+		tail NEXT
   comment_loop:
 		bgt t1, t3, comment_done
 		lbu t6, 0(t1)
-		beq t4, t6, comment_done
+		beq t4, t6, comment_break
 		addi t1, t1, 1
 		j comment_loop
-  comment_done:
-		beqz t5, comment_break
-		sd t3, 0(t0)
-		tail NEXT
   comment_break:
 		addi t1, t1, 1
 		sd t1, 0(t0)
@@ -798,6 +799,9 @@
 		ret
 
   do_fix_up_comment:
+		la t1, MULTILINE
+		ld t2, 0(t1)
+		bnez t2, keep_fixing_up_comment
 		la t0, INFILELOAD
 		ld t0, 0(t0)
 		beqz t0, keep_fixing_up_comment

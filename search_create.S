@@ -368,7 +368,7 @@
 		j search_create_leave
   search_create_test_semi:
 		la t0, WA_SEMI			      #are we finished with create?
-		sd zero, PROCESSDOES, a0
+		sd zero, MULTILINE, a0
 		bne t3, t0, search_create_leave
 		#tidy up create as we are done
 		la t0, CREATEFLAG
