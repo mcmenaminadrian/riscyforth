@@ -32,6 +32,11 @@
 
   search_create_tokens_matched:
                 addi t3, t3, 8                        #address that points to the code
+		#if this is just a comment we don't care - get to the next CR
+		la t0, WA_COMMENT
+		bne t3, t0, search_create_check_bracket
+		j search_create_dispose_of_comment
+  search_create_check_bracket:
 		la t0, WA_BRACKET
 		bne t3, t0, search_create_check_paren
 		la s7, outer_loop_tokenize
@@ -838,3 +843,30 @@ func_test_octal:
 		fence.i
 		tail NEXT
 
+
+  search_create_dispose_of_comment:
+		#this code just takes us beyond the current comment
+		#no need to write out a comment word - just delay execution for nothing
+		#only need to check if we are in MULTILINE
+		la t0, MULTILINE
+		ld t1, 0(t0)
+		la t0, INPUT_START
+		la t2, INPUT_END
+		ld t3, 0(t2)
+		bnez t1, search_create_move_through_comment
+  search_create_comment_done:
+		sd t3, 0(t0)
+		la s7, outer_loop_tokenize
+		tail NEXT
+  search_create_move_through_comment:
+		#we are in MULTILINE mode - so search for next CR
+		li t4, 10
+		ld t1, 0(t0)
+  search_create_keep_processing_comment:
+		beq t1, t3, search_create_comment_done
+		lb t5, 0(t1)
+		addi t1, t1, 1
+		bne t4, t5, search_create_keep_processing_comment
+		sd t1, 0(t0)
+		la s7, outer_loop_tokenize
+		tail NEXT
