@@ -715,7 +715,10 @@
 		j fix_up_done
   fix_up_comment:
 		call do_fix_up_comment
-		j fix_up_done
+		mv t0, a0
+		mv t1, a1
+		mv t2, a5
+		j tokenize_finished_sanitization	#no expansion
   fix_up_tick:
 		call do_fix_up_tick
 		j fix_up_done
