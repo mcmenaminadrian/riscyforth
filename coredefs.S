@@ -889,8 +889,14 @@
 		mv a1, t1
 		mv a5, t2
 		lbu t1, 0(a0)
+		li t2, 0x30			#0
+		beq t1, t2, tick_length_two_beginzero
 		li t2, 0x2E			#.
 		beq t1, t2, tick_length_two_begindot
+		li t2, 0x3E			#>
+		beq t1, t2, tick_length_two_begingt
+		li t2, 0x3C			#<
+		beq t1, t2, tick_length_two_beginlt
 		PUSH t1
 		andi t1, t1, 0x5F		#character based tests all in here
 		li t2, 0x43
@@ -908,6 +914,27 @@
   tick_length_two_begindot_done:
 		j tix_up_length_two_finished
 		
+  tick_length_two_beginzero:
+		lbu t1, 1(a0)
+		li t2, 0x3D			#=
+		bne t1, t2, tick_length_two_begindot_done
+                call fix_up_zeroequal
+		j tix_up_done
+
+  tick_length_two_begingt:
+		lbu t1, 1(a0)
+		li t2, 0x3D			#=
+		bne t1, t2, tick_length_two_begindot_done
+                call fix_up_gteq
+		j tix_up_done
+
+  tick_length_two_beginlt:
+		lbu t1, 1(a0)
+		li t2, 0x3D			#=
+		bne t1, t2, tick_length_two_begindot_done
+                call fix_up_lteq
+		j tix_up_done
+
   tick_length_two_beginC:
 		sb t1, 0(a2)
 		addi sp, sp, 8

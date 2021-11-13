@@ -656,13 +656,13 @@
 		j fix_up_done
   length_two_begingt:
 		lb t1, 1(a0)
-		li t2, 0x3D
+		li t2, 0x3D			#>
 		bne t1, t2, length_two_begindot_done
  		call fix_up_gteq
 		j fix_up_done	
   length_two_beginlt:
 		lb t1, 1(a0)
-		li t2, 0x3D
+		li t2, 0x3D			#<
 		bne t1, t2, length_two_begindot_done
  		call fix_up_lteq
 		j fix_up_done	
