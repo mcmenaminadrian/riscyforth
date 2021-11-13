@@ -1,20 +1,21 @@
 
 
 		CODEHEADER TRUE, COLON, 0x01
+		addi sp, sp, -8
 		j gt_true
 
 		CODEHEADERZ GT, >, TRUE, 0x01
 		ld t1, 0(sp)
 		ld t0, 8(sp)
-		addi sp, sp, 16
+		addi sp, sp, 8
   gt_test:
 		bgt t0, t1, gt_true
   gt_false:
-		PUSH zero
+		sd zero, 0(sp)
 		tail NEXT
   gt_true:	
 		li t0, -1
-		PUSH t0
+		sd t0, 0(sp)
 		tail NEXT
 
 		CODEHEADER LTEQ, GT, 0x01
@@ -23,7 +24,7 @@
 		ld t0, 0(sp)
 		ld t1, 8(sp)
   lteq_as_gteq:
-		addi sp, sp, 16
+		addi sp, sp, 8
 		ble t1, t0, gt_true
 		j gt_false
 
@@ -37,16 +38,17 @@
 		CODEHEADERZ LT, <, GTEQ, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
-		addi sp, sp, 16
+		addi sp, sp, 8
 		j gt_test
 
 		CODEHEADER FALSE, LT, 0x01
+		addi sp, sp, -8
 		j gt_false
 
 		CODEHEADER EQUAL, FALSE, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
-		addi sp, sp, 16
+		addi sp, sp, 8
 		bne t0, t1, gt_false
 		j gt_true
 
