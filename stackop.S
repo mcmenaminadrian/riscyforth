@@ -53,6 +53,7 @@
 
                 CODEHEADER PICK, BACKROT, 0x01
 		ld t0, 0(sp)
+		addi t0, t0, 1
                 li t1, STACKOFFSET
                 mul t2, t0, t1
                 add t3, sp, t2

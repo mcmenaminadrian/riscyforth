@@ -10,6 +10,10 @@ DECIMAL
 BLUE 50 = SWAP 30 = AND IF ." 2OVER passed " else RED ." 2OVER FAILED " then RESET cr
 ;
 
+: TESTPICK
+." Testing PICK" 5 SPACES
+14 12 13 2 PICK 14 = IF BLUE ." PICK passed" ELSE RED ." PICK FAILED" THEN RESET CR ;
+
 : testDrop2
 ." Testing 2DROP " 5 spaces
 99 2 3 4
@@ -583,7 +587,7 @@ testCube
 testNIP2 testDUP2
 testtuck2 testswap2 testrot2 testdup testbl testdepth
 testinvert
-TEST[]
+TEST[] TESTPICK
 ." stackop tests over " cr
 ;
 

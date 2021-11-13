@@ -257,14 +257,7 @@
                 bltu t0, a1, colon_tokenize_look_for_start
                 j colon_tokenize_all_over                   #got nothing
   colon_tokenize_found_start:
-		li t2, 0x30
-		li t3, 0x39
-		bgt t4, t3, colon_not_a_numeral
-		bge t4, t2, colon_tokenize_all_over	    #cannot redefine a number
-  colon_not_a_numeral:
                 mv t1, t0                             #t1 to track end of token
-		li t2, 0x20			#back to checkinging space and CR
-		li t3, 0x0A
   colon_tokenize_advance_search:
                 addi t1, t1, 1
                 bgeu t1, a1, colon_tokenize_end_token
