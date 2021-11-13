@@ -616,6 +616,8 @@
 		# ."  --> ENCSQ
 		# C,  --> CCOMMA
 		# 0=  --> ZEROEQUAL
+		# >=  --> GTEQ
+		# <=  --> LTEQ
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -626,6 +628,10 @@
 		beq t1, t2, length_two_begin0
 		li t2, 0x2E			#.
 		beq t1, t2, length_two_begindot
+		li t2, 0x3E			#>
+		beq t1, t2, length_two_begingt
+		li t2, 0x3C			#<
+		beq t1, t2, length_two_beginlt
 		PUSH t1
 		andi t1, t1, 0x5F		#character based tests all in here
 		li t2, 0x43			#C
@@ -648,6 +654,19 @@
 		bne t1, t2, length_two_begindot_done
                 call fix_up_encsq
 		j fix_up_done
+  length_two_begingt:
+		lb t1, 1(a0)
+		li t2, 0x3D
+		bne t1, t2, length_two_begindot_done
+ 		call fix_up_gteq
+		j fix_up_done	
+  length_two_beginlt:
+		lb t1, 1(a0)
+		li t2, 0x3D
+		bne t1, t2, length_two_begindot_done
+ 		call fix_up_lteq
+		j fix_up_done	
+		
   length_two_begindot_done:
 		j fix_up_length_two_finished
 
@@ -861,6 +880,23 @@
 		sb t3, 8(a3)
 		addi a2, a2, 8
 		ret
+
+  fix_up_gteq:
+		li t3, 0x47
+  gteq_to_lteq:
+		sb t3, 0(a2)
+		li t3, 0x54
+		sb t3, 1(a2)
+		li t3, 0x45
+		sb t3, 2(a2)
+		li t3, 0x51
+		sb t3, 3(a2)
+		addi a2, a2, 3
+		ret
+
+  fix_up_lteq:
+		li t3, 0x4C
+		j gteq_to_lteq
 		
   fix_up_ccomma:
 		li t3, 0x43

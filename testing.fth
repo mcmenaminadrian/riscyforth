@@ -143,6 +143,12 @@ BLUE IF ." + passed " ELSE RED ." + FAILED " THEN RESET CR ;
 BLUE = if ." * passed " else RED ." * FAILED " then RESET cr
 ;
 
+: TESTINEQUALITIES
+." Testing equality and inequalities..." 5 SPACES
+5 6 < 66 55 > AND 5 6 <= AND 66 55 >= AND 667 667 >= AND 667 667 <= AND 667 666 <= FALSE = AND
+5 6 > FALSE = AND 6 5 <= FALSE = AND 10 9 < FALSE = AND 10 10 = AND 10 11 = FALSE = AND
+IF BLUE ." Equality and Inequalities passed" ELSE RED ." Inequalities FAILED" THEN RESET CR ;
+
 : TESTDIV
 ." Testing / " 5 SPACES 99 11 / 101 11 / * 81 =
 BLUE IF ." / passed " else RED ." / FAILED " then RESET cr ;
@@ -564,7 +570,7 @@ VERIFYSOURCE TESTCONSTANTVALUE
 ." Running integer tests " cr
 TESTADD TESTMUL TESTDIV TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST0<> TEST0>
 TESTminus2 testplus2 testunderplus testminmax testabs testnegate testshifts
-TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2*
+TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES
 ." Integer tests complete " CR
 ;
 

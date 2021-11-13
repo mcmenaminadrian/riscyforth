@@ -17,7 +17,24 @@
 		PUSH t0
 		tail NEXT
 
-		CODEHEADERZ LT, <, GT, 0x01
+		CODEHEADER LTEQ, GT, 0x01
+		#non-standard less than or equal
+		#(n n -- f)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+  lteq_as_gteq:
+		addi sp, sp, 16
+		ble t1, t0, gt_true
+		j gt_false
+
+		CODEHEADER GTEQ, LTEQ, 0x01
+		#non-standard greater than or equal
+		#(n n -- f)
+		ld t1, 0(sp)
+		ld t0, 8(sp)
+		j lteq_as_gteq
+
+		CODEHEADERZ LT, <, GTEQ, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 16
