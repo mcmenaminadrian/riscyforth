@@ -14,6 +14,16 @@ Riscyforth is still under heavy development and is moving (much) closer to the F
 
 To see the words currently available start Riscyforth and run the **WORDS** command. For reasons to do with the macros used in the RISC V assembly, some words are listed in their long form and not their more familiar form - e.g., **0=** is listed as **ZEROEQUALS** but the 0= form will be correctly handled in any program.
 
-You can see the Forth stanard here: [https://forth-standard.org/]
+You can see the Forth standard here: [https://forth-standard.org/]
+
+***To run Riscyforth***
+
+Clone the repo
+
+cd <riscyforth directory>
+
+make
+
+./riscyforth
 
 Copyright, Adrian McMenamin, 2020 - 2021
