@@ -105,7 +105,16 @@
 		addi sp, sp, 16
                 tail NEXT
 
-                CODEHEADERZ DUP2,  2DUP, NIP2, 0x01
+		CODEHEADERZ QDUP, ?DUP, NIP2, 0x01
+		#(x -- 0 | xx)
+		ld t0, 0(sp)
+		beqz t0, qdup_zero
+		addi sp, sp, -8
+		sd t0, 0(sp)
+  qdup_zero:
+		tail NEXT
+
+                CODEHEADERZ DUP2,  2DUP, QDUP, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, -16
@@ -164,6 +173,7 @@
 
                 CODEHEADER DUP, ROT2, 0x01
 		ld t0, 0(sp)
+  dup_qdup_join:
 		addi sp, sp, -8
 		sd t0, 0(sp)
                 tail NEXT

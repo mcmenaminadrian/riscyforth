@@ -75,7 +75,17 @@ BLUE 45 = SWAP 45 = AND swap 34 = AND IF ." DUP passed " else RED ." DUP FAILED 
 
 : TESTDEPTH
 ." Testing DEPTH" 5 spaces
-depth dup 0 < IF GREEN ." WARNING: Stack in negative territory " THEN 10 20 rot depth swap - 3 = IF BLUE ." DEPTH passed " ELSE RED ." DEPTH FAILED " then RESET cr ;
+DEPTH DUP DUP 0> IF GREEN ." Stack over committed by " DUP . RESET CR ELSE DUP 0= IF BLUE ." DEPTH passed: stack depth " . RESET CR EXIT
+ELSE RED ." DEPTH FAILED with stack depth " . RESET CR EXIT THEN THEN
+DUP GREEN ." Removing " . ." stack entries" RESET CR
+1+ 0 DO DROP LOOP
+DEPTH DUP GREEN ." Stack depth now " . RESET CR
+0= IF BLUE ." DEPTH passed" ELSE RED ." DEPTH FAILED" THEN RESET CR ;
+
+: TEST?DUP
+." Testing ?DUP " 5 SPACES
+10 -1 0 ?DUP DROP -1 = ?DUP DROP -1 =
+AND IF BLUE ." ?DUP passed" ELSE ." ?DUP FAILED" THEN RESET CR ;
 
 : TESTINVERT
 ." Testing INVERT " 5 spaces
@@ -360,8 +370,6 @@ VARIABLE TESTUNLOOPV
 : SECONDPARTUNLOOP
 TESTUNLOOPV @ 3 = IF BLUE ." UNLOOP passed " ELSE RED ." UNLOOP FAILED" THEN RESET CR ;
 
-
-
 \ Testing memory functions
 : ZZ BLUE ." ', EXECUTE and C! passed " RESET ;
 
@@ -584,10 +592,10 @@ TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES
 TESTOVER2
 testDrop2 testSquare
 testCube
-testNIP2 testDUP2
-testtuck2 testswap2 testrot2 testdup testbl testdepth
+testNIP2 testDUP2 TEST?DUP
+testtuck2 testswap2 testrot2 testdup testbl
 testinvert
-TEST[] TESTPICK
+TEST[] TESTPICK 
 ." stackop tests over " cr
 ;
 
@@ -633,5 +641,7 @@ ENTERCONTINUE
 TESTLOOPS
 ENTERCONTINUE
 TESTMEMORY
+ENTERCONTINUE
+TESTDEPTH
 ENTERCONTINUE
  ABORT" Verifying ABORTCOMM and leaving tests with this message "  ." ABORTCOMM has FAILED" ;
