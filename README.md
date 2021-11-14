@@ -20,7 +20,7 @@ You can see the Forth standard here: [https://forth-standard.org/]
 
 Clone the repo
 
-cd <riscyforth directory>
+cd < riscyforth directory >
 
 make
 
