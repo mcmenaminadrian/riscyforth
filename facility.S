@@ -8,8 +8,13 @@
 
 .balign 8
 
+		#get date the date and time from rtc
+		CODEHEADERZ TIME_DATE, TIME&DATE, BYE, 0x01
+
+		tail NEXT
+
 		#sleep for u milliseconds
-		CODEHEADER MS, BYE, 0x01
+		CODEHEADER MS, TIME_DATE, 0x01
 		#(u --)
 		ld t0, 0(sp)
 		addi sp, sp, -8
