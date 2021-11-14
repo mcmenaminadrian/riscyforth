@@ -916,4 +916,5 @@
 .include "stackop.S"
 .include "listwords.S"
 .include "loops.S"
+.include "facility.S"
 

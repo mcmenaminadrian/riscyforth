@@ -547,7 +547,18 @@ YELLOW BBLUE ." Yellow on blue " 3 spaces GREEN BRED ." Green on red " 3 SPACES 
 MAGENTA BBLACK BRIGHT ." Going bright... Magenta on black" 3 spaces WHITE BCYAN ." White on cyan" 3 spaces RED BMAGENTA ." Red on magenta " CR
 RESET ." And back to normal..." CR ;
 
+: TESTMS
+." Verifying MS word - waiting around 1 second..." 5 SPACES
+1000 MS
+BLUE ." Verification of MS complete" RESET CR ;
+
 \ Test groupings
+
+\ Test facility
+: TESTFACILITY
+." Testing facility and timing words" CR
+TESTMS
+." Testing of facility and timing words complete" CR ;
 
 \ Memory tests
 : TESTMEMORY
@@ -641,6 +652,8 @@ ENTERCONTINUE
 TESTLOOPS
 ENTERCONTINUE
 TESTMEMORY
+ENTERCONTINUE
+TESTFACILITY
 ENTERCONTINUE
 TESTDEPTH
 ENTERCONTINUE

@@ -1,7 +1,7 @@
 #Stack operations
 
 
-                CODEHEADER SWAP, BYE, 0x01
+                CODEHEADER SWAP, MS, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		sd t1, 0(sp)
