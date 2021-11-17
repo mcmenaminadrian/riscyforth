@@ -89,8 +89,8 @@
    decimalout:    	.asciz "%lld "
    hexout:        	.asciz "%#llX "
    octalout:      	.asciz "%lloo "
-
-
+   badif:		.asciz "Bad IF"
+   badelse:		.asciz "Bad ELSE"
 
 
   .text
