@@ -236,52 +236,21 @@
   search_create_test_conditionals:
 		la t0, WA_WHILE
 		bne t3, t0, search_create_test_if
-		la t3, WA_IF
-		j search_create_in_if
+		la t3, WA__WHILE
+		j search_create_while_out
 		#test for conditionals
   search_create_test_if:
 		la t0, WA_IF
 		bne t3, t0, search_create_test_else
   search_create_in_if:
 		#if code
-		call get_iffmode
-		beqz a0, search_create_start_if
-		call get_flag_mode
-		bnez a0, search_create_test_elseif
-		#if -> if
-		j search_create_start_if
-  search_create_test_elseif:
-		beqz a2, search_create_test_thenif
-		#else -> if
-		j search_create_start_if
-  search_create_test_thenif:
-		beqz a1, search_create_if_fail
-		j search_create_start_if
-  search_create_if_fail:
-		j search_create_bad_ifmode
-  search_create_start_if:
-		call increment_iffmode
-		#now write out the test code
-		SETUP_CONDITIONAL_CALL
-		call ifelse_func_create
-		mv t3, a0 
-		j search_create_inscribe
-
+		la t3, WA__IF
+		j search_create_if_out
   search_create_test_else:
 		la t0, WA_ELSE
 		bne t0, t3, search_create_test_repeat
-		call get_iffmode
-		beqz a0, search_create_bad_ifmode
-		call get_flag_mode
-		beqz a2, search_create_test_thenelse
-		#cannot have ELSE ... ELSE
-		j search_create_bad_ifmode		
-  search_create_test_thenelse:
-		beqz a1, search_create_setup_else
-		tail transition_then_else
-  search_create_setup_else:
-		tail transition_if_else
-
+		la t3, WA__ELSE
+		j search_create_else_out
   search_create_test_repeat:
 		la t0, WA_REPEAT
 		bne t0, t3, search_create_test_then

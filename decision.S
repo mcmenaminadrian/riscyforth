@@ -98,13 +98,13 @@
 		beqz t2, _if_handle_then
 		#have an else clause
 		mul t3, t2, t0
-		addi s7, s7, t3
+		add s7, s7, t3
 		tail NEXT
   _if_handle_then:
 		ld t2, 8(s7)
 		beqz t2, _if_failure
 		mul t3, t2, t0
-		addi s7, s7, t3
+		add s7, s7, t3
 		tail NEXT
   _if_failure:
 		#no THEN created
@@ -125,7 +125,7 @@
 		beqz t1, _else_failure
 		li t0, 8
 		mul t2, t0, t1
-		addi s7, s7, t2
+		add s7, s7, t2
 		tail NEXT
 		
 
