@@ -234,57 +234,25 @@
 		la t3, WA__EXIT
 		j search_create_inscribe
   search_create_test_conditionals:
-		la t0, WA_WHILE
-		bne t3, t0, search_create_test_if
-		la t3, WA__WHILE
-		j search_create_while_out
 		#test for conditionals
-  search_create_test_if:
 		la t0, WA_IF
 		bne t3, t0, search_create_test_else
-  search_create_in_if:
-		#if code
 		la t3, WA__IF
-		j search_create_if_out
+		j transitions_if_out
   search_create_test_else:
 		la t0, WA_ELSE
-		bne t0, t3, search_create_test_repeat
-		la t3, WA__ELSE
-		j search_create_else_out
-  search_create_test_repeat:
-		la t0, WA_REPEAT
 		bne t0, t3, search_create_test_then
-		#are we in if mode
-		call get_iffmode
-		beqz a0, search_create_bad_ifmode
-		call get_flag_mode
-		bnez a0, search_create_test_repeat_state
-		la a0, WA__REPEAT				#write out _REPEAT
-		tail transition_if_repeat
-  search_create_test_repeat_state:
-		#test for then->repeat
-		beqz a1, search_create_test_else_repeat
-		la a0, WA__REPEAT
-		tail transition_then_repeat
-  search_create_test_else_repeat:
-		beqz a2, search_create_bad_ifmode
-		tail transition_else_then
+		la t3, WA__ELSE
+		j transitions_else_out
   search_create_test_then:
 		la t0, WA_THEN
+		bne t0, t3, search_create_test_repeat
+		j transitions_then_out
+  search_create_test_repeat:
+		la t0, WA_REPEAT
 		bne t0, t3, search_create_inscribe
-		#are we in if mode
-		call get_iffmode
-		beqz a0, search_create_bad_ifmode
-		call get_flag_mode
-		bnez a0, search_create_test_then_state
-		tail transition_if_then
-  search_create_test_then_state:
-		#test for then->then
-		beqz a1, search_create_test_else_then
-		tail transition_then_then
-  search_create_test_else_then:
-		beqz a2, search_create_bad_ifmode	#bad state
-		tail transition_else_then
+		la t3, WA__REPEAT
+		j transitions_repeat_out
   search_create_bad_ifmode:
 		#error
 		la t0, CREATEFLAG
@@ -292,23 +260,14 @@
 		tail search_failed
 
   search_create_inscribe:
-		#update the depth of the current skip if needed
-		call get_iffmode
-		beqz a0, search_create_continue_test_until
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip
-  search_create_continue_test_until:
 		#test for special case
 		la t0, WA__UNTIL
 		beq t0, t3, search_create_add_until_backcount
 		la t0, WA__AGAIN
 		bne t0, t3, search_create_continue_inscription
+		j transitions_again_out
   search_create_add_until_backcount:
-		#setup call to write additional WA__UNTIL stuff
-		mv a0, t3
-		call compile_in_until
-		bnez a0, search_create_leave
-		j search_create_bad_ifmode
+		j transitions_until_out
   search_create_continue_inscription:
 		la t0, createwritepoint
 		ld t1, 0(t0)
@@ -464,14 +423,6 @@
 		addi t1, t1, 16
 		sd t1, 0(t0)
 		la s7, outer_loop_tokenize
-		#update the depth of the current skip if needed
-		call get_iffmode
-		beqz a0, search_create_literal_go
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip
-  search_create_literal_go:
 		fence.i
 		tail NEXT
 
@@ -721,17 +672,10 @@ func_test_octal:
 		add t1, t1, a1
 		la a0, createwritepoint
 		sd t1, 0(a0)				#advance writepoint
-		call get_iffmode			#handle conditionals
 		beqz a0, embed_tick_done
 		#increment the conditionals
 		addi a1, a1, 16				#command and length
 		srli a5, a1, 3
-  embed_tick_skiploop:
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip
-		addi a5, a5, -1
-		beq a5, zero, embed_tick_done
-		j embed_tick_skiploop
   embed_tick_done:
 		la s7, outer_loop_tokenize
 		fence.i
@@ -797,16 +741,9 @@ func_test_octal:
 		ld t0, 0(t1)
 		add t0, t0, a1
 		sd t0, 0(t1)
-		call get_iffmode
 		beqz a0, embed_encsq_done
 		#increment the conditionals
 		srli a5, a1, 3
-  embed_encsq_skiploop:
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip
-		addi a5, a5, -1
-		beq a5, zero, embed_encsq_done
-		j embed_encsq_skiploop
   embed_encsq_done:
 		la s7, outer_loop_tokenize
 		fence.i

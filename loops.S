@@ -118,7 +118,9 @@
 		CODEHEADER _UNTIL, UNTIL, 0x0	#subsitituted in compiled
 		POP t0
 		bnez t0, end_of_until
+		li t1, 8
 		ld t0, 0(s7)
+		mul t0, t0, t1
 		add s7, s7, t0
 		tail NEXT
   end_of_until:
@@ -129,7 +131,9 @@
 		tail NEXT			#do nothing in immediatre mode
 
 		CODEHEADER _AGAIN, AGAIN, 0x0
+		li t1, 8
 		ld t0, 0(s7)
+		mul t0, t0, t1
 		add s7, s7, t0			#unconditional return to BEGIN
 		tail NEXT
 
@@ -138,6 +142,8 @@
 
 		CODEHEADER _REPEAT, REPEAT, 0x0
 		ld t0, 0(s7)			#similar to _UNTIL but jump back is unconditional
+		li t1, 8
+		mul t0, t0, t1
 		add s7, s7, t0
 		tail NEXT
 
@@ -407,74 +413,3 @@
 		POP zero
 		PRINT bad_colon
 		tail NEXT
-		
-		
-  compile_in_until:					#a0 has old s7 value
-		addi sp, sp, -80
-		sd ra, 72(sp)
-		sd s8, 64(sp)
-		sd s7, 56(sp)
-		sd s6, 48(sp)
-		sd s5, 40(sp)
-		sd s4, 32(sp)
-		sd s3, 24(sp)
-		sd s2, 16(sp)
-		sd s1, 8(sp)
-		sd s0, 0(sp)
-		
-		la s3, createwritepoint
-		ld s3, 0(s3)
-		sd a0, 0(s3)
-		
-		#now search for WA_BEGIN
-		li s0, 0x200				#max depth of search backwards
-		li s1, -8
-		li s2, 8
-		la s5, WA_BEGIN
-		mv s6, s3
-		mv s7, zero
-		la s8, WA__UNTIL
-  end_check_begin:
-		addi s3, s3, -8
-		ld s4, 0(s3)
-		bne s4, s8, end_keep_checking
-		addi s7, s7, 1
-		j end_check_next
-  end_keep_checking:
-		beq s5, s4, end_found_begin
-  end_check_next:
-		add s1, s1, -8
-		add s2, s2, 8
-		blt s2, s0, end_check_begin
-		#we have failed
-		mv a0, zero
-		j real_end_of_end
-  end_found_begin:
-		beqz s7, end_correct_begin
-		addi s7, s7, -1				#skip an inner loop
-		j end_check_next
-  end_correct_begin:
-		sd s1, 8(s6)				#write out offset
-		la s0, createwritepoint
-		addi s6, s6, 16
-		sd s6, 0(s0)
-		#now - are we in a conditional?
-		call get_iffmode
-		beqz a0, almost_end_of_end
-		SETUP_CONDITIONAL_CALL
-		call increment_current_skip		#we have to account for the literal (skip) if in a conditional
-  almost_end_of_end:
-		li a0, 1
-  real_end_of_end:
-		ld s0, 0(sp)
-		ld s1, 8(sp)
-		ld s2, 16(sp)
-		ld s3, 24(sp)
-		ld s4, 32(sp)
-		ld s5, 40(sp)
-		ld s6, 48(sp)
-		ld s7, 56(sp)
-		ld s8, 64(sp)
-		ld ra, 72(sp)
-		addi sp, sp, 80
-		ret

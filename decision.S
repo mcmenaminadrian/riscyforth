@@ -86,7 +86,7 @@
 		CODEHEADER _IF, INVERT, 0x00
 		ld t1, 0(sp)
 		addi sp, sp, 8
-		beqz t1, _if__handle_false
+		beqz t1, _if_handle_false
 		#In TRUE lane
 		#so execute next words
 		addi s7, s7, 16
@@ -127,6 +127,8 @@
 		mul t2, t0, t1
 		add s7, s7, t2
 		tail NEXT
+  _else_failure:
+		tail trackback_failed_else
 		
 
 		CODEHEADER ELSE, _ELSE, 0x01
