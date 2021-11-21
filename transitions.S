@@ -17,8 +17,8 @@
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)
-		sd zero, 8(t1)
-		sd zero, 16(t1)
+		sd zero, 8(t1)		#ELSE offset stored here
+		sd zero, 16(t1)		#THEN offset stored here
 		addi t1, t1, 24
 		sd t1, 0(t0)
 		tail search_create_leave
@@ -54,7 +54,7 @@
 		addi a0, a0, -1
 		j transitions_else_search_back_retreat
   transitions_else_fix_jump:
-		addi a1, a1, 2		#jump to after ELSE
+		addi a1, a1, 1		#jump to after ELSE
 		sd a1, 8(a6)		#insert jump
 		#now update write point
 		addi t1, t1, 16
@@ -85,7 +85,7 @@
 		addi a1, a1, 1
 		beq a1, a5, trackback_failed_if
 		addi a6, a6, -8
-		j transitions_else_search_back
+		j transitions_then_search_back
   transitions_then_search_back_inc_index:
 		addi a0, a0, 1
 		j transitions_then_search_back_retreat
@@ -105,7 +105,7 @@
 		addi a1, a1, 1		#jump to after THEN
 		sd a1, 16(a6)		#insert jump
 		#now update write point
-		addi t1, t1, 16
+		addi t1, t1, 8
 		sd t1, 0(t0)
 		tail search_create_leave
 
