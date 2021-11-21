@@ -563,10 +563,7 @@
 		sd t1, 0(sp)
 		tail NEXT
 
-		CODEHEADER _WHILE, RSHIFT, 0x0
-		tail NEXT
-
-		CODEHEADER WHILE, _WHILE, 0x01
+		CODEHEADER WHILE, RSHIFT, 0x01
 		#Do nothing in immediate mode
 		tail NEXT
 		
