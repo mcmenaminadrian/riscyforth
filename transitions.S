@@ -93,7 +93,6 @@
 		beqz a0, transitions_then_else_jump
 		j transitions_then_search_back_retreat
   transitions_then_else_jump:
-		#addi a1, a1, 1		#jump to after ELSE
 		sd a1, 8(a6)		#insert jump
 		addi a1, a1, -1
 		j transitions_then_search_back_retreat
@@ -102,7 +101,6 @@
 		addi a0, a0, -1
 		j transitions_then_search_back_retreat
   transitions_then_fix_jump:
-	#	addi a1, a1, 1		#jump to after THEN
 		sd a1, 16(a6)		#insert jump
 		#now update write point
 		addi t1, t1, 8
@@ -114,6 +112,7 @@
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)
+		sd zero, 8(t1)
 		li a0, 0
 		li a1, -1
 		la a2, WA_BEGIN
@@ -140,7 +139,7 @@
 		addi a0, a0, -1
 		j transitions_until_retreat
   transitions_until_fix_jump:
-		addi a1, a1, -1
+		addi a1, a1, -2
 		sd a1, 8(t1)
 		addi t1, t1, 16
 		sd t1, 0(t0)
@@ -163,6 +162,7 @@
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)
+		sd zero, 8(t1)
 		li a0, 0
 		li a1, -1
 		la a2, WA_BEGIN
@@ -191,3 +191,14 @@
 		j transitions_repeat_retreat
   transitions_repeat_fix_jump:
 		j transitions_until_fix_jump
+
+  transitions_begin_out:
+		la t0, createwritepoint
+		ld t1, 0(t0)
+		sd t3, 0(t1)
+		sd zero, 8(t1)
+		addi t1, t1, 16
+		sd t1, 0(t0)
+		tail search_create_leave
+		
+		

@@ -173,7 +173,6 @@
 
                 CODEHEADER DUP, ROT2, 0x01
 		ld t0, 0(sp)
-  dup_qdup_join:
 		addi sp, sp, -8
 		sd t0, 0(sp)
                 tail NEXT
