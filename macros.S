@@ -77,23 +77,6 @@ end_\Name:
 \Name: 
 .endm
 
-.macro CODEHEADERZX Name, ExtName, PrevName, flags
-.balign 8
-TIL_\Name:
-        .8byte  \flags
-WA_\Name:
-        .8byte  \Name
-ptr_\PrevName:
-        .8byte TIL_\PrevName
-length_ASCII_\Name:
-        .8byte (end_\Name - beg_\Name)
-beg_\Name:
-        .ascii \ExtName
-end_\Name:
-        .fill (24 - (end_\Name - beg_\Name)), 1, 0xFF
-\Name: 
-.endm
-
 .macro CODEEND Name, flags
 .balign 8
 TIL_\Name:
@@ -167,33 +150,3 @@ end_\Name:
     li t1,  0x0A
     sd t1, 0(t0)
 .endm
-
-.macro TRANSITION_PROLOGUE
-			addi sp, sp, -56
-			sd s0, 0(sp)
-			sd s1, 8(sp)
-			sd s2, 16(sp)
-			sd s3, 24(sp)
-			sd s4, 32(sp)
-			sd s5, 40(sp)
-			sd s6, 48(sp)
-  .endm
-
-  .macro TRANSITION_EPILOGUE
-			ld s6, 48(sp)
-			ld s5, 40(sp)
-			ld s4, 32(sp)
-			ld s3, 24(sp)
-			ld s2, 16(sp)
-			ld s1, 8(sp)
-			ld s0, 0(sp)
-			addi sp, sp, 56
-  .endm
-
-  .macro SETUP_CONDITIONAL_CALL
-			la a0, DECIDESTACKB
-			ld a0, 0(a0)
-			la a2, DECIDESTACKP
-			ld a1, 0(a2)
-  .endm
-
