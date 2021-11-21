@@ -54,7 +54,7 @@
 		addi a0, a0, -1
 		j transitions_else_search_back_retreat
   transitions_else_fix_jump:
-		addi a1, a1, 1		#jump to after ELSE
+		addi a1, a1, 2		#jump to after ELSE
 		sd a1, 8(a6)		#insert jump
 		#now update write point
 		addi t1, t1, 16
@@ -90,11 +90,11 @@
 		addi a0, a0, 1
 		j transitions_then_search_back_retreat
   transitions_then_search_back_else_found:
-		beqz a0, transitions_then_fix_jump
-		addi a0, a0, -1
+		beqz a0, transitions_then_else_jump
 		j transitions_then_search_back_retreat
+  transitions_then_else_jump:
 		addi a1, a1, 1		#jump to after THEN
-		sd a1, 16(a6)		#insert jump
+		sd a1, 8(a6)		#insert jump
 		addi a1, a1, -1
 		j transitions_then_search_back_retreat
   transitions_then_search_back_dec_index:
