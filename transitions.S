@@ -69,13 +69,13 @@
 		sd t3, 0(t1)
 		# now search for the IF
 		li a0, 0		#must be zero to write
-		li a1, 2		#counter - starts at 2 (may be ELSE)
+		li a1, 1		#counter - starts at 2 (may be ELSE)
 		la a2, WA__IF		# looking for this
 		la a7, WA__ELSE		# or this
 		la a3, WA_THEN		#index incrementer
 		li a5, 512		# max track back (4KB)
 		mv a6, t1		# search point
-		addi a6, a6, -16
+		addi a6, a6, -8
   transitions_then_search_back:
 		ld a4, 0(a6)
 		beq a4, a3, transitions_then_search_back_inc_index
