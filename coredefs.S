@@ -563,25 +563,23 @@
 		sd t1, 0(sp)
 		tail NEXT
 
-		CODEHEADER _BEGIN, RSHIFT, 0x0
-		#compiled in BEGIN
+		CODEHEADER _WHILE, RSHIFT, 0x0
 		ld t0, 0(sp)
 		addi sp, sp, 8
-		bnez t0, _begin_false_path
-		addi s7, s7, 8		#skip jump param
+		beqz t0, _while_finished
+		addi s7, s7, 8		#true path
 		tail NEXT
-  _begin_false_path:
+  _while_finished:
+		ld t0, 0(s7)
+		beqz t0, _while_failed
 		li t1, 8
-		ld t2, 0(s7)
-		beqz t2, _begin_failure
-		mul t2, t1, t2
-		add s7, s7, t2
+		mul t0, t0, t1
+		add s7, s7, t0
 		tail NEXT
-  _begin_failure:
+  _while_failed:
 		tail trackback_failed
-		
 
-		CODEHEADER WHILE, _BEGIN, 0x01
+		CODEHEADER WHILE, _WHILE, 0x01
 		#Do nothing in immediate mode
 		tail NEXT
 		

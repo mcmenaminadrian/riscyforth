@@ -139,7 +139,7 @@
 		addi a0, a0, -1
 		j transitions_until_retreat
   transitions_until_fix_jump:
-		addi a1, a1, -2
+#		addi a1, a1, -2
 		sd a1, 8(t1)
 		addi t1, t1, 16
 		sd t1, 0(t0)
@@ -157,6 +157,16 @@
 		la a7, WA__UNTIL	# also an incrementer
 		j transitions_search_back_common
 
+  transitions_while_out:
+		la t0, createwritepoint
+		ld t1, 0(t0)
+		sd t3, 0(t1)
+		sd zero, 8(t1)
+		addi t1, t1, 16
+		sd t1, 0(t0)
+		tail search_create_leave
+
+
   transitions_repeat_out:
 		#look for WA_BEGIN
 		la t0, createwritepoint
@@ -169,6 +179,7 @@
 		la a3, WA__REPEAT
 		la a7, WA__UNTIL
 		la t5, WA__AGAIN
+		la t6, WA__WHILE
 		li a5, 512
 		mv a6, t1
   transitions_repeat_search_back:
@@ -178,10 +189,17 @@
 		beq a4, a2, transitions_repeat_dec
 		beq a4, a7, transitions_repeat_inc
 		beq a4, t5, transitions_repeat_inc
+		beq a4, t6, transitions_repeat_while
   transitions_repeat_retreat:
 		addi a1, a1, -1
 		beq a1, a5, trackback_failed
 		j transitions_repeat_search_back
+  transitions_repeat_while:
+		bnez a0, transitions_repeat_retreat
+		sub t4, zero, a1
+		addi t4, t4, 1
+		sd t4, 8(a6)
+		j transitions_repeat_retreat
   transitions_repeat_inc:
 		addi a0, a0, 1
 		j transitions_repeat_retreat
@@ -191,14 +209,4 @@
 		j transitions_repeat_retreat
   transitions_repeat_fix_jump:
 		j transitions_until_fix_jump
-
-  transitions_begin_out:
-		la t0, createwritepoint
-		ld t1, 0(t0)
-		sd t3, 0(t1)
-		sd zero, 8(t1)
-		addi t1, t1, 16
-		sd t1, 0(t0)
-		tail search_create_leave
-		
 		

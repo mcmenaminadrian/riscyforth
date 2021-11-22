@@ -246,8 +246,13 @@
 		j transitions_else_out
   search_create_test_then:
 		la t0, WA_THEN
-		bne t0, t3, search_create_test_repeat
+		bne t0, t3, search_create_test_while
 		j transitions_then_out
+  search_create_test_while:
+		la t0, WA_WHILE
+		bne t0, t3, search_create_test_repeat
+		la t3, WA__WHILE
+		j transitions_while_out
   search_create_test_repeat:
 		la t0, WA_REPEAT
 		bne t0, t3, search_create_inscribe
