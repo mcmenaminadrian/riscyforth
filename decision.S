@@ -92,19 +92,16 @@
 		addi s7, s7, 16
 		tail NEXT
   _if_handle_false:
-		li t0, 8
 		#FALSE lane
 		ld t2, 0(s7)
 		beqz t2, _if_handle_then
 		#have an else clause
-		mul t3, t2, t0
-		add s7, s7, t3
+		mv s7, t2
 		tail NEXT
   _if_handle_then:
 		ld t2, 8(s7)
 		beqz t2, _if_failure
-		mul t3, t2, t0
-		add s7, s7, t3
+		mv s7, t2
 		tail NEXT
   _if_failure:
 		#no THEN created
@@ -123,9 +120,7 @@
 		#only get here if we were executing TRUE path
 		ld t1, 0(s7)
 		beqz t1, _else_failure
-		li t0, 8
-		mul t2, t0, t1
-		add s7, s7, t2
+		mv s7, t1
 		tail NEXT
   _else_failure:
 		tail trackback_failed_else

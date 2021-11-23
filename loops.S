@@ -118,10 +118,7 @@
 		CODEHEADER _UNTIL, UNTIL, 0x0	#subsitituted in compiled
 		POP t0
 		bnez t0, end_of_until
-		li t1, 8
-		ld t0, 0(s7)
-		mul t0, t0, t1
-		add s7, s7, t0
+		ld s7, 0(s7)
 		tail NEXT
   end_of_until:
 		add s7, s7, 8
@@ -131,20 +128,14 @@
 		tail NEXT			#do nothing in immediatre mode
 
 		CODEHEADER _AGAIN, AGAIN, 0x0
-		li t1, 8
-		ld t0, 0(s7)
-		mul t0, t0, t1
-		add s7, s7, t0			#unconditional return to BEGIN
+		ld s7, 0(s7)
 		tail NEXT
 
 		CODEHEADER REPEAT, _AGAIN, 0x01
 		tail NEXT
 
 		CODEHEADER _REPEAT, REPEAT, 0x0
-		ld t0, 0(s7)			#similar to _UNTIL but jump back is unconditional
-		li t1, 8
-		mul t0, t0, t1
-		add s7, s7, t0
+		ld s7, 0(s7)			#similar to _UNTIL but jump back is unconditional
 		tail NEXT
 
 		CODEHEADER CR, _REPEAT, 0x01

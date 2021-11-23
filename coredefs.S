@@ -573,9 +573,7 @@
 		ld t0, 0(s7)
 		beqz t0, _while_then
   _while_continuation:
-		li t1, 8
-		mul t0, t0, t1
-		add s7, s7, t0
+		mv s7, t0
 		tail NEXT
   _while_then:
 		ld t0, 8(s7)
