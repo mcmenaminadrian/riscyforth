@@ -567,15 +567,19 @@
 		ld t0, 0(sp)
 		addi sp, sp, 8
 		beqz t0, _while_finished
-		addi s7, s7, 8		#true path
+		addi s7, s7, 16		#true path
 		tail NEXT
   _while_finished:
 		ld t0, 0(s7)
-		beqz t0, _while_failed
+		beqz t0, _while_then
+  _while_continuation:
 		li t1, 8
 		mul t0, t0, t1
 		add s7, s7, t0
 		tail NEXT
+  _while_then:
+		ld t0, 8(s7)
+		bnez t0, _while_continuation
   _while_failed:
 		tail trackback_failed
 
