@@ -215,4 +215,44 @@
 		j transitions_repeat_retreat
   transitions_repeat_fix_jump:
 		j transitions_until_fix_jump
-		
+
+  transitions_do_out:
+		la t0, createwritepoint
+		ld t1, 0(t0)
+		sd t3, 0(t1)
+		sd zero, 8(t1) 		#jump if needed
+		addi t1, t1, 16
+		sd t1, 0(t0)
+		tail search_create_leave
+
+  transitions_loop_out:
+		#look for WA__DO and WA__QDO
+		la t0, createwritepoint
+		ld t1, 0(t0)
+		sd s3, 0(t1)		#write word
+		la a2, WA__QDO
+		la a3, WA__DO
+		la a4, WA__LOOP
+		li a1, 0
+		mv a6, t1
+		li a0, -4096
+		add a5, a6, a0
+  transitions_loop_trackback:
+		addi a6, a6, -8
+		beq a6, a5, trackback_failed
+		ld a0, 0(a6)
+		beq a0, a4, transitions_loop_inc
+		beq a0, a3, transitions_loop_dec
+		beq a0, a2, transitions_loop_dec
+		j transitions_loop_trackback
+  transitions_loop_inc:
+		addi a1, a1, 1
+		j transitions_loop_trackback
+  transitions_loop_dec:
+		beqz a1, transitions_loop_exit
+		addi a1, a1, -1
+		j transitions_loop_trackback
+  transitions_loop_exit:
+		addi t2, t1, 8
+		sd t2, 8(a6)
+		tail NEXT

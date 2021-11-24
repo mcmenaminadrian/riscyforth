@@ -188,14 +188,19 @@
 		j search_create_inscribe
   search_loop_replace_do:
 		la t0, WA_DO
-		bne t3, t0, search_loop_replace_loop
+		bne t3, t0, search_loop_replace_qdo
 		la t3, WA__DO
-		j search_create_inscribe
+		j transitions_do_out
+  search_loop_replace_qdo:
+		la t0, WA_QDO
+		bne t3, t0, search_loop_replace_loop
+		la t3, WA__QDO
+		j transitions_do_out
   search_loop_replace_loop:
 		la t0, WA_LOOP
 		bne t3, t0, search_loop_replace_plusloop
 		la t3, WA__LOOP
-		j search_create_inscribe
+		j transitions_loop_out
   search_loop_replace_plusloop:
 		la t0, WA_PLUSLOOP
 		bne t3, t0, search_loop_replace_unloop

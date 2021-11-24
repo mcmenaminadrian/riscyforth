@@ -84,6 +84,7 @@
   _do_loop:
 		addi s10, s10, -24
 		sd s7, 16(s10)
+		addi s7, s7, 8
 		sd t1, 8(s10)
 		sd t0, 0(s10)
 		tail NEXT
@@ -97,16 +98,18 @@
 		ld t1, 8(sp)
 		addi sp, sp, 16
 		beq t0, t1, _qdo_no_loop
-		j _do_loop
-  _qdo_no_loop:
-		
+		addi s10, s10, -24
+		sd s7, 16(s10)
+		addi s7, s7, 8
+		sd t1, 8(s10)
+		sd t0, 0(s10)
+  _qdo_no_loop:	
 		tail NEXT
 
 		CODEHEADERZ QDO, ?DO, _QDO, 0x01
 		tail NEXT
 
-
-		CODEHEADER I, J, 0x01
+		CODEHEADER I, QDO, 0x01
 		tail NEXT
 
 		CODEHEADER LEAVE, I, 0x01
