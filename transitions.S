@@ -229,7 +229,7 @@
 		#look for WA__DO and WA__QDO
 		la t0, createwritepoint
 		ld t1, 0(t0)
-		sd s3, 0(t1)		#write word
+		sd t3, 0(t1)		#write word
 		la a2, WA__QDO
 		la a3, WA__DO
 		la a4, WA__LOOP
@@ -255,4 +255,6 @@
   transitions_loop_exit:
 		addi t2, t1, 8
 		sd t2, 8(a6)
-		tail NEXT
+		addi t1, t1, 8
+		sd t1, 0(t0)
+		tail search_create_leave
