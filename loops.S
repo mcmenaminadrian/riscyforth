@@ -83,8 +83,8 @@
 		addi sp, sp, 16
   _do_loop:
 		addi s10, s10, -24
-		sd s7, 16(s10)
 		addi s7, s7, 8
+		sd s7, 16(s10)
 		sd t1, 8(s10)
 		sd t0, 0(s10)
 		tail NEXT
@@ -99,8 +99,8 @@
 		addi sp, sp, 16
 		beq t0, t1, _qdo_no_loop
 		addi s10, s10, -24
-		sd s7, 16(s10)
 		addi s7, s7, 8
+		sd s7, 16(s10)
 		sd t1, 8(s10)
 		sd t0, 0(s10)
   _qdo_no_loop:	
