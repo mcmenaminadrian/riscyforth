@@ -205,7 +205,7 @@
 		la t0, WA_PLUSLOOP
 		bne t3, t0, search_loop_replace_unloop
 		la t3, WA__PLUSLOOP
-		j search_create_inscribe
+		j transitions_loop_out
   search_loop_replace_unloop:
 		la t0, WA_UNLOOP
 		bne t3, t0, search_loop_replace_leave

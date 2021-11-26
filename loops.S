@@ -25,10 +25,13 @@
 		la t0, WA__LOOP
 		la t1, WA__PLUSLOOP
 		la t3, WA__DO
+		la t6, WA__QDO
 		mv t4, zero
   leave_load_secondary:
 		ld t2, 0(s7)
+		beq t2, t6, leave_inc
 		bne t2, t3, leave_test
+  leave_inc:
 		addi t4, t4, 1			#account for nested loops
 		j leave_move_on
   leave_test:
@@ -103,7 +106,9 @@
 		sd s7, 16(s10)
 		sd t1, 8(s10)
 		sd t0, 0(s10)
+		tail NEXT
   _qdo_no_loop:	
+		ld s7, 0(s7)
 		tail NEXT
 
 		CODEHEADERZ QDO, ?DO, _QDO, 0x01

@@ -233,6 +233,7 @@
 		la a2, WA__QDO
 		la a3, WA__DO
 		la a4, WA__LOOP
+		la a7, WA__PLUSLOOP
 		li a1, 0
 		mv a6, t1
 		li a0, -4096
@@ -242,6 +243,7 @@
 		beq a6, a5, trackback_failed
 		ld a0, 0(a6)
 		beq a0, a4, transitions_loop_inc
+		beq a0, a7, transitions_loop_inc
 		beq a0, a3, transitions_loop_dec
 		beq a0, a2, transitions_loop_dec
 		j transitions_loop_trackback
