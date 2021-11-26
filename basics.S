@@ -445,7 +445,11 @@
                 addi s9, s9, STACKOFFSET
                 tail NEXT
 
-		CODEHEADER _DOTQ, SEMI, 0x00
+		CODEHEADER SQ, SEMI, 0x01
+
+		tail NEXT
+
+		CODEHEADER _DOTQ, SQ, 0x00
 		#compiled DOTQ
 		ld a0, 0(s7)
 		mv a1, s7
