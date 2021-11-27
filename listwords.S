@@ -68,6 +68,7 @@
 		
 		CODEHEADERZ DOTS, .S, TIB, 0x01
 		# display contents of stack (tools word)
+		# ( -- )
 		# from DEPTH
 		la t0, STACKTOP
                 ld t1, 0(t0)
@@ -75,7 +76,7 @@
                 srai t3, t2, 3
                 #t3 now has the depth of the stack
 		#display as number
-		beqz t3, dots_done
+		blez t3, dots_done
 		#copy the stack
 		mv t0, t3
 		mv t1, sp
@@ -174,7 +175,6 @@
 		WRITECHAR 0x0A
   dots_done:
 		tail NEXT
-
 
 		CODEHEADER DISPLAY, DOTS, 0x01
 		la t0, SCRATCH_PAD
