@@ -446,7 +446,8 @@
                 tail NEXT
 
 		CODEHEADER SQ, SEMI, 0x01
-
+		/* Expands to S"
+		   (-- c-addr u) */
 		tail NEXT
 
 		CODEHEADER _DOTQ, SQ, 0x00

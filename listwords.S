@@ -66,7 +66,117 @@
 		PUSH t0
 		tail NEXT
 		
-		CODEHEADER DISPLAY, TIB, 0x01
+		CODEHEADERZ DOTS, .S, TIB, 0x01
+		# display contents of stack (tools word)
+		# from DEPTH
+		la t0, STACKTOP
+                ld t1, 0(t0)
+                sub t2, t1, sp
+                srai t3, t2, 3
+                #t3 now has the depth of the stack
+		#display as number
+		beqz t3, dots_done
+		#copy the stack
+		mv t0, t3
+		mv t1, sp
+  dots_copying_stack:
+		addi sp, sp, -8
+		ld t2, 0(t1)
+		sd t2, 0(sp)
+		addi t0, t0, -1
+		beqz t0, dots_display
+		addi t1, t1, 8
+		j dots_copying_stack
+  dots_display:
+		addi s10, s10, -8
+		sd t3, 0(s10)
+  dots_output:
+		ld t0, CURRENT_BASE
+                POP a2                            #get item on stack
+                la a0, SCRATCH_PAD                #sprintf uses this
+                addi t1, zero, 16
+                beq t0, t1, dots_ps_format_hex
+                addi t1, zero, 8
+                beq t0, t1, dots_ps_format_octal
+                addi t1, zero, 2
+                beq t0, t1, dots_ps_format_binary
+                la a1, decimalout
+                j dots_dot_output
+  dots_ps_format_hex:
+                la a1, hexout
+                j dots_dot_output
+  dots_ps_format_octal:
+                la a1, octalout
+                j dots_dot_output
+  dots_dot_output:
+                addi a3, zero, 3
+                call sprintf
+                la t0, SCRATCH_PAD
+                mv t1, a0
+                WRITESTRINGR t0, t1
+                j dots_loop_output
+  dots_ps_format_binary:                             #binary output not supported by sprintf, so do it ourselves
+                li t0, 1
+                li t1, 63
+  dots_dot_test_against_shift:
+                sll t3, t0, t1
+                and a0, a2, t3
+                bne a0, zero, dots_dot_start_binary  #past any trailing zeros - so start output
+                sub t1, t1, t0
+                beq t1, zero, dots_dot_last_and_out
+                j dots_dot_test_against_shift
+  dots_dot_start_binary:
+		addi sp, sp, -32
+		sd a2, 24(sp)
+		sd t0, 16(sp)
+		sd t1, 8(sp)
+		sd t3, 0(sp)
+                WRITECHAR 0x31                #output 1
+  dots_dot_start_pop:
+		ld t3, 0(sp)
+		ld t1, 8(sp)
+		ld t0, 16(sp)
+		ld a2, 24(sp)
+		addi sp, sp, 32
+  dots_dot_shift_and_test:
+                sub t1, t1, t0
+                beq t1, zero, dots_dot_last_and_out
+                sll t3, t0, t1
+                and a0, a2, t3
+                bne a0, zero, dots_dot_start_binary
+		addi sp, sp, -32
+		sd a2, 24(sp)
+		sd t0, 16(sp)
+		sd t1, 8(sp)
+		sd t3, 0(sp)
+                WRITECHAR 0x030		#output 0
+                j dots_dot_start_pop
+  dots_dot_last_and_out:
+                and a0, a2, t0
+                beq a0, zero, dots_dot_zero_and_out
+                WRITECHAR 0x31
+                j dots_dot_output_b_and_space
+  dots_dot_zero_and_out:
+                WRITECHAR 0x30
+  dots_dot_output_b_and_space:
+                WRITECHAR 0x62            #b
+		WRITECHAR 0x20
+  dots_loop_output:
+		ld a7, 0(s10)
+		addi a7, a7, -1
+		beqz a7, dots_cr_out
+		sd a7, 0(s10)
+		WRITECHAR 0x2C
+		WRITECHAR 0x20
+		j dots_output
+  dots_cr_out:
+		addi s10, s10, 8
+		WRITECHAR 0x0A
+  dots_done:
+		tail NEXT
+
+
+		CODEHEADER DISPLAY, DOTS, 0x01
 		la t0, SCRATCH_PAD
 		mv t1, zero
 		mv t3, sp

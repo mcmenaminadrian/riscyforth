@@ -146,6 +146,9 @@ CYAN . cr . cr . cr . cr . cr . cr . cr . cr . cr . cr RESET DECIMAL ;
 ." Verifying DOT " 5 spaces 0 1 2 3 4 5
 ." ... should see countdown from 5 to 0: " CYAN . . . . . . RESET CR ;
 
+: VERIFY.S
+." Verifying .S" 5 SPACES CYAN 48 49 50 51 52 53 54 55 56 57 10 .S BLUE ."  .S verified" RESET CR ;
+
 : TESTADD
 ." Testing + " 5 SPACES 900 -899 +
 BLUE IF ." + passed " ELSE RED ." + FAILED " THEN RESET CR ;
@@ -628,7 +631,7 @@ CYAN ." ***Any error message above can almost certainly be ignored*** " RESET CR
 TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY TESTEXIT
 ." Verifying ENCSQ with this output " cr
 ." Verifying COMMENT " cr \ ." COMMENT verification FAILED " 
-VERIFYDOT
+VERIFYDOT VERIFY.S
 ." Basics tests and verifications over " cr
 ;
 
