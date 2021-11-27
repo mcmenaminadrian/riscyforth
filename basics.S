@@ -671,6 +671,7 @@
 		# 0=  --> ZEROEQUAL
 		# >=  --> GTEQ
 		# <=  --> LTEQ
+		# S"  --> SQ
 		POP a0				#unexpanded token address
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
@@ -689,6 +690,8 @@
 		andi t1, t1, 0x5F		#character based tests all in here
 		li t2, 0x43			#C
 		beq t1, t2, length_two_beginC
+		li t2, 0x53
+		beq t1, t2, length_two_beginS
 		POP t1
 		
 		
@@ -727,13 +730,20 @@
 		lb t1, 1(a0)
 		li t2, 0x2C			#,
 		bne t1, t2, length_two_c_done
-		sb t1, 0(a2)
 		addi sp, sp, 8
 		call fix_up_ccomma
 		j fix_up_done
   length_two_c_done:
 		POP zero			#clear stack
 		j fix_up_length_two_finished
+
+  length_two_beginS:
+		lb t1, 1(a0)
+		li t2, 0x22			#"
+		bne t1, t2, length_two_c_done
+		addi sp, sp, 8
+		call fix_up_squote
+		j fix_up_done
 
 
   fix_up_input:
@@ -963,6 +973,14 @@
 		li t3, 0x41
 		sb t3, 5(a2)
 		addi a2, a2, 5
+		ret
+
+  fix_up_squote:
+		li t3, 0x53
+		sb t3, 0(a2)
+		li t3, 0x51
+		sb t3, 1(a2)
+		addi a2, a2, 1
 		ret
 		
 .include "integer.S"

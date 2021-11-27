@@ -898,8 +898,6 @@
 		mv t2, a5
 		ret
 
-
-
   tick_fix_up_length_two:
 		mv a0, t0
 		la a2, EXPANDED_BUFFER 		#store expanded token
@@ -919,6 +917,8 @@
 		andi t1, t1, 0x5F		#character based tests all in here
 		li t2, 0x43
 		beq t1, t2, tick_length_two_beginC
+		li t2, 0x53
+		beq t1, t2, tick_length_two_beginS
 		POP t1
   tix_up_length_two_finished:
 		j tix_up_finished
@@ -964,6 +964,17 @@
   tick_length_two_c_done:
 		POP zero			#clear stack
 		j tix_up_length_two_finished
+
+
+  tick_length_two_beginS:
+		sb t1, 0(a2)
+		addi sp, sp, 8
+		lbu t1, 1(a0)
+		li t2, 0x22			#"
+		bne t1, t2, tick_length_two_c_done
+		call fix_up_squote
+		j tix_up_done
+
 
   tick_fix_up_length_six:
 		#expand the following
