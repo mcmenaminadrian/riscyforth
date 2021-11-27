@@ -447,7 +447,55 @@
 
 		CODEHEADER SQ, SEMI, 0x01
 		/* Expands to S"
-		   (-- c-addr u) */
+		   (-- c-addr u)
+		In immediate mode this string
+		not guarenteed to last */
+		la t5, INPUT_END
+		ld t5, 0(t5)		#absolute end of string
+		li t3, 0
+		la t6, INPUT_START
+		ld t4, 0(t6)
+		li t1, 0x22		#"
+  sq_check_next:
+		lb t0, 0(t4)
+		beq t0, t1, sq_prep_imm_syscall
+		addi t3, t3, 1
+		addi t4, t4, 1
+		blt t4, t5, sq_check_next
+		la t0, String_err
+		li t1, 18		#length of error message
+		WRITESTRINGR t0, t1
+		tail NEXT
+  sq_prep_imm_syscall:
+		ld t4, 0(t6)
+		addi t2, t3, 1
+		add t1, t4, t2
+		sd t1, 0(t6)
+		#now copy to memory area - temporary copy only
+		la t0, dataspaceptr
+		ld t1, 0(t0)
+		li t2, 7
+		and t0, t1, t2
+		beqz t0, sq_write_out
+		li t2, 8
+		sub t2, t2, t0
+		add t1, t1, t2
+  sq_write_out:
+		addi t3, t3, -1
+		sd t3, 0(t1)
+		addi t1, t1, 8
+		addi sp, sp, -16
+		sd t3, 0(sp)
+		sd t1, 8(sp)
+  sq_write_mem:
+		beqz t3, sq_done
+		lb t5, 0(t4)
+		sb t5, 0(t1)
+		addi t4, t4, 1
+		addi t1, t1, 1
+		addi t3, t3, -1
+		j sq_write_mem
+  sq_done:
 		tail NEXT
 
 		CODEHEADER _DOTQ, SQ, 0x00
