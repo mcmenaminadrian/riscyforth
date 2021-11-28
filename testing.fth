@@ -276,6 +276,13 @@ BLUE IF ." VARIABLE, @ and ! passed " ELSE RED ." VARIABLE, @ and ! FAILED " THE
 ." Verifying GETLINE, TYPE and TIB " CR YELLOW BRIGHT ." Please enter some text to be echoed back. " RESET CR
 GETLINE CR ." Echoing... " CYAN TIB SWAP TYPE RESET CR ;
 
+
+create acceptpad 80 allot
+: TESTACCEPT
+." Verifying ACCEPT" 5 SPACES ." Please type some text..." 
+ACCEPTPAD 3 ACCEPT CR ." You should only see first 3 characters typed:"
+CYAN ACCEPTPAD 10 TYPE BLUE ." : ACCEPT verified" RESET CR ;
+
 : TESTCHAR
 ." Testing CHAR" 5 spaces
 char Z 90 = IF char z 122 = IF BLUE ." CHAR passed " else RED ." CHAR FAILED " then RESET
@@ -594,7 +601,7 @@ testrstackbasics
 : LISTWORDSTESTS
 ." Running 'listwords' group of tests " CR
 VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE TESTTYPE
-VERIFYSOURCE TESTCONSTANTVALUE
+VERIFYSOURCE TESTCONSTANTVALUE TESTACCEPT
 ." 'listwords' group of tests complete " CR ;
 
 \ Test integer
@@ -630,9 +637,9 @@ VERIFYSEARCH OK
 CYAN ." ***Any error message above can almost certainly be ignored*** " RESET CR
 TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY TESTEXIT
 BLUE ." Verifying ENCSQ with this output " RESET cr
-S" Verifying SQ" 12 = IF BLUE ." Verified SQ" ELSE RED ." SQ FAILED" THEN RESET CR
+S" Verifying SQ" 2DUP 5 SPACES TYPE 12 = IF BLUE ." Verified SQ" ELSE RED ." SQ FAILED" THEN RESET CR
 BLUE ." Verifying COMMENT " RESET cr \ ." COMMENT verification FAILED " 
-VERIFYDOT VERIFY.S
+VERIFYDOT VERIFY.S 
 ." Basics tests and verifications over " cr
 ;
 

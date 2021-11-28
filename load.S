@@ -1,6 +1,21 @@
 	#Load files
 
-	CODEHEADER LOAD, ELSE, 0x01
+	CODEHEADER ACCEPT, ELSE, 0x01
+	#( addr m -- n ) 
+	#Fetch up to m characters
+	mv a0, zero
+	ld a1, 8(sp)
+	ld a2, 0(sp)
+	li a7, 63
+	ecall
+	sd a0, 8(sp)
+	addi sp, sp, 8
+	la a0, INPUT_BUFFER		#ensure no tokenization
+	sd a0, INPUT_START, t0
+	sd a0, INPUT_END, t0
+	tail NEXT
+
+	CODEHEADER INCLUDE, ACCEPT, 0x01
 	#Load a file line by line, executing each line as we go
 	addi sp, sp, -72
 	sd s0, 0(sp)

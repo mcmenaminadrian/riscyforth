@@ -477,10 +477,11 @@
 		li t3, 0
 		la t6, INPUT_START
 		ld t4, 0(t6)
+		addi t4, t4, 1
 		li t1, 0x22		#"
   sq_check_next:
 		lb t0, 0(t4)
-		beq t0, t1, sq_prep_imm_syscall
+		beq t0, t1, sq_prep_memory_area
 		addi t3, t3, 1
 		addi t4, t4, 1
 		blt t4, t5, sq_check_next
@@ -488,11 +489,12 @@
 		li t1, 18		#length of error message
 		WRITESTRINGR t0, t1
 		tail NEXT
-  sq_prep_imm_syscall:
+  sq_prep_memory_area:
 		ld t4, 0(t6)
-		addi t2, t3, 1
+		addi t4, t4, 1
+		addi t2, t3, 1		#calculate end of string
 		add t1, t4, t2
-		sd t1, 0(t6)
+		sd t1, 0(t6)		#update input read point
 		#now copy to memory area - temporary copy only
 		la t0, dataspaceptr
 		ld t1, 0(t0)
@@ -503,7 +505,6 @@
 		sub t2, t2, t0
 		add t1, t1, t2
   sq_write_out:
-		addi t3, t3, -1
 		sd t3, 0(t1)
 		addi t1, t1, 8
 		addi sp, sp, -16
