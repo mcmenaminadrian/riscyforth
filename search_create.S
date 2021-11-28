@@ -144,11 +144,17 @@
   search_encsq:
 		#test for DOTQ (ie string printing)
 		la t0, WA_DOTQ
-		bne t3, t0, search_tick
+		bne t3, t0, search_sq
 		#substitute WA__DOTQ
 		la t3, WA__DOTQ
 		#jump to code that will count string and embed length and literal
 		tail embed_encsq
+  search_sq:
+		la t0, WA_SQ
+		bne t3, t0, search_tick
+		#put in WA__SQ
+		la t3, WA__SQ
+		tail embed_sq
   search_tick:
 		la t0, WA_TICK
 		bne t3, t0, search_is
@@ -690,7 +696,7 @@ func_test_octal:
 		la s7, outer_loop_tokenize
 		fence.i
 		tail NEXT
-
+  embed_sq:
   embed_encsq:
 		#embed string - after we count how long it is
 		la t0, createwritepoint

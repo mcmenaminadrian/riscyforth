@@ -629,8 +629,9 @@ VERIFYTOKENIZE_IMM
 VERIFYSEARCH OK
 CYAN ." ***Any error message above can almost certainly be ignored*** " RESET CR
 TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY TESTEXIT
-." Verifying ENCSQ with this output " cr
-." Verifying COMMENT " cr \ ." COMMENT verification FAILED " 
+BLUE ." Verifying ENCSQ with this output " RESET cr
+S" Verifying SQ" 12 = IF BLUE ." Verified SQ" ELSE RED ." SQ FAILED" THEN RESET CR
+BLUE ." Verifying COMMENT " RESET cr \ ." COMMENT verification FAILED " 
 VERIFYDOT VERIFY.S
 ." Basics tests and verifications over " cr
 ;

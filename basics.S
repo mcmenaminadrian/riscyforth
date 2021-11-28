@@ -445,7 +445,29 @@
                 addi s9, s9, STACKOFFSET
                 tail NEXT
 
-		CODEHEADER SQ, SEMI, 0x01
+		CODEHEADER _SQ, SEMI, 0x0
+		/* Expands to/from S"
+		   (-- c-addr u)
+		   Compiled version - permanent strings
+		*/
+		addi sp, sp, -16
+		ld t1, 0(s7)
+		sd t1, 0(sp)
+		addi s7, s7, 8
+		sd s7, 8(sp)
+		#now move s7 to next aligned address
+		add t3, s7, t1
+		li t4, 7
+		and t5, t3, t4
+		beqz t5, _sq_out
+		li t4, 8
+		sub t6, t4, t5
+		add t3, t3, t6
+  _sq_out:
+		mv s7, t3
+		tail NEXT
+
+		CODEHEADER SQ, _SQ, 0x01
 		/* Expands to S"
 		   (-- c-addr u)
 		In immediate mode this string
