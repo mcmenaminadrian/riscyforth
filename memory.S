@@ -37,7 +37,12 @@
 		sb t0, 0(t2)
 		tail NEXT
 
-		CODEHEADER NOP, CCOMMA, 0x0
+		CODEHEADER CHARS, CCOMMA, 0x01
+		#(n -- n)
+		#chars are 1 wide
+		tail NEXT
+
+		CODEHEADER NOP, CHARS, 0x0
 		#do nothing
 		tail NEXT
 
