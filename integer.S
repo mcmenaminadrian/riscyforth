@@ -155,6 +155,7 @@
 		ld a0, 8(t0)			#a0 has count in PAD 
 		ld t1, 0(sp)			#t1 has number
 		la t2, CURRENT_BASE		#t2 has BASE
+		ld t2, 0(t2)
 		div t3, t1, t2			
 		mul t4, t2, t3			
 		sub t5, t1, t4			#t5 has remainder
@@ -167,7 +168,6 @@
 		addi t5, t5, 0x37
   num_pass_to_pad:
 		la a1, SCRATCH_PAD
-		ld a1, 0(a1)
 		add a2, a1, a0
 		sb t5, 0(a2)			#store char
 		addi a0, a0, 1
@@ -185,6 +185,7 @@
   nums_keep_going:
 		ld t1, 0(sp)			#t1 has number
 		la t2, CURRENT_BASE		#t2 has BASE
+		ld t2, 0(t2)
 		div t3, t1, t2			
 		mul t4, t2, t3			
 		sub t5, t1, t4			#t5 has remainder
@@ -197,7 +198,6 @@
 		addi t5, t5, 0x37
   nums_pass_to_pad:
 		la a1, SCRATCH_PAD
-		ld a1, 0(a1)
 		add a2, a1, a0
 		sb t5, 0(a2)			#store char
 		addi a0, a0, 1
@@ -217,7 +217,6 @@
 		ble a0, t2, numend_end
 		addi a0, a0, -1
 		la a1, SCRATCH_PAD
-		ld a1, 0(a1)
 		add a0, a0, a1
   numend_keep_on:
 		lbu t4, 0(a0)
@@ -231,18 +230,17 @@
   numend_end:
 		#now write the whole thing out again
 		#prefixing with length
-		la t3, SCRATCH_PAD
-		ld t4, 0(t3)
+		la t4, SCRATCH_PAD
 		mv t2, a3
   numend_end_final_write:
 		add t5, t4, t2
 		lbu t6, 0(t5)
-		sb t6, 1(t5)
-		add t2, t2, -1
+		sb t6, 8(t5)
 		beqz t2, numend_out
+		add t2, t2, -1
 		j numend_end_final_write
-		sd a3, 0(t3)
   numend_out:
+		sd a3, 0(t4)
 		sd zero, 0(t0)
 		sd zero, 8(t0)
 		tail NEXT 
