@@ -138,7 +138,116 @@
 		sd t0, 0(sp)
                 tail NEXT
 
-                CODEHEADER MIN, ABS, 0x01
+		CODEHEADERZ NUMSTART, \<\#, ABS, 0x01
+		#(--)
+		#start pictured numeric output conversion
+		li t0, 1
+		la t1, PICTUREDN
+		sd t0, 0(t1)
+		sd zero, 8(t1)		#count to zero
+		tail NEXT
+
+		CODEHEADERZ NUM, \#, NUMSTART, 0x01
+		#( u -- u )
+		la t0, PICTUREDN		#t0 has address of PICTUREDN var
+		ld t1, 0(t0)			
+		beqz t1, num_done		#we are not in pictured number mode
+		ld a0, 8(t0)			#a0 has count in PAD 
+		ld t1, 0(sp)			#t1 has number
+		la t2, CURRENT_BASE		#t2 has BASE
+		div t3, t1, t2			
+		mul t4, t2, t3			
+		sub t5, t1, t4			#t5 has remainder
+		li t6, 10
+		bge t5, t6, num_use_letters
+		#remainder is <10
+		addi t5, t5, 0x30
+		j num_pass_to_pad
+  num_use_letters:
+		addi t5, t5, 0x37
+  num_pass_to_pad:
+		la a1, SCRATCH_PAD
+		ld a1, 0(a1)
+		add a2, a1, a0
+		sb t5, 0(a2)			#store char
+		addi a0, a0, 1
+		sd a0, 8(t0)			#increment PAD writing point
+		sd t3, 0(sp)			#pass what's left back to the stack
+  num_done:
+		tail NEXT
+
+		CODEHEADERZ NUMS, \#S, NUM, 0x01
+		#( u -- 0)
+		la t0, PICTUREDN		#t0 has address of PICTUREDN var
+		ld t1, 0(t0)			
+		beqz t1, num_done		#we are not in pictured number mode
+		ld a0, 8(t0)			#a0 has count in PAD 
+  nums_keep_going:
+		ld t1, 0(sp)			#t1 has number
+		la t2, CURRENT_BASE		#t2 has BASE
+		div t3, t1, t2			
+		mul t4, t2, t3			
+		sub t5, t1, t4			#t5 has remainder
+		li t6, 10
+		bge t5, t6, nums_use_letters
+		#remainder is <10
+		addi t5, t5, 0x30
+		j nums_pass_to_pad
+  nums_use_letters:
+		addi t5, t5, 0x37
+  nums_pass_to_pad:
+		la a1, SCRATCH_PAD
+		ld a1, 0(a1)
+		add a2, a1, a0
+		sb t5, 0(a2)			#store char
+		addi a0, a0, 1
+		sd a0, 8(t0)			#increment PAD writing point
+		sd t3, 0(sp)			#pass what's left back to the stack
+		beqz t3, num_done
+		j nums_keep_going
+
+		CODEHEADERZ NUMEND, \#\>, NUMS, 0x01
+		#now reverse
+		la t0, PICTUREDN
+		ld t1, 0(t0)
+		beqz t1, num_done
+		ld a0, 8(t0)
+		li t2, 1
+		mv a3, a0
+		ble a0, t2, numend_end
+		addi a0, a0, -1
+		la a1, SCRATCH_PAD
+		ld a1, 0(a1)
+		add a0, a0, a1
+  numend_keep_on:
+		lbu t4, 0(a0)
+		lbu t5, 0(a1)
+		sb t4, 0(a1)
+		sb t5, 0(a0)
+		addi a0, a0, -1
+		addi a1, a1, 1
+		ble a0, a1, numend_end
+		j numend_keep_on
+  numend_end:
+		#now write the whole thing out again
+		#prefixing with length
+		la t3, SCRATCH_PAD
+		ld t4, 0(t3)
+		mv t2, a3
+  numend_end_final_write:
+		add t5, t4, t2
+		lbu t6, 0(t5)
+		sb t6, 1(t5)
+		add t2, t2, -1
+		beqz t2, numend_out
+		j numend_end_final_write
+		sd a3, 0(t3)
+  numend_out:
+		sd zero, 0(t0)
+		sd zero, 8(t0)
+		tail NEXT 
+
+                CODEHEADER MIN, NUMEND, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 8

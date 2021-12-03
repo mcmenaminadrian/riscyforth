@@ -66,13 +66,14 @@
    .common dataspaceptr, 0x08, 0x08
    .common INDOES, 0x08, 0x08
    .common MULTILINE, 0x08, 0x08
+   .common PICTUREDN, 0x08, 0x08
 
    .data
-   welcome_msg:   	.asciz  "WELCOME TO RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
+   welcome_msg:   	.asciz "RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
    riscy_forth0:  	.asciz "*******************************************************************************"
-   riscy_forth1:  	.asciz "RISCYFORTH is a threaded interpreted language closely based on FORTH."
-   riscy_forth2:  	.asciz "Currently you are running in IMMEDIATE mode and anything you type will"
-   riscy_forth3:  	.asciz "be executed as each line is entered."
+   riscy_forth1:  	.asciz "RISCYFORTH is a FORTH for RISC-V devices."
+   riscy_forth2:  	.asciz "To see supported words type 'WORDS'."
+   riscy_forth3:	.asciz "==============================================================================="
    riscy_forth4:  	.asciz "RISCYFORTH is licenced under version 2 of the GNU General Public Licence."
    riscy_forth5:  	.asciz "See https://github.com/mcmenaminadrian/riscyforth.git"
    riscy_forthQ:  	.asciz "Exiting RISCYFORTH."
@@ -100,12 +101,6 @@
   main:
                 la s10, STACK + 0x7FFF8
                 la s9, CALLSTACK + 0x7FFF8
-                la a0, riscy_forth0
-                call puts
-                la a0, riscy_forth0
-                call puts
-                la a0, riscy_forth0
-                call puts
                 la a0, riscy_forth0
                 call puts
                 la a0, welcome_msg
