@@ -138,7 +138,54 @@
 		sd t0, 0(sp)
                 tail NEXT
 
-		CODEHEADERZ NUMSTART, \<\#, ABS, 0x01
+		CODEHEADERZ TONUMBER, >NUMBER, ABS, 0x01
+		#(ud c-addr u -- ud c-addr u)
+		ld t0, 0(sp) 			#length of string
+		ld t1, 8(sp)			#address of string
+		ld t2, 16(sp)			#number to add to
+		mv t6, zero
+		la t3, CURRENT_BASE
+		ld t3, 0(t3)			#base
+		#establish the range of characters
+		li t4, 0x0A
+		li a0, 0x30
+		bgt t3, t4, tonumber_letter_base
+		add a1, a0, t3
+		j tonumber_process_start
+  tonumber_letter_base:
+		addi a1, t3, 0x36
+  tonumber_process_start:
+		li a2, 0x40			#impermissibles
+		li a3, 0x3A
+		mv a4, zero			#count of converted characters
+  tonumber_read:
+		lbu t5, 0(t1)
+		blt t5, a0, tonumber_done	#less than 0
+		bgt t5, a1, tonumber_done	#greater than max
+		blt t5, a3, tonumber_continue
+		ble t5, a2, tonumber_done	#impermissible
+  tonumber_continue:
+		mul t6, t6, t3
+		blt t5, a3, tonumber_digit
+		addi t5, t5, -55
+		j tonumber_sum
+  tonumber_digit:
+		add t5, t5, -48
+  tonumber_sum:
+		add t6, t6, t5
+		addi a4, a4, 1
+		addi t1, t1, 1
+		addi t0, t0, -1
+		beqz t0, tonumber_done
+		j tonumber_read
+  tonumber_done:
+		add t6, t6, t2
+		sd t6, 16(sp)
+		sd t1, 8(sp)
+		sd t0, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ NUMSTART, \<\#, TONUMBER, 0x01
 		#(--)
 		#start pictured numeric output conversion
 		li t0, 1
