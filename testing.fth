@@ -577,6 +577,10 @@ CYAN S" -£125.45" type ."  = " -12545 <# dup # # 46 hold #s 163 hold 194 hold d
 CYAN 324 DUP . ." in binary is..." binary <# #s #> type decimal RESET CR
 BLUE ." Numbered pictured output verified." RESET CR ; 
 
+: TEST>NUMBER
+." Testing >NUMBER" 5 SPACES
+10 S" 1005" >NUMBER DROP DROP 1015 = IF BLUE ." >NUMBER passed" ELSE RED ." >NUMBER FAILED" THEN RESET CR ;
+
 \ Test groupings
 
 \ Test facility
@@ -618,7 +622,7 @@ VERIFYSOURCE TESTCONSTANTVALUE TESTACCEPT
 ." Running integer tests " cr
 TESTADD TESTMUL TESTDIV TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST0<> TEST0>
 TESTminus2 testplus2 testunderplus testminmax testabs testnegate testshifts
-TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES
+TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES TEST>NUMBER
 ." Integer tests complete " CR
 ;
 
