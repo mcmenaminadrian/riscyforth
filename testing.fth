@@ -569,6 +569,14 @@ RESET ." And back to normal..." CR ;
 1000 MS
 BLUE ." Verification of MS complete" RESET CR ;
 
+\ testing pictured output
+: VERIFYPICTURED
+." Verifying pictured output" CR
+CYAN S" -£125.45" type ."  = " -12545 <# dup # # 46 hold #s 163 hold 194 hold drop sign 0 #> type RESET CR
+." And verifying base conversion..." CR
+CYAN 324 DUP . ." in binary is..." binary <# #s #> type decimal RESET CR
+BLUE ." Numbered pictured output verified." RESET CR ; 
+
 \ Test groupings
 
 \ Test facility
@@ -660,6 +668,8 @@ ENTERCONTINUE
 BASICSTESTS
 ENTERCONTINUE
 INTEGERTESTS
+ENTERCONTINUE
+VERIFYPICTURED
 ENTERCONTINUE
 LISTWORDSTESTS
 ENTERCONTINUE

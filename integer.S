@@ -154,6 +154,9 @@
 		beqz t1, num_done		#we are not in pictured number mode
 		ld a0, 8(t0)			#a0 has count in PAD 
 		ld t1, 0(sp)			#t1 has number
+		bgez t1, num_positive
+		neg t1, t1			#have to work with positive numbers
+  num_positive:
 		la t2, CURRENT_BASE		#t2 has BASE
 		ld t2, 0(t2)
 		div t3, t1, t2			
@@ -184,6 +187,9 @@
 		ld a0, 8(t0)			#a0 has count in PAD 
   nums_keep_going:
 		ld t1, 0(sp)			#t1 has number
+		bgez t1, nums_positive
+		neg t1, t1			#have to work with positive numbers
+  nums_positive:
 		la t2, CURRENT_BASE		#t2 has BASE
 		ld t2, 0(t2)
 		div t3, t1, t2			
@@ -207,7 +213,9 @@
 		j nums_keep_going
 
 		CODEHEADERZ NUMEND, \#\>, NUMS, 0x01
-		#now reverse
+		#( xd -- c-addr u )
+		#reverse stored string
+		POP zero			#drop xd as per standard
 		la t0, PICTUREDN
 		ld t1, 0(t0)
 		beqz t1, num_done
@@ -228,24 +236,49 @@
 		ble a0, a1, numend_end
 		j numend_keep_on
   numend_end:
-		#now write the whole thing out again
-		#prefixing with length
+		#write address and length to the stack
+		addi sp, sp, -16
 		la t4, SCRATCH_PAD
-		mv t2, a3
-  numend_end_final_write:
-		add t5, t4, t2
-		lbu t6, 0(t5)
-		sb t6, 8(t5)
-		beqz t2, numend_out
-		add t2, t2, -1
-		j numend_end_final_write
-  numend_out:
-		sd a3, 0(t4)
+		sd t4, 8(sp)
+		sd a3, 0(sp)
 		sd zero, 0(t0)
 		sd zero, 8(t0)
-		tail NEXT 
+		tail NEXT
 
-                CODEHEADER MIN, NUMEND, 0x01
+		CODEHEADER SIGN, NUMEND, 0x01
+		#(n --)
+		POP t5
+		la t0, PICTUREDN
+		ld t1, 0(t0)
+		beqz t1, num_done
+		bltz t5, sign_neg
+		tail NEXT
+  sign_neg:
+		ld a0, 8(t0)
+		li t3, 0x2D		#-
+		la t4, SCRATCH_PAD
+		add t4, t4, a0
+		sb t3, 0(t4)
+		addi a0, a0, 1
+		sd a0, 8(t0)
+		tail NEXT
+		
+
+		CODEHEADER HOLD, SIGN, 0x01
+		#(char --)
+		POP t5
+		la t0, PICTUREDN
+		ld t1, 0(t0)
+		beqz t1, num_done
+		ld a0, 8(t0)
+		la t2, SCRATCH_PAD
+		add t3, t2, a0
+		sb t5, 0(t3)
+		addi a0, a0, 1
+		sd a0, 8(t0)
+		tail NEXT
+
+                CODEHEADER MIN, HOLD, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 8

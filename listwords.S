@@ -54,10 +54,12 @@
 		CODEHEADER TYPE, LITERALADDR, 0x01
 		ld t0, 0(sp)
 		bnez t0, type_continue
+		addi sp, sp, 16
 		tail NEXT
   type_continue:
 		ld t1, 8(sp)
 		WRITESTRINGR t1, t0
+		addi sp, sp, 16
 		tail NEXT
 
 		CODEHEADER TIB, TYPE, 0x01

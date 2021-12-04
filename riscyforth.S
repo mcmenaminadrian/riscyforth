@@ -27,46 +27,46 @@
 
 
    .bss
-   .common INPUT_BUFFER, BUFFERLEN, 8
-   .common EXPANDED_BUFFER, BUFFERLEN, 8
-   .common SCRATCH_PAD, SYSTEMAREA, 8
-   .common NEWWORDENTRY, 0x08, 0x08
-   .common CREATEFLAG, 0x08, 0x08
-   .common OKSTATUS, 0x08, 0x08
-   .common TOKEN_START, 0x08, 0x08
-   .common TOKEN_END, 0x08, 0x08
-   .common CURRENT_BASE, 0x08, 0x08
-   .common INPUT_START, 0x08, 0x08
-   .common INPUT_END, 0x08, 0x08
-   .common CALLSTACK, 0x80000, 0x08
-   .common STACK, 0x80000, 0x08
-   .common VARIABLES, BIGSPACE, 0x08
-   .common CONSTANTS, BIGSPACE, 0x08
-   .common TOP_VARS, 0x08, 0x08
-   .common BOTTOM_VARS, 0x08, 0x08
-   .common TOP_CONS, 0x08, 0x08
-   .common BOTTOM_CONS, 0x08, 0x08
-   .common dictionary, 0x08, 0x08 
-   .common newdictionary, 0x08, 0x08
-   .common inputfileptr, 0x08, 0x08
-   .common createwritepoint, 0x08, 0x08
-   .common ifflag, 0x08, 0x08
-   .common DECIDESTACKP, 0x08, 0x08
-   .common DECIDESTACKB, 0x08, 0x08
-   .common VARIABLEFLAG, 0x08, 0x08
-   .common INFILELOAD, 0x08, 0x08
-   .common LOADLINESETUP, 0x08, 0x08
-   .common LOADINGFILE, 0x08, 0x08
-   .common FILEMEMORYADDR, 0x08, 0x08
-   .common STACKTOP, 0x08, 0x08
-   .common datamanagement, 0x08, 0x08
-   .common recycleallot, 0x08, 0x08
-   .common recyclewatermark, 0x08, 0x08
-   .common dataspace, 0x08, 0x08
-   .common dataspaceptr, 0x08, 0x08
-   .common INDOES, 0x08, 0x08
-   .common MULTILINE, 0x08, 0x08
-   .common PICTUREDN, 0x08, 0x08
+   .comm INPUT_BUFFER, BUFFERLEN
+   .comm EXPANDED_BUFFER, BUFFERLEN
+   .comm SCRATCH_PAD, SYSTEMAREA
+   .comm NEWWORDENTRY, 0x08
+   .comm CREATEFLAG, 0x08
+   .comm OKSTATUS, 0x08
+   .comm TOKEN_START, 0x08
+   .comm TOKEN_END, 0x08
+   .comm CURRENT_BASE, 0x08
+   .comm INPUT_START, 0x08
+   .comm INPUT_END, 0x08
+   .comm CALLSTACK, 0x80000
+   .comm STACK, 0x80000
+   .comm VARIABLES, BIGSPACE
+   .comm CONSTANTS, BIGSPACE
+   .comm TOP_VARS, 0x08
+   .comm BOTTOM_VARS, 0x08
+   .comm TOP_CONS, 0x08
+   .comm BOTTOM_CONS, 0x08
+   .comm dictionary, 0x08 
+   .comm newdictionary, 0x08
+   .comm inputfileptr, 0x08
+   .comm createwritepoint, 0x08
+   .comm ifflag, 0x08
+   .comm DECIDESTACKP, 0x08
+   .comm DECIDESTACKB, 0x08
+   .comm VARIABLEFLAG, 0x08
+   .comm INFILELOAD, 0x08
+   .comm LOADLINESETUP, 0x08
+   .comm LOADINGFILE, 0x08
+   .comm FILEMEMORYADDR, 0x08
+   .comm STACKTOP, 0x08
+   .comm datamanagement, 0x08
+   .comm recycleallot, 0x08
+   .comm recyclewatermark, 0x08
+   .comm dataspace, 0x08
+   .comm dataspaceptr, 0x08
+   .comm INDOES, 0x08
+   .comm MULTILINE, 0x08
+   .comm PICTUREDN, 0x10
 
    .data
    welcome_msg:   	.asciz "RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
