@@ -274,7 +274,7 @@
 		li a5, 0x0A				#CR
   search_read:
 		lbu t5, 0(t1)
-		beq t5, a4. search_done
+		beq t5, a4, search_done
 		beq t5, a5, search_done
 		blt t5, a0, search_done_no_numb		#less than 0
 		bgt t5, a1, search_done_no_numb		#greater than max

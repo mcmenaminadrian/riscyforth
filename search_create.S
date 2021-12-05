@@ -377,13 +377,13 @@
   search_create_check_decimal:
 		mv a0, t0
 		mv a3, t1
-		call func_test_decimal
+		call func_test_hex
 		j search_create_test_func_result
 
   search_create_check_octal:
 		mv a0, t0
 		mv a3, t1
-		call func_test_octal
+		call func_test_hex
 		j search_create_test_func_result
 
   search_create_read_address:
@@ -417,12 +417,12 @@
 
   search_create_check_decimal_address:
 		mv a0, t0
-		call func_test_decimal
+		call func_test_hex
 		j search_create_test_func_result_address
 
   search_create_check_octal_address:
 		mv a0, t0
-		call func_test_octal
+		call func_test_hex
 		j search_create_test_func_result_address
 
   search_create_number_on_stack:
@@ -449,6 +449,7 @@
 		#a3 end of token [in]
 		#a4 base (set in fuction)
   func_test_hex:
+		#hex name is hangover from old code - handles all bases
 		add sp, sp, -96
 		sd s0, 0(sp)
 		sd s1, 8(sp)
@@ -464,75 +465,57 @@
 		sd s11, 88(sp)
 		mv a1, zero
 		mv a2, zero
-		li a4, 16
-		
-  func_check_hex:
-                lbu s4, 0(a0)
-                li s5, 48                             #check number begins with 0X
-                beq s4, s5, func_test_X
-                j func_return_hex					#failed
-  func_test_X:
-                lbu s4, 1(a0)
-		and s4, s4, 0x5F
-                li s6, 88                             #X
-                beq s4, s6, func_build_hex
-                j func_return_hex
-  func_build_hex:
-                sub s3, a3, a0
-                add s3, s3, -2
-                bge s3, zero, func_hex_entry_likely
-                j func_return_hex
-  func_hex_entry_likely:
-                mv s4, a0 
-                addi s4, s4, 2                        #get s4 to point to first numeral
-                li s6, 58                             #: (1 > 9 in ascii)
-                li s1, 65			      #A
-                li s2, 71                             #G
-                mv s7, zero                           #total goes in a7
-  func_leading_zero_hex:
-                lbu s10, 0(s4)
-                beq s3, zero, func_hex
-                beq s10, s5, func_increment_hex      #looking for end of trailing zeros
-                j func_hex
-  func_increment_hex:
-                addi s4, s4, 1
-                addi s3, s3, -1
-                j func_leading_zero_hex
-  func_hex:
-                bge s10, s2, func_hex_fail             #too big
-                bge s10, s1, func_hex_letter           #A - F
-                bge s10, s6, func_hex_fail             #too big
-                bge s10, s5, func_hex_number           #0 -9
-  func_hex_fail:
-                j func_return_hex
+		la a4, CURRENT_BASE
+		ld a4, 0(a4)
 
-  func_hex_letter:
-                addi s10, s10, -55
-                j func_hex_multi
-  func_hex_number:
-                addi s10, s10, -48
-  func_hex_multi:
-                beq s10, zero, func_add_in_hex
-                beq s3, zero, func_add_in_hex
-                mv s5, s3
-  func_hex_multiple:
-                mul s10, s10, a4
-                addi s5, s5, -1
-                bne s5, zero, func_hex_multiple
-		
-  func_add_in_hex:
-                add s7, s7, s10
-                beq s3, zero, func_hex_push_it
-                add s3, s3, -1
-                add s4, s4, 1
-                lbu s10, 0(s4)
-                j func_hex
-  func_hex_push_it:
+		#test if number is neagtive
+		li s10, 1
+		li s0, 0x2D
+		lbu s11, 0(a0)
+		bge s0, s11, func_test_hex_negative
+		j func_test_hex_characters
+  func_test_hex_negative:
+		li s10, -1			#handle negative
+		addi a0, a0, 1
+		bgt a0, a3, func_test_hex_clean
+  func_test_hex_characters:
+		#establish the range of characters
+		li s0, 0x30			#0
+		li s1, 0x39			#9
+		li s2, 0x41			#A
+
+		li s5, 10
+		bgt a4, s5, func_test_hex_over10
+		li s4, 0x2F
+		j func_test_hex_set_max
+  func_test_hex_over10:
+		li s4, 0x36
+  func_test_hex_set_max:
+		add s4, s4, a4
+  func_test_hex_read:
+		lbu s3, 0(a0)			#read character
+		blt s3, s0, func_test_hex_clean	#too low
+		bgt s3, s4, func_test_hex_clean	#too high
+		bge s3, s2, func_test_hex_good
+		ble s3, s1, func_test_hex_good
+		j func_test_hex_clean		#in impermissable range
+  func_test_hex_good:
+		mul a2, a2, a4
+		ble s3, s1, func_test_hex_digit
+		addi s3, s3, -55
+		j func_test_hex_sum
+  func_test_hex_digit:
+		addi s3, s3, -48
+  func_test_hex_sum:
+		add a2, a2, s3
+		addi a0, a0, 1
+		bgt a0, a3, func_test_hex_done
+		j func_test_hex_read
+
+  func_test_hex_done:
+		mul a2, a2, s10
 		li a1, 1
-		mv a2, s7
-
-  func_return_hex:
-		#common return for all number funcs
+  func_test_hex_clean:
 		ld s11, 88(sp)
 		ld s10, 80(sp)
 		ld s9, 72(sp)
@@ -548,104 +531,6 @@
 		addi sp, sp, 96
 		ret		
 
-
-func_test_octal:
-		add sp, sp, -96
-		sd s0, 0(sp)
-		sd s1, 8(sp)
-		sd s2, 16(sp)
-		sd s3, 24(sp)
-		sd s4, 32(sp)
-		sd s5, 40(sp)
-		sd s6, 48(sp)
-		sd s7, 56(sp)
-		sd s8, 64(sp)
-		sd s9, 72(sp)
-		sd s10, 80(sp)
-		sd s11, 88(sp)
-		mv a1, zero
-		mv a2, zero
-		li a4, 8
-
-		li s5, 48
-		li s6, 55
-		j func_octdec_join
-		
- 
-  func_test_decimal:
-		add sp, sp, -96
-		sd s0, 0(sp)
-		sd s1, 8(sp)
-		sd s2, 16(sp)
-		sd s3, 24(sp)
-		sd s4, 32(sp)
-		sd s5, 40(sp)
-		sd s6, 48(sp)
-		sd s7, 56(sp)
-		sd s8, 64(sp)
-		sd s9, 72(sp)
-		sd s10, 80(sp)
-		sd s11, 88(sp)
-		mv a1, zero
-		mv a2, zero
-		li a4, 10
-
-		li s5, 48
-		li s6, 57
-
-  func_octdec_join:				#common octal decimal code
-		mv s7, zero
-		mv s10, zero
-		mv s11, zero
-		sub s3, a3, a0
-		mv s4, a0
-		lbu s9, 0(s4)
-		li s8, 45
-		bne s9, s8, func_octdec_leading_zero_check
-		bne s3, zero, func_minus_more_than_nothing
-		j func_return_hex		#failed
-  func_minus_more_than_nothing:
-		li s10, -1
-		addi s3, s3, -1
-		addi s4, s4, 1
-  func_octdec_leading_zero_check:
-		lbu s9, 0(s4)
-		beq s9, s5, func_increment_octdec
-		j func_literal
-  func_increment_octdec:
-		beq s3, zero, func_literal	#output a zero if we are last character
-		addi s4, s4, 1
-		addi s3, s3, -1
-		j func_octdec_leading_zero_check
-  func_literal:
-		bltu s6, s9, func_literal_fail
-		bge s9, s5, func_octdec_continue
-  func_literal_fail:
-		j func_return_hex
-  func_octdec_continue:
-		sub s9, s9, s5
-		beq s9, zero, func_add_in_octdec
-		beq s3, zero, func_add_in_octdec
-		mv s8, s3
-  func_octdec_multiple:
-		mul s9, s9, a4
-		add s8, s8, -1
-		bne s8, zero, func_octdec_multiple
-  func_add_in_octdec:
-		add s7, s7, s9
-		beq s3, zero, func_push_octdec
-		addi s3, s3, -1
-		addi s4, s4, 1
-		lbu s9, 0(s4)
-		j func_literal
-  func_push_octdec:
-		beq s10, zero, func_not_minus
-		xori s7, s7, -1
-		addi s7, s7, 1
-  func_not_minus:
-		li a1, 1
-		mv a2, s7
-		j func_return_hex		#success
   embed_to:
   embed_tick:
 		#embed string - but don't process it in any way
