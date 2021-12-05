@@ -244,152 +244,63 @@
                 tail EXE
 
   search_exhausted:
-                #test if this has an alpha first char
-                mv a4, t0
-                li a5, 0x3A
-                lb t4, 0(a4)
-                bge t4, a5, search_check_variables	#actually a fail
-                j search_check_numbers
-  search_check_variables:
-                j search_scan_variable_stack
-  search_check_numbers:
-                ld t2, CURRENT_BASE
-                li t3, 16
-                beq t2, t3, search_check_hex
-                li t3, 8
-                bne t2, t3, search_assume_decimal
-                j search_check_octal                  #go to octal code
-  search_assume_decimal:
-                j search_setup_decimal
-  search_check_octal:
-                li t2, 8
-                li t5, 48
-                li t6, 55
-                j search_octal_decimal_join
-  search_setup_decimal:
-                li t2, 10                             #assume we are decimal - trust but verify
-                li t5, 48                             #ascii 0
-                li t6, 57
-  search_octal_decimal_join:
-                mv a6, zero
-                mv a7, zero                           #a7 will hold the number
-                sub t3, t1, t0                        #t3 holds radix power needed
-                mv a4, t0                             #a4 points to first digit
-                lb t4, 0(a4)
-                li a5, 45
-                bne t4, a5, search_leading_zero_check
-                bne t3, zero, search_minus_more_than_nothing
-                j search_failed
-  search_minus_more_than_nothing:
-                addi a6, zero, -1
-                addi t3, t3, -1
-                addi a4, a4, 1
-  search_leading_zero_check:
-                lb t4, 0(a4)                          #look at this
-                beq t4, t5, search_increment_octdec   #is it zero?
-                j search_literal
-  search_increment_octdec:
-                beq t3, zero, search_literal          #output 0 if nothing else
-                addi a4, a4, 1                    
-                addi t3, t3, -1
-                j search_leading_zero_check           #if leading zero addvance
-  search_check_hex:
-                lb t4, 0(t0)
-                li t5, 48                             #check number begins with 0X
-                beq t4, t5, search_test_X
-                j search_failed
-  search_test_X:
-                lb t4, 1(t0)
-		andi t4, t4, 0x5F
-                li t6, 88                             #X
-                beq t4, t6, search_build_hex
-                j search_failed
-  search_build_hex:
-                sub t3, t1, t0
-                add t3, t3, -2
-                bge t3, zero, search_hex_entry_likely
-                j search_failed
-  search_hex_entry_likely:
-                mv a4, t0                             
-                addi a4, a4, 2                        #get a4 to point to first numeral
-                li t6, 58                             #: (1 > 9 in ascii)
-                li a1, 65
-                li a2, 71                             #G
-                mv a7, zero                           #total goes in a7
-  search_leading_zero_hex:
-                lb t4, 0(a4)
-                beq t3, zero, search_hex
-                beq t4, t5, search_increment_hex      #looking for end of trailing zeros
-                j search_hex
-  search_increment_hex:
-                addi a4, a4, 1
-                addi t3, t3, -1
-                j search_leading_zero_hex
-  search_hex:
-                bge t4, a2, search_hex_fail             #too big
-                bge t4, a1, search_hex_letter           #A - F
-                bge t4, t6, search_hex_fail             #too big
-                bge t4, t5, search_hex_number           #0 -9
-  search_hex_fail:
-                j search_failed
-                
-  search_hex_letter:
-                addi t4, t4, -55
-                j search_hex_multi
-  search_hex_number:
-                addi t4, t4, -48
-  search_hex_multi:
-                beq t4, zero, search_add_in_hex
-                beq t3, zero, search_add_in_hex
-                mv a5, t3
-  search_hex_multiple:
-                mul t4, t4, t2
-                addi a5, a5, -1
-                bne a5, zero, search_hex_multiple
-  search_add_in_hex:
-                add a7, a7, t4
-                beq t3, zero, search_hex_push_it
-                add t3, t3, -1
-                add a4, a4, 1
-                lb t4, 0(a4)
-                j search_hex
-  search_hex_push_it:
-                PUSH a7                               #save number on stack
-                la t0, WA_TOKENIZE_IMM                #keep tokenizing
-                PUSH t0
-                tail EXE
-  search_literal:
-                bltu t6, t4, search_literal_fail      #digit above max range
-                bge t4, t5, search_octdec_continue    #digit in range
-  search_literal_fail:
-                j search_failed
-  search_octdec_continue:
-                sub t4, t4, t5                        #reduce to number
-                beq t4, zero, search_add_in_octdec
-                beq t3, zero, search_add_in_octdec
-                mv a5, t3
-  search_octdec_multiple:
-                mul t4, t4, t2
-                addi a5, a5, -1
-                bne a5, zero, search_octdec_multiple
-  search_add_in_octdec:
-                add a7, a7, t4
-                beq t3, zero, search_push_octdec
-                addi t3, t3, -1
-                addi a4, a4, 1
-                lb t4, 0(a4)
-                j search_literal
-  search_push_octdec:
-                beq a6, zero, search_not_minus        #not a negative number
-                xori a7, a7, -1                       #is a negative
-                addi a7, a7, 1
-  search_not_minus:
-                PUSH a7
-  search_var_reentry:
-                la t0, WA_TOKENIZE_IMM
-                PUSH t0
+		#not a keyword - so can we interpret it as a number?
+		#t0 points to start
+		#modified version of code used in >NUMBER here
+		mv t1, t0				#t1 points to characters
+		mv t2, zero				#sum of number	
+		#check if negative
+		li a7, 1
+		lbu t0, 0(t1)
+		li t3, 0x2D
+		bne t3, t0, search_start_number
+		li a7, -1
+  search_start_number:
+		mv t6, zero
+		la t3, CURRENT_BASE
+		ld t3, 0(t3)				#base
+		#establish the range of characters
+		li t4, 0x0A
+		li a0, 0x30
+		bgt t3, t4, search_letter_base
+		add a1, a0, t3
+		j search_process_start
+  search_letter_base:
+		addi a1, t3, 0x36
+  search_process_start:
+		li a2, 0x40				#impermissibles
+		li a3, 0x3A
+		li a4, 0x20				#space
+		li a5, 0x0A				#CR
+  search_read:
+		lbu t5, 0(t1)
+		beq t5, a4. search_done
+		beq t5, a5, search_done
+		blt t5, a0, search_done_no_numb		#less than 0
+		bgt t5, a1, search_done_no_numb		#greater than max
+		blt t5, a3, search_continue_numb
+		ble t5, a2, search_done_no_numb		#impermissible
+  search_continue_numb:
+		mul t6, t6, t3
+		blt t5, a3, search_digit
+		addi t5, t5, -55
+		j search_sum
+  search_digit:
+		add t5, t5, -48
+  search_sum:
+		add t6, t6, t5
+		addi t1, t1, 1
+		j search_read
+  search_done:
+		add t6, t6, t2
+		mul t6, t6, a7			      	#multiply by 1 or -1
+		addi sp, sp, -16
+                sd t6, 8(sp)                      	#save number on stack
+                la t0, WA_TOKENIZE_IMM                	#keep tokenizing
+                sd t0, 0(sp)
                 tail EXE
 
+  search_done_no_numb:
   search_failed:
   search_scan_variable_stack:
                 la t0, NotOk_msg

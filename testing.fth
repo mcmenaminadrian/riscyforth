@@ -89,7 +89,7 @@ AND IF BLUE ." ?DUP passed" ELSE ." ?DUP FAILED" THEN RESET CR ;
 
 : TESTINVERT
 ." Testing INVERT " 5 spaces
--1 INVERT IF RED ." INVERT FAILED " RESET ELSE hex 0xF0F0F0F00F0F0F35 INVERT 0xF0F0F0FF0F0F0CA = IF BLUE ." INVERT passed " ELSE RED ." INVERT FAILED " then then decimal RESET cr ;
+-1 INVERT IF RED ." INVERT FAILED " RESET ELSE hex F0F0F0F00F0F0F35 INVERT F0F0F0FF0F0F0CA = IF BLUE ." INVERT passed " ELSE RED ." INVERT FAILED " then then decimal RESET cr ;
 
 \ Basic tests
 
@@ -120,8 +120,8 @@ SEARCH
 
 : TESTHEX
 ." Testing HEX " 5 SPACES
-HEX 0x10 0xFF + DUP
-BLUE 0x10F = IF ." HEX passed with output 0x10F = " . ELSE RED ." HEX FAILED with output 0x10F =  " . then RESET cr
+HEX 10 FF + DUP
+BLUE 10F = IF ." HEX passed with output 0x10F = " . ELSE RED ." HEX FAILED with output 0x10F =  " . then RESET cr
 \ ensure other tests keep testdup2
 DECIMAL
 ;
@@ -391,10 +391,10 @@ TESTUNLOOPV @ 3 = IF BLUE ." UNLOOP passed " ELSE RED ." UNLOOP FAILED" THEN RES
 
 : TESTINGTICK 
 ." Testing ', EXECUTE and C! " 5 spaces
-hex 0x58 decimal ' ZZ 24 + C! ' XZ execute cr
+hex 58 decimal ' ZZ 24 + C! ' XZ execute cr
 \ Change back or else subsequent tests will break
 ." Testing one more time " 5 spaces
-hex 0x5A decimal ' xz 24 + C! ' zZ exeCUTE  cr ;
+hex 5A decimal ' xz 24 + C! ' zZ exeCUTE  cr ;
 
 : testcfetch 
 ." Testing C@" 5 spaces
@@ -411,7 +411,7 @@ hex 0x5A decimal ' xz 24 + C! ' zZ exeCUTE  cr ;
 
 : TEST@
 ." Testing @ (and BASE)" 5 spaces
-octal base @ 10 = hex base @ 0x10 = AND decimal base @ 10 = AND if BLUE ." @ and BASE passed" ELSE RED ." @ and BASE FAILED" then RESET cr ;
+octal base @ 10 = hex base @ 10 = AND decimal base @ 10 = AND if BLUE ." @ and BASE passed" ELSE RED ." @ and BASE FAILED" then RESET cr ;
 
 1 CELLS ALLOT
 CREATE SPEAKLIKEACHILD
@@ -474,9 +474,9 @@ VARIABLE allocx
 : TESTRESIZE
 ." Testing RESIZE " 5 SPACES
 1 ALLOCATE DROP allocx !
-HEX 0xBADCAFEF00D DECIMAL allocx @ !
+HEX BADCAFEF00D DECIMAL allocx @ !
 allocx @ 40 RESIZE 0 = FALSE AND IF RED ." RESIZE FAIL - no resize " RESET CR EXIT THEN
-@ HEX 0xBADCAFEF00D DECIMAL = IF BLUE ." RESIZE passed " RESET ELSE RED ." RESIZE FAIL: no copy" RESET CR EXIT THEN
+@ HEX BADCAFEF00D DECIMAL = IF BLUE ." RESIZE passed " RESET ELSE RED ." RESIZE FAIL: no copy" RESET CR EXIT THEN
 CR ;
 
 

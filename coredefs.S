@@ -829,7 +829,12 @@
 		PUSH t1
 		tail NEXT
 
-		CODEHEADER BASE, CHAR, 0x01
+		CODEHEADER QUIT, CHAR, 0x01
+		#(?? --)
+		#currently restarts interpreter which is not quite correct
+		tail main
+
+		CODEHEADER BASE, QUIT, 0x01
 		la t0, CURRENT_BASE
 		PUSH t0
 		tail NEXT
