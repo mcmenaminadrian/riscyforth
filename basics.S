@@ -255,6 +255,7 @@
 		li t3, 0x2D
 		bne t3, t0, search_start_number
 		li a7, -1
+		addi t1, t1, 1
   search_start_number:
 		mv t6, zero
 		la t3, CURRENT_BASE
@@ -492,72 +493,59 @@
                 ld t0, CURRENT_BASE
                 POP a2                            #get item on stack
                 la a0, SCRATCH_PAD                #sprintf uses this
-                addi t1, zero, 16
-                beq t0, t1, ps_format_hex
-                addi t1, zero, 8
-                beq t0, t1, ps_format_octal
-                addi t1, zero, 2
-                beq t0, t1, ps_format_binary
-                la a1, decimalout
-                j dot_output
-  ps_format_hex:
-                la a1, hexout
-                j dot_output
-  ps_format_octal:
-                la a1, octalout
-                j dot_output
-  dot_output:
-                addi a3, zero, 3
-                call sprintf
-                la t0, SCRATCH_PAD
-                mv t1, a0
-                WRITESTRINGR t0, t1
-                tail NEXT
-  ps_format_binary:                             #binary output not supported by sprintf, so do it ourselves
-                li t0, 1
-                li t1, 63
-  dot_test_against_shift:
-                sll t3, t0, t1
-                and a0, a2, t3
-                bne a0, zero, dot_start_binary  #past any trailing zeros - so start output
-                sub t1, t1, t0
-                beq t1, zero, dot_last_and_out
-                j dot_test_against_shift
-  dot_start_binary:
-		addi sp, sp, -32
-		sd a2, 24(sp)
-		sd t0, 16(sp)
-		sd t1, 8(sp)
-		sd t3, 0(sp)
-                WRITECHAR 0x31                #output 1
-  dot_start_pop:
-		ld t3, 0(sp)
-		ld t1, 8(sp)
-		ld t0, 16(sp)
-		ld a2, 24(sp)
-		addi sp, sp, 32
-  dot_shift_and_test:
-                sub t1, t1, t0
-                beq t1, zero, dot_last_and_out
-                sll t3, t0, t1
-                and a0, a2, t3
-                bne a0, zero, dot_start_binary
-		addi sp, sp, -32
-		sd a2, 24(sp)
-		sd t0, 16(sp)
-		sd t1, 8(sp)
-		sd t3, 0(sp)
-                WRITECHAR 0x030		#output 0
-                j dot_start_pop
-  dot_last_and_out:
-                and a0, a2, t0
-                beq a0, zero, dot_zero_and_out
-                WRITECHAR 0x31
-                j dot_output_b_and_space
-  dot_zero_and_out:
-                WRITECHAR 0x30
-  dot_output_b_and_space:
-                WRITECHAR 0x62            #b
+		mv a3, zero
+
+		#convert to based string
+		#limiting characters
+		li t2, 0x30				#0
+		li t3, 0x39				#9
+		mv a1, a2
+		bgez a2, dot_produce_char
+		neg a2, a2				#positives only
+		
+  dot_produce_char:		
+		div t1, a2, t0
+		mul t6, t1, t0
+		sub t6, a2, t6				#t6 now has remainder
+		add t6, t6, t2
+		ble t6, t3, dot_char_out
+		#greater than 9 - so add more
+		addi t6, t6, 7
+  dot_char_out:
+		sb t6, 0(a0)
+		addi a0, a0, 1
+		addi a3, a3, 1
+		mv a2, t1
+		bnez a2, dot_produce_char
+
+		#now have our string but backwards
+		la t5, SCRATCH_PAD
+		#negative number?
+		bge a1, zero, dot_prepare_to_write
+		li t6, 0x2D				#-
+		add t0, t5, a3	
+		sb t6, 0(t0)
+		addi a3, a3, 1
+
+  dot_prepare_to_write:
+		li t0, 1
+		beq a3, t0, dot_write
+		mv t0, t5
+		add t1, t5, a3
+		addi t1, t1, -1
+		mv t2, t5
+  dot_reverse:
+		lbu t3, 0(t2)
+		lbu t4, 0(t1)
+		sb t4, 0(t2)
+		sb t3, 0(t1)
+		addi t2, t2, 1
+		addi t1, t1, -1
+		ble t1, t2, dot_write
+		j dot_reverse
+  dot_write:
+		mv t1, a3
+		WRITESTRINGR t5, t1		
                 WRITECHAR 0x20            #space
                 j NEXT
 

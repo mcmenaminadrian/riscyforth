@@ -93,31 +93,6 @@ AND IF BLUE ." ?DUP passed" ELSE ." ?DUP FAILED" THEN RESET CR ;
 
 \ Basic tests
 
-: VERIFYTYPEPROMPT
-." Verifying TYPEPROMPT " cr
-TYPEPROMPT cr
-;
-
-: VERIFYGETNEXTLINE_IMM
-." Verifying GETNEXTLINE_IMM - please press RETURN only " cr
-GETNEXTLINE_IMM cr
-;
-
-: VERIFYOK
-." Verifying OK " cr
-OK cr
-;
-
-: VERIFYTOKENIZE_IMM
-." Verifying TOKENIZE_IMM " cr
-TOKENIZE_IMM
-;
-
-: VERIFYSEARCH
-." Verifying SEARCH " cr
-SEARCH
-;
-
 : TESTHEX
 ." Testing HEX " 5 SPACES
 HEX 10 FF + DUP
@@ -642,12 +617,6 @@ TEST[] TESTPICK
 \ Group of Basics tests
 : BASICSTESTS
 ." Running basics tests and verifications " cr
-VERIFYTYPEPROMPT
-VERIFYGETNEXTLINE_IMM
-VERIFYOK
-VERIFYTOKENIZE_IMM 
-VERIFYSEARCH OK
-CYAN ." ***Any error message above can almost certainly be ignored*** " RESET CR
 TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY TESTEXIT
 BLUE ." Verifying ENCSQ with this output " RESET cr
 S" Verifying SQ" 2DUP 5 SPACES TYPE 12 = IF BLUE ." Verified SQ" ELSE RED ." SQ FAILED" THEN RESET CR

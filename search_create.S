@@ -346,7 +346,7 @@
 		li a5, 0x23
 		#test for address #
 		beq t4, a5, search_create_read_address
-		li a5, 0x3A 				#:
+		li a5, 0x5A 				#Z
 		#if not a number then a fail 
 		bleu t4, a5, search_create_handle_number
 		j variable_gone_bad
