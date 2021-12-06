@@ -25,7 +25,37 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADERZ ZERONE, 0<>, _ABORTCOMM, 0x01
+		CODEHEADER CASE, _ABORTCOMM, 0x01
+		#( -- )
+		tail NEXT
+
+		CODEHEADER ENDOF, CASE, 0x01
+		tail NEXT
+
+		CODEHEADER _OF, ENDOF, 0x00
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		addi sp, sp, 8
+		beq t0, t1, _of_execute
+		#did not match so advance until we hit ENDOF
+		la t0, WA_ENDOF
+  _of_keep_looking:
+		ld t1, 0(s7)
+		addi s7, s7, 8
+		beq t0, t1, _of_execute
+		j _of_keep_looking
+  _of_execute:
+		tail NEXT
+
+		CODEHEADER OF, _OF, 0x01
+		#do nothing in immediate mode
+		tail NEXT
+
+		CODEHEADER ENDCASE, OF, 0x01
+		POP zero
+		tail NEXT
+
+		CODEHEADERZ ZERONE, 0<>, ENDCASE, 0x01
 		#(x -- flag)
 		ld t0, 0(sp)
 		bnez t0, zerone_not_zero

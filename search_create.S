@@ -252,9 +252,14 @@
 		j transitions_if_out
   search_create_test_else:
 		la t0, WA_ELSE
-		bne t0, t3, search_create_test_then
+		bne t0, t3, search_create_test_of
 		la t3, WA__ELSE
 		j transitions_else_out
+  search_create_test_of:
+		la t0, WA_OF
+		bne t0, t3, search_create_test_then
+		la t3, WA__OF
+		j search_create_inscribe
   search_create_test_then:
 		la t0, WA_THEN
 		bne t0, t3, search_create_test_while
