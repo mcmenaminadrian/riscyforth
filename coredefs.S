@@ -3,8 +3,24 @@
 # Words from the Forth standard core not defined somewhere else
 
 		
-		CODEHEADER _ABORTCOMM, ALLOCATE, 0x0                
+		CODEHEADER _ABORTCOMM, ALLOCATE, 0x0
+		#(ba -- b)
 		#compiled ABORTCOMM
+		ld t0, 0(sp)
+		addi sp, sp, 8
+		bnez t0, abortcomm_abort
+		ld t0, 0(s7)
+		li t1, 7
+		and t2, t0, t1
+		beqz t2, abort_advance
+		li t3, 8
+		sub t4, t3, t2
+		add t0, t0, t4
+  abort_advance:
+		addi s7, s7, 8
+		add s7, s7, t0
+		tail NEXT
+  abortcomm_abort:
                 ld a0, 0(s7)
                 mv a1, s7
                 add s7, s7, a0
@@ -496,32 +512,7 @@
 		j DISPLAY
 
 		CODEHEADER ABORTCOMM, RESET, 0x01
-		#Print in a string
-		#first of all, get the address and length of the string
-		la t5, INPUT_END
-		ld t5, 0(t5)		#absolute end of string
-		li t3, 0
-		la t6, INPUT_START
-		ld t4, 0(t6)
-		li t1, 0x22		#"
-  abort_check_next:
-		lbu t0, 0(t4)
-		beq t0, t1, abort_prep_imm_syscall
-		addi t3, t3, 1
-		add t4, t4, 1
-		blt t4, t5, abort_check_next
-		la t0, String_err
-		li t1, 18		#length of error message
-		WRITESTRINGR t0, t1
-		la s7, outer_loop_ok
-		tail NEXT
-  abort_prep_imm_syscall:
-		ld t4, 0(t6)
-		addi t2, t3, 1
-		add t1, t4, t2
-		sd t1, 0(t6)
-		WRITESTRINGR t4, t3
-		la s7, outer_loop_ok
+		#does nothing in interpretration mode
 		tail NEXT
 
 		CODEHEADER RECURSE, ABORTCOMM, 0x01
