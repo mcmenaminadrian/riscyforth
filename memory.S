@@ -13,7 +13,19 @@
 		sd t0, 0(sp)
 		tail NEXT
 
-		CODEHEADER COMMA, CELLS, 0x01
+		CODEHEADERZ CELLPLUS, CELL+, CELLS, 0x01
+		ld t0, 0(sp)
+		addi t0, t0, 8
+		sd t0, 0(sp)
+		tail NEXT
+
+		CODEHEADER CELL, CELLPLUS, 0x01
+		addi sp, sp, -8
+		li t0, 8
+		sd t0, 0(sp)
+		tail NEXT
+
+		CODEHEADER COMMA, CELL, 0x01
 		#(x --)
 		#reserve one cell of data space and store TOS in the cell
 		ld t0, 0(sp)
