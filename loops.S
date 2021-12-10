@@ -71,10 +71,9 @@
 		addi t0, t0, 1
   loop_plusloop_entry:
 		ld t1, 8(s10)			#limit
-		ld t2, 16(s10)			#return point
 		bge t0, t1, loop_over
+		ld s7, 16(s10)			#return point
 		sd t0, 0(s10)
-		mv s7, t2
 		tail NEXT
   loop_over:
 		addi s10, s10, 24
