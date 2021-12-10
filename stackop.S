@@ -18,7 +18,7 @@
                 tail NEXT
 
                 CODEHEADER DROP, ROT, 0x01
-                POP t0
+                addi sp, sp, 8
                 tail NEXT
 
                 CODEHEADER NIP, DROP, 0x01
@@ -78,11 +78,15 @@
                 sd t1, 0(sp)
                 tail NEXT
 
-                CODEHEADERZ DROP2, 2DROP, ROLL, 0x01
+/*                CODEHEADERZ DROP2, 2DROP, ROLL, 0x01
                 COLON DROP2
                 .8byte WA_DROP
                 .8byte WA_DROP
                 .8byte WA_SEMI
+*/
+		CODEHEADERZ DROP2, 2DROP, ROLL, 0x01
+		addi sp, sp, 16
+		tail NEXT
 
 		CODEHEADER SQUARE, DROP2, 0x01
 		ld t0, 0(sp)
