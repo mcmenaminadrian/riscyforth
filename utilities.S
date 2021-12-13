@@ -336,18 +336,19 @@
 			#a2 holds NEXT address
 			li t0, 0x297
 			sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
-			li t0, 0x182B383
+			li t0, 0x182B303
 			sw t0, 4(a0)						#ld t1, 24(t0)
 			li t0, 0xFF810113
 			sw t0, 8(a0)						#addi sp, sp, -8
 			li t0, 0x613023
 			sw t0, 12(a0)						#sd t1, 0(sp)
 			#now jump to next
-			li t0, 0x202B383
+			li t0, 0x202B303
 			sw t0, 16(a0)						#ld t1, 32(t0)
 			li t0, 0x30067
 			sw t0, 20(a0)						#jr t1
 			sd a1, 24(a0)
 			sd a2, 32(a0)
+			addi a0, a0, 40
 			fence.i
 			ret

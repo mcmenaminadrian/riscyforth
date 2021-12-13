@@ -25,7 +25,8 @@
 		#now over-write code
 		ld a0, 8(a4)
 		mv a1, t6
-		call utility_write_number_to_stack
+		sd a1, 24(a0)
+		fence.i
 		tail NEXT
 
 		CODEHEADER CSET, TO, 0x01

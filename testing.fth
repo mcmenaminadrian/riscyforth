@@ -637,7 +637,7 @@ TEST[] TESTPICK
 ." Running basics tests and verifications " cr
 TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY TESTEXIT
 BLUE ." Verifying ENCSQ with this output " RESET cr
-S" Verifying SQ" 2DUP 5 SPACES TYPE 12 = IF BLUE ." Verified SQ" ELSE RED ." SQ FAILED" THEN RESET CR
+S" Verifying SQ" 2DUP TYPE 12 = IF BLUE 5 spaces ." Verified SQ" ELSE 5 spaces RED ." SQ FAILED" THEN RESET CR
 BLUE ." Verifying COMMENT " RESET cr \ ." COMMENT verification FAILED " 
 VERIFYDOT VERIFY.S 
 ." Basics tests and verifications over " cr
