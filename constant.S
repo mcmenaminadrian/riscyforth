@@ -114,10 +114,9 @@
 		mv a1, a2
 		call utility_write_function_header
 		mv a1, t6				#fetch constant
-		call utility_write_number_to_stack
+		la a2, NEXT				#get out address
+		call utility_constant_code
 		#and get out
-		la a1, NEXT
-		call utility_write_out_call_function
 		#now check if we are 8 bit aligned on writing address
 		li t0, 0x07
 		li t2, 0x08

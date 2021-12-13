@@ -329,3 +329,25 @@
 			addi sp, sp, 56
 			fence.i
 			ret
+
+  utility_constant_code:
+			#a0 holds address to start writing
+			#a1 holds number
+			#a2 holds NEXT address
+			li t0, 0x297
+			sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
+			li t0, 0x182B383
+			sw t0, 4(a0)						#ld t1, 24(t0)
+			li t0, 0xFF810113
+			sw t0, 8(a0)						#addi sp, sp, -8
+			li t0, 0x613023
+			sw t0, 12(a0)						#sd t1, 0(sp)
+			#now jump to next
+			li t0, 0x202B383
+			sw t0, 16(a0)						#ld t1, 32(t0)
+			li t0, 0x30067
+			sw t0, 20(a0)						#jr t1
+			sd a1, 24(a0)
+			sd a2, 32(a0)
+			fence.i
+			ret
