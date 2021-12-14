@@ -501,10 +501,8 @@
 		call utility_write_function_header
 		la a3, dataspaceptr
 		ld a1, 0(a3)
-		call utility_write_number_to_stack
-		#and get out
-		la a1, NEXT
-		call utility_write_out_call_function
+		la a2, NEXT
+		call utility_constant_code
 		#now check if we are 8 bit aligned on writing address
 		li t0, 7
 		li t2, 8
