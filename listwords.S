@@ -266,11 +266,12 @@
   variable_advance_alloc:
 		add a4, a1, t2
 		sd a4, 0(a3)
-		call utility_write_number_to_stack
-		#and get out
-		la a1, NEXT
-		call utility_write_out_call_function
+		la a2, NEXT
+		call utility_constant_code
 		#now check if we are 8 bit aligned on writing address
+		li t0, 0x07
+		li t2, 0x08
+		and t1, a1, t0
 		and t1, a0, t0
 		beqz t1, variable_done
 		sub t3, t2, t1
