@@ -264,7 +264,7 @@
 			
   #a0 holds address to start writing
   #a1 holds number
-#  utility_write_number_to_stack:
+  utility_write_number_to_stack:
 			addi sp, sp, -56
 			sd ra, 0(sp)
 			sd s0, 8(sp)
