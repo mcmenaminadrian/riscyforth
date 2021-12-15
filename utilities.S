@@ -264,7 +264,7 @@
 			
   #a0 holds address to start writing
   #a1 holds number
-  utility_write_number_to_stack:
+ # utility_write_number_to_stack:
 			addi sp, sp, -56
 			sd ra, 0(sp)
 			sd s0, 8(sp)
@@ -350,5 +350,19 @@
 			sd a1, 24(a0)
 			sd a2, 32(a0)
 			addi a0, a0, 40
+			fence.i
+			ret
+
+  utility_jump_next:
+			#a0 holds address to write to
+			#a2 holds NEXT address
+			li t0, 0x297
+			sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
+			li t0, 0xC2B303
+			sw t0, 4(a0)						#ld t1, 12(t0)
+			li t0, 0x30067
+			sw t0, 8(a0)						#jr t1
+			sd a2, 12(a0)
+			addi a0, a0, 20
 			fence.i
 			ret
