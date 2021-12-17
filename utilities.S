@@ -366,3 +366,29 @@
 			addi a0, a0, 20
 			fence.i
 			ret
+
+  utility_do_colon:
+			#a0 holds address to start writing
+			#a1 holds number for s7
+			#a2 holds NEXT address
+			li t0, 0x297
+			sw t0, 0(a0)						#aui t0, 0
+			li t0, 0xFF8C8C93
+			sw t0, 4(a0)						#addi s9, s9, -8,
+			li t0, 0x017cb023	
+			sw t0, 8(a0)						#sd s7, 0(s9)
+			li t0, 0x182BB83
+			sw t0, 12(a0)						#ld s7, 24(t0)
+			#now jump to next
+			li t0, 0x202B303
+			sw t0, 16(a0)						#ld t1, 32(t0)
+			li t0, 0x30067
+			sw t0, 20(a0)						#jr t1
+			sd a1, 24(a0)
+			sd a2, 32(a0)
+			addi a0, a0, 40
+			fence.i
+			ret
+
+			
+			

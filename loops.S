@@ -1,5 +1,5 @@
 # offset for jumping
-		.equ CREATEOFFSET,	128
+		.equ CREATEOFFSET,	40
 
 
 		CODEHEADER EMIT, CONSTANT, 0x01
@@ -320,59 +320,12 @@
 		addi t1, t1, 1
 		j colon_write_out_name
   colon_name_written:
-		#now write out the colon code
-		li t0, 0xFF8C8C93
-		sw t0, 56(t3)		#addi s9, s9, -8,
-		li t0, 0x017cb023	
-		sw t0, 60(t3)		#sd s7, 0(s9)
-		#calculate the address we need to jump to for 64 bits
-		mv t2, t3
-		addi t2, t2, CREATEOFFSET
-		srli t2, t2, 32
-		slli t2, t2, 20
-		li t1, 0xC13
-		or t2, t2, t1
-		sw t2, 64(t3)		#addi s8, zero, [upper 32 bits >> 32]
-		li t2, 0x20C1C13
-		sw t2, 68(t3)		#slli s8, s8, 32
-		li t1, 0xFFFFF000
-		addi t4, t3, CREATEOFFSET
-		and t0, t4, t1
-		li t1, 0x2B7
-		or t0, t0, t1
-		sw t0, 72(t3)		#lui t0, [bits 12 - 31]
-		li t2, 0x2029293
-		sw t2, 76(t3)		#slli t0 32
-		li t2, 0x202D293
-		sw t2, 80(t3)		#srli t0 32	(zero out upper 32 bits)
-		li t1, 0xFFF
-		and t0, t4, t1		#t0 now has lower 12 bits
-		mv t1, t0		#t1 has same lower 12 bits
-		srli t1, t1, 11		#t1 now just top bit
-		slli t1, t1, 20
-		
-		li t2, 0x313
-		or t2, t1, t2
-		sw t2, 84(t3)		#either addi t1, zero, 1 or addi t1, zero, 0
-		li t1, 0xB31313
-		sw t1, 88(t3)		#slli t1, t1, 11
-		andi t0, t0, 0x7FF	#lower eleven bits
-		slli t0, t0, 20
-		li t1, 0x30313
-		or t1, t0, t1
-		sw t1, 92(t3)		#add bottom 11 bits to t1
-		li t1, 0x6282B3
-		sw t1, 96(t3)		#add t0, t0, t1
-		li t0, 0x5C6C33
-		sw t0, 100(t3)		#or s8, s8, t0
-		li t0, 0x8be2
-		sh t0, 104(t3)		#mv s7, s8
-		#execute register based jump to NEXT
-		#make this fully portable even at cost of unneeded code
-		la a2, NEXT
 		mv a0, t3
-		addi a0, a0, 106
-		call utility_jump_next
+		addi a0, a0, 56
+		mv a1, a0
+		addi a1, a1, 40
+		la a2, NEXT
+		call utility_do_colon
 		#ensure we are aligned
 		li t4, 7
 		and t5, a0, t4
