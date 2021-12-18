@@ -57,19 +57,29 @@
 		addi sp, sp, 8
 		ld t0, 0(s10)
 		add t0, t0, t3
-		bgt t3, zero, loop_plusloop_entry
-		# decrement on this path
-		ld t1, 8(s10)
-		ld t2, 16(s10)
-		bge t1, t0, loop_over		#reverse check
+		ld t1, 8(s10)			#limit
+		bge t0, t1, loop_over
+		ld s7, 16(s10)			#return point
 		sd t0, 0(s10)
-		mv s7, t2
 		tail NEXT
 
-		CODEHEADER _LOOP, _PLUSLOOP, 0x0
+		CODEHEADER _MINUSLOOP, _PLUSLOOP, 0x0
+		#non-standard word
+		#(x --)
+		ld t3, 0(sp)
+		addi sp, sp, 8
+		ld t0, 0(s10)
+		add t0, t0, t3
+		# decrement on this path
+		ld t1, 8(s10)
+		bge t1, t0, loop_over		#reverse check
+		ld s7, 16(s10)
+		sd t0, 0(s10)
+		tail NEXT
+
+		CODEHEADER _LOOP, _MINUSLOOP, 0x0
 		ld t0, 0(s10)			#current value
 		addi t0, t0, 1
-  loop_plusloop_entry:
 		ld t1, 8(s10)			#limit
 		bge t0, t1, loop_over
 		ld s7, 16(s10)			#return point
@@ -125,7 +135,10 @@
 		CODEHEADERZ PLUSLOOP, +LOOP, UNLOOP, 0x01
 		tail NEXT
 
-		CODEHEADER LOOP, PLUSLOOP, 0x01
+		CODEHEADERZ MINUSLOOP, -LOOP, PLUSLOOP, 0x01
+		tail NEXT
+
+		CODEHEADER LOOP, MINUSLOOP, 0x01
 		tail NEXT
 
 		CODEHEADER DO, LOOP, 0x01

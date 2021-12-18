@@ -209,8 +209,13 @@
 		j transitions_loop_out
   search_loop_replace_plusloop:
 		la t0, WA_PLUSLOOP
-		bne t3, t0, search_loop_replace_unloop
+		bne t3, t0, search_loop_replace_minusloop
 		la t3, WA__PLUSLOOP
+		j transitions_loop_out
+  search_loop_replace_minusloop:
+		la t0, WA_MINUSLOOP
+		bne t3, t0, search_loop_replace_unloop
+		la t3, WA__MINUSLOOP
 		j transitions_loop_out
   search_loop_replace_unloop:
 		la t0, WA_UNLOOP
