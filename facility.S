@@ -8,9 +8,97 @@
 
 .balign 8
 
-		#get date the date and time from rtc
+		#get date the date and time
 		CODEHEADERZ TIME_DATE, TIME&DATE, BYE, 0x01
-
+		#( -- n n n n n n)
+		#create space on the stack
+		addi sp, sp, -80
+        	sd s0, 72(sp)
+        	addi s0,sp,80
+        	addi a5,s0,-32
+        	li a1,0
+        	mv a0,a5
+        	call gettimeofday
+		#a1 returns with pointer to Unix epoch time
+		ld t0, 0(a1)
+		ld s0, 72(sp)
+		addi sp, sp, 32
+		#get the clock time
+		li a0, 86400		#seconds per day
+		div t1, t0, a0		#t1 number of whole days that have elapsed
+		mul t2, t1, a0
+		sub t3, t0, t2		#t3 has number of seconds into this day
+		li a1, 60
+		div t4, t3, a1		#t4 number of whole minutes that have elapsed
+		mul t2, t4, a1
+		sub t2, t3, t2		#t2 seconds of minute
+		sd t2, 40(sp)		#on to stack
+		div t2, t4, a1		#t2 number of whole hours that have elapsed
+		mul t5, t2, a1
+		sub t6, t4, t5
+		sd t6, 32(sp)		#store minutes
+		sd t2, 24(sp)		#store hours
+		#now the date portion
+		#now store month lengths on the stack
+		addi sp, sp, -12
+		li a0, 31
+		li a1, 30
+		li a2, 28
+		sb a0, 0(sp)		#JANUARY
+		sb a2, 1(sp)
+		sb a0, 2(sp)
+		sb a1, 3(sp)
+		sb a0, 4(sp)
+		sb a1, 5(sp)
+		sb a0, 6(sp)
+		sb a0, 7(sp)
+		sb a1, 8(sp)
+		sb a0, 9(sp)
+		sb a1, 10(sp)
+		sb a0, 11(sp)		#DECEMBER
+		mv a0, sp		#a0 points to top of month lengths
+		li a1, 1970		#start of Unix epoch
+		li a2, 365
+		li a3, 366
+		li a4, 4
+		#NB we are assuming this code won't be running in 2100 - so will ignore century rule
+		#using t1 from above for number of whole days
+  time_date_count_down_years:
+		div t0, a1, a4
+		mul t2, t0, a4
+		sub t3, a1, t2
+		beqz t3, time_date_leapyear
+		bgeu a2, t1, time_date_year_reached
+		sub t1, t1, a2
+		addi a1, a1, 1
+		j time_date_count_down_years
+  time_date_leapyear:
+		bgeu a3, t1, time_date_year_reached_leap
+		sub t1, t1, a3
+		addi a1, a1, 1
+		j time_date_count_down_years
+  time_date_year_reached_leap:
+		li a0, 29
+		sb a0, 1(sp)
+  time_date_year_reached:
+		#a1 now has the year
+		#t1 has the excess days
+		addi t1, t1, 1		#count from 1, not zero
+		#store the year
+		sd a1, 12(sp)
+		li a0, 0		#month counter
+  time_date_count_down_months:
+		mv a1, sp
+		add a1, a1, a0
+		lb a2, 0(a1)
+		add a0, a0, 1
+		bgeu a2, t1, time_date_month_reached
+		sub t1, t1, a2
+		j time_date_count_down_months
+  time_date_month_reached:
+		sd a0, 20(sp)
+		sd t1, 28(sp)
+		addi sp, sp, 12
 		tail NEXT
 
 		#sleep for u milliseconds
