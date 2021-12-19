@@ -260,75 +260,7 @@
 			addi sp, sp, 56
 			fence.i
 			ret
-			
-			
-  #a0 holds address to start writing
-  #a1 holds number
- # utility_write_number_to_stack:
-			addi sp, sp, -56
-			sd ra, 0(sp)
-			sd s0, 8(sp)
-			sd s1, 16(sp)
-			sd s2, 24(sp)
-			sd s3, 32(sp)
-			sd s4, 40(sp)
-			sd s5, 48(sp)
-			mv s1, a1
-			srli s1, s1, 32
-			slli s1, s1, 20
-			li s0, 0x293
-			or s0, s0, s1
-			sw s0, 0(a0)						#addi t0, zero, [upper 32 of fuction address]
-			li s0, 0x2029293
-			sw s0, 4(a0)						#slli t0, t0, 32
-			#now lower 32 bit bits
-			mv s1, a1
-			li s2, 0xFFFFF000
-			and s1, s1, s2						#upper 20 bits of lower 32
-			li s2, 0x337
-			or s0, s1, s2
-			sw s0, 8(a0)						#lui t1, [bits 12 - 31]
-			li s0, 0x2031313
-			sw s0, 12(a0)						#slli t1, t1, 0x20
-			li s0, 0x2035313
-			sw s0, 16(a0)						#srli t1, t1, 0x20 (zero out upper 32 bits)
-			mv s1, a1
-			li s2, 0xFFF
-			and s0, s1, s2						#lower 12 bits only
-			srli s1, s0, 11						#s1 has twelveth bit only
-			li s2, 0x7FF
-			and s0, s0, s2						#s0 has the lower 11 bits
-			li s4, 0x393
-			slli s1, s1, 20
-			or s4, s4, s1
-			sw s4, 20(a0)						#addi t2, zero, [0 or 1]
-			li s4, 0xB39393
-			sw s4, 24(a0)						#slli t2, t2, 11
-			li s4, 0x7282B3
-			sw s4, 28(a0)						#add t0, t0, t2
-			li s4, 0x393
-			slli s0, s0, 20
-			or s4, s4, s0
-			sw s4, 32(a0)						#addi t2, zero, [lower 11 bits]
-			li s4, 0x7282B3
-			sw s4, 36(a0)						#add t0, t0, t2
-			li s4, 0x6282B3
-			sw s4, 40(a0)						#add t0, t0, t1
-			li s0, 0xFF810113
-			sw s0, 44(a0)						#add sp, sp, -8
-			li s0, 0x513023
-			sw s0, 48(a0)						#sd t0, 0(sp)
-			addi a0, a0, 52
-			ld ra, 0(sp)
-			ld s0, 8(sp)
-			ld s1, 16(sp)
-			ld s2, 24(sp)
-			ld s3, 32(sp)
-			ld s4, 40(sp)
-			ld s5, 48(sp)
-			addi sp, sp, 56
-			fence.i
-			ret
+
 
   utility_constant_code:
 			#a0 holds address to start writing
