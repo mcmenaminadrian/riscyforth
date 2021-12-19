@@ -4,6 +4,12 @@ DECIMAL
 ( Verify brackets in immediate code )
 \ Stack operations tests
 
+: WHEN
+TIME&DATE
+." Date is " . ." : " . ." : " . CR
+." Time is " . ." : " . ." : " . CR ;
+
+
 : testOVER2
 ." Testing 2OVER " 5 SPACES
 10 30 50 90 70 2OVER
@@ -656,6 +662,7 @@ DECIMAL
 ." Running unit tests (cleared screen verifies CLEARSCREEN)" cr
 ( Verify brackets in compiled code )
 VERIFYCOLOURS CR
+WHEN
 STACKOPTESTS
 ENTERCONTINUE
 BASICSTESTS
