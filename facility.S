@@ -101,8 +101,15 @@
 		addi sp, sp, 12
 		tail NEXT
 
+		CODEHEADERZ Q, ?, TIME_DATE, 0x01
+		#(addr --)
+		ld t0, 0(sp)
+		ld t1, 0(t0)
+		sd t1, 0(sp)
+		tail DOT
+
 		#sleep for u milliseconds
-		CODEHEADER MS, TIME_DATE, 0x01
+		CODEHEADER MS, Q, 0x01
 		#(u --)
 		ld t0, 0(sp)
 		addi sp, sp, -8
