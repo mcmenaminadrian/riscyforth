@@ -157,6 +157,10 @@
 	la s7, outer_loop_ok
 	ld ra, 0(sp)
 	addi sp, sp, 8
+	la a0, INPUT_START			#ensure we don't process junk bytes
+	la a1, INPUT_END
+	ld a2, 0(a1)
+	sd a2, 0(a0)
 	ret				
 
 
