@@ -303,7 +303,6 @@
 
   search_done_no_numb:
   search_failed:
-  search_scan_variable_stack:
                 la t0, NotOk_msg
                 addi t1, zero, 24                     #error message is 24 chars long 
                 WRITESTRINGR t0, t1
