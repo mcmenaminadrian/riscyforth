@@ -108,8 +108,57 @@
 		sd t1, 0(sp)
 		tail DOT
 
+		CODEHEADER DEBUGIN, Q, 0x0
+		#(--)
+		#debug word
+		la t0, CYCLESTART
+		rdcycle t1
+		sd t1, 0(t0)
+		tail NEXT
+		
+		CODEHEADER DEBUGOUT, DEBUGIN, 0x0
+		#(--)
+		#debug word
+		rdcycle t0
+		la t1, CYCLESTART
+		ld t2, 0(t1)
+		bgt t0, t2, debugout_normal
+		li t3, -1
+		sub t4, t3, t2
+		add t4, t4, t0
+		j debugout_sum
+  debugout_normal:
+		sub t4, t0, t2
+  debugout_sum:
+		la t5, CYCLECOUNT
+		ld t0, 0(t5)
+		add t1, t0, t4
+		sd t1, 0(t5)
+		la t6, CYCLEPINGS
+		ld t2, 0(t6)
+		addi t2, t2, 1
+		sd t2, 0(t6)
+		tail NEXT
+
+		CODEHEADER DEBUGRESULTS, DEBUGOUT, 0x0
+		#(-- n n n)
+		la t0, CYCLECOUNT
+		la t1, CYCLEPINGS
+		ld t2, 0(t0)
+		ld t3, 0(t1)
+		div t4, t2, t3
+		addi sp, sp, -24
+		sd t2, 0(sp)
+		sd t3, 8(sp)
+		sd t4, 16(sp)
+		sd zero, 0(t0)
+		sd zero, 0(t1)
+		la t2, CYCLESTART
+		sd zero, 0(t2)
+		tail NEXT
+
 		#sleep for u milliseconds
-		CODEHEADER MS, Q, 0x01
+		CODEHEADER MS, DEBUGRESULTS, 0x01
 		#(u --)
 		ld t0, 0(sp)
 		addi sp, sp, -8
