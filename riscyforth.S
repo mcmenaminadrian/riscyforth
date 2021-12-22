@@ -67,6 +67,11 @@
    .comm INDOES, 0x08
    .comm MULTILINE, 0x08
    .comm PICTUREDN, 0x10
+   #for debugging
+   .comm CYCLESTART, 0x08
+   .comm CYCLECOUNT, 0x08
+   .comm CYCLEPINGS, 0x08
+
 
    .data
    welcome_msg:   	.asciz "RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"

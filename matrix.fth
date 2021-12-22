@@ -36,7 +36,7 @@ align create imr mat-byte-size allot
   0 row-size 0 do
     >r over @ over @ * r> + >r
     swap cell+ swap row-byte-size +
-    r>
+  r>
   loop
   >r 2drop r>
 ;
