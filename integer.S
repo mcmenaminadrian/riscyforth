@@ -345,7 +345,27 @@
 		sd t0, 0(sp)
                 tail NEXT
 
-                CODEHEADER BYE, MAX, 0x01
+		CODEHEADER U, MAX, 0x01
+		#(u --)
+		tail NEXT
+
+		CODEHEADERZ UMDIVMOD, UM/MOD, U, 0x01
+		#(ud u -- u u)
+		tail NEXT
+
+		CODEHEADERZ UMTIMES, UM*, UMDIVMOD, 0x01
+		#(u u -- u)
+		tail NEXT
+
+		CODEHEADERZ UMORE, U>, UMTIMES, 0x01
+		#(u u -- flag)
+		tail NEXT
+
+		CODEHEADERZ ULESS, U<, UMORE, 0x01
+		#(u u -- flag)
+		tail NEXT
+
+                CODEHEADER BYE, ULESS, 0x01
                 PRINT riscy_forth0
                 PRINT riscy_forthQ
                 PRINT riscy_forth0

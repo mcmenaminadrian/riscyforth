@@ -662,9 +662,9 @@ YELLOW BRIGHT
 
 \ Run all the tests
 : UTS
-CLEARSCREEN   \ Verifies CLEARSCREEN
+PAGE   \ Verifies PAGE
 DECIMAL
-." Running unit tests (cleared screen verifies CLEARSCREEN)" cr
+." Running unit tests (cleared screen verifies PAGE)" cr
 ( Verify brackets in compiled code )
 VERIFYCOLOURS CR
 WHEN

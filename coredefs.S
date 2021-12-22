@@ -167,7 +167,8 @@
 		sd t1, 0(sp)
 		tail NEXT
 
-		CODEHEADER CLEARSCREEN, TIMESDIVMOD, 0x01
+		CODEHEADER PAGE, TIMESDIVMOD, 0x01
+		#(--)
 		#Clear the screen go home, reset all settings
 		# \e[2J\ec
 		addi sp, sp, -56
@@ -187,7 +188,7 @@
 		sd t0, 48(sp)
 		j DISPLAY
 
-		CODEHEADER YELLOW, CLEARSCREEN, 0x01
+		CODEHEADER YELLOW, PAGE, 0x01
 		#Yellow foreground text
 		#\e[33m
 		addi sp, sp, -48
