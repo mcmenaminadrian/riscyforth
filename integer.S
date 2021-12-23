@@ -351,10 +351,23 @@
 
 		CODEHEADERZ UMDIVMOD, UM/MOD, U, 0x01
 		#(ud u -- u u)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		remu t2, t1, t0
+		divu t3, t1, t0
+		sd t2, 8(sp)
+		sd t3, 0(sp)
 		tail NEXT
 
 		CODEHEADERZ UMTIMES, UM*, UMDIVMOD, 0x01
 		#(u u -- u)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		mulhu t2, t0, t1
+		mulw t3, t0, t1
+		or t4, t2, t3
+		sd t4, 8(sp)
+		addi sp, sp, 8
 		tail NEXT
 
 		CODEHEADERZ UMORE, U>, UMTIMES, 0x01
