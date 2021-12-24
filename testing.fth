@@ -141,6 +141,11 @@ BLUE IF ." + passed " ELSE RED ." + FAILED " THEN RESET CR ;
 BLUE = if ." * passed " else RED ." * FAILED " then RESET cr
 ;
 
+: TESTUM*
+." Testing UM*" 5 SPACES
+hex 7fffffffffffffff 2 um* dup fffffffffffffffe = decimal swap -2 =
+IF BLUE ." UM* passed" ELSE RED ." UM* FAILED" THEN RESET CR ;
+
 : TESTINEQUALITIES
 ." Testing equality and inequalities..." 5 SPACES
 5 6 < 66 55 > AND 5 6 <= AND 66 55 >= AND 667 667 >= AND 667 667 <= AND 667 666 <= FALSE = AND
@@ -628,7 +633,7 @@ VERIFYSOURCE TESTCONSTANTVALUE TESTACCEPT
 TESTADD TESTMUL TESTDIV TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST0<> TEST0>
 TESTminus2 testplus2 testunderplus testminmax testabs testnegate testshifts
 TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES TEST>NUMBER
-TESTINGCASE
+TESTINGCASE TESTUM*
 ." Integer tests complete " CR
 ;
 
