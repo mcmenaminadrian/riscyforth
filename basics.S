@@ -487,8 +487,9 @@
 		ld t2, 0(t1)
 		sd t2, 0(t0)
 		tail NEXT
-		
+
                 CODEHEADERZ DOT, ., COMMENT, 0x01
+		li a7, 10
                 ld t0, CURRENT_BASE
                 POP a2                            #get item on stack
                 la a0, SCRATCH_PAD                #sprintf uses this
@@ -499,11 +500,17 @@
 		li t2, 0x30				#0
 		li t3, 0x39				#9
 		mv a1, a2
+		bne t0, a7, dot_produce_char_non_decimal
 		bgez a2, dot_produce_char
-		neg a2, a2				#positives only
+		neg a2, a2				#in decimal - negative number
 		
   dot_produce_char:		
+		#decimal - signed output
 		div t1, a2, t0
+		j dot_produce_continue
+  dot_produce_char_non_decimal:
+		divu t1, a2, t0
+  dot_produce_continue:
 		mul t6, t1, t0
 		sub t6, a2, t6				#t6 now has remainder
 		add t6, t6, t2
@@ -515,11 +522,15 @@
 		addi a0, a0, 1
 		addi a3, a3, 1
 		mv a2, t1
-		bnez a2, dot_produce_char
+		beqz a2, dot_produce_output
+		beq t0, a7, dot_produce_char
+		j dot_produce_char_non_decimal
 
+  dot_produce_output:
 		#now have our string but backwards
 		la t5, SCRATCH_PAD
 		#negative number?
+		bne t0, a7, dot_prepare_to_write
 		bge a1, zero, dot_prepare_to_write
 		li t6, 0x2D				#-
 		add t0, t5, a3	
