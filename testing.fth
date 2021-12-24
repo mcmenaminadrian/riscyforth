@@ -144,7 +144,7 @@ BLUE = if ." * passed " else RED ." * FAILED " then RESET cr
 : TESTINEQUALITIES
 ." Testing equality and inequalities..." 5 SPACES
 5 6 < 66 55 > AND 5 6 <= AND 66 55 >= AND 667 667 >= AND 667 667 <= AND 667 666 <= FALSE = AND
-5 6 > FALSE = AND 6 5 <= FALSE = AND 10 9 < FALSE = AND 10 10 = AND 10 11 = FALSE = AND
+5 6 > FALSE = AND 6 5 <= FALSE = AND 10 9 < FALSE = AND 10 10 = AND 10 11 = FALSE = AND 10 10 <> FALSE = AND
 IF BLUE ." Equality and Inequalities passed" ELSE RED ." Inequalities FAILED" THEN RESET CR ;
 
 : TESTDIV

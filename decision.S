@@ -35,7 +35,21 @@
 		ld t0, 8(sp)
 		j lteq_as_gteq
 
-		CODEHEADERZ LT, <, GTEQ, 0x01
+		CODEHEADERZ NE, <>, GTEQ, 0x01
+		# (n n -- flag)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		beq t0, t1, ne_ne
+		li t0, -1
+		sd t0, 8(sp)
+		addi sp, sp, 8
+		tail NEXT
+  ne_ne:
+		sd zero, 8(sp)
+		addi sp, sp, 8
+		tail NEXT
+
+		CODEHEADERZ LT, <, NE, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 8
