@@ -148,8 +148,12 @@ IF BLUE ." UM* passed" ELSE RED ." UM* FAILED" THEN RESET CR ;
 
 : TESTUM/MOD
 ." Testing UM/MOD" 5 SPACES
-hex bfffffffffffffff dup decimal 0< SWAP 4 um/mod over 3 = over dup 0> over hex 2fffffffffffffff = and and and decimal
-IF BLUE ." UM/MOD passed" ELSE RED ." UM/MOD FAILED" THEN CR ;
+hex bfffffffffffffff dup decimal 0< SWAP 4 um/mod swap 3 = swap dup 0> swap hex 2fffffffffffffff = and and and decimal
+IF BLUE ." UM/MOD passed" ELSE RED ." UM/MOD FAILED" THEN RESET CR ;
+
+: TESTUINEQUALITIES
+." Testing U> and U<" 5 SPACES
+decimal -1 1 U> 100 -100 U< AND IF BLUE ." U> and U< passed" ELSE RED ." U> and U< FAILED" THEN RESET CR ;
 
 : TESTINEQUALITIES
 ." Testing equality and inequalities..." 5 SPACES
@@ -638,7 +642,7 @@ VERIFYSOURCE TESTCONSTANTVALUE TESTACCEPT
 TESTADD TESTMUL TESTDIV TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST0<> TEST0>
 TESTminus2 testplus2 testunderplus testminmax testabs testnegate testshifts
 TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES TEST>NUMBER
-TESTINGCASE TESTUM* TESTUM/MOD
+TESTINGCASE TESTUM* TESTUM/MOD TESTUINEQUALITIES
 ." Integer tests complete " CR
 ;
 

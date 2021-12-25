@@ -372,10 +372,25 @@
 
 		CODEHEADERZ UMORE, U>, UMTIMES, 0x01
 		#(u u -- flag)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		addi sp, sp, 8
+		bleu t1, t0, uless_fail
+		li t2, -1
+		sd t2, 0(sp)
 		tail NEXT
 
 		CODEHEADERZ ULESS, U<, UMORE, 0x01
 		#(u u -- flag)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		addi sp, sp, 8
+		bgeu t1, t0, uless_fail
+		li t2, -1
+		sd t2, 0(sp)
+		tail NEXT
+  uless_fail:
+		sd zero, 0(sp)
 		tail NEXT
 
                 CODEHEADER BYE, ULESS, 0x01
