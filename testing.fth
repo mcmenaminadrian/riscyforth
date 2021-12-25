@@ -155,6 +155,11 @@ IF BLUE ." UM/MOD passed" ELSE RED ." UM/MOD FAILED" THEN RESET CR ;
 ." Testing U> and U<" 5 SPACES
 decimal -1 1 U> 100 -100 U< AND IF BLUE ." U> and U< passed" ELSE RED ." U> and U< FAILED" THEN RESET CR ;
 
+: VERIFYU.
+." Verifying U." CR
+hex 7fffffffffffffff dup decimal 2 + ." With . a negative and a positive number..." CYAN . . RESET CR
+hex 7fffffffffffffff dup decimal 2 + ." With U. two positive numbers..." CYAN U. U. RESET CR ;
+
 : TESTINEQUALITIES
 ." Testing equality and inequalities..." 5 SPACES
 5 6 < 66 55 > AND 5 6 <= AND 66 55 >= AND 667 667 >= AND 667 667 <= AND 667 666 <= FALSE = AND
@@ -642,7 +647,7 @@ VERIFYSOURCE TESTCONSTANTVALUE TESTACCEPT
 TESTADD TESTMUL TESTDIV TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST0<> TEST0>
 TESTminus2 testplus2 testunderplus testminmax testabs testnegate testshifts
 TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES TEST>NUMBER
-TESTINGCASE TESTUM* TESTUM/MOD TESTUINEQUALITIES
+TESTINGCASE TESTUM* TESTUM/MOD TESTUINEQUALITIES VERIFYU.
 ." Integer tests complete " CR
 ;
 

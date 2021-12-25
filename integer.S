@@ -347,6 +347,54 @@
 
 		CODEHEADERZ UD, U., MAX, 0x01
 		#(u --)
+		ld t0, 0(sp)
+		blez t0, ud_neg_to_unsigned
+		#just let . handle it
+  ud_dot:
+		tail DOT
+  ud_neg_to_unsigned:
+		la t1, CURRENT_BASE
+		li a3, 10
+		ld t1, 0(t1)
+		bne a3, t1, ud_dot
+		#harder bit
+		li a0, 0x30	#0
+		li a1, 0x37	#'0' for numbers greater than 9
+		mv a2, zero	#characters written
+  		addi sp, sp, 8
+		la t2, SCRATCH_PAD
+		mv t5, t2
+  ud_generate_characters:
+		remu t3, t0, t1
+		divu t0, t0, t1
+		bgeu t3, a3, ud_bigger_remainder
+		add t4, t3, a0
+		j ud_paste_in
+  ud_bigger_remainder:
+		add t4, t3, a1
+  ud_paste_in:
+		sb t4, 0(t2)
+		addi t2, t2, 1
+		addi a2, a2, 1
+		bne t0, zero, ud_generate_characters
+		#now reverse the order
+		mv t0, t5
+		mv t1, t2
+		addi t1, t1, -1
+  ud_reverse:
+		bgeu t0, t1, ud_reverse_done
+		lb t3, 0(t0)
+		lb t4, 0(t1)
+		sb t3, 0(t1)
+		sb t4, 0(t0)
+		addi t0, t0, 1
+		addi t1, t1, -1
+		j ud_reverse
+  ud_reverse_done:
+		li t4, 0x20	#space
+		sb t4, 0(t2)
+		addi a2, a2, 1
+		WRITESTRINGR t5, a2 
 		tail NEXT
 
 		CODEHEADERZ UMDIVMOD, UM/MOD, UD, 0x01
