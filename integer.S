@@ -345,11 +345,11 @@
 		sd t0, 0(sp)
                 tail NEXT
 
-		CODEHEADER U, MAX, 0x01
+		CODEHEADERZ UD, U., MAX, 0x01
 		#(u --)
 		tail NEXT
 
-		CODEHEADERZ UMDIVMOD, UM/MOD, U, 0x01
+		CODEHEADERZ UMDIVMOD, UM/MOD, UD, 0x01
 		#(ud u -- u u)
 		ld t0, 0(sp)
 		ld t1, 8(sp)
