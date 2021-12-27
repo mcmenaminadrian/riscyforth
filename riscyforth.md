@@ -16,31 +16,37 @@ riscyforth - Forth for RISC-V SBCs
 written in RISC-V assembly and is free software with modification and
 distribution (including of this man file) covered by version 2 of the GNU
 General Public Licence (which should be found in every distribution of
-riscyforth).
+**riscyforth**).
 
-The most up-to-date version of riscyforth can be found at
+The most up-to-date version of **riscyforth** can be found at
 https://github.com/mcmenaminadrian/riscyforth
 
-This man file describes the words natively supported by riscyforth.
+Staring **riscyforth** will invoke a terminal interface and programs may be 
+loaded or written directly. Persistent programs need to be written in an
+editor and loaded into a running instance of **riscyforth**.
 
-riscyforth aims to support the Forth 2012 standard but not all words here
+This man file describes the words natively supported by **riscyforth**. Like
+all Forths **riscyforth** may be extended through *colon words* written in
+Forth itself.
+
+**riscyforth** aims to support the Forth 2012 standard but not all words here
 are part of the standard and not all the standard is (currently) supported.
 
-It should be noted that riscyforth is a 64 bit Forth - i.e., cells are 8 bytes
-wide by default.
+It should be noted that **riscyforth** is a 64 bit Forth - i.e., cells are 8
+bytes wide by default.
 
-riscyforth is copyright (c) Adrian McMenamin, 2020 - 2021.
+**riscyforth** is copyright (c) Adrian McMenamin, 2020 - 2021.
 
 # FORTH WORDS
 
-An alphabetical list of Forth words implemented on **riscyforth**. A word
-in the Forth 2012 Core which is not yet implemented (and may never be) is
+An alphabetical list of Forth words implemented on **riscyforth** follows. A
+word in the Forth 2012 Core which is not yet implemented (and may never be) is
 also noted for the convenience of those porting code.
 
 **ABORT** Quit without displaying a message
 
 **ABORT"** (x --) if *x* is non-zero quit displaying a message
-e.g., 1 ABORT" Display this message on quitting"
+e.g., *1 ABORT" Display this message on quitting"*
 
 **ABS** (n -- u) Place the absolute value of *n* on the stack
 
@@ -49,7 +55,7 @@ e.g., 1 ABORT" Display this message on quitting"
 
 **ACTION-OF** NOT YET IMPLEMENTED
 
-**AGAIN** Return to the code block marked by BEGIN
+**AGAIN** Return to the code block marked by *BEGIN*
 
 **ALIGN** (--) If required (8-byte) align the data space pointer
 
@@ -60,7 +66,7 @@ to *a1*
 
 **ALLOT** (n --) move the data space pointer by *n* bytes
 
-**AND** (x1 x2 -- x3) *x3* is the bitwise logical AND of *x1* with *x2*
+**AND** (x1 x2 -- x3) *x3* is the bitwise logical *AND* of *x1* with *x2*
 
 **BASE** (-- a) *a* is the address of the current number conversion radix
 (number base)
@@ -77,7 +83,7 @@ to *a1*
 
 **BINARY** Set the radix (base) to two
 
-**BL** (-- c) Places the valie 0x20 (32 - space) on the stack
+**BL** (-- c) Places the value 0x20 (ascii 32 - space) on the stack
 
 **BLACK** Set terminal foreground to black
 
@@ -90,7 +96,7 @@ to *a1*
 **BRIGHT** Set terminal output to bright
 
 **BUFFER:** (-- a) Creates a buffer that returns address *a* e.g.,
-*80 BUFFER: TESTBUF* creates the buffer TESTBUF of length 80 bytes
+*80 BUFFER: TESTBUF* creates the buffer *TESTBUF* of length 80 bytes
 
 **BWHITE** Set terminal background to white
 
@@ -127,9 +133,9 @@ the stack as *char*
 
 **COMPILE,** NOT YET IMPLEMENTED
 
-**CONSTANT** Create a constant that returns a constant value to the stack e.g.,
+**CONSTANT** Create a word that returns a constant value to the stack e.g.,
 *25 FIVESQUARED CONSTANT* creates the constant *FIVESQUARED* that will always
-return 25 tonthe stack
+return 25 on the stack
 
 **COUNT** NOT YET IMPLEMENTED 
 
@@ -147,7 +153,7 @@ data space pointer at the time of creation.
 
 **:NONAME** NOT YET IMPLEMENTED
 
-**,** (x --) Advance data space pointer by one cell and store x in the cell
+**,** (x --) Advance data space pointer by one cell and store *x* in the cell
 
 **C"** NOT YET IMPLEMENTED
 
@@ -159,13 +165,13 @@ data space pointer at the time of creation.
 
 **CUBE** (x1 -- x2) Cube *x1* and store in *x2*
 
-**DECIMAL** Set radix (base) to ten (decimal)
+**DECIMAL** Set radix (base) to ten
 
 **DEFER** Defer execution of created word to another word
 e.g., *DEFER TEST* creates a word *TEST* that we can later assign execution
-characteristsics to (see e.g., *DEFER@*)
+characteristics to (see e.g., *DEFER@*)
 
-**DEFER@** (x1 -- x2) iReports that xxecution token *x1* is set to *x2* e.g.,
+**DEFER@** (x1 -- x2) Reports that execution token *x1* is set to *x2* e.g.,
 *EMIT IS TESTDEFER ' TESTDEFER DEFER@ ' EMIT =* will return *TRUE* if a call
 to *TESTDEFER* executes *EMIT*
 
@@ -183,9 +189,9 @@ to *TESTDEFER* executes *EMIT*
 *: INDEXED-ARRAY CREATE CELLS ALLOT DOES> SWAP CELLS + ;* creates an
 indexed array type
 
-**DROP** (x --) Removes the top of the stack
+**DROP** (x --)
 
-**DUP** (x -- x x) Duplicates the top of the stack
+**DUP** (x -- x x)
 
 **/** (n1 n2 -- n3) Divide *n1* by *n2* and store the result on the stack as
  *n3*
@@ -219,7 +225,7 @@ from address *addr*
 
 **EVALUATE** NOT YET IMPLEMENTED
 
-**EXECUTE** (xt -- ?) REmove *xt* from stack and execute it
+**EXECUTE** (xt -- ?) Remove *xt* from stack and execute it
 
 **EXIT** Leave an *IF .. ELSE .. THEN* structure (care must be taken to 
 *UNLOOP* if necessary)
@@ -239,7 +245,7 @@ from address *addr*
 **@** (addr -- x) Fetch as *x* the contents of cell at *addr* and store on
 the stack
 
-**FREE** (addr -- ior) Free memort at *addr* (*ior* on success)
+**FREE** (addr -- ior) Free memort at *addr* (*ior* is zero on success)
 
 **GETLINE** Fetch text input
 
@@ -262,7 +268,7 @@ string
 **IMMEDIATE** NOT YET IMPLEMENTED
 
 **INCLUDE** Load file and immediately parse e.g.
-*INCLUDE /home/foo/bar.fth*
+*INCLUDE /home/foo/bar.fth* will load and evaluate *bar.fth*
 
 **INVERT** (x1 -- x2) Invert all bits of *x1* and store on the stack as *x2*
 
@@ -305,7 +311,7 @@ continue to execute loop R:(x1 -- x2)
 
 **MS** (x --) Pause execution for *x* milliseconds
 
-**NEGATE** (n1 -- n2) *n2* is the arthmetic inverse of *n1*
+**NEGATE** (n1 -- n2) *n2* is the arithmetic inverse of *n1*
 
 **NIP** (x1 x2 -- x2)
 
@@ -394,12 +400,6 @@ number of caharcters it contains
 
 **;** Mark the end of a *colon word*
 
-**STATE** NOT YET IMPLEMENTED
-
-**SWAP** (x1 x2 -- x2 x1)
-
-**;** Mark the end of a *colon word*
-
 **S\\"** NOT YET IMPLEMENTED
 
 **S"** (-- addr u) *addr* contains the address of, and *u* the length of,
@@ -443,7 +443,8 @@ divided by *n3* and *n5* is the quotient
 
 **2/** (x1 -- x2) *x2* is x1 divided by 2
 
-**2@** (addr -- x1 x2) Fetch the two cells at *addr* (*x2*) and *addr + 8* (*x1*)
+**2@** (addr -- x1 x2) Fetch the two cells at *addr* (stored in *x2*) and
+*addr + 8* (stored in *x1*)
 
 **2OVER** (x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2)
 
@@ -484,7 +485,6 @@ arithmetic is unsigned
 
 **UNDERPLUS** (x2 x1 x0 -- x1 x3) *x3* is the sum of *x2* and *x0*
 
-
 **UNLOOP** Discard the loop parameters for the current loop (before *EXIT*)
 
 **UNTIL** (x --) if *x* is zero return to code block starting with *BEGIN*
@@ -493,10 +493,11 @@ arithmetic is unsigned
 
 **U.** (u --) display *u* as an unsigned number
 
-**VALUE** A value is a proxy for a number e.g.
+**VALUE** A value is a word proxy for a number e.g.
 *7 VALUE SEVEN* assigns 7 to the word *SEVEN*
 
-**VARIABLE** A variable is a store for a number accessed via *!* and *@*
+**VARIABLE** A variable is word proxy for a memory address - 
+accessed via *!* and *@*
 
 **WHILE** (x --) if *x* is non-zero execute the code in a *WHILE .. REPEAT*
 block
@@ -515,22 +516,29 @@ block
 **YELLOW** Set terminal foreground to yellow
 
 **0=** (x -- flag) *flag* is *TRUE* if *x* is zero
+(otherwise *FALSE*)
 
 **0<** (x -- flag) *flag* is *TRUE* if *x* is less than zero
+(otherwise *FALSE*)
 
 **0>** (x -- flag) *flag* is *TRUE* if *x* is greater than zero
+(otherwise *FALSE*)
 
 **0<>** (x -- flag) *flag* is *TRUE* if *x* is not equal to zero
+(otherwise *FALSE*)
 
 **\\** The rest of the line is treated as a comment and is not processed
 
 **.** (x --) *x* is output (as a signed number if *BASE* is ten)
 
 **<** (x1 x2 -- flag) *flag* is *TRUE* if *x1* is less than *x2*
+(otherwise *FALSE*)
 
 **>** (x1 x2 -- flag) *flag* is *TRUE* if *x1* is greater than *x2*
+(otherwise *FALSE*)
 
 **<>** (x1 x2 -- flag) *flag* is *TRUE* if *x1* is not equal to *x2*
+(otherwise *FALSE*)
 
 **#>** (xd -- addr u) Make a pictured numeric string of length *u* 
 available at *addr*
@@ -547,9 +555,9 @@ at conclusion **ud2** is zero
 
 **?DO** (n1 n2 --) Do not execute loop body if *n1* and *n2* are equal
 
-**?DUP** (x -- 0| x x) if *x* is non-zero duplicate *x*
+**?DUP** (x -- 0 | x x) if *x* is non-zero duplicate *x*
 
-**>BODY** (xt -- addr) return in *addr* the data space pointer value used
+**>BODY** (xt -- addr) *addr* returns the data space pointer value used
 by *xt*
 
 **>IN** NOT YET IMPLEMENTED
@@ -561,5 +569,4 @@ At the end *ud2* holds the converted number, *addr2* points to the first
 unconverted characted and *u2* holds the number of unconverted characters.
 
 **>R** (x --) R:(--x) Move *x* from the (data) stack to the return stack
-
 
