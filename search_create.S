@@ -175,9 +175,14 @@
 		tail embed_to
   search_char:
 		la t0, WA_CHAR
-		bne t3, t0, search_wa_again
+		bne t3, t0, search_actionof
 		la t3, WA__CHAR
 		tail embed_tick
+  search_actionof:
+		la t0, WA_ACTIONOF
+		bne t3, t0, search_wa_again
+		la t3, WA__ACTIONOF
+		tail embed_defer
   search_wa_again:
 		#test for AGAIN
 		la t0, WA_AGAIN
@@ -540,6 +545,67 @@
 		ld s0, 0(sp)
 		addi sp, sp, 96
 		ret		
+
+  embed_defer:
+		#embed string - processing it as we go
+		la t0, createwritepoint
+		ld t1, 0(t0)
+		sd t3, 0(t1)				#write out word address
+		PUSH t1					# save for later
+		la a0, INPUT_START
+		la a1, INPUT_END
+		ld a0, 0(a0)
+		ld a1, 0(a1)
+		call utility_find_string
+		bnez a0, embed_defer_continue
+		tail search_failed
+  embed_defer_continue:
+		sd a1, INPUT_START, t5
+		call utility_sanitize_string
+		mv t0, a0
+		mv t1, a1
+		#t0 has start of token
+		#t1 has end of token
+		addi t1, t1, -1
+		mv t2, t0
+		mv t3, t1
+		sub a0, t3, t2
+		addi a0, a0, 1
+		POP t1
+		sd a0, 8(t1)				#write out length
+		addi t1, t1, 16				#prepare to embed
+		mv a2, a0
+		mv a3, t0
+		mv a5, t1
+  embed_defer_code:
+		beqz a2, embed_defer_check_alignment
+		lbu a4, 0(a3)
+		sb a4, 0(a5)
+		addi a2, a2, -1
+		addi a5, a5, 1
+		addi a3, a3, 1
+		j tick_embed_code
+  embed_defer_check_alignment:
+		#need to ensure alignment of output maintained
+		#a1 holds length
+		mv a1, a0
+		li a0, 0x07
+		li a2, 0x08
+		and a3, a1, a0
+		sub a3, a2, a3
+		add a1, a1, a3
+		add t1, t1, a1
+		la a0, createwritepoint
+		sd t1, 0(a0)				#advance writepoint
+		beqz a0, embed_defer_done
+		#increment the conditionals
+		addi a1, a1, 16				#command and length
+		srli a5, a1, 3
+  embed_defer_done:
+		la s7, outer_loop_tokenize
+		fence.i
+		tail NEXT
+
 
   embed_to:
   embed_tick:

@@ -30,47 +30,46 @@
    .comm INPUT_BUFFER, BUFFERLEN
    .comm EXPANDED_BUFFER, BUFFERLEN
    .comm SCRATCH_PAD, SYSTEMAREA
-   .comm NEWWORDENTRY, 0x08
-   .comm CREATEFLAG, 0x08
-   .comm OKSTATUS, 0x08
-   .comm TOKEN_START, 0x08
-   .comm TOKEN_END, 0x08
-   .comm CURRENT_BASE, 0x08
-   .comm INPUT_START, 0x08
-   .comm INPUT_END, 0x08
-   .comm CALLSTACK, 0x80000
-   .comm STACK, 0x80000
+   .comm NEWWORDENTRY, ADDRWIDTH
+   .comm CREATEFLAG, ADDRWIDTH
+   .comm OKSTATUS, ADDRWIDTH
+   .comm TOKEN_START, ADDRWIDTH
+   .comm TOKEN_END, ADDRWIDTH
+   .comm CURRENT_BASE, ADDRWIDTH
+   .comm INPUT_START, ADDRWIDTH
+   .comm INPUT_END, ADDRWIDTH
+   .comm CALLSTACK, BIGSPACE
+   .comm STACK, BIGSPACE
    .comm VARIABLES, BIGSPACE
    .comm CONSTANTS, BIGSPACE
-   .comm TOP_VARS, 0x08
-   .comm BOTTOM_VARS, 0x08
-   .comm TOP_CONS, 0x08
-   .comm BOTTOM_CONS, 0x08
-   .comm dictionary, 0x08 
-   .comm newdictionary, 0x08
-   .comm inputfileptr, 0x08
-   .comm createwritepoint, 0x08
-   .comm ifflag, 0x08
-   .comm DECIDESTACKP, 0x08
-   .comm DECIDESTACKB, 0x08
-   .comm VARIABLEFLAG, 0x08
-   .comm INFILELOAD, 0x08
-   .comm LOADLINESETUP, 0x08
-   .comm LOADINGFILE, 0x08
-   .comm FILEMEMORYADDR, 0x08
-   .comm STACKTOP, 0x08
-   .comm datamanagement, 0x08
-   .comm recycleallot, 0x08
-   .comm recyclewatermark, 0x08
-   .comm dataspace, 0x08
-   .comm dataspaceptr, 0x08
-   .comm INDOES, 0x08
-   .comm MULTILINE, 0x08
+   .comm TOP_VARS, ADDRWIDTH
+   .comm BOTTOM_VARS, ADDRWIDTH
+   .comm TOP_CONS, ADDRWIDTH
+   .comm BOTTOM_CONS, ADDRWIDTH
+   .comm dictionary, ADDRWIDTH 
+   .comm newdictionary, ADDRWIDTH
+   .comm inputfileptr, ADDRWIDTH
+   .comm createwritepoint, ADDRWIDTH
+   .comm DECIDESTACKP, ADDRWIDTH
+   .comm DECIDESTACKB, ADDRWIDTH
+   .comm VARIABLEFLAG, ADDRWIDTH
+   .comm INFILELOAD, ADDRWIDTH
+   .comm LOADLINESETUP, ADDRWIDTH
+   .comm LOADINGFILE, ADDRWIDTH
+   .comm FILEMEMORYADDR, ADDRWIDTH
+   .comm STACKTOP, ADDRWIDTH
+   .comm datamanagement, ADDRWIDTH
+   .comm recycleallot, ADDRWIDTH
+   .comm recyclewatermark, ADDRWIDTH
+   .comm dataspace, ADDRWIDTH
+   .comm dataspaceptr, ADDRWIDTH
+   .comm INDOES, ADDRWIDTH
+   .comm MULTILINE, ADDRWIDTH
    .comm PICTUREDN, 0x10
    #for debugging
-   .comm CYCLESTART, 0x08
-   .comm CYCLECOUNT, 0x08
-   .comm CYCLEPINGS, 0x08
+   .comm CYCLESTART, ADDRWIDTH
+   .comm CYCLECOUNT, ADDRWIDTH
+   .comm CYCLEPINGS, ADDRWIDTH
 
 
    .data
@@ -104,8 +103,8 @@
   .globl main
   _start:
   main:
-                la s10, STACK + 0x7FFF8
-                la s9, CALLSTACK + 0x7FFF8
+                la s10, STACK + BIGSPACE - STACKOFFSET
+                la s9, CALLSTACK + BIGSPACE - STACKOFFSET
                 la a0, riscy_forth0
                 call puts
                 la a0, welcome_msg

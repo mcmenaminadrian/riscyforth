@@ -29,8 +29,6 @@
 		la t0, LOADLINESETUP
 		sd zero, 0(t0) 
 		li t0, 1
-		la t1, ifflag
-		sd t0, 0(t1)			  #ignore ELSE by default
 		#set up memory allocator
 		call initialize_memoryspace	  
 		#now create standard dataspace
@@ -88,7 +86,6 @@
 		sd zero, VARIABLEFLAG, t0
                 la t1, TIL_ABORT	                    #start search from here
                 sd t1, dictionary, t0
-		sd zero, ifflag, t0
 
                 sd zero, TOKEN_START, t0
                 sd zero, TOKEN_END, t0

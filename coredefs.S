@@ -880,7 +880,47 @@
 		PUSH t3
 		tail NEXT
 
-		CODEHEADER ABORT, DEPTH, 0x01
+		CODEHEADER _ACTIONOF, DEPTH, 0x00
+		#( -- xt)
+		#compiled version
+		ld a2, 0(s7)		#length
+		mv a1, a0
+		addi s7, s7, 8
+		mv a0, s7
+		add s7, s7, a2
+		li t0, 7
+		and t1, s7, t0
+		beqz t1, _actionof_adjustment_over
+		li t2, 8
+		sub t2, t2, t1
+		add s7, s7, t2
+  _actionof_adjustment_over:
+		j actionof_completion
+
+		CODEHEADERZ ACTIONOF,  ACTION-OF, _ACTIONOF, 0x01
+		#("name" -- xt)
+		#parse name
+		#in immediate mode here
+		# look for the string
+		ld a0, INPUT_START
+		ld a1, INPUT_END
+		call utility_find_string
+		beqz a0, actionof_error
+		#a0 has start, a1 has end + 1, a2 has length
+		sd a1, INPUT_START, t5
+		call utility_sanitize_string
+  actionof_completion:
+		call utility_check_dictionary_match
+		beqz a3, actionof_error
+		ld t0, 160(a4)
+		addi sp, sp, -8
+		sd t0, 0(sp)
+		tail NEXT
+  actionof_error:
+		tail variable_gone_bad
+  
+
+		CODEHEADER ABORT, ACTIONOF, 0x01
 		la s7, outer_loop_ok
 		tail NEXT
 
