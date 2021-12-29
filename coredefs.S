@@ -754,8 +754,13 @@
 		j tick_prepare_sanity_test		#can skip the other tests for length
   tick_length_two_or_more:
 		li a1, 1
-		bne a0, a1, tick_length_six_or_more
+		bne a0, a1, tick_length_three_or_more
 		call tick_fix_up_length_two
+		j tick_prepare_sanity_test
+  tick_length_three_or_more:
+		li a1, 2
+		bne a0, a1, tick_length_six_or_more
+		call tick_fix_up_length_three
 		j tick_prepare_sanity_test
   tick_length_six_or_more:
 		li a1, 5
@@ -809,7 +814,11 @@
   tick_exhausted:
 		tail search_failed
 
-		CODEHEADERZ CFETCH, C@, TICK, 0x01
+		CODEHEADER BRACKETTICK, TICK, 0x01
+		#really not an immediate word!
+		tail TICK
+
+		CODEHEADERZ CFETCH, C@, BRACKETTICK, 0x01
 		ld t0, 0(sp)
 		lbu t1, 0(t0)
 		sd t1, 0(sp)
@@ -1078,6 +1087,24 @@
 		call fix_up_squote
 		j tix_up_done
 
+  tick_fix_up_length_three:
+		#expand ['] --> BRACKETTICK
+		mv a0, t0
+		la a2, EXPANDED_BUFFER
+		mv a3, a2
+		mv a1, t1
+		mv a5, t2
+		lbu t1, 0(a0)
+		li t2, 0x5B		#[
+		bne t1, t2, tix_up_six_done
+		lbu t1, 1(a0)
+		li t2, 0x27		#'
+		bne t1, t2, tix_up_six_done
+		lbu t1, 2(a0)
+		li t2, 0x5D		#]
+		bne t1, t2, tix_up_six_done
+		call fix_up_brackettick
+		j tix_up_done
 
   tick_fix_up_length_six:
 		#expand the following

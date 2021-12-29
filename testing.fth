@@ -397,11 +397,12 @@ TESTUNLOOPV @ 3 = IF BLUE ." UNLOOP passed " ELSE RED ." UNLOOP FAILED" THEN RES
 : ZZ BLUE ." ', EXECUTE and C! passed " RESET ;
 
 : TESTINGTICK 
-." Testing ', EXECUTE and C! " 5 spaces
+." Testing ', ['], EXECUTE and C! " 5 spaces
 hex 58 decimal ' ZZ 24 + C! ' XZ execute cr
 \ Change back or else subsequent tests will break
 ." Testing one more time " 5 spaces
-hex 5A decimal ' xz 24 + C! ' zZ exeCUTE  cr ;
+hex 5A decimal ' xz 24 + C! ' zZ exeCUTE  cr
+['] testingtick ' testingtick = IF BLUE ." ['] passed" else RED ." ['] FAILED" THEN RESET CR ;
 
 : testcfetch 
 ." Testing C@" 5 spaces

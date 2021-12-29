@@ -157,10 +157,14 @@
 		tail embed_sq
   search_tick:
 		la t0, WA_TICK
-		bne t3, t0, search_is
+		bne t3, t0, search_brackettick
 		#substitute WA__TICK
+  search_tick_brackettick_join:
 		la t3, WA__TICK
 		tail embed_tick
+  search_brackettick:
+		la t0, WA_BRACKETTICK
+		beq t3, t0, search_tick_brackettick_join
   search_is:
 		la t0, WA_IS
 		bne t3, t0, search_to

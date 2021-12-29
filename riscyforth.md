@@ -110,9 +110,10 @@ to *a1*
 **[CHAR]** ("spaces\<name\>" --) At runtime: (-- char) Places value of first
 character in *name* on stack as *char*
 
-**[COMPILE]** NOT YET IMPLEMENTED
+**[COMPILE]** NOT IMPLEMENTED: Word is obsolescent in Forth 2012
 
-**[']** NOT YET IMPLEMENTED
+**[']** ("spaces"\<name\>" --) At runtime: (-- xt) Please use *'* instead
+(*[']* has the same functionality)
 
 **CASE** Mark the start of *CASE .. OF .. ENDOF .. ENDCASE* control structure
 

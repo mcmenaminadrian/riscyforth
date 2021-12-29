@@ -150,7 +150,7 @@
 		j tokenize_fix_up_single
   tokenize_test_length_two:
 		li a1, 1			      #test if input is of length2
-		bne a0, a1, tokenize_test_length_six
+		bne a0, a1, tokenize_test_length_three
 		PUSH t0
 		jal fix_up_length_two
 		j tokenize_prepare_sanity_test
@@ -158,6 +158,12 @@
 		PUSH t0
 		jal fix_up_input		      #one character token so check for expansion
 		j tokenize_prepare_sanity_test
+  tokenize_test_length_three:
+		li a1, 2
+		bne a0, a1, tokenize_test_length_six
+		PUSH t0
+		jal fix_up_length_three
+		j tokenize_prepare_sanity_test	
   tokenize_test_length_six:	
 		li a1, 5
 		bne a0, a1, tokenize_prepare_sanity_test
@@ -558,6 +564,24 @@
 		WRITESTRINGR t5, t1		
                 WRITECHAR 0x20            #space
                 j NEXT
+  fix_up_length_three:
+		#expand ['] --> BRACKETTICK
+		POP a0
+		la a2, EXPANDED_BUFFER
+		mv a3, a2
+		mv a1, t1 
+		mv a5, t2
+		lbu t1, 0(a0)
+                li t2, 0x5B             #[
+                bne t1, t2, fix_up_finished
+                lbu t1, 1(a0)
+                li t2, 0x27             #'
+                bne t1, t2, fix_up_finished
+                lbu t1, 2(a0)
+                li t2, 0x5D             #]
+                bne t1, t2, fix_up_finished
+		call fix_up_brackettick
+		j fix_up_done
 
   fix_up_length_six:
 		#expand the following
@@ -808,6 +832,31 @@
 		beqz t0, keep_fixing_up_comment
 		j pull_in_another		      #suck in a line
   keep_fixing_up_comment:
+		ret
+
+  fix_up_brackettick:
+		#BRACKETTICK
+		#0x42 0x52 0x41 0x43 0x4B 0x45 0x54 0x54 0x49 0x43 0x4B
+		li t0, 0x54		#T
+		li t1, 0x4B		#K
+		li t4, 0x43		#C
+		li t3, 0x42
+		sb t3, 0(a2)
+		li t3, 0x52
+		sb t3, 1(a2)
+		li t3, 0x41
+		sb t3, 2(a2)
+		sb t4, 3(a2)
+		sb t1, 4(a2)
+		li t3, 0x45
+		sb t3, 5(a2)
+		sb t0, 6(a2)
+		sb t0, 7(a2)
+		li t3, 0x49
+		sb t3, 8(a2)
+		sb t4, 9(a2)
+		sb t1, 10(a2)
+		addi a2, a2, 10
 		ret
 
   do_fix_up_tick:
