@@ -13,7 +13,14 @@
 		sd t0, 0(sp)
 		tail NEXT
 
-		CODEHEADERZ CELLPLUS, CELL+, CELLS, 0x01
+		CODEHEADERZ CHARPLUS, CHAR+, CELLS, 0x01
+		#(caddr1 -- caddr2)
+		ld t0, 0(sp)
+		addi t0, t0, 1
+		sd t0, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ CELLPLUS, CELL+, CHARPLUS, 0x01
 		ld t0, 0(sp)
 		addi t0, t0, 8
 		sd t0, 0(sp)

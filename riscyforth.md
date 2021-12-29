@@ -130,7 +130,8 @@ on the stack as *char*
 **CHAR** ("name" -- char) Put the first character of the string *name* on
 the stack as *char*
 
-**CHAR+** NOT YET IMPLEMENTED
+**CHAR+** (caddr1 -- caddr2) Add character size (1) to address *caddr1* and
+store result on stack in *caddr2*
 
 **CHARS** (n1 -- n2) *n2* is the size in address units of *n1* (this is a NOP)
 
