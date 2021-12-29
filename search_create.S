@@ -169,9 +169,15 @@
 		tail embed_tick
   search_to:
 	 	la t0, WA_TO
-		bne t3, t0, search_char
+		bne t3, t0, search_bracketchar
 		#substitute WA__TO
 		la t3, WA__TO
+		tail embed_to
+  search_bracketchar:
+		la t0, WA_BRACKETCHAR
+		bne t3, t0, search_char
+		#substitute WA__BRACKETCHAR
+		la t3, WA__BRACKETCHAR
 		tail embed_to
   search_char:
 		la t0, WA_CHAR

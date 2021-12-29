@@ -53,8 +53,8 @@ e.g., *1 ABORT" Display this message on quitting"*
 **ACCEPT** (addr n1 -- n2) Store at most *n1* characters in buffer at address
 *addr*, *n2* is the actual number of characters stored
 
-**ACTION-OF** (-- xt) At run time returns the execution token $xt$ for the
-deferred word eg., to use $ACTION-OF TESTDEFER$
+**ACTION-OF** (-- xt) At run time returns the execution token *xt* for the
+deferred word eg., to use *ACTION-OF TESTDEFER*
 
 **AGAIN** Return to the code block marked by *BEGIN*
 
@@ -107,7 +107,8 @@ to *a1*
 
 **[** At compile time the contents of *[ ]* are immediately evaluated
 
-**[CHAR]** NOT YET IMPLEMENTED
+**[CHAR]** ("spaces\<name\> --) At runtime: (-- char) Places value of first
+character in *name* on stack as *char*
 
 **[COMPILE]** NOT YET IMPLEMENTED
 
