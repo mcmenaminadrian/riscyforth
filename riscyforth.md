@@ -107,7 +107,7 @@ to *a1*
 
 **[** At compile time the contents of *[ ]* are immediately evaluated
 
-**[CHAR]** ("spaces\<name\> --) At runtime: (-- char) Places value of first
+**[CHAR]** ("spaces\<name\>" --) At runtime: (-- char) Places value of first
 character in *name* on stack as *char*
 
 **[COMPILE]** NOT YET IMPLEMENTED
