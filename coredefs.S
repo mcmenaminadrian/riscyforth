@@ -773,8 +773,13 @@
 		j tick_prepare_sanity_test
   tick_length_six_or_more:
 		li a1, 5
-		bne a0, a1, tick_prepare_sanity_test
+		bne a0, a1, tick_length_twelve_or_more
 		call tick_fix_up_length_six
+		j tick_prepare_sanity_test
+  tick_length_twelve_or_more:
+		li a1, 11
+		bne a0, a1, tick_prepare_sanity_test
+		call tick_fix_up_length_twelve
   tick_prepare_sanity_test:
 		li t3, 0x5F
 		addi t5, zero, 0x61
@@ -1122,6 +1127,49 @@
 		li t2, 0x5D		#]
 		bne t1, t2, tix_up_six_done
 		call fix_up_brackettick
+		j tix_up_done
+
+  tick_fix_up_length_twelve:
+		#expand COMPILE, --> COMPILECOMMA
+		#COMPILE: 0x43 0x4F 0x4D 0x50 0x49 0x4C 0x45
+		#COMMA: 0x43 0x4F 0x4D 0x4D 0x41
+		mv a0, t0
+		la a2, EXPANDED_BUFFER
+		mv a3, a2
+		mv a1, t1 
+		mv a5, t2
+		li t2, 0x43		#C
+		lbu t1, 0(a0)
+		andi t1, t1, 0x5F
+		bne t1, t2, tix_up_six_done
+		li t2, 0x4F		#O
+		lbu t1, 1(a0)
+		andi t1, t1, 0x5F
+		bne t1, t2, tix_up_six_done
+		li t2, 0x4D		#M
+		lbu t1, 2(a0)
+		andi t1, t1, 0x5F
+		bne t1, t2, tix_up_six_done
+		li t2, 0x50		#P
+		lbu t1, 3(a0)
+		andi t1, t1, 0x5F
+		bne t1, t2, tix_up_six_done
+		li t2, 0x49		#I
+		lbu t1, 4(a0)
+		andi t1, t1, 0x5F
+		bne t1, t2, tix_up_six_done
+		li t2, 0x4C		#L
+		lbu t1, 5(a0)
+		andi t1, t1, 0x5F
+		bne t1, t2, tix_up_six_done
+		li t2, 0x45		#E
+		lbu t1, 6(a0)
+		andi t1, t1, 0x5F
+		bne t1, t2, tix_up_six_done
+		li t2, 0x2C		#,
+		lbu t1, 11(a0)
+		bne t1, t2, tix_up_six_done
+		call fix_up_compilecomma
 		j tix_up_done
 
   tick_fix_up_length_six:
