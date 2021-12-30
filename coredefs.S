@@ -39,6 +39,8 @@
                 ecall                   #make system call
 		WRITECR
 		la s7, outer_loop_ok
+		la t0, CREATEFLAG
+		sd zero, 0(t0)
 		tail NEXT
 
 		CODEHEADER STATE, _ABORTCOMM, 0x01
@@ -876,7 +878,12 @@
 		sd t1, 0(t0)
 		tail NEXT
 
-		CODEHEADERZ P, (, RIGHTBRACKET, 0x01
+		CODEHEADER COMPILECOMMA, RIGHTBRACKET, 0x01
+		#does nothing in interpretation
+		#( -- )
+		tail NEXT
+
+		CODEHEADERZ P, (, COMPILECOMMA, 0x01
 		# look for the closing bracket - this is an immediate word
   paren_go:				#called in compile mode to get out
 		la t0, INPUT_START
@@ -906,6 +913,8 @@
 		CODEHEADER QUIT, CHAR, 0x01
 		#(?? --)
 		#currently restarts interpreter which is not quite correct
+		la t0, CREATEFLAG
+		sd zero, 0(t0)
 		tail main
 
 		CODEHEADER BASE, QUIT, 0x01
@@ -974,6 +983,8 @@
 
 		CODEHEADER ABORT, ACTIONOF, 0x01
 		la s7, outer_loop_ok
+		la t0, CREATEFLAG
+		sd zero, 0(t0)
 		tail NEXT
 
 

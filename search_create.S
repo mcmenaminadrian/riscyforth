@@ -165,6 +165,12 @@
   search_brackettick:
 		la t0, WA_BRACKETTICK
 		beq t3, t0, search_tick_brackettick_join
+		#handle COMPILE,
+		la t0, WA_COMPILECOMMA
+		bne t3, t0, search_is
+		ld t3, 0(sp)
+		addi sp, sp, 8
+		j search_create_inscribe
   search_is:
 		la t0, WA_IS
 		bne t3, t0, search_to
