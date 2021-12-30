@@ -6,9 +6,11 @@ DECIMAL
 
 : WHEN
 TIME&DATE
-." Date is " . ." : " . ." : " . CR
-." Time is " . ." : " . ." : " . CR ;
-
+." ================Running tests==================" CR
+." Date is " BRIGHT GREEN . ." : " . ." : " . RESET CR
+." Time is " BRIGHT GREEN . ." : " . ." : " . RESET CR
+." ===============================================" CR
+STATE @ 0= IF BLUE ." STATE passed " ELSE RED ." STATE FAILED" THEN RESET CR ;
 
 : testOVER2
 ." Testing 2OVER " 5 SPACES

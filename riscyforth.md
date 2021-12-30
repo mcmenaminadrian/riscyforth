@@ -398,7 +398,8 @@ number of caharcters it contains
 
 **SQUARE** (x1 -- x2) Square *x1* and store in *x2*
 
-**STATE** NOT YET IMPLEMENTED
+**STATE** (-- addr) $addr$ is the address of a cell reporting the compilation
+state
 
 **SWAP** (x1 x2 -- x2 x1)
 

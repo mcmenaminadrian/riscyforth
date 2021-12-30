@@ -41,7 +41,14 @@
 		la s7, outer_loop_ok
 		tail NEXT
 
-		CODEHEADER _BRACKETCHAR, _ABORTCOMM, 0x0
+		CODEHEADER STATE, _ABORTCOMM, 0x01
+		#(-- addr)
+		la t0, CREATEFLAG
+		addi sp, sp, -8
+		sd t0, 0(sp)
+		tail NEXT
+
+		CODEHEADER _BRACKETCHAR, STATE, 0x0
 		#("spaces<name>" --) at interpretation
 		#(-- char) at runtime
 		#compiled version
