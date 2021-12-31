@@ -141,7 +141,8 @@ store result on stack in *caddr2*
 *25 FIVESQUARED CONSTANT* creates the constant *FIVESQUARED* that will always
 return 25 on the stack
 
-**COUNT** NOT YET IMPLEMENTED 
+**COUNT** (c-addr1 -- c-addr2 u) Return character count and text address for
+counted string 
 
 **CR** (--) output a newline
 

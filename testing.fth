@@ -330,18 +330,16 @@ variable allocated_buffer
 : TESTCOUNT
 ." Testing COUNT..." 5 SPACES
 S" 0123456"
-.s cr
-2dup CELLS + allocate drop allocated_buffer !
-.s cr
-swap buffer_to_copy !
-.s cr
+2dup CELL+ allocate drop allocated_buffer !
+buffer_to_copy !
+dup allocated_buffer @ !
 0 do
-    buffer_to_copy  @ i + c@ \ entered character
+    buffer_to_copy  @ i + c@        \ entered character
     allocated_buffer @ i + cell+ c! \ copy to storage
 loop
-hex allocated_buffer . SPACE allocated_buffer @ SPACE CR DECIMAL
-." verifying string: " cyan allocated_buffer type reset cr
-allocated_buffer count 7 = if blue ." COUNT passed" ELSE red ." COUNT FAILED" THEN RESET CR ;
+." verifying string: " cyan allocated_buffer @  cell+ allocated_buffer @ @ type reset cr
+." verifying count string: " cyan allocated_buffer @ count type reset cr
+allocated_buffer @ count 7 = if blue ." COUNT passed numeric test" ELSE red ." COUNT FAILED" THEN RESET CR ;
 
 \ Test return stack words
 
@@ -655,7 +653,7 @@ TESTMS
 TESTINGTICK testcfetch testingmove testchar test@ TEST2@ testplusstore TESTPADFILLERASE
 TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN TESTCOMMA TESTDOES> TEST2!
 VERIFYDEFERIS TESTDEFER@ TESTBUFFER: TEST>BODY TEST>BODY2 TESTBITMANIP TESTQ-?
-TESTADDRPLUS
+TESTADDRPLUS TESTCOUNT
 ." Testing of memory code complete" cr ;
 
 \ Test loops
