@@ -844,8 +844,18 @@
 		addi sp, sp, 16
 		sb t1, 0(t0)
 		tail NEXT
-	
-		CODEHEADER _EXIT, CSTORE, 0x0
+
+		CODEHEADER COUNT, CSTORE, 0x01
+		#(addr1 -- addr2 u)
+		ld t0, 0(sp)
+		ld t1, 0(t0)
+		addi t0, t0, ADDRWIDTH
+		sd t0, 0(sp)
+		addi sp, sp, -STACKOFFSET
+		sd t1, 0(sp)
+		tail NEXT
+		
+		CODEHEADER _EXIT, COUNT, 0x0
 		# just call SEMI
 		tail SEMI
 

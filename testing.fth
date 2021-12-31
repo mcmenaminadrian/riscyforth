@@ -325,6 +325,24 @@ EXITVAR DUP @ 1+ SWAP ! EXITVAR DUP @ 1+ SWAP ! EXIT EXITVAR DUP @ 1+ SWAP ! ;
 ." Testing EXIT " 5 SPACES EXITTEST1
 EXITTEST2 EXITTEST3 EXITVAR @ 202 = IF BLUE ." EXIT passed " ELSE RED ." EXIT FAILED " THEN RESET CR ;
 
+variable buffer_to_copy
+variable allocated_buffer
+: TESTCOUNT
+." Testing COUNT..." 5 SPACES
+S" 0123456"
+.s cr
+2dup CELLS + allocate drop allocated_buffer !
+.s cr
+swap buffer_to_copy !
+.s cr
+0 do
+    buffer_to_copy  @ i + c@ \ entered character
+    allocated_buffer @ i + cell+ c! \ copy to storage
+loop
+hex allocated_buffer . SPACE allocated_buffer @ SPACE CR DECIMAL
+." verifying string: " cyan allocated_buffer type reset cr
+allocated_buffer count 7 = if blue ." COUNT passed" ELSE red ." COUNT FAILED" THEN RESET CR ;
+
 \ Test return stack words
 
 : TESTRSTACKBASICS
