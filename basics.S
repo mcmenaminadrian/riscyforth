@@ -166,15 +166,15 @@
 		j tokenize_prepare_sanity_test	
   tokenize_test_length_six:	
 		li a1, 5
-		bne a0, a1, tokenize_test_length_twelve
+		bne a0, a1, tokenize_test_length_eight
 		PUSH t0
 		jal fix_up_length_six
 		j tokenize_prepare_sanity_test
-  tokenize_test_length_twelve:
-		li a1, 11
+  tokenize_test_length_eight:
+		li a1, 7
 		bne a0, a1, tokenize_prepare_sanity_test
 		PUSH t0
-		jal fix_up_length_twelve
+		jal fix_up_length_eight
 		
   tokenize_prepare_sanity_test:
                 addi t5, zero, 0x61                   #lowercase a
@@ -589,7 +589,7 @@
 		call fix_up_brackettick
 		j fix_up_done
 
-  fix_up_length_twelve:
+  fix_up_length_eight:
 		#expand COMPILE, --> COMPILECOMMA
 		#COMPILE: 0x43 0x4F 0x4D 0x50 0x49 0x4C 0x45
 		#COMMA: 0x43 0x4F 0x4D 0x4D 0x41
@@ -627,7 +627,7 @@
 		andi t1, t1, 0x5F
 		bne t1, t2, fix_up_finished
 		li t2, 0x2C		#,
-		lbu t1, 11(a0)
+		lbu t1, 7(a0)
 		bne t1, t2, fix_up_finished
 
 		#now the fix up
@@ -662,7 +662,7 @@
 		sh t3, 9(a2)
 		li t3, 0x41
 		sb t3, 11(a2)
-		addi a2, a2, 8
+		addi a2, a2, 11
 		j fix_up_done
 					
 

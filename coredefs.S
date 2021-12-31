@@ -773,13 +773,13 @@
 		j tick_prepare_sanity_test
   tick_length_six_or_more:
 		li a1, 5
-		bne a0, a1, tick_length_twelve_or_more
+		bne a0, a1, tick_length_eight_or_more
 		call tick_fix_up_length_six
 		j tick_prepare_sanity_test
-  tick_length_twelve_or_more:
-		li a1, 11
+  tick_length_eight_or_more:
+		li a1, 7
 		bne a0, a1, tick_prepare_sanity_test
-		call tick_fix_up_length_twelve
+		call tick_fix_up_length_eight
   tick_prepare_sanity_test:
 		li t3, 0x5F
 		addi t5, zero, 0x61
@@ -1129,7 +1129,7 @@
 		call fix_up_brackettick
 		j tix_up_done
 
-  tick_fix_up_length_twelve:
+  tick_fix_up_length_eight:
 		#expand COMPILE, --> COMPILECOMMA
 		#COMPILE: 0x43 0x4F 0x4D 0x50 0x49 0x4C 0x45
 		#COMMA: 0x43 0x4F 0x4D 0x4D 0x41
