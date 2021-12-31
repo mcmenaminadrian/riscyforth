@@ -135,7 +135,7 @@ store result on stack in *caddr2*
 
 **CHARS** (n1 -- n2) *n2* is the size in address units of *n1* (this is a NOP)
 
-**COMPILE,** NOT YET IMPLEMENTED
+**COMPILE,** (xt --) At compile time *xt* is compiled in (replacing *COMPILE,*)
 
 **CONSTANT** Create a word that returns a constant value to the stack e.g.,
 *25 FIVESQUARED CONSTANT* creates the constant *FIVESQUARED* that will always
