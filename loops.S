@@ -243,7 +243,31 @@
 		POP s0		#honour ABI
 		tail NEXT
 
-		CODEHEADERZ COLON, :, SPACES, 0x01
+		CODEHEADERZ COLONNONAME, :NONAME, SPACES, 0x01
+		#Execution (--xt)
+		la t0, CREATEFLAG
+		li t1, 0x01
+		sd t1, 0(t0)				#set MODE to 1 (compile)
+		la t1, newdictionary
+		ld t3, 0(t1)
+		li t2, 0x0				#0 flag - make word invisble to WORDS
+		sd t2, 0(t3)				#flag
+		addi t2, t3, 0x38			#word address of new word
+		sd t2, 8(t3)
+		#place on stack
+		addi sp, sp, -8
+		sd t2, 0(sp)
+		la t0, dictionary
+		ld t1, 0(t0)
+		sd t1, 16(t3)				#words address of previous word
+		sd zero, 24(t3)				#zero length
+		li t2, 0XFFFFFFFFFFFFFFFF		#now fill in name space
+		sd t2, 32(t3)
+		sd t2, 40(t3)
+		#now join colon code
+		j colon_name_written
+
+		CODEHEADERZ COLON, :, COLONNONAME, 0x01
 		#SHIFT TO COMPILE MODE
 		#WRITE OUT FLAGS
 		#WRITE OUT PTR

@@ -690,6 +690,7 @@
 		tail NEXT
 		
 		CODEHEADER EXECUTE, SOURCE, 0x01
+		#(xt --)
 		#Code will crash system if used badly!
 		POP s8
 		tail RUN
