@@ -252,11 +252,12 @@
 		ld t3, 0(t1)
 		li t2, 0x0				#0 flag - make word invisble to WORDS
 		sd t2, 0(t3)				#flag
+		#place on stack
+		addi t2, t3, ADDRWIDTH
+		addi sp, sp, -STACKOFFSET
+		sd t2, 0(sp)
 		addi t2, t3, 0x38			#word address of new word
 		sd t2, 8(t3)
-		#place on stack
-		addi sp, sp, -8
-		sd t2, 0(sp)
 		la t0, dictionary
 		ld t1, 0(t0)
 		sd t1, 16(t3)				#words address of previous word

@@ -156,7 +156,8 @@ data space pointer at the time of creation.
 
 **:** Begin a *colon word* definition
 
-**:NONAME** NOT YET IMPLEMENTED
+**:NONAME** (-- xt) Create a *colon-word* and place execution token *xt*
+on stack
 
 **,** (x --) Advance data space pointer by one cell and store *x* in the cell
 
