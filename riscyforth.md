@@ -273,7 +273,7 @@ string
 **IF** (x --) Begin *IF ... ELSE .. THEN* structure. *IF* clause is executed if
 *x* is non-zero, otherwise *ELSE* clause (if present) is executed.
 
-**IMMEDIATE** NOT YET IMPLEMENTED
+**IMMEDIATE** (--) Make the most recent definition an immediate word
 
 **INCLUDE** Load file and immediately parse e.g.
 *INCLUDE /home/foo/bar.fth* will load and evaluate *bar.fth*
