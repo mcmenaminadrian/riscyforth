@@ -151,9 +151,15 @@
 		tail embed_encsq
   search_sq:
 		la t0, WA_SQ
-		bne t3, t0, search_tick
+		bne t3, t0, search_cq
 		#put in WA__SQ
 		la t3, WA__SQ
+		tail embed_sq
+  search_cq:
+		la t0, WA_CQ
+		bne t3, t0, search_tick
+		#subsititue WA__CQ
+		la t3, WA__CQ
 		tail embed_sq
   search_tick:
 		la t0, WA_TICK

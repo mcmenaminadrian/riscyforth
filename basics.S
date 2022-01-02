@@ -368,7 +368,31 @@
                 addi s9, s9, STACKOFFSET
                 tail NEXT
 
-		CODEHEADER _SQ, SEMI, 0x0
+		CODEHEADER _CQ, SEMI, 0x0
+		#(-- c-addr)
+		#pointer to counted string
+		#only in compiled code
+		PUSH s7
+		ld t1, 0(s7)
+		#now move s7 to next aligned address
+		addi s7, s7, 8
+		add t3, s7, t1
+		li t4, 7
+		and t5, t3, t4
+		beqz t5, _cq_out
+		li t4, 8
+		sub t6, t4, t5
+		add t3, t3, t6
+  _cq_out:
+		mv s7, t3
+		tail NEXT
+
+		CODEHEADER CQ, _CQ, 0x01
+		#do nothing in interpreted code
+		#nb expanded from C"
+		tail NEXT
+
+		CODEHEADER _SQ, CQ, 0x0
 		/* Expands to/from S"
 		   (-- c-addr u)
 		   Compiled version - permanent strings
