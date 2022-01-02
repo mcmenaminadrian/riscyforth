@@ -73,7 +73,7 @@
 
 
    .data
-   welcome_msg:   	.asciz "RISCYFORTH - Copyright Adrian McMenamin 2020 - 2021"
+   welcome_msg:   	.asciz "RISCYFORTH - Copyright Adrian McMenamin 2020 - 2022"
    riscy_forth0:  	.asciz "*******************************************************************************"
    riscy_forth1:  	.asciz "RISCYFORTH is a FORTH for RISC-V devices."
    riscy_forth2:  	.asciz "To see supported words type 'WORDS'."

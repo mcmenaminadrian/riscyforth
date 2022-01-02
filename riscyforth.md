@@ -1,6 +1,6 @@
 % RISCYFORTH
 % Adrian McMenamin
-% December 2021
+% January 2022
 
 # NAME
 
@@ -35,7 +35,7 @@ are part of the standard and not all the standard is (currently) supported.
 It should be noted that **riscyforth** is a 64 bit Forth - i.e., cells are 8
 bytes wide by default.
 
-**riscyforth** is copyright (c) Adrian McMenamin, 2020 - 2021.
+**riscyforth** is copyright (c) Adrian McMenamin, 2020 - 2022.
 
 # FORTH WORDS
 
@@ -161,7 +161,9 @@ on stack
 
 **,** (x --) Advance data space pointer by one cell and store *x* in the cell
 
-**C"** NOT YET IMPLEMENTED
+**C"** (-- c-addr) on execution, ("ccc<quote>" --) on compilation. Return
+counted string at address *c-addr* - compiled code only. Does nothing
+in intrepreted code.
 
 **CRESET** (mask addr --) Turn bits off at *addr* using 8-bit *mask*
 

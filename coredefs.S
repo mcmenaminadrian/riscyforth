@@ -1104,11 +1104,15 @@
 		addi sp, sp, 8
 		lbu t1, 1(a0)
 		li t2, 0x2C
-		bne t1, t2, tick_length_two_c_done
+		bne t1, t2, tick_length_two_cq
 		call fix_up_ccomma		#,
 		j tix_up_done
+  tick_length_two_cq:
+		li t2, 0x22			#"
+		bne t1, t2, tick_length_two_c_done
+		call fix_up_cq
+		j tix_up_done
   tick_length_two_c_done:
-		addi sp, sp, STACKOFFSET	#clear stack
 		j tix_up_length_two_finished
 
 

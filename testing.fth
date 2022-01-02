@@ -711,6 +711,7 @@ TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY TESTEXIT
 BLUE ." Verifying ENCSQ with this output " RESET cr
 TEST[CHAR]
 S" Verifying SQ" 2DUP TYPE 12 = IF BLUE 5 spaces ." Verified SQ" ELSE 5 spaces RED ." SQ FAILED" THEN RESET CR
+." Verifying CQ - look for comment" 5 SPACES BLUE C" Verified" COUNT TYPE RESET CR
 BLUE ." Verifying COMMENT " RESET cr \ ." COMMENT verification FAILED " 
 VERIFYDOT VERIFY.S 
 ." Basics tests and verifications over " cr
