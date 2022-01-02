@@ -262,7 +262,7 @@
 		CODEHEADERZ NUMEND, \#\>, NUMS, 0x01
 		#( xd -- c-addr u )
 		#reverse stored string
-		POP zero			#drop xd as per standard
+		addi sp, sp, STACKOFFSET	#drop xd as per standard
 		la t0, PICTUREDN
 		ld t1, 0(t0)
 		beqz t1, num_done

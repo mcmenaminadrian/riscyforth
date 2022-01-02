@@ -766,14 +766,19 @@
 		j fix_up_length_two_finished
 
   length_two_beginC:
+		addi sp, sp, 8			#clear stack
 		lb t1, 1(a0)
 		li t2, 0x2C			#,
-		bne t1, t2, length_two_c_done
-		addi sp, sp, 8
+		bne t1, t2, length_two_c_q
 		call fix_up_ccomma
 		j fix_up_done
+  length_two_c_q:
+		li t2, 0x22			#"
+		bne t1, t2, length_two_c_done
+		call fix_up_cq
+		j fix_up_done
+		
   length_two_c_done:
-		POP zero			#clear stack
 		j fix_up_length_two_finished
 
   length_two_beginS:
@@ -1037,6 +1042,14 @@
 		li t3, 0x41
 		sb t3, 5(a2)
 		addi a2, a2, 5
+		ret
+
+  fix_up_cq:
+		li t3, 0x43		#C
+		sb t3, 0(a2)
+		li t3, 0x51		#Q
+		sb t3, 1(a2)
+		addi a2, a2, 1
 		ret
 
   fix_up_squote:

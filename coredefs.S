@@ -113,7 +113,7 @@
 		tail NEXT
 
 		CODEHEADER ENDCASE, OF, 0x01
-		POP zero
+		addi sp, sp, STACKOFFSET
 		tail NEXT
 
 		CODEHEADERZ ZERONE, 0<>, ENDCASE, 0x01
@@ -1108,7 +1108,7 @@
 		call fix_up_ccomma		#,
 		j tix_up_done
   tick_length_two_c_done:
-		POP zero			#clear stack
+		addi sp, sp, STACKOFFSET	#clear stack
 		j tix_up_length_two_finished
 
 

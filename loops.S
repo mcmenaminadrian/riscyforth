@@ -7,7 +7,7 @@
 		mv a1, sp
 		li a2, 1
 		call write
-		POP zero
+		addi sp, sp, STACKOFFSET
 		tail NEXT
 
 		CODEHEADER _J, EMIT, 0x0
@@ -379,6 +379,6 @@
   colon_fail:
 		la t0, CREATEFLAG
 		sd zero, 0(t0)				#set MODE to 0 (no compile)
-		POP zero
+		addi sp, sp, STACKOFFSET
 		PRINT bad_colon
 		tail NEXT
