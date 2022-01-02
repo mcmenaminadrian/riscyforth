@@ -863,20 +863,32 @@
 		CODEHEADER EXIT, _EXIT, 0x01
 		tail NEXT				#do nothing in immediate mode
 
-		CODEHEADER _CHAR, EXIT, 0x0
+		CODEHEADER IMMEDIATE, EXIT, 0x01
+		#( -- )
+		#find the word at the bottom of the dictionary and mark it as immediate
+		la t0, dictionary
+		ld t1, 0(t0)
+		ld t2, 0(t1)
+		li a0, 0x100
+		or t2, t2, a0
+		sd t2, 0(t1)
+		fence.i
+		tail NEXT
+
+		CODEHEADER _CHAR, IMMEDIATE, 0x0
 		#get length
 		ld a0, 0(s7)
 		mv a1, s7
-		addi s7, s7, 8
+		addi s7, s7, ADDRWIDTH
 		add s7, s7, a0
 		li t0, 7
 		and t1, s7, t0
 		beqz t1, _char_done_adjustment
-		li t2, 8
+		li t2, ADDRWIDTH
 		sub t2, t2, t1
 		add s7, s7, t2
   _char_done_adjustment:
-		addi a1, a1, 8
+		addi a1, a1, ADDRWIDTH
 		lbu t0, 0(a1)
 		PUSH t0
 		tail NEXT

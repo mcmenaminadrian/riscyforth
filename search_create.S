@@ -31,6 +31,14 @@
                 j search_create_next_in_dictionary
 
   search_create_tokens_matched:
+		#check - is this an immediate word
+		ld a0, 0(t3)
+		li a1, 0x100
+		and a2, a0, a1
+		beqz a2, search_create_nonimmediate
+		la s7, outer_loop_tokenize
+		tail search_tokens_matched
+  search_create_nonimmediate:
                 addi t3, t3, 8                        #address that points to the code
 		#if this is just a comment we don't care - get to the next CR
 		la t0, WA_COMMENT
