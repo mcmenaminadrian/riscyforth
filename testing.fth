@@ -37,11 +37,8 @@ BLUE 49 = if ." SQUARE passed " else RED ." SQUARE FAILED " then RESET cr
 
 : testCube
 ." Testing CUBE " 5 spaces
-5 cube
-BLUE 125 = if ." CUBE passed " else RED ." CUBE FAILED " then RESET 5 spaces
-3 cube
-28 = if RED ." CUBE FAILED " else BLUE ." CUBE passed " then RESET cr
-;
+5 cube 125 = 3 cube <> 28 AND
+if BLUE ." CUBE passed " else RED ." CUBE FAILED " then RESET CR ;
 
 : testNIP2
 ." Testing 2NIP " 5 spaces

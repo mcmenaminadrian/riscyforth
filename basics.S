@@ -515,14 +515,9 @@
 		WRITESTRINGR t4, t3
 		tail NEXT
 
-		CODEHEADERZ COMMENT, \\, DOTQ, 0x01
-		#should only ever get here in immediate mode
-		#as we just remove comments in compile mode
-		la t0, INPUT_START
-		la t1, INPUT_END
-		ld t2, 0(t1)
-		sd t2, 0(t0)
-		tail NEXT
+		CODEHEADERZ COMMENT, \\, DOTQ, 0x101
+		#immediate word
+		tail search_create_dispose_of_comment
 
                 CODEHEADERZ DOT, ., COMMENT, 0x01
 		li a7, 10

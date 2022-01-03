@@ -895,7 +895,6 @@
 
 		CODEHEADERZ BRACKET, [, _CHAR, 0x101
 		#no stack action - go into immediate mode
-  bracket_go:
 		la t0, CREATEFLAG
 		sd zero, 0(t0)
 		tail NEXT
@@ -918,7 +917,6 @@
 
 		CODEHEADERZ P, (, POSTPONE, 0x101
 		# look for the closing bracket - this is an immediate word
-  paren_go:				#called in compile mode to get out
 		la t0, INPUT_START
 		la t1, INPUT_END
 		ld t2, 0(t0)

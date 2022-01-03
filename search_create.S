@@ -41,14 +41,9 @@
   search_create_nonimmediate:
                 addi t3, t3, 8                        #address that points to the code
 		#if this is just a comment we don't care - get to the next CR
-		la t0, WA_COMMENT
-		bne t3, t0, search_create_check_bracket
-		j search_create_dispose_of_comment
-  search_create_check_bracket:
-		la t0, WA_BRACKET
+		la t0, WA_POSTPONE
 		bne t3, t0, search_create_check_colon
-		la s7, outer_loop_tokenize
-		tail bracket_go	
+		tail utility_process_postpone
   search_create_check_colon:
 		#now check it is allowed
 		la t0, WA_COLON			      #cannot nest definitions
