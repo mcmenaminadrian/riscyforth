@@ -345,7 +345,7 @@ continue to execute loop R:(x1 -- x2)
 
 **PICK** (xu ... x1 x0 u -- x1 x0 xu)
 
-**POSTPONE** NOT YET IMPLEMENTED
+**POSTPONE** <"<spaces>name" --) Compile in *name* even if *IMMEDIATE*
 
 **+** (n1 n2 -- n3) *n3* is the sum of *n1* and *n2*
 
