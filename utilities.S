@@ -323,7 +323,21 @@
 			ret
 
   utility_process_postpone:
-			tail NEXT
+			#find word
+			#find token
+			#compile in
+			#TODO: Handle multi-line entry
+			PUSH ra
+			call utility_find_string
+			la a5, INPUT_START
+			add a6, a0, a2
+			sd a6, 0(a5)
+			call utility_sanitize_string
+			call utility_check_dictionary_match
+			addi a4, a4, 8
+			mv t3, a4
+			POP ra
+			ret
 
 			
 			

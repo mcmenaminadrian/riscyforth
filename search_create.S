@@ -43,7 +43,12 @@
 		#if this is just a comment we don't care - get to the next CR
 		la t0, WA_POSTPONE
 		bne t3, t0, search_create_check_colon
-		tail utility_process_postpone
+		la a0, INPUT_START
+		ld a0, 0(a0)
+		la a1, INPUT_END
+		ld a1, 0(a1)
+		call utility_process_postpone
+		j search_create_inscribe
   search_create_check_colon:
 		#now check it is allowed
 		la t0, WA_COLON			      #cannot nest definitions
