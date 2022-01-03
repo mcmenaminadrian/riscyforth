@@ -46,15 +46,9 @@
 		j search_create_dispose_of_comment
   search_create_check_bracket:
 		la t0, WA_BRACKET
-		bne t3, t0, search_create_check_paren
-		la s7, outer_loop_tokenize
-		tail bracket_go	
-  search_create_check_paren:
-		la t0, WA_P				#open bracket
 		bne t3, t0, search_create_check_colon
 		la s7, outer_loop_tokenize
-		#read ahead until we hit a closing parenthesis
-		tail paren_go	
+		tail bracket_go	
   search_create_check_colon:
 		#now check it is allowed
 		la t0, WA_COLON			      #cannot nest definitions

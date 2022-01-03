@@ -893,14 +893,14 @@
 		PUSH t0
 		tail NEXT
 
-		CODEHEADERZ BRACKET, [, _CHAR, 0x01
+		CODEHEADERZ BRACKET, [, _CHAR, 0x101
 		#no stack action - go into immediate mode
   bracket_go:
 		la t0, CREATEFLAG
 		sd zero, 0(t0)
 		tail NEXT
 
-		CODEHEADERZ RIGHTBRACKET, ], BRACKET, 0x01
+		CODEHEADERZ RIGHTBRACKET, ], BRACKET, 0x101
 		la t0, CREATEFLAG
 		li t1, 1
 		sd t1, 0(t0)
@@ -911,7 +911,12 @@
 		#( -- )
 		tail NEXT
 
-		CODEHEADERZ P, (, COMPILECOMMA, 0x01
+		CODEHEADER POSTPONE, COMPILECOMMA, 0x01
+		#do nothing in immediate mode
+		#see search_create for compile code
+		tail NEXT
+
+		CODEHEADERZ P, (, POSTPONE, 0x101
 		# look for the closing bracket - this is an immediate word
   paren_go:				#called in compile mode to get out
 		la t0, INPUT_START
