@@ -31,6 +31,14 @@
                 j search_create_next_in_dictionary
 
   search_create_tokens_matched:
+		#are we in POSTPONE mode?
+		la a0, INPPONE
+		ld a1, 0(a0)
+		beqz a1, search_create_not_postpone_mode
+		sd zero, 0(a0)
+		addi t3, t3, 8
+		j search_create_inscribe
+  search_create_not_postpone_mode:
 		#check - is this an immediate word
 		ld a0, 0(t3)
 		li a1, 0x100
@@ -48,6 +56,9 @@
 		la a1, INPUT_END
 		ld a1, 0(a1)
 		call utility_process_postpone
+		bnez a0, search_create_handle_postponed_word
+		j search_create_does_outer_loop
+  search_create_handle_postponed_word:
 		j search_create_inscribe
   search_create_check_colon:
 		#now check it is allowed

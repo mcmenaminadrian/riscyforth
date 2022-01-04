@@ -21,8 +21,16 @@
 			#setup limiting characters
 			li s0, 0x20		#space
 			li s1, 0x0A		#CR
+			#test at start
+			li a3, 1
+			sub a4, a1, a0
+			bgt a4, a3, utility_find_string_test_start
+			lbu s2, 0(a0)
+			bne s2, s1, utility_find_string_test_startA
+			j utility_find_string_failed
   utility_find_string_test_start:
 			lbu s2, 0(a0)
+  utility_find_string_test_startA:
 			beq s2, s0, utility_find_string_advance
 			bne s2, s1, utility_find_string_found_start
   utility_find_string_advance:
@@ -329,9 +337,18 @@
 			#TODO: Handle multi-line entry
 			PUSH ra
 			call utility_find_string
+			bnez a0, utility_process_postpone_found
+			la a5, INPPONE
+			li a6, 1
+			sd a6, 0(a5)
+			POP ra
+			ret
+  utility_process_postpone_found:
 			la a5, INPUT_START
 			add a6, a0, a2
 			sd a6, 0(a5)
+			la a5, INPPONE
+			sd zero, 0(a5)	
 			call utility_sanitize_string
 			call utility_check_dictionary_match
 			addi a4, a4, 8
@@ -339,5 +356,3 @@
 			POP ra
 			ret
 
-			
-			

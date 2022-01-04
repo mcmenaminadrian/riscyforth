@@ -64,6 +64,7 @@
    .comm dataspace, ADDRWIDTH
    .comm dataspaceptr, ADDRWIDTH
    .comm INDOES, ADDRWIDTH
+   .comm INPPONE, ADDRWIDTH
    .comm MULTILINE, ADDRWIDTH
    .comm PICTUREDN, 0x10
    #for debugging
