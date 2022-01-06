@@ -102,6 +102,257 @@
 			addi sp, sp, 48
 			ret
 
+
+  #a0 has start
+  #a1 has end
+  #a2 returns length
+  utility_expand_word:
+			#returns expanded word if required
+			addi sp, sp, -56
+			sd ra, 0(sp)
+			sd s0, 8(sp)
+			sd s1, 16(sp)
+			sd s2, 24(sp)
+			sd s3, 32(sp)
+			sub s0, a1, a0
+			mv a2, s0
+			beqz s0, utility_expand_word_test1
+			li s1, 3
+			li s2, 5
+			blt s0, s1, utility_expand_word_test2
+			blt s0, s2, utility_expand_complete
+			beq s0, s2, utility_expand_word_test6
+			li s2, 7
+			beq s0, s2, utility_expand_word_test8
+			j utility_expand_complete
+  utility_expand_word_test1:
+			call utility_expand_one
+			j utility_expand_complete
+  utility_expand_word_test2:
+			li s1, 1
+			bne s0, s1, utility_expand_word_test3
+			call utility_expand_two
+			j utility_expand_complete
+  utility_expand_word_test3:
+			#should only get here if length is 3
+			call utility_expand_three
+			j utility_expand_complete
+  utility_expand_word_test6:
+			call utility_expand_six
+			j utility_expand_complete
+  utility_expand_word_test8:
+			call_utility_expand_eight
+			j utility_expand_complete
+   utility_expand_complete:
+			ld s5, 48(sp)
+			ld s4, 40(sp)
+			ld s3, 32(sp)
+			ld s2, 24(sp)
+			ld s1, 16(sp)
+			ld s0, 8(sp)
+			ld ra, 0(sp)
+			addi sp, sp, 56
+			ret
+
+
+  utility_expand_one:
+			mv t0, a0
+			mv t1, a1
+			la a2, EXPANDED_BUFFER
+			mv a3, a2
+			lbu t1, 0(a0)
+			li t2, 0x3B
+			beq t2, t1, utility_expand_semi
+			li t2, 0x3D
+			beq t2, t1, utility_expand_equals
+			li t2, 0x27
+			beq t2, t1, utility_expand_tick
+			li t2, 0x2C
+			beq t2, t1, utility_expand_comma
+			ret
+  utility_expand_semi:
+			call do_fix_up_semi
+			j utility_expand_done
+  utility_expand_equals:
+			call do_fix_up_equals
+			j utility_expand_done
+  utility_expand_tick:
+			call do_fix_up_tick
+			j utility_expand_done
+  utility_expand_comma:
+			call do_fix_up_comma
+
+  utility_expand_done:
+			mv a0, a3
+			mv a1, a2
+			sub a2, a1, a0
+			ret
+
+  utility_expand_two:
+			mv t0, a0
+			mv t1, a1
+			la a2, EXPANDED_BUFFER 		#store expanded token
+			mv a3, a2
+			lbu t1, 0(a0)
+			li t2, 0x30			#0
+			beq t1, t2, utility_expand_two_beginzero
+			li t2, 0x2E			#.
+			beq t1, t2, utility_expand_two_begindot
+			li t2, 0x3E			#>
+			beq t1, t2, utility_expand_two_begingt
+			li t2, 0x3C			#<
+			beq t1, t2, utility_expand_two_beginlt
+			PUSH t1
+			andi t1, t1, 0x5F		#character based tests all in here
+			li t2, 0x43
+			beq t1, t2, utility_expand_two_beginC
+			li t2, 0x53
+			beq t1, t2, utility_expand_two_beginS
+			POP t1
+			ret
+  utility_expand_two_finished:
+			j utility_expand_done
+
+  utility_expand_two_begindot:
+			lbu t1, 1(a0)
+			li t2, 0x22			#"
+			bne t1, t2, utility_expand_two_begindot_done
+                	call fix_up_encsq
+			j tix_up_done
+  utility_expand_two_begindot_done:
+			j utility_expand_two_finished
+		
+  utility_expand_two_beginzero:
+			lbu t1, 1(a0)
+			li t2, 0x3D			#=
+			bne t1, t2, utility_expand_two_begindot_done
+                	call fix_up_zeroequal
+			j utility_expand_done
+
+  utility_expand_two_begingt:
+			lbu t1, 1(a0)
+			li t2, 0x3D			#=
+			bne t1, t2, utility_expand_two_begindot_done
+                	call fix_up_gteq
+			j utility_expand_done
+
+  utility_expand_two_beginlt:
+			lbu t1, 1(a0)
+			li t2, 0x3D			#=
+			bne t1, t2, utility_expand_two_begindot_done
+                	call fix_up_lteq
+			j utility_expand_done
+
+  utility_expand_two_beginC:
+			sb t1, 0(a2)
+			addi sp, sp, 8
+			lbu t1, 1(a0)
+			li t2, 0x2C
+			bne t1, t2, tick_length_two_cq
+			call fix_up_ccomma		#,
+			j utility_expand_done
+  utility_expand_two_cq:
+			li t2, 0x22			#"
+			bne t1, t2, utility_expand_two_c_done
+			call fix_up_cq
+			j utility_expand_done
+  utility_expand_two_c_done:
+			j utility_expand_two_finished
+
+
+  utility_expand_two_beginS:
+			sb t1, 0(a2)
+			addi sp, sp, 8
+			lbu t1, 1(a0)
+			li t2, 0x22			#"
+			bne t1, t2, utility_expand_two_c_done
+			call fix_up_squote
+			j utility_expand_done
+
+ utility_expand_three:
+			#expand ['] --> BRACKETTICK
+			mv a0, t0
+			la a2, EXPANDED_BUFFER
+			mv a3, a2
+			mv a1, t1
+			mv a5, t2
+			lbu t1, 0(a0)
+			li t2, 0x5B		#[
+			bne t1, t2, utility_expand_three_done
+			lbu t1, 1(a0)
+			li t2, 0x27		#'
+			bne t1, t2, utility_expand_three_done
+			lbu t1, 2(a0)
+			li t2, 0x5D		#]
+			bne t1, t2, utility_expand_three_done
+			call fix_up_brackettick
+			j tix_up_done
+  utility_expand_three_done:
+			ret
+
+
+  tick_fix_up_length_six:
+			#expand the following
+			# ABORT" --> ABORTCOMM
+			mv a0, t0
+			la a2, EXPANDED_BUFFER
+			mv a3, a2
+			mv a1, t1 
+			mv a5, t2
+			lbu t1, 5(a0)
+			li t2, 0x22		 #"
+			bne t1, t2, tix_up_six_done
+			call fix_up_acomma
+			j tix_up_done
+  tix_up_six_done:
+			j tix_up_finished
+
+
+  tick_fix_up_length_eight:
+			#expand COMPILE, --> COMPILECOMMA
+			#COMPILE: 0x43 0x4F 0x4D 0x50 0x49 0x4C 0x45
+			#COMMA: 0x43 0x4F 0x4D 0x4D 0x41
+			mv a0, t0
+			la a2, EXPANDED_BUFFER
+			mv a3, a2
+			mv a1, t1 
+			mv a5, t2
+			li t2, 0x43		#C
+			lbu t1, 0(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, tix_up_six_done
+			li t2, 0x4F		#O
+			lbu t1, 1(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, tix_up_six_done
+			li t2, 0x4D		#M
+			lbu t1, 2(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, tix_up_six_done
+			li t2, 0x50		#P
+			lbu t1, 3(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, tix_up_six_done
+			li t2, 0x49		#I
+			lbu t1, 4(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, tix_up_six_done
+			li t2, 0x4C		#L
+			lbu t1, 5(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, tix_up_six_done
+			li t2, 0x45		#E
+			lbu t1, 6(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, tix_up_six_done
+			li t2, 0x2C		#,
+			lbu t1, 11(a0)
+			bne t1, t2, tix_up_six_done
+			call fix_up_compilecomma
+			j tix_up_done
+
+
+
   #a0 has start
   #a1 has end
   #a2 has length
