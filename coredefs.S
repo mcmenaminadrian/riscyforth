@@ -992,7 +992,7 @@
 		CODEHEADERZ ACTIONOF,  ACTION-OF, _ACTIONOF, 0x01
 		#("name" -- xt)
 		#parse name
-		#in immediate mode here
+		#in interpreter mode here
 		# look for the string
 		ld a0, INPUT_START
 		ld a1, INPUT_END

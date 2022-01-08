@@ -363,7 +363,7 @@
 		tail NEXT
 		
 		#semi for the rest of us
-                CODEHEADER SEMI, OLSEMI, 0x0
+                CODEHEADER SEMI, OLSEMI, 0x01
                 ld s7, 0(s9)
                 addi s9, s9, STACKOFFSET
                 tail NEXT
