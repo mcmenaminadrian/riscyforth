@@ -160,6 +160,7 @@
 
   utility_expand_one:
 			la a2, EXPANDED_BUFFER
+			mv a3, a2
 			lbu t1, 0(a0)
 			li t2, 0x3B
 			beq t2, t1, utility_expand_semi
@@ -172,25 +173,35 @@
 			sub a2, a1, a0
 			ret
   utility_expand_semi:
+			PUSH ra
 			call do_fix_up_semi
+			POP ra
 			j utility_expand_done
   utility_expand_equals:
+			PUSH ra
 			call do_fix_up_equals
+			POP ra
 			j utility_expand_done
   utility_expand_tick:
+			PUSH ra
 			call do_fix_up_tick
+			POP ra
 			j utility_expand_done
   utility_expand_comma:
+			PUSH ra
 			call do_fix_up_comma
+			POP ra
 
   utility_expand_done:
 			mv a0, a3
 			mv a1, a2
 			sub a2, a1, a0
+			addi a2, a2, 1
 			ret
 
   utility_expand_two:
 			la a2, EXPANDED_BUFFER 		#store expanded token
+			mv a3, a2
 			lbu t1, 0(a0)
 			li t2, 0x30			#0
 			beq t1, t2, utility_expand_two_beginzero
@@ -217,7 +228,9 @@
 			lbu t1, 1(a0)
 			li t2, 0x22			#"
 			bne t1, t2, utility_expand_two_bail
+			PUSH ra
                 	call fix_up_encsq
+			POP ra
   utility_expand_two_begindot_done:
 			j utility_expand_two_finished
 		
@@ -225,21 +238,27 @@
 			lbu t1, 1(a0)
 			li t2, 0x3D			#=
 			bne t1, t2, utility_expand_two_bail
+			PUSH ra
                 	call fix_up_zeroequal
+			POP ra
 			j utility_expand_done
 
   utility_expand_two_begingt:
 			lbu t1, 1(a0)
 			li t2, 0x3D			#=
 			bne t1, t2, utility_expand_two_bail
+			PUSH ra
                 	call fix_up_gteq
+			POP ra
 			j utility_expand_done
 
   utility_expand_two_beginlt:
 			lbu t1, 1(a0)
 			li t2, 0x3D			#=
 			bne t1, t2, utility_expand_two_bail
+			PUSH ra
                 	call fix_up_lteq
+			POP ra
 			j utility_expand_done
 
   utility_expand_two_beginC:
@@ -248,12 +267,16 @@
 			lbu t1, 1(a0)
 			li t2, 0x2C
 			bne t1, t2, tick_length_two_cq
+			PUSH ra
 			call fix_up_ccomma		#,
+			POP ra
 			j utility_expand_done
   utility_expand_two_cq:
 			li t2, 0x22			#"
 			bne t1, t2, utility_expand_two_bail
+			PUSH ra
 			call fix_up_cq
+			POP ra
 			j utility_expand_done
   utility_expand_two_c_done:
 			j utility_expand_two_finished
@@ -265,12 +288,15 @@
 			lbu t1, 1(a0)
 			li t2, 0x22			#"
 			bne t1, t2, utility_expand_two_bail
+			PUSH ra
 			call fix_up_squote
+			POP ra
 			j utility_expand_done
 
  utility_expand_three:
 			#expand ['] --> BRACKETTICK
 			la a2, EXPANDED_BUFFER
+			mv a3, a2
 			lbu t1, 0(a0)
 			li t2, 0x5B		#[
 			bne t1, t2, utility_expand_three_done
@@ -280,10 +306,13 @@
 			lbu t1, 2(a0)
 			li t2, 0x5D		#]
 			bne t1, t2, utility_expand_three_done
+			PUSH ra
 			call fix_up_brackettick
+			POP ra
 			j utility_expand_done
   utility_expand_three_done:
 			sub a2, a1, a0
+			addi a2, a2, 1
 			ret
 
 
@@ -291,13 +320,17 @@
 			#expand the following
 			# ABORT" --> ABORTCOMM
 			la a2, EXPANDED_BUFFER
+			mv a3, a2
 			lbu t1, 5(a0)
 			li t2, 0x22		 #"
 			bne t1, t2, utilities_expand_six_done
+			PUSH ra
 			call fix_up_acomma
+			POP ra
 			j utility_expand_done
   utilities_expand_six_done:
 			sub a2, a1, a0
+			addi a2, a2, 1
 			ret
 
 
@@ -306,6 +339,7 @@
 			#COMPILE: 0x43 0x4F 0x4D 0x50 0x49 0x4C 0x45
 			#COMMA: 0x43 0x4F 0x4D 0x4D 0x41
 			la a2, EXPANDED_BUFFER
+			mv a3, a2
 			li t2, 0x43		#C
 			lbu t1, 0(a0)
 			andi t1, t1, 0x5F
@@ -337,9 +371,10 @@
 			li t2, 0x2C		#,
 			lbu t1, 11(a0)
 			bne t1, t2, tix_up_six_done
+			PUSH ra
 			call fix_up_compilecomma
+			POP ra
 			j utility_expand_done
-
 
 
   #a0 has start
@@ -356,7 +391,7 @@
 			sd s3, 32(sp)
 			sd s4, 40(sp)
 			sd s5, 48(sp)
-			#call utility_expand_word - will we ever need this? TODO: Consider removal
+			call utility_expand_word
 			li a3, 1
 			# check we don't exceed max length - in which case we fail anyway
 			li s0, NAMEMAXLEN

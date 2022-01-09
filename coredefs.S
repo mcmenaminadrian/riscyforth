@@ -1010,9 +1010,38 @@
 		tail NEXT
   actionof_error:
 		tail variable_gone_bad
-  
 
-		CODEHEADER ABORT, ACTIONOF, 0x01
+		CODEHEADER FIND, ACTIONOF, 0x01
+		#(caddr -- caddr 0 | xt 1 | xt -1)
+		#Counted string caddr
+		# 0 for unfound, 1 for immediate, -1 for otherwise
+		ld t0, 0(sp)
+		ld t1, 0(t0)		# count
+		addi sp, sp, -STACKOFFSET
+		addi a0, t0, ADDRWIDTH
+		add a1, a0, t1
+		mv a2, t1
+		call utility_check_dictionary_match
+		beqz a3, find_failed
+		ld t5, 8(a4)
+		sd t5, 8(sp)
+		#have a word - is it immediate?
+		li t2, 0x100
+		ld t3, 0(a4)
+		and t4, t2, t3
+		beqz t4, find_ordinary
+		li t6, 1
+		sd t6, 0(sp)
+		tail NEXT
+  find_ordinary:
+		li t6, -1
+		sd t6, 0(sp)
+  		tail NEXT
+  find_failed:
+		sd zero, 0(sp)
+		tail NEXT
+
+		CODEHEADER ABORT, FIND, 0x01
 		la s7, outer_loop_ok
 		la t0, CREATEFLAG
 		sd zero, 0(t0)
