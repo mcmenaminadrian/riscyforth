@@ -1016,15 +1016,14 @@
 		#Counted string caddr
 		# 0 for unfound, 1 for immediate, -1 for otherwise
 		ld t0, 0(sp)
-		ld t1, 0(t0)		# count
+		ld a2, 0(t0)		# count
 		addi sp, sp, -STACKOFFSET
 		addi a0, t0, ADDRWIDTH
-		add a1, a0, t1
-		mv a2, t1
+		add a1, a0, a2
 		call utility_check_dictionary_match
 		beqz a3, find_failed
-		ld t5, 8(a4)
-		sd t5, 8(sp)
+		addi a4, a4, ADDRWIDTH
+		sd a4, 8(sp)
 		#have a word - is it immediate?
 		li t2, 0x100
 		ld t3, 0(a4)

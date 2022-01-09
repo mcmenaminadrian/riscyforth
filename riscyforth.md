@@ -246,7 +246,11 @@ from address *addr*
 **FILL** (c-addr u char --) if *u* is greater than zero set *u* bytes from
 *c-addr* onwards to *char*
 
-**FIND** NOT YET IMPLEMENTED
+**FIND** (c-addr -- caddr 0 | xt 1 | xt -1) Find the definition named in the
+counted string at c-addr. If the definition is not found, return c-addr and
+zero. If the definition is found, return its execution token xt. If the
+definition is immediate, also return one (1), otherwise also return minus-one 
+(-1).
 
 **FM/MOD** NOT YET IMPLEMENTED
 

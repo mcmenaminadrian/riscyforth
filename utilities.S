@@ -312,7 +312,6 @@
 			j utility_expand_done
   utility_expand_three_done:
 			sub a2, a1, a0
-			addi a2, a2, 1
 			ret
 
 
@@ -330,7 +329,6 @@
 			j utility_expand_done
   utilities_expand_six_done:
 			sub a2, a1, a0
-			addi a2, a2, 1
 			ret
 
 
