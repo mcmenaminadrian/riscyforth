@@ -392,7 +392,19 @@
 		#nb expanded from C"
 		tail NEXT
 
-		CODEHEADER _SQ, CQ, 0x0
+		CODEHEADERZ DOTP, .(, CQ, 0x101
+		#("ccc<paren>" ---) immediate word
+		#Print in a string
+		#first of all, get the address and length of the string
+		la t5, INPUT_END
+		ld t5, 0(t5)		#absolute end of string
+		li t3, 0
+		la t6, INPUT_START
+		ld t4, 0(t6)
+		li t1, 0x29		#)
+		j encsq_check_next
+
+		CODEHEADER _SQ, DOTP, 0x0
 		/* Expands to/from S"
 		   (-- c-addr u)
 		   Compiled version - permanent strings

@@ -626,7 +626,64 @@
 			call utility_sanitize_string
 			call utility_check_dictionary_match
 			addi a4, a4, 8
+			#now check if we have compiling behaviour
+			#WA_COLON
+			la a5, WA_COLON
+			bne a4, a5, postpone_check_literal
+			#COLON compiling behaviour generates error!
+			la t0, CREATEFLAG
+			sd zero, 0(t0)
+			addi sp, sp, 8
+			tail search_failed
+  postpone_check_literal:
+			la a5, WA_LITERAL
+			bne a4, a5, postpone_check_does
+			la a5, WA__LITERALCOMP
+			j postpone_output_normal
+  postpone_check_does:
+			la a5, WA_DOES_
+			bne a4, a5, postpone_allowed
+			la a5, WA__DOESCOMP
+			j postpone_output_normal
+  postpone_allowed:
+			la a5, WA_ABORTCOMM
+			bne a4, a5. postpone_encsq
+			la a5, WA__ABORTCOMP
+			j postpone_output_normal
+  postpone_encsq:
+			la a5, WA_DOTQ
+			bne a5, a5, postpone_search_sq
+			la a5, WA__DOTQCOMP
+			j postpone_output_normal
+  postpone_search_sq:
+			la a5, WA_SQ
+			bne a5, a5, postpone_search_sq
+			la a5, WA__SQCOMP
+			j postpone_output_normal
+			
+  postpone_output_normal:
 			mv t3, a4
 			POP ra
 			ret
 
+			#COMPILE ONLY WORDS
+			CODEEND _LITERALCOMP, 0x0
+			POP a2
+			tail search_create_number_on_stack
+
+			CODEEND _DOESCOMP, 0x0
+			la t3, WA_DOES_
+			tail search_create_keep_does_
+
+			CODEND _ABORTCOMP, 0x0
+			la t3, WA__ABORTCOMM
+			addi a5, a5, 4
+			tail embed_encsq
+
+			CODEEND _DOTQCOMP, 0x0
+			la t3, WA__DOTQ
+			tail embed_encsq
+
+			CODEEND _SQCOMP, 0x0
+			la t3, WA__SQ
+			tail embed_sq
