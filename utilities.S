@@ -652,13 +652,103 @@
 			j postpone_output_normal
   postpone_encsq:
 			la a5, WA_DOTQ
-			bne a5, a5, postpone_search_sq
+			bne a4, a5, postpone_search_sq
 			la a5, WA__DOTQCOMP
 			j postpone_output_normal
   postpone_search_sq:
 			la a5, WA_SQ
-			bne a5, a5, postpone_search_sq
+			bne a4, a5, postpone_search_cq
 			la a5, WA__SQCOMP
+			j postpone_output_normal
+  postpone_search_cq:
+			la a5, WA_CQ
+			bne a4, a5, postpone_search_tick
+			la a5, WA__CQCOMP
+			j postpone_output_normal
+  postpone_search_tick:
+			la a5, WA_TICK
+			bne a4, a5, postpone_search_brackettick
+			la a5, WA__TICKCOMP
+			j postpone_output_normal
+  postpone_search_brackettick:
+			la a5, WA_BRACKETTICK
+			bne a4, a5, postpone_search_compilecomma
+			la a5, WA__TICKCOMP
+			j postpone_output_normal
+  postpone_search_compilecomma:
+			la a5, WA_COMPILCOMMA
+			bne a4, a5, postpone_search_is
+			la a5, WA__COMPCOMPCOMMA
+			j postpone_output_normal
+  postpone_search_is:
+			la a5, WA_IS
+			bne a4, a5, postpone_search_to
+			la a5, WA__COMPIS
+			j postpone_output_normal
+  postpone_search_is:
+			la a5, WA_TO
+			bne a4, a5, postpone_search_bracketchar
+			la a5, WA__COMPTO
+			j postpone_output_normal
+  postpone_search_bracketchar:
+			la a5, WA_BRACKETCHAR
+			bne a4, a5, postpone_search_char
+			la a5, WA__COMPBRACKETCHAR
+			j postpone_output_normal
+  postpone_search_char:
+			la a5, WA_CHAR
+			bne a4, a5, postpone_search_actionof
+			la a5, WA__COMPCHAR
+			j postpone_output_normal
+  postpone_search_actionof:
+			la a5, WA_ACTIONOF
+			bne a4, a5, postpone_search_again
+			la a5, WA__COMPACTIONOF
+			j postpone_output_normal
+  postpone_search_again:
+			la a5, WA_AGAIN
+			bne a4, a5, postpone_search_until
+			la a5, WA__AGAIN
+			j postpone_output_normal
+  postpone_search_until:
+			la a5, WA_UNTIL
+			bne a4, a5, postpone_search_do
+			la a5, WA__UNTIL
+			j postpone_output_normal
+  postpone_search_do:
+			la a5, WA_DO
+			bne a4, a5, postpone_search_qdo
+			la a5, WA__COMPDO
+			j postpone_output_normal
+  postpone_search_qdo:
+			la a5, WA_QDO
+			bne a4, a5, postpone_search_loop
+			la a5, WA__COMPQDO
+			j postpone_output_normal
+  postpone_search_loop:
+			la a5, WA_LOOP
+			bne a4, a5, postpone_search_plusloop
+			la a5, WA__COMPLOOP
+			j postpone_output_normal
+  postpone_search_plusloop:
+			la a5, WA_PLUSLOOP
+			bne a4, a5, postpone_search_minusloop
+			la a5, WA__COMPPLUSLOOP
+			j postpone_output_normal
+  postpone_search_minusloop:
+			la a5, WA_MINUSLOOP
+			bne a4, a5, postpone_search_unloop
+			la a5, WA__COMPMINUSLOOP
+			j postpone_output_normal
+  postpone_search_unloop:
+			la a5, WA_UNLOOP
+			bne a4, a5, postpone_search_leave
+			la a5, WA__UNLOOP
+			j postpone_output_normal
+  postpone_search_leave:
+			la a5, WA_LEAVE
+			bne a4, a5, postpone_search_leave
+			la a5, WA__LEAVE
 			j postpone_output_normal
 			
   postpone_output_normal:
@@ -667,6 +757,38 @@
 			ret
 
 			#COMPILE ONLY WORDS
+			CODEND __COMPMINUSLOOP, 0x0
+			la t3, WA__MINUSLOOP
+			tail transitions_loop_out
+
+			CODEND __COMPPLUSLOOP, 0x0
+			la t3, WA__PLUSLOOP
+			tail transitions_loop_out
+
+			CODEND __COMPLOOP, 0x0
+			la t3, WA__LOOP
+			tail transitions_loop_out
+
+			CODEND __COMPQDO, 0x0
+			la t3, WA__QDO
+			tail transitions_do_out
+
+			CODEND __COMPDO, 0x0
+			la t3, WA__DO
+			tail transitions_do_out
+
+			CODEND __COMPACTIONOF, 0x0
+			la t3, WA__ACTIONOF
+			tail embed_defer
+
+			CODEND __COMPCHAR, 0x0
+			la t3, WA__CHAR
+			tail embed_tick
+
+			CODEND __COMPBRACKETCHAR, 0x0
+			la t3, WA__BRACKETCHAR
+			tail embed_to
+
 			CODEEND _LITERALCOMP, 0x0
 			POP a2
 			tail search_create_number_on_stack
@@ -687,3 +809,24 @@
 			CODEEND _SQCOMP, 0x0
 			la t3, WA__SQ
 			tail embed_sq
+
+			CODEEND _CQCOMP, 0x0
+			la t3, WA__CQ
+			tail embed_sq
+
+			CODEEND _TICKCOMP, 0x0
+			la t3, WA__TICK
+			tail embed_tick
+
+			CODEEND _COMPCOMPCOMMA, 0x0
+			ld t3, 0(sp)
+			addi sp, sp, 8
+			tail postpone_output_normal
+
+			CODEND __COMPIS, 0x0
+			la t3, WA__IS
+			tail embed_tick
+
+			CODEND __COMPTO, 0x0
+			la t3, WA__TO
+			tail embed_to
