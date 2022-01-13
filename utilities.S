@@ -708,12 +708,12 @@
   postpone_search_again:
 			la a5, WA_AGAIN
 			bne a4, a5, postpone_search_until
-			la a5, WA__AGAIN
+			la a5, WA__COMPAGAIN
 			j postpone_output_normal
   postpone_search_until:
 			la a5, WA_UNTIL
 			bne a4, a5, postpone_search_do
-			la a5, WA__UNTIL
+			la a5, WA__COMPUNTIL
 			j postpone_output_normal
   postpone_search_do:
 			la a5, WA_DO
@@ -747,16 +747,105 @@
 			j postpone_output_normal
   postpone_search_leave:
 			la a5, WA_LEAVE
-			bne a4, a5, postpone_search_leave
+			bne a4, a5, postpone_search_recurse
 			la a5, WA__LEAVE
 			j postpone_output_normal
+  postpone_search_recurse:
+			la a5, WA_RECURSE
+			bne a4, a5, postpone_search_i
+			la t0, newdictionary
+			ld t1, 0(t0)
+			addi a5, t1, 0x8
+			j postpone_output_normal
+  postpone_search_i:
+			la a5, WA_I
+			bne a5, a5, postpone_search_j
+			la a5, WA__I
+			j postpone_output_normal
+  postpone_search_j:
+			la a5, WA_J
+			bne a5, a5, postpone_search_exit
+			la a5, WA__J
+			j postpone_output_normal
+  postpone_search_exit:
+			la a5, WA_EXIT
+			bne a5, a5, postpone_search_if
+			la a5, WA__EXIT
+			j postpone_output_normal
+  postpone_search_if:
+			la a5, WA_IF
+			bne a5, a5, postpone_search_else
+			la a5, WA__COMPIF
+			j postpone_output_normal
+  postpone_search_else:
+			la a5, WA_ELSE
+			bne a5, a5, postpone_search_of
+			la a5, WA__COMPELSE
+			j postpone_output_normal
+  postpone_search_of:
+			la a5, WA_OF
+			bne a5, a5, postpone_search_then
+			la a5, WA__OF
+			j postpone_output_normal
+  postpone_search_then:
+			la a5, WA_THEN
+			bne a5, a5, postpone_search_while
+			la a5, WA__COMPTHEN
+			j postpone_output_normal
+  postpone_search_while:
+			la a5, WA_WHILE
+			bne a5, a5, postpone_search_repeat
+			la a5, WA__COMPWHILE
+			j postpone_output_normal
+  postpone_search_repeat:
+			la a5, WA_REPEAT
+			bne a5, a5, postpone_output_normal_ext
+			la a5, WA__COMPREPEAT
+#			j postpone_output_normal
 			
   postpone_output_normal:
 			mv t3, a4
 			POP ra
 			ret
 
+  postpone_output_normal_ext:
+			#not special compile words but still have some checking to do
+
+  postpone_output_normal_ext:
+			#not a word with a special compiling word
+			mv t3, a4
+			POP ra
+			#but we have other tests to do
+
 			#COMPILE ONLY WORDS
+			CODEND __COMPUNIT, 0x0
+			la t3, WA__UNTIL
+			tail transitions_until_out
+
+			CODEND __COMPAGAIN, 0x0
+			la t3, WA__AGAIN
+			tail transitions_again_out
+
+			CODEND __COMPREPEAT, 0x0
+			la t3, WA__REPEAT
+			tail transitions_repeat_out
+
+			CODEND __COMPWHILE, 0x0
+			la t3, WA__WHILE
+			tail transitions_while_out
+
+			CODEND __COMPTHEN, 0x0
+			la t3, WA__THEN
+			tail transitions_then_out
+
+			CODEND __COMPELSE, 0x0
+			la t3, WA__ELSE
+			tail transitions_else_out
+
+			CODEND __COMPIF, 0x0
+			la t3, WA__IF
+			tail transitions_if_out
+
 			CODEND __COMPMINUSLOOP, 0x0
 			la t3, WA__MINUSLOOP
 			tail transitions_loop_out
