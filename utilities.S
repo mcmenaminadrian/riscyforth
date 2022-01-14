@@ -799,26 +799,65 @@
 			j postpone_output_normal
   postpone_search_repeat:
 			la a5, WA_REPEAT
-			bne a5, a5, postpone_output_normal_ext
+			bne a5, a5, postpone_search_decimal
 			la a5, WA__COMPREPEAT
-#			j postpone_output_normal
+			j postpone_output_normal
+  postpone_search_decimal:
+			la a5, WA_DECIMAL
+			bne a5, a5, postpone_search_octal
+			la a5, WA__COMPDECIMAL
+			j postpone_output_normal
+  postpone_search_octal:
+			la a5, WA_OCTAL
+			bne a5, a5, postpone_search_binary
+			la a5, WA__COMPOCTAL
+			j postpone_output_normal
+  postpone_search_binary:
+			la a5, WA_BINARY
+			bne a5, a5, postpone_search_semi
+			la a5, WA__COMPBINARY
+			j postpone_output_normal
+  postpone_search_semi:
+			la a5, WA_SEMI
+			bne a5, a5, postpone_search_decimal
+			la a5, WA__COMPSEMI
+
 			
   postpone_output_normal:
 			mv t3, a4
 			POP ra
 			ret
 
-  postpone_output_normal_ext:
+  postpone_output_normal_number:
 			#not special compile words but still have some checking to do
-
-  postpone_output_normal_ext:
-			#not a word with a special compiling word
 			mv t3, a4
 			POP ra
 			#but we have other tests to do
 
 			#COMPILE ONLY WORDS
-			CODEND __COMPUNIT, 0x0
+			CODEND __COMPSEMI, 0x0
+			la t3, WA_SEMI
+			tail search_create_test_postpone_semi
+
+			CODEND __COMPBINARY, 0x0
+			la t3, WA_BINARY
+			li t1, 2
+			sd t1, CURRENT_BASE, t0
+			tail search_create_leave
+
+			CODEND __COMPOCTAL, 0x0
+			la t3, WA_OCTAL
+			li t1, 8
+			sd t1, CURRENT_BASE, t0
+			tail search_create_leave
+
+			CODEND __COMPDECIMAL, 0x0
+			la t3, WA_DECIMAL
+			li t1, 10
+			sd t1, CURRENT_BASE, t0
+			tail search_create_leave
+
+			CODEND __COMPUNTIL, 0x0
 			la t3, WA__UNTIL
 			tail transitions_until_out
 
