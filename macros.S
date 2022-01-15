@@ -83,7 +83,6 @@ TIL_\Name:
         .8byte  \flags
 WA_\Name:
         .8byte  \Name
-ptr_NULL:
         .8byte 0x0
 length_ASCII_\Name:
         .8byte end_\Name - beg_\Name

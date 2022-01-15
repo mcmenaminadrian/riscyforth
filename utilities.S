@@ -604,6 +604,131 @@
 			fence.i
 			ret
 
+			#COMPILE ONLY WORDS
+			CODEEND _COMPSEMI, 0x0
+			la t3, WA_SEMI
+			tail search_create_test_postpone_semi
+
+			CODEEND _COMPBINARY, 0x0
+			la t3, WA_BINARY
+			li t1, 2
+			sd t1, CURRENT_BASE, t0
+			tail search_create_leave
+
+			CODEEND _COMPOCTAL, 0x0
+			la t3, WA_OCTAL
+			li t1, 8
+			sd t1, CURRENT_BASE, t0
+			tail search_create_leave
+
+			CODEEND _COMPDECIMAL, 0x0
+			la t3, WA_DECIMAL
+			li t1, 10
+			sd t1, CURRENT_BASE, t0
+			tail search_create_leave
+
+			CODEEND _COMPUNTIL, 0x0
+			la t3, WA__UNTIL
+			tail transitions_until_out
+
+			CODEEND _COMPAGAIN, 0x0
+			la t3, WA__AGAIN
+			tail transitions_again_out
+
+			CODEEND _COMPREPEAT, 0x0
+			la t3, WA__REPEAT
+			tail transitions_repeat_out
+
+			CODEEND _COMPWHILE, 0x0
+			la t3, WA__WHILE
+			tail transitions_while_out
+
+			CODEEND _COMPTHEN, 0x0
+			la t3, WA_THEN
+			tail transitions_then_out
+
+			CODEEND _COMPELSE, 0x0
+			la t3, WA__ELSE
+			tail transitions_else_out
+
+			CODEEND _COMPIF, 0x0
+			la t3, WA__IF
+			tail transitions_if_out
+
+			CODEEND _COMPMINUSLOOP, 0x0
+			la t3, WA__MINUSLOOP
+			tail transitions_loop_out
+
+			CODEEND _COMPPLUSLOOP, 0x0
+			la t3, WA__PLUSLOOP
+			tail transitions_loop_out
+
+			CODEEND _COMPLOOP, 0x0
+			la t3, WA__LOOP
+			tail transitions_loop_out
+
+			CODEEND _COMPQDO, 0x0
+			la t3, WA__QDO
+			tail transitions_do_out
+
+			CODEEND _COMPDO, 0x0
+			la t3, WA__DO
+			tail transitions_do_out
+
+			CODEEND _COMPACTIONOF, 0x0
+			la t3, WA__ACTIONOF
+			tail embed_defer
+
+			CODEEND _COMPCHAR, 0x0
+			la t3, WA__CHAR
+			tail embed_tick
+
+			CODEEND _COMPBRACKETCHAR, 0x0
+			la t3, WA__BRACKETCHAR
+			tail embed_to
+
+			CODEEND _LITERALCOMP, 0x0
+			POP a2
+			tail search_create_number_on_stack
+
+			CODEEND _DOESCOMP, 0x0
+			la t3, WA_DOES_
+			tail search_create_keep_does_
+
+			CODEEND _ABORTCOMP, 0x0
+			la t3, WA__ABORTCOMM
+			addi a5, a5, 4
+			tail embed_encsq
+
+			CODEEND _DOTQCOMP, 0x0
+			la t3, WA__DOTQ
+			tail embed_encsq
+
+			CODEEND _SQCOMP, 0x0
+			la t3, WA__SQ
+			tail embed_sq
+
+			CODEEND _CQCOMP, 0x0
+			la t3, WA__CQ
+			tail embed_sq
+
+			CODEEND _TICKCOMP, 0x0
+			la t3, WA__TICK
+			tail embed_tick
+
+			CODEEND _COMPCOMPCOMMA, 0x0
+			ld t3, 0(sp)
+			addi sp, sp, 8
+			tail postpone_output_normal
+
+			CODEEND _COMPIS, 0x0
+			la t3, WA__IS
+			tail embed_tick
+
+			CODEEND _COMPTO, 0x0
+			la t3, WA__TO
+			tail embed_to
+
   utility_process_postpone:
 			#find word
 			#find token
@@ -647,7 +772,7 @@
 			j postpone_output_normal
   postpone_allowed:
 			la a5, WA_ABORTCOMM
-			bne a4, a5. postpone_encsq
+			bne a4, a5, postpone_encsq
 			la a5, WA__ABORTCOMP
 			j postpone_output_normal
   postpone_encsq:
@@ -676,7 +801,7 @@
 			la a5, WA__TICKCOMP
 			j postpone_output_normal
   postpone_search_compilecomma:
-			la a5, WA_COMPILCOMMA
+			la a5, WA_COMPILECOMMA
 			bne a4, a5, postpone_search_is
 			la a5, WA__COMPCOMPCOMMA
 			j postpone_output_normal
@@ -685,7 +810,7 @@
 			bne a4, a5, postpone_search_to
 			la a5, WA__COMPIS
 			j postpone_output_normal
-  postpone_search_is:
+  postpone_search_to:
 			la a5, WA_TO
 			bne a4, a5, postpone_search_bracketchar
 			la a5, WA__COMPTO
@@ -834,127 +959,3 @@
 			POP ra
 			#but we have other tests to do
 
-			#COMPILE ONLY WORDS
-			CODEND __COMPSEMI, 0x0
-			la t3, WA_SEMI
-			tail search_create_test_postpone_semi
-
-			CODEND __COMPBINARY, 0x0
-			la t3, WA_BINARY
-			li t1, 2
-			sd t1, CURRENT_BASE, t0
-			tail search_create_leave
-
-			CODEND __COMPOCTAL, 0x0
-			la t3, WA_OCTAL
-			li t1, 8
-			sd t1, CURRENT_BASE, t0
-			tail search_create_leave
-
-			CODEND __COMPDECIMAL, 0x0
-			la t3, WA_DECIMAL
-			li t1, 10
-			sd t1, CURRENT_BASE, t0
-			tail search_create_leave
-
-			CODEND __COMPUNTIL, 0x0
-			la t3, WA__UNTIL
-			tail transitions_until_out
-
-			CODEND __COMPAGAIN, 0x0
-			la t3, WA__AGAIN
-			tail transitions_again_out
-
-			CODEND __COMPREPEAT, 0x0
-			la t3, WA__REPEAT
-			tail transitions_repeat_out
-
-			CODEND __COMPWHILE, 0x0
-			la t3, WA__WHILE
-			tail transitions_while_out
-
-			CODEND __COMPTHEN, 0x0
-			la t3, WA__THEN
-			tail transitions_then_out
-
-			CODEND __COMPELSE, 0x0
-			la t3, WA__ELSE
-			tail transitions_else_out
-
-			CODEND __COMPIF, 0x0
-			la t3, WA__IF
-			tail transitions_if_out
-
-			CODEND __COMPMINUSLOOP, 0x0
-			la t3, WA__MINUSLOOP
-			tail transitions_loop_out
-
-			CODEND __COMPPLUSLOOP, 0x0
-			la t3, WA__PLUSLOOP
-			tail transitions_loop_out
-
-			CODEND __COMPLOOP, 0x0
-			la t3, WA__LOOP
-			tail transitions_loop_out
-
-			CODEND __COMPQDO, 0x0
-			la t3, WA__QDO
-			tail transitions_do_out
-
-			CODEND __COMPDO, 0x0
-			la t3, WA__DO
-			tail transitions_do_out
-
-			CODEND __COMPACTIONOF, 0x0
-			la t3, WA__ACTIONOF
-			tail embed_defer
-
-			CODEND __COMPCHAR, 0x0
-			la t3, WA__CHAR
-			tail embed_tick
-
-			CODEND __COMPBRACKETCHAR, 0x0
-			la t3, WA__BRACKETCHAR
-			tail embed_to
-
-			CODEEND _LITERALCOMP, 0x0
-			POP a2
-			tail search_create_number_on_stack
-
-			CODEEND _DOESCOMP, 0x0
-			la t3, WA_DOES_
-			tail search_create_keep_does_
-
-			CODEND _ABORTCOMP, 0x0
-			la t3, WA__ABORTCOMM
-			addi a5, a5, 4
-			tail embed_encsq
-
-			CODEEND _DOTQCOMP, 0x0
-			la t3, WA__DOTQ
-			tail embed_encsq
-
-			CODEEND _SQCOMP, 0x0
-			la t3, WA__SQ
-			tail embed_sq
-
-			CODEEND _CQCOMP, 0x0
-			la t3, WA__CQ
-			tail embed_sq
-
-			CODEEND _TICKCOMP, 0x0
-			la t3, WA__TICK
-			tail embed_tick
-
-			CODEEND _COMPCOMPCOMMA, 0x0
-			ld t3, 0(sp)
-			addi sp, sp, 8
-			tail postpone_output_normal
-
-			CODEND __COMPIS, 0x0
-			la t3, WA__IS
-			tail embed_tick
-
-			CODEND __COMPTO, 0x0
-			la t3, WA__TO
-			tail embed_to
