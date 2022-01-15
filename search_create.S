@@ -391,6 +391,18 @@
                 tail NEXT
 
   search_create_exhausted:
+		#firstly - are we in POSTPONE?
+		la a0, INPPONE
+		ld a1, 0(a0)
+		beqz a1, search_create_exhausted_postpone_only
+		la t3, WA__NUMBER
+		la t0, createwritepoint
+		ld t1, 0(t0)
+		sd t3, 0(t1)			      #write out word address in definition
+		addi t1, t1, 8
+		sd t1, 0(t0)
+		j search_create_leave	
+  search_create_exhausted_postpone_only:
 		#test for variable etc
 		mv a4, t0
 		lbu t4, 0(a4)

@@ -725,7 +725,10 @@
 			la t3, WA__IS
 			tail embed_tick
 
-			CODEHEADER _COMPTO, _COMPIS, 0x0
+			CODEHEADER _NUMBER, _COMPIS
+			tail search_create_exhausted_postpone_only
+
+			CODEHEADER _COMPTO, _NUMBER, 0x0
 			la t3, WA__TO
 			tail embed_to
 
@@ -750,6 +753,10 @@
 			sd zero, 0(a5)	
 			call utility_sanitize_string
 			call utility_check_dictionary_match
+			beqz a3, utility_process_postpone_found_matched
+			#not a dictionary word - is it a number?
+			j utility_postpone_process_number
+  utility_process_postpone_found_matched:
 			addi a4, a4, 8
 			#now check if we have compiling behaviour
 			#WA_COLON
@@ -760,120 +767,121 @@
 			sd zero, 0(t0)
 			addi sp, sp, 8
 			tail search_failed
+
   postpone_check_literal:
 			la a5, WA_LITERAL
 			bne a4, a5, postpone_check_does
-			la a5, WA__LITERALCOMP
+			la a4, WA__LITERALCOMP
 			j postpone_output_normal
   postpone_check_does:
 			la a5, WA_DOES_
 			bne a4, a5, postpone_allowed
-			la a5, WA__DOESCOMP
+			la a4, WA__DOESCOMP
 			j postpone_output_normal
   postpone_allowed:
 			la a5, WA_ABORTCOMM
 			bne a4, a5, postpone_encsq
-			la a5, WA__ABORTCOMP
+			la a4, WA__ABORTCOMP
 			j postpone_output_normal
   postpone_encsq:
 			la a5, WA_DOTQ
 			bne a4, a5, postpone_search_sq
-			la a5, WA__DOTQCOMP
+			la a4, WA__DOTQCOMP
 			j postpone_output_normal
   postpone_search_sq:
 			la a5, WA_SQ
 			bne a4, a5, postpone_search_cq
-			la a5, WA__SQCOMP
+			la a4, WA__SQCOMP
 			j postpone_output_normal
   postpone_search_cq:
 			la a5, WA_CQ
 			bne a4, a5, postpone_search_tick
-			la a5, WA__CQCOMP
+			la a4, WA__CQCOMP
 			j postpone_output_normal
   postpone_search_tick:
 			la a5, WA_TICK
 			bne a4, a5, postpone_search_brackettick
-			la a5, WA__TICKCOMP
+			la a4, WA__TICKCOMP
 			j postpone_output_normal
   postpone_search_brackettick:
 			la a5, WA_BRACKETTICK
 			bne a4, a5, postpone_search_compilecomma
-			la a5, WA__TICKCOMP
+			la a4, WA__TICKCOMP
 			j postpone_output_normal
   postpone_search_compilecomma:
 			la a5, WA_COMPILECOMMA
 			bne a4, a5, postpone_search_is
-			la a5, WA__COMPCOMPCOMMA
+			la a4, WA__COMPCOMPCOMMA
 			j postpone_output_normal
   postpone_search_is:
 			la a5, WA_IS
 			bne a4, a5, postpone_search_to
-			la a5, WA__COMPIS
+			la a4, WA__COMPIS
 			j postpone_output_normal
   postpone_search_to:
 			la a5, WA_TO
 			bne a4, a5, postpone_search_bracketchar
-			la a5, WA__COMPTO
+			la a4, WA__COMPTO
 			j postpone_output_normal
   postpone_search_bracketchar:
 			la a5, WA_BRACKETCHAR
 			bne a4, a5, postpone_search_char
-			la a5, WA__COMPBRACKETCHAR
+			la a4, WA__COMPBRACKETCHAR
 			j postpone_output_normal
   postpone_search_char:
 			la a5, WA_CHAR
 			bne a4, a5, postpone_search_actionof
-			la a5, WA__COMPCHAR
+			la a4, WA__COMPCHAR
 			j postpone_output_normal
   postpone_search_actionof:
 			la a5, WA_ACTIONOF
 			bne a4, a5, postpone_search_again
-			la a5, WA__COMPACTIONOF
+			la a4, WA__COMPACTIONOF
 			j postpone_output_normal
   postpone_search_again:
 			la a5, WA_AGAIN
 			bne a4, a5, postpone_search_until
-			la a5, WA__COMPAGAIN
+			la a4, WA__COMPAGAIN
 			j postpone_output_normal
   postpone_search_until:
 			la a5, WA_UNTIL
 			bne a4, a5, postpone_search_do
-			la a5, WA__COMPUNTIL
+			la a4, WA__COMPUNTIL
 			j postpone_output_normal
   postpone_search_do:
 			la a5, WA_DO
 			bne a4, a5, postpone_search_qdo
-			la a5, WA__COMPDO
+			la a4, WA__COMPDO
 			j postpone_output_normal
   postpone_search_qdo:
 			la a5, WA_QDO
 			bne a4, a5, postpone_search_loop
-			la a5, WA__COMPQDO
+			la a4, WA__COMPQDO
 			j postpone_output_normal
   postpone_search_loop:
 			la a5, WA_LOOP
 			bne a4, a5, postpone_search_plusloop
-			la a5, WA__COMPLOOP
+			la a4, WA__COMPLOOP
 			j postpone_output_normal
   postpone_search_plusloop:
 			la a5, WA_PLUSLOOP
 			bne a4, a5, postpone_search_minusloop
-			la a5, WA__COMPPLUSLOOP
+			la a4, WA__COMPPLUSLOOP
 			j postpone_output_normal
   postpone_search_minusloop:
 			la a5, WA_MINUSLOOP
 			bne a4, a5, postpone_search_unloop
-			la a5, WA__COMPMINUSLOOP
+			la a4, WA__COMPMINUSLOOP
 			j postpone_output_normal
   postpone_search_unloop:
 			la a5, WA_UNLOOP
 			bne a4, a5, postpone_search_leave
-			la a5, WA__UNLOOP
+			la a4, WA__UNLOOP
 			j postpone_output_normal
   postpone_search_leave:
 			la a5, WA_LEAVE
 			bne a4, a5, postpone_search_recurse
-			la a5, WA__LEAVE
+			la a4, WA__LEAVE
 			j postpone_output_normal
   postpone_search_recurse:
 			la a5, WA_RECURSE
@@ -884,68 +892,68 @@
 			j postpone_output_normal
   postpone_search_i:
 			la a5, WA_I
-			bne a5, a5, postpone_search_j
-			la a5, WA__I
+			bne a5, a4, postpone_search_j
+			la a4, WA__I
 			j postpone_output_normal
   postpone_search_j:
 			la a5, WA_J
-			bne a5, a5, postpone_search_exit
-			la a5, WA__J
+			bne a5, a4, postpone_search_exit
+			la a4, WA__J
 			j postpone_output_normal
   postpone_search_exit:
 			la a5, WA_EXIT
-			bne a5, a5, postpone_search_if
-			la a5, WA__EXIT
+			bne a5, a4, postpone_search_if
+			la a4, WA__EXIT
 			j postpone_output_normal
   postpone_search_if:
 			la a5, WA_IF
-			bne a5, a5, postpone_search_else
-			la a5, WA__COMPIF
+			bne a5, a4, postpone_search_else
+			la a4, WA__COMPIF
 			j postpone_output_normal
   postpone_search_else:
 			la a5, WA_ELSE
-			bne a5, a5, postpone_search_of
-			la a5, WA__COMPELSE
+			bne a5, a4, postpone_search_of
+			la a4, WA__COMPELSE
 			j postpone_output_normal
   postpone_search_of:
 			la a5, WA_OF
-			bne a5, a5, postpone_search_then
-			la a5, WA__OF
+			bne a5, a4, postpone_search_then
+			la a4, WA__OF
 			j postpone_output_normal
   postpone_search_then:
 			la a5, WA_THEN
-			bne a5, a5, postpone_search_while
-			la a5, WA__COMPTHEN
+			bne a5, a4, postpone_search_while
+			la a4, WA__COMPTHEN
 			j postpone_output_normal
   postpone_search_while:
 			la a5, WA_WHILE
-			bne a5, a5, postpone_search_repeat
-			la a5, WA__COMPWHILE
+			bne a5, a4, postpone_search_repeat
+			la a4, WA__COMPWHILE
 			j postpone_output_normal
   postpone_search_repeat:
 			la a5, WA_REPEAT
-			bne a5, a5, postpone_search_decimal
-			la a5, WA__COMPREPEAT
+			bne a5, a4, postpone_search_decimal
+			la a4, WA__COMPREPEAT
 			j postpone_output_normal
   postpone_search_decimal:
 			la a5, WA_DECIMAL
-			bne a5, a5, postpone_search_octal
-			la a5, WA__COMPDECIMAL
+			bne a5, a4, postpone_search_octal
+			la a4, WA__COMPDECIMAL
 			j postpone_output_normal
   postpone_search_octal:
 			la a5, WA_OCTAL
-			bne a5, a5, postpone_search_binary
-			la a5, WA__COMPOCTAL
+			bne a5, a4, postpone_search_binary
+			la a4, WA__COMPOCTAL
 			j postpone_output_normal
   postpone_search_binary:
 			la a5, WA_BINARY
-			bne a5, a5, postpone_search_semi
-			la a5, WA__COMPBINARY
+			bne a5, a4, postpone_search_semi
+			la a4, WA__COMPBINARY
 			j postpone_output_normal
   postpone_search_semi:
 			la a5, WA_SEMI
 			bne a5, a5, postpone_search_decimal
-			la a5, WA__COMPSEMI
+			la a4, WA__COMPSEMI
 
 			
   postpone_output_normal:
@@ -953,9 +961,9 @@
 			POP ra
 			ret
 
-  postpone_output_normal_number:
+  utility_postpone_process_number:
+			la t3, WA__NUMBER
 			#not special compile words but still have some checking to do
-			mv t3, a4
 			POP ra
-			#but we have other tests to do
+			ret
 
