@@ -726,6 +726,21 @@
 			tail embed_tick
 
 			CODEHEADER _NUMBER, _COMPIS, 0x0
+			ld t0, 0(s7)			#how many bytes?
+			mv t6, t0
+			addi s7, s7, 8
+			mv a0, s7
+			add a1, a0, t0
+			li t1, 7
+			and t2, t1, t0
+			beqz t2, _number_aligned
+			li t3, 8
+			sub t4, t3, t2
+			add t6, t6, t4
+  _number_aligned:
+			add s7, s7, t6
+			mv t0, a0
+			mv t1, a1
 			tail search_create_exhausted_postpone_only
 
 			CODEHEADER _COMPTO, _NUMBER, 0x0
@@ -961,8 +976,33 @@
 			ret
 
   utility_postpone_process_number:
-			la t3, WA__NUMBER
 			#not special compile words but still have some checking to do
-			POP ra
-			ret
-
+			addi sp, sp, 8		#not returning
+			la t3, WA__NUMBER
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			sd t3, 0(t1)
+			addi t1, t1, 8
+			sd t1, 0(t0)
+			sd a2, 0(t1)
+			addi t1, t1, 8
+  utility_postpone_process_number_write:
+			lbu t3, 0(a0)
+			sb t3, 0(t1)
+			addi t1, t1, 1
+			addi a0, a0, 1
+			addi a2, a2, -1
+			beqz a2, utility_postpone_process_number_done
+			j utility_postpone_process_number_write
+  utility_postpone_process_number_done:
+			#check alignment
+			li t3, 7
+			and t4, t3, t1
+			beqz t4, utility_postpone_process_number_clear
+			li t5, 8
+			sub t6, t5, t4
+			add t1, t1, t6
+  utility_postpone_process_number_clear:
+			sd t1, 0(t0)
+			tail search_create_leave
+	
