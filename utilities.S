@@ -378,7 +378,7 @@
   #a0 has start
   #a1 has end
   #a2 has length
-  #a3 returns 0 on success
+  #a3 returns 1 on success
   #a4 holds address
   utility_check_dictionary_match:
 			addi sp, sp, -56
@@ -725,7 +725,7 @@
 			la t3, WA__IS
 			tail embed_tick
 
-			CODEHEADER _NUMBER, _COMPIS
+			CODEHEADER _NUMBER, _COMPIS, 0x0
 			tail search_create_exhausted_postpone_only
 
 			CODEHEADER _COMPTO, _NUMBER, 0x0
@@ -736,7 +736,6 @@
 			#find word
 			#find token
 			#compile in
-			#TODO: Handle multi-line entry
 			PUSH ra
 			call utility_find_string
 			bnez a0, utility_process_postpone_found
@@ -753,7 +752,7 @@
 			sd zero, 0(a5)	
 			call utility_sanitize_string
 			call utility_check_dictionary_match
-			beqz a3, utility_process_postpone_found_matched
+			bnez a3, utility_process_postpone_found_matched
 			#not a dictionary word - is it a number?
 			j utility_postpone_process_number
   utility_process_postpone_found_matched:
@@ -952,7 +951,7 @@
 			j postpone_output_normal
   postpone_search_semi:
 			la a5, WA_SEMI
-			bne a5, a5, postpone_search_decimal
+			bne a5, a4, postpone_output_normal
 			la a4, WA__COMPSEMI
 
 			
