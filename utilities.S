@@ -726,11 +726,12 @@
 			tail embed_tick
 
 			CODEHEADER _NUMBER, _COMPIS, 0x0
+			#(-- x)
 			ld t0, 0(s7)			#how many bytes?
-			mv t6, t0
+			mv t6, t0			#copy to t6
 			addi s7, s7, 8
-			mv a0, s7
-			add a1, a0, t0
+			mv a0, s7			#a0 points to start of string
+			add a3, a0, t0			#a3 points to end
 			li t1, 7
 			and t2, t1, t0
 			beqz t2, _number_aligned
@@ -739,9 +740,9 @@
 			add t6, t6, t4
   _number_aligned:
 			add s7, s7, t6
-			mv t0, a0
-			mv t1, a1
-			tail search_create_exhausted_postpone_only
+			call func_test_hex
+			PUSH a2
+			tail NEXT
 
 			CODEHEADER _COMPTO, _NUMBER, 0x0
 			la t3, WA__TO
