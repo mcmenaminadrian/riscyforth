@@ -438,7 +438,8 @@ RED COMPILE, ." If COMPILE, works this text is blue, if FAILS THEN IN RED" RESET
 
 : TEST@
 ." Testing @ (and BASE)" 5 spaces
-octal base @ 10 = hex base @ 10 = AND decimal base @ 10 = AND if BLUE ." @ and BASE passed" ELSE RED ." @ and BASE FAILED" then RESET cr ;
+postpone octal base @ postpone 10 = postpone hex base @ postpone 10 = AND postpone decimal base @ postpone 10 = AND if BLUE ." @ and BASE passed"
+ELSE RED ." @ and BASE FAILED" then RESET cr ;
 
 1 CELLS ALLOT
 CREATE SPEAKLIKEACHILD

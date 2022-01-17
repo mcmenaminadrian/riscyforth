@@ -330,22 +330,22 @@
                 sd t0, OKSTATUS, t1
                 tail NEXT
 
-                CODEHEADER DECIMAL, SEARCH, 0x01
+                CODEHEADER DECIMAL, SEARCH, 0x101
 		li t1, 10
                 sd t1, CURRENT_BASE, t0
                 tail NEXT
 
-                CODEHEADER HEX, DECIMAL, 0x01
+                CODEHEADER HEX, DECIMAL, 0x101
 		li t1, 16
                 sd t1, CURRENT_BASE, t0
                 tail NEXT
 
-                CODEHEADER OCTAL, HEX, 0x01
+                CODEHEADER OCTAL, HEX, 0x101
 		li t1, 8
                 sd t1, CURRENT_BASE, t0
                 tail NEXT
 
-                CODEHEADER BINARY, OCTAL, 0x01
+                CODEHEADER BINARY, OCTAL, 0x101
 		li t1, 2
                 sd t1, CURRENT_BASE, t0
                 tail NEXT

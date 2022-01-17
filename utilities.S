@@ -606,28 +606,9 @@
 
 			#COMPILE ONLY WORDS
 			CODEHEADER _COMPSEMI, INCLUDE, 0x0
-			la t3, WA_SEMI
 			tail search_create_test_postpone_semi
 
-			CODEHEADER _COMPBINARY, _COMPSEMI, 0x0
-			la t3, WA_BINARY
-			li t1, 2
-			sd t1, CURRENT_BASE, t0
-			tail search_create_leave
-
-			CODEHEADER _COMPOCTAL, _COMPBINARY, 0x0
-			la t3, WA_OCTAL
-			li t1, 8
-			sd t1, CURRENT_BASE, t0
-			tail search_create_leave
-
-			CODEHEADER _COMPDECIMAL, _COMPOCTAL, 0x0
-			la t3, WA_DECIMAL
-			li t1, 10
-			sd t1, CURRENT_BASE, t0
-			tail search_create_leave
-
-			CODEHEADER _COMPUNTIL, _COMPDECIMAL, 0x0
+			CODEHEADER _COMPUNTIL, _COMPSEMI, 0x0
 			la t3, WA__UNTIL
 			tail transitions_until_out
 
@@ -947,23 +928,8 @@
 			j postpone_output_normal
   postpone_search_repeat:
 			la a5, WA_REPEAT
-			bne a5, a4, postpone_search_decimal
-			la a4, WA__COMPREPEAT
-			j postpone_output_normal
-  postpone_search_decimal:
-			la a5, WA_DECIMAL
-			bne a5, a4, postpone_search_octal
-			la a4, WA__COMPDECIMAL
-			j postpone_output_normal
-  postpone_search_octal:
-			la a5, WA_OCTAL
-			bne a5, a4, postpone_search_binary
-			la a4, WA__COMPOCTAL
-			j postpone_output_normal
-  postpone_search_binary:
-			la a5, WA_BINARY
 			bne a5, a4, postpone_search_semi
-			la a4, WA__COMPBINARY
+			la a4, WA__COMPREPEAT
 			j postpone_output_normal
   postpone_search_semi:
 			la a5, WA_SEMI
