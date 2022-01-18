@@ -116,6 +116,8 @@
 
   transitions_until_out:
 		#look for WA_BEGIN
+		PUSH s0
+		PUSH s1
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)
@@ -124,6 +126,8 @@
 		la a2, WA_BEGIN
 		la a3, WA__UNTIL
 		la a7, WA__AGAIN	# also an incrementer
+		la s0, WA__COMPAGAIN
+		la s1, WA__UNTIL
   transitions_search_back_common:
 		mv a6, t1
 		addi a6, a6, -8
@@ -135,6 +139,8 @@
 		beq a4, a3, transitions_until_search_back_inc_index
 		beq a4, a2, transitions_until_search_back_dec_index
 		beq a4, a7, transitions_until_search_back_inc_index
+		beq a4, s0, transitions_until_search_back_inc_index
+		beq a4, s1, transitions_until_search_back_inc_index
   transitions_until_retreat:
 		beq a6, a5, trackback_failed
 		j transitions_until_search_back
@@ -146,6 +152,8 @@
 		addi a0, a0, -1
 		j transitions_until_retreat
   transitions_until_fix_jump:
+		POP s1
+		POP s0
 		addi a6, a6, 8
 		sd a6, 8(t1)
 		addi t1, t1, 16
@@ -154,6 +162,8 @@
 
   transitions_again_out:
 		#look for WA_BEGIN
+		PUSH s0
+		PUSH s1
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)
@@ -161,6 +171,8 @@
 		la a2, WA_BEGIN
 		la a3, WA__AGAIN
 		la a7, WA__UNTIL	# also an incrementer
+		la s0, WA__COMPAGAIN
+		la s1, WA__COMPUNTIL
 		j transitions_search_back_common
 
   transitions_while_out:
@@ -176,6 +188,8 @@
 
   transitions_repeat_out:
 		#look for WA_BEGIN
+		PUSH s0
+		PUSH s1
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)
@@ -186,6 +200,8 @@
 		la a7, WA__UNTIL
 		la t5, WA__AGAIN
 		la t6, WA__WHILE
+		la s0, WA__COMPUNTIL
+		la s1, WA__COMPAGAIN
 		mv a6, t1
 		addi a6, a6, -8
 		li a4, -4096
@@ -197,6 +213,8 @@
 		beq a4, a2, transitions_repeat_dec
 		beq a4, a7, transitions_repeat_inc
 		beq a4, t5, transitions_repeat_inc
+		beq s0, t5, transitions_repeat_inc
+		beq s1, t5, transitions_repeat_inc
 		beq a4, t6, transitions_repeat_while
   transitions_repeat_retreat:
 		beq a6, a5, trackback_failed
@@ -214,6 +232,8 @@
 		addi a0, a0, -1
 		j transitions_repeat_retreat
   transitions_repeat_fix_jump:
+		POP s1
+		POP s0
 		j transitions_until_fix_jump
 
   transitions_do_out:

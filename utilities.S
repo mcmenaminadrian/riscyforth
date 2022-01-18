@@ -618,6 +618,8 @@
 			la t1, WA_BEGIN
 			la t2, WA__UNTIL
 			la t3, WA__AGAIN
+			la a0, WA__COMPAGAIN
+			la a1, WA__COMPUNTIL
 			mv t4, s7
   _comp_until_look_back:
 			addi t4, t4, -8
@@ -625,6 +627,8 @@
 			beq t5, t1, _comp_until_test_begin
 			beq t5, t2, _comp_until_inc_index
 			beq t5, t3, _comp_until_inc_index
+			beq a0, t5, _comp_until_inc_index
+			beq a1, t5, _comp_until_inc_index
 			j _comp_until_look_back
   _comp_until_inc_index:
 			addi t0, t0, 1
@@ -638,12 +642,37 @@
 			tail NEXT
 
 			CODEHEADER _COMPAGAIN, _COMPUNTIL, 0x0
-			la t3, WA__AGAIN
-			tail transitions_again_out
+			#(--)
+			la t0, 0
+			la t1, WA_BEGIN
+			la t2, WA__AGAIN
+			la t3, WA__UNTIL
+			la t4, WA__COMPAGAIN
+			la t5, WA__COMPUNTIL
+			mv t6, s7
+  _comp_again_look_back:
+			addi t6, t6, -8
+			ld a0, -8(t6)
+			beq t6, t1, _comp_again_test_begin
+			beq t6, t2, _comp_again_inc_index
+			beq t6, t3, _comp_again_inc_index
+			beq t6, t4, _comp_again_inc_index
+			beq t6, t5, _comp_again_inc_index
+			j _comp_again_look_back
+  _comp_again_inc_index:
+			addi t0, t0, 1
+			j _comp_again_look_back
+  _comp_again_test_begin:
+		 	beqz t0, _comp_again_prime_jump
+			addi t0, t0, -1
+			j _comp_again_look_back
+  _comp_again_prime_jump:
+			mv s7, t6
+			tail NEXT
+  
 
 			CODEHEADER _COMPREPEAT, _COMPAGAIN, 0x0
-			la t3, WA__REPEAT
-			tail transitions_repeat_out
+			j _comp_until_look_begin
 
 			CODEHEADER _COMPWHILE, _COMPREPEAT, 0x0
 			la t3, WA__WHILE
