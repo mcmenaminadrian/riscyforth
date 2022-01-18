@@ -608,9 +608,34 @@
 			CODEHEADER _COMPSEMI, INCLUDE, 0x0
 			tail search_create_test_postpone_semi
 
-			CODEHEADER _COMPUNTIL, _COMPSEMI, 0x0
-			la t3, WA__UNTIL
-			tail transitions_until_out
+			CODEHEADER _COMPUNTIL, _COMPSEMI, 0x0a
+			#(x --)
+			POP t0
+			beqz t0, _comp_until_look_begin
+			tail NEXT
+  _comp_until_look_begin:
+			li t0, 0
+			la t1, WA_BEGIN
+			la t2, WA__UNTIL
+			la t3, WA__AGAIN
+			mv t4, s7
+  _comp_until_look_back:
+			addi t4, t4, -8
+			ld t5, -8(t4)
+			beq t5, t1, _comp_until_test_begin
+			beq t5, t2, _comp_until_inc_index
+			beq t5, t3, _comp_until_inc_index
+			j _comp_until_look_back
+  _comp_until_inc_index:
+			addi t0, t0, 1
+			j _comp_until_look_back
+  _comp_until_test_begin:
+		 	beqz t0, _comp_until_prime_jump
+			addi t0, t0, -1
+			j _comp_until_look_back
+  _comp_until_prime_jump:
+			mv s7, t4
+			tail NEXT
 
 			CODEHEADER _COMPAGAIN, _COMPUNTIL, 0x0
 			la t3, WA__AGAIN
