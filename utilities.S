@@ -978,8 +978,8 @@
   postpone_search_while:
 			la a5, WA_WHILE
 			bne a5, a4, postpone_search_repeat
-			la a4, WA__COMPWHILE
-			j postpone_output_normal
+			POP ra
+			tail search_create_bad_ifmode
   postpone_search_repeat:
 			la a5, WA_REPEAT
 			bne a5, a4, postpone_search_semi
