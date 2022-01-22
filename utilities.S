@@ -643,7 +643,7 @@
 
 			CODEHEADER _COMPAGAIN, _COMPUNTIL, 0x0
 			#(--)
-			la t0, 0
+			li t0, 0
 			la t1, WA_BEGIN
 			la t2, WA__AGAIN
 			la t3, WA__UNTIL
@@ -674,17 +674,82 @@
 			CODEHEADER _COMPREPEAT, _COMPAGAIN, 0x0
 			j _comp_until_look_begin
 
-			CODEHEADER _COMPWHILE, _COMPREPEAT, 0x0
-			la t3, WA__WHILE
-			tail transitions_while_out
+			CODEHEADER _COMPTHEN, _COMPREPEAT, 0x0
+			#(--)
+			#Look for an IF or WHILE and update
+			li t0, 0
+			la t1, WA__IF
+			la t2, WA__WHILE
+			la t3, WA__ELSE
+			la t4, WA_THEN
+			la t5, WA__COMPTHEN
+			la t6, WA__REPEAT
+			la a0, WA__COMPREPEAT
+			la a4, WA__COMPELSE
+			mv a1, s7
+			addi a1, a1, -8
+  _compthen_track_check:
+			ld a2, -8(a1)
+			beq a2, t1, _compthen_dec
+			beq a2, t2, _compthen_dec
+			beq a2, t3, _compthen_else
+			beq a2, a4, _compthen_else
+			beq a2, t4, _compthen_inc
+			beq a2, t5, _compthen_inc
+			beq a2, t6, _compthen_inc
+			beq a2, a0, _compthen_inc
+  _compthen_track_back:
+			addi a1, a1, -8
+			j _compthen_track_check
+  _compthen_inc:
+			addi t0, t0, 1
+			j _compthen_track_back
+  _compthen_else:
+			beqz t0, _compthen_else_jump
+			j _compthen_track_back
+  _compthen_dec:
+			beqz t0,  _compthen_if_jump
+			addi t0, t0, -1
+			j _compthen_track_back
+  _compthen_else_jump:
+			sd s7, 0(a1)
+			j _compthen_track_back
+  _compthen_if_jump:
+			sd s7, 8(a1)
+			tail NEXT
 
-			CODEHEADER _COMPTHEN, _COMPWHILE, 0x0
-			la t3, WA_THEN
-			tail transitions_then_out
 
 			CODEHEADER _COMPELSE, _COMPTHEN, 0x0
-			la t3, WA__ELSE
-			tail transitions_else_out
+			#(--)
+			li t0, 0
+			la t1, WA__IF
+			la t2, WA_THEN
+			la t3, WA__WHILE
+			la t4, WA__COMPTHEN
+			la t6, WA__REPEAT
+			mv a0, s7
+			add a0, a0, -8
+  _compelse_track_check:
+			ld a1, -8(a0)
+			beq a1, t1, _compelse_dec
+			beq a1, t2, _compelse_inc
+			beq a1, t3, _compelse_dec
+			beq a1, t4, _compelse_inc
+			beq a1, t6, _compelse_inc
+  _compelse_track_back:
+			addi a0, a0, -8
+			j _comp_else_track_check
+  _compelse_inc:
+			addi t0, t0, 1
+			j _comp_else_track_check
+  _compelse_dec:
+			beqz t0, _compelse_if_jump
+			addi t0, t0, -1
+			j _comp_else_track_check
+  _compelse_if_jumo:
+			sd s7, 8(a1)
+			tail NEXT
+
 
 			CODEHEADER _COMPIF, _COMPELSE, 0x0
 			la t3, WA__IF
