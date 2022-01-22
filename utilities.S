@@ -738,15 +738,15 @@
 			beq a1, t6, _compelse_inc
   _compelse_track_back:
 			addi a0, a0, -8
-			j _comp_else_track_check
+			j _compelse_track_check
   _compelse_inc:
 			addi t0, t0, 1
-			j _comp_else_track_check
+			j _compelse_track_check
   _compelse_dec:
 			beqz t0, _compelse_if_jump
 			addi t0, t0, -1
-			j _comp_else_track_check
-  _compelse_if_jumo:
+			j _compelse_track_check
+  _compelse_if_jump:
 			sd s7, 8(a1)
 			tail NEXT
 
