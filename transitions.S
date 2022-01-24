@@ -17,6 +17,7 @@
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)
+  transitions_if_out_postpone:
 		sd zero, 8(t1)		#ELSE offset stored here
 		sd zero, 16(t1)		#THEN offset stored here
 		addi t1, t1, 24
@@ -28,6 +29,7 @@
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)
+  transitions_else_out_postpone:
 		sd zero, 8(t1)
 		# now search for the IF (or WHILE)
 		li a0, 0		#must be zero to write
@@ -69,6 +71,7 @@
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)
+  transitions_then_out_postpone:
 		# now search for the IF
 		li a0, 0		#must be zero to write
 		la a2, WA__IF		# looking for this
@@ -250,6 +253,7 @@
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)		#write word
+  transitions_loop_out_postpone:
 		la a2, WA__QDO
 		la a3, WA__DO
 		la a4, WA__LOOP

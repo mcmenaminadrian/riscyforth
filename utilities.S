@@ -679,58 +679,56 @@
 			#Look for an IF or WHILE and update
 			#Could be writing nonsense - but not if we've been POSTPONE'd and then
 			#made IMMEDIATE
-			#have to replace this word with NOP so we only run once
-			la t0, WA_NOP
+			#have to replace this word with THEN (a NOP) so we only run once
+			la t0, WA_THEN
 			sd t0, -8(s7)
-			tail transitions_then_out
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail transitions_then_out_postpone
 
 			CODEHEADER _COMPELSE, _COMPTHEN, 0x0
 			#(--)
-			li t0, 0
-			la t1, WA__IF
-			la t2, WA_THEN
-			la t3, WA__WHILE
-			la t4, WA__COMPTHEN
-			la t6, WA__REPEAT
-			mv a0, s7
-			add a0, a0, -8
-  _compelse_track_check:
-			ld a1, -8(a0)
-			beq a1, t1, _compelse_dec
-			beq a1, t2, _compelse_inc
-			beq a1, t3, _compelse_dec
-			beq a1, t4, _compelse_inc
-			beq a1, t6, _compelse_inc
-  _compelse_track_back:
-			addi a0, a0, -8
-			j _compelse_track_check
-  _compelse_inc:
-			addi t0, t0, 1
-			j _compelse_track_check
-  _compelse_dec:
-			beqz t0, _compelse_if_jump
-			addi t0, t0, -1
-			j _compelse_track_check
-  _compelse_if_jump:
-			sd s7, 8(a1)
-			tail NEXT
-
+			# as with _COMPTHEN
+			la t0, WA__ELSE
+			sd t0, -8(s7)
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail transitions_else_out_postpone
 
 			CODEHEADER _COMPIF, _COMPELSE, 0x0
-			la t3, WA__IF
-			tail transitions_if_out
+			#(--)
+			la t0, WA__IF
+			sd t0, -8(s7)
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail transitions_if_out_postpone
 
 			CODEHEADER _COMPMINUSLOOP, _COMPIF, 0x0
-			la t3, WA__MINUSLOOP
-			tail transitions_loop_out
+			la t0, WA__MINUSLOOP
+			sd t0, -8(s7)
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail transitions_loop_out_postpone
 
 			CODEHEADER _COMPPLUSLOOP, _COMPMINUSLOOP, 0x0
-			la t3, WA__PLUSLOOP
-			tail transitions_loop_out
+			la t0, WA__PLUSLOOP
+			sd t0, -8(s7)
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail transitions_loop_out_postpone
 
 			CODEHEADER _COMPLOOP, _COMPPLUSLOOP, 0x0
-			la t3, WA__LOOP
-			tail transitions_loop_out
+			la t0, WA__LOOP
+			sd t0, -8(s7)
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail transitions_loop_out_postpone
 
 			CODEHEADER _COMPQDO, _COMPLOOP, 0x0
 			la t3, WA__QDO
