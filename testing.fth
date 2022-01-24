@@ -108,8 +108,8 @@ DECIMAL
 
 : TESTDECIMAL
 ." Testing DECIMAL " 5 SPACES
-DECIMAL 20 DUP
-BLUE 20 = IF ." DECIMAL passed wth output 20 = " DUP . ." = " HEX . DECIMAL ELSE RED ." DECIMAL FAILED with output 20 = " DUP . ." = " HEX . DECIMAL THEN 
+DECIMAL 20 DUP POSTPONE DECIMAL
+BLUE 20 = IF ." DECIMAL passed wth output 20 = " DUP . ." = " POSTPONE HEX . POSTPONE DECIMAL ELSE RED ." DECIMAL FAILED with output 20 = " DUP . ." = " POSTPONE HEX . POSTPONE DECIMAL THEN 
 RESET CR
 ;
 
@@ -119,8 +119,8 @@ ELSE RED ." OCTAL FAILED with 20o = " DUP OCTAL . ." = " DECIMAL . THEN RESET CR
 
 : VERIFYBINARY 
 ." Verifying BINARY  - " 1 2 4 8 16 32 64 128 256 512
-BINARY ." powers of 2 from 9 to 0 in binary... " cr
-CYAN . cr . cr . cr . cr . cr . cr . cr . cr . cr . cr RESET DECIMAL ;
+POSTPONE BINARY ." powers of 2 from 9 to 0 in binary... " cr
+CYAN . cr . cr . cr . cr . cr . cr . cr . cr . cr . cr RESET POSTPONE DECIMAL ;
 
 : VERIFYDOT
 ." Verifying DOT " 5 spaces 0 1 2 3 4 5
@@ -205,9 +205,9 @@ BLUE -1 1- -2 = IF ." 1- passed " ELSE RED ." 1- FAILED " THEN RESET CR ;
 ." Testing 2- " 5 SPACES
 BLUE 10 2- 8 = IF ." 2- passed " ELSE RED ." 2- FAILED " THEN RESET CR ;
 
-: TESTUNDERPLUS
-." Testing UNDERPLUS" 5 spaces
-BLUE 10 15 20 underplus 30 = if ." UNDERPLUS passed" else RED ." UNDERPLUS FAILED" then RESET cr ;
+: TEST+UNDER
+." Testing +UNDER" 5 spaces
+BLUE 10 15 20 +under 30 = if ." +UNDER passed" else RED ." +UNDER FAILED" then RESET cr ;
 
 : TESTMOD
 ." Testing MOD" 5 spaces
@@ -613,7 +613,7 @@ BLUE ." Verification of MS complete" RESET CR ;
 ." Verifying pictured output" CR
 CYAN S" -£125.45" type ."  = " -12545 <# dup # # 46 hold #s 163 hold 194 hold drop sign 0 #> type RESET CR
 ." And verifying base conversion..." CR
-CYAN 324 DUP . ." in binary is..." binary <# #s #> type decimal RESET CR
+CYAN 324 DUP . ." in binary is..." postpone binary <# #s #> type postpone decimal RESET CR
 BLUE ." Numbered pictured output verified." RESET CR ; 
 
 : TEST>NUMBER
@@ -693,7 +693,7 @@ VERIFYSOURCE TESTCONSTANTVALUE TESTACCEPT
 : INTEGERTESTS
 ." Running integer tests " cr
 TESTADD TESTMUL TESTDIV TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST0<> TEST0>
-TESTminus2 testplus2 testunderplus testminmax testabs testnegate testshifts
+TESTminus2 testplus2 test+under testminmax testabs testnegate testshifts
 TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES TEST>NUMBER
 TESTINGCASE TESTUM* TESTUM/MOD TESTUINEQUALITIES VERIFYU.
 ." Integer tests complete " CR

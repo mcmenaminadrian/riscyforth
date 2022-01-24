@@ -675,49 +675,14 @@
 			j _comp_until_look_begin
 
 			CODEHEADER _COMPTHEN, _COMPREPEAT, 0x0
-			#(--)
+			#(--)			
 			#Look for an IF or WHILE and update
-			li t0, 0
-			la t1, WA__IF
-			la t2, WA__WHILE
-			la t3, WA__ELSE
-			la t4, WA_THEN
-			la t5, WA__COMPTHEN
-			la t6, WA__REPEAT
-			la a0, WA__COMPREPEAT
-			la a4, WA__COMPELSE
-			mv a1, s7
-			addi a1, a1, -8
-  _compthen_track_check:
-			ld a2, -8(a1)
-			beq a2, t1, _compthen_dec
-			beq a2, t2, _compthen_dec
-			beq a2, t3, _compthen_else
-			beq a2, a4, _compthen_else
-			beq a2, t4, _compthen_inc
-			beq a2, t5, _compthen_inc
-			beq a2, t6, _compthen_inc
-			beq a2, a0, _compthen_inc
-  _compthen_track_back:
-			addi a1, a1, -8
-			j _compthen_track_check
-  _compthen_inc:
-			addi t0, t0, 1
-			j _compthen_track_back
-  _compthen_else:
-			beqz t0, _compthen_else_jump
-			j _compthen_track_back
-  _compthen_dec:
-			beqz t0,  _compthen_if_jump
-			addi t0, t0, -1
-			j _compthen_track_back
-  _compthen_else_jump:
-			sd s7, 0(a1)
-			j _compthen_track_back
-  _compthen_if_jump:
-			sd s7, 8(a1)
-			tail NEXT
-
+			#Could be writing nonsense - but not if we've been POSTPONE'd and then
+			#made IMMEDIATE
+			#have to replace this word with NOP so we only run once
+			la t0, WA_NOP
+			sd t0, -8(s7)
+			tail transitions_then_out
 
 			CODEHEADER _COMPELSE, _COMPTHEN, 0x0
 			#(--)
@@ -1091,4 +1056,3 @@
   utility_postpone_process_number_clear:
 			sd t1, 0(t0)
 			tail search_create_leave
-	

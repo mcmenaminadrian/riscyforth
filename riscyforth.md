@@ -496,7 +496,7 @@ remainder *u2* - all arithmetic is unsigned
 **UM\*** (u1 u2 -- ud) Multipy *u1* by *u2* and store result in *ud* - all
 arithmetic is unsigned
 
-**UNDERPLUS** (x2 x1 x0 -- x1 x3) *x3* is the sum of *x2* and *x0*
+**+UNDER** (x2 x1 x0 -- x1 x3) *x3* is the sum of *x2* and *x0*
 
 **UNLOOP** Discard the loop parameters for the current loop (before *EXIT*)
 
