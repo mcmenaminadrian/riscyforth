@@ -243,6 +243,7 @@
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)
+  transitions_do_out_postpone:
 		sd zero, 8(t1) 		#jump if needed
 		addi t1, t1, 16
 		sd t1, 0(t0)

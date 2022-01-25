@@ -473,6 +473,7 @@
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)			      #write out word address in definition
+  search_create_literal_out_postpone:
 		sd a2, 8(t1)
 		addi t1, t1, 16
 		sd t1, 0(t0)
@@ -574,6 +575,7 @@
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)				#write out word address
+  embed_defer_postpone:
 		PUSH t1					# save for later
 		la a0, INPUT_START
 		la a1, INPUT_END
@@ -636,6 +638,7 @@
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)				#write out word address
+  embed_tick_postpone:
 		PUSH t1					# save for later
 		#find length
 		call tick_start_looking

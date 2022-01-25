@@ -680,8 +680,8 @@
 			#Could be writing nonsense - but not if we've been POSTPONE'd and then
 			#made IMMEDIATE
 			#have to replace this word with THEN (a NOP) so we only run once
-			la t0, WA_THEN
-			sd t0, -8(s7)
+#			la t0, WA_THEN
+#			sd t0, -8(s7)
 			la t0, createwritepoint
 			ld t1, 0(t0)
 			addi t1, t1, -8
@@ -731,28 +731,53 @@
 			tail transitions_loop_out_postpone
 
 			CODEHEADER _COMPQDO, _COMPLOOP, 0x0
-			la t3, WA__QDO
-			tail transitions_do_out
+			la t0, WA__QDO
+			sd t0, -8(s7)
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail transitions_do_out_postpone
 
 			CODEHEADER _COMPDO, _COMPQDO, 0x0
-			la t3, WA__DO
-			tail transitions_do_out
+			la t0, WA__DO
+			sd t0, -8(s7)
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail transitions_do_out_postpone
 
 			CODEHEADER _COMPACTIONOF, _COMPDO, 0x0
-			la t3, WA__ACTIONOF
-			tail embed_defer
+			la t0, WA__ACTIONOF
+			sd t0, -8(s7)
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail embed_defer_postpone
 
 			CODEHEADER _COMPCHAR, _COMPACTIONOF, 0x0
-			la t3, WA__CHAR
-			tail embed_tick
+			la t0, WA__CHAR
+			sd t0, -8(s7)
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail embed_tick_postpone
 
 			CODEHEADER _COMPBRACKETCHAR, _COMPCHAR, 0x0
-			la t3, WA__BRACKETCHAR
-			tail embed_to
+			la t0, WA__BRACKETCHAR
+			sd t0, -8(s7)
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail embed_tick_postpone
 
 			CODEHEADER _LITERALCOMP, _COMPBRACKETCHAR, 0x0
 			POP a2
-			tail search_create_number_on_stack
+			la t0, WA_LITERALNUMB
+			sd t0, -8(s7)
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			addi t1, t1, -8
+			tail search_create_literal_out_postpone
 
 			CODEHEADER _DOESCOMP, _LITERALCOMP, 0x0
 			la t3, WA_DOES_
