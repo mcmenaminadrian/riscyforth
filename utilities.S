@@ -679,9 +679,6 @@
 			#Look for an IF or WHILE and update
 			#Could be writing nonsense - but not if we've been POSTPONE'd and then
 			#made IMMEDIATE
-			#have to replace this word with THEN (a NOP) so we only run once
-#			la t0, WA_THEN
-#			sd t0, -8(s7)
 			la t0, createwritepoint
 			ld t1, 0(t0)
 			addi t1, t1, -8
@@ -689,13 +686,8 @@
 
 			CODEHEADER _COMPELSE, _COMPTHEN, 0x0
 			#(--)
-			# as with _COMPTHEN
-			la t0, WA__ELSE
-			sd t0, -8(s7)
-			la t0, createwritepoint
-			ld t1, 0(t0)
-			addi t1, t1, -8
-			tail transitions_else_out_postpone
+			la t3, WA__ELSE
+			j transitions_else_out
 
 			CODEHEADER _COMPIF, _COMPELSE, 0x0
 			#(--)
