@@ -695,77 +695,41 @@
 			tail transitions_if_out
 
 			CODEHEADER _COMPMINUSLOOP, _COMPIF, 0x0
-			la t0, WA__MINUSLOOP
-			sd t0, -8(s7)
-			la t0, createwritepoint
-			ld t1, 0(t0)
-			addi t1, t1, -8
-			tail transitions_loop_out_postpone
+			la t3, WA__MINUSLOOP
+			tail transitions_loop_out
 
 			CODEHEADER _COMPPLUSLOOP, _COMPMINUSLOOP, 0x0
-			la t0, WA__PLUSLOOP
-			sd t0, -8(s7)
-			la t0, createwritepoint
-			ld t1, 0(t0)
-			addi t1, t1, -8
-			tail transitions_loop_out_postpone
+			la t3, WA__PLUSLOOP
+			tail transitions_loop_out
 
 			CODEHEADER _COMPLOOP, _COMPPLUSLOOP, 0x0
-			la t0, WA__LOOP
-			sd t0, -8(s7)
-			la t0, createwritepoint
-			ld t1, 0(t0)
-			addi t1, t1, -8
-			tail transitions_loop_out_postpone
+			la t3, WA__LOOP
+			tail transitions_loop_out
 
 			CODEHEADER _COMPQDO, _COMPLOOP, 0x0
-			la t0, WA__QDO
-			sd t0, -8(s7)
-			la t0, createwritepoint
-			ld t1, 0(t0)
-			addi t1, t1, -8
-			tail transitions_do_out_postpone
+			la t3, WA__QDO
+			tail transitions_do_out
 
 			CODEHEADER _COMPDO, _COMPQDO, 0x0
-			la t0, WA__DO
-			sd t0, -8(s7)
-			la t0, createwritepoint
-			ld t1, 0(t0)
-			addi t1, t1, -8
-			tail transitions_do_out_postpone
+			la t3, WA__DO
+			tail transitions_do_out
 
 			CODEHEADER _COMPACTIONOF, _COMPDO, 0x0
-			la t0, WA__ACTIONOF
-			sd t0, -8(s7)
-			la t0, createwritepoint
-			ld t1, 0(t0)
-			addi t1, t1, -8
-			tail embed_defer_postpone
+			la t3, WA__ACTIONOF
+			tail embed_defer
 
 			CODEHEADER _COMPCHAR, _COMPACTIONOF, 0x0
-			la t0, WA__CHAR
-			sd t0, -8(s7)
-			la t0, createwritepoint
-			ld t1, 0(t0)
-			addi t1, t1, -8
-			tail embed_tick_postpone
+			la t3, WA__CHAR
+			tail embed_tick
 
 			CODEHEADER _COMPBRACKETCHAR, _COMPCHAR, 0x0
-			la t0, WA__BRACKETCHAR
-			sd t0, -8(s7)
-			la t0, createwritepoint
-			ld t1, 0(t0)
-			addi t1, t1, -8
-			tail embed_tick_postpone
+			la t3, WA__BRACKETCHAR
+			tail embed_tick
 
 			CODEHEADER _LITERALCOMP, _COMPBRACKETCHAR, 0x0
 			POP a2
-			la t0, WA_LITERALNUMB
-			sd t0, -8(s7)
-			la t0, createwritepoint
-			ld t1, 0(t0)
-			addi t1, t1, -8
-			tail search_create_literal_out_postpone
+			la t3, WA_LITERALNUMB
+			tail search_create_literal_out
 
 			CODEHEADER _DOESCOMP, _LITERALCOMP, 0x0
 			la t3, WA_DOES_
@@ -793,8 +757,7 @@
 			tail embed_tick
 
 			CODEHEADER _COMPCOMPCOMMA, _TICKCOMP, 0x0
-			ld t3, 0(sp)
-			addi sp, sp, 8
+			POP t3
 			tail postpone_output_normal
 
 			CODEHEADER _COMPIS, _COMPCOMPCOMMA, 0x0
