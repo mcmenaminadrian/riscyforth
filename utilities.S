@@ -691,12 +691,8 @@
 
 			CODEHEADER _COMPIF, _COMPELSE, 0x0
 			#(--)
-			la t0, WA__IF
-			sd t0, -8(s7)
-			la t0, createwritepoint
-			ld t1, 0(t0)
-			addi t1, t1, -8
-			tail transitions_if_out_postpone
+			la t3, WA__IF
+			tail transitions_if_out
 
 			CODEHEADER _COMPMINUSLOOP, _COMPIF, 0x0
 			la t0, WA__MINUSLOOP
@@ -805,7 +801,18 @@
 			la t3, WA__IS
 			tail embed_tick
 
-			CODEHEADER _NUMBER, _COMPIS, 0x0
+			CODEHEADER _COMPPPONE, _COMPIS, 0x0
+			#write out embedded word address
+			ld t0, 0(s7)
+			addi s7, s7, 8
+			la t1, createwritepoint
+			ld t2, 0(t1)
+			sd t0, 0(t2)
+			addi t2, t2, 8
+			sd t2, 0(t1)
+			tail NEXT
+
+			CODEHEADER _NUMBER, _COMPPPONE, 0x0
 			#(-- x)
 			ld t0, 0(s7)			#how many bytes?
 			mv t6, t0			#copy to t6
@@ -1032,9 +1039,18 @@
 			j postpone_output_normal
   postpone_search_semi:
 			la a5, WA_SEMI
-			bne a5, a4, postpone_output_normal
+			bne a5, a4, postpone_search_no_matches
 			la a4, WA__COMPSEMI
-
+			j postpone_output_normal
+  postpone_search_no_matches:
+			#so here we need to write out our special postpone word and 
+			#embed the token
+			la t0, createwritepoint
+			ld t1, 0(t0)
+			la t4, WA__COMPPPONE
+			sd t4, 0(t1)
+			addi t1, t1, 8
+			sd t1, 0(t0)
 			
   postpone_output_normal:
 			mv t3, a4
