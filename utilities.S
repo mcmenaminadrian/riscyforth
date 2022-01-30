@@ -1010,6 +1010,11 @@
 			la a4, WA__COMPSEMI
 			j postpone_output_normal
   postpone_search_no_matches:
+			#is the word IMMEDIATE?
+			ld t0, -8(a4)
+			li t1, 0x100
+			and t2, t0, t1
+			bnez t2, postpone_output_normal
 			#so here we need to write out our special postpone word and 
 			#embed the token
 			la t0, createwritepoint

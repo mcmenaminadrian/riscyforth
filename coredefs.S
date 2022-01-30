@@ -1025,7 +1025,7 @@
 		sd a4, 8(sp)
 		#have a word - is it immediate?
 		li t2, 0x100
-		ld t3, 0(a4)
+		ld t3, -8(a4)
 		and t4, t2, t3
 		beqz t4, find_ordinary
 		li t6, 1
