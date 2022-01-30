@@ -911,7 +911,6 @@
 		tail NEXT
 
 		CODEHEADER POSTPONE, COMPILECOMMA, 0x01
-		#do nothing in immediate mode
 		#see search_create for compile code
 		tail NEXT
 

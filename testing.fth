@@ -94,33 +94,38 @@ AND IF BLUE ." ?DUP passed" ELSE ." ?DUP FAILED" THEN RESET CR ;
 
 : TESTINVERT
 ." Testing INVERT " 5 spaces
--1 INVERT IF RED ." INVERT FAILED " RESET ELSE hex F0F0F0F00F0F0F35 INVERT F0F0F0FF0F0F0CA = IF BLUE ." INVERT passed " ELSE RED ." INVERT FAILED " then then decimal RESET cr ;
+-1 INVERT IF RED ." INVERT FAILED " RESET ELSE [ hex F0F0F0F00F0F0F35 ] literal INVERT [ hex F0F0F0FF0F0F0CA ] literal = IF BLUE ." INVERT passed " ELSE 
+RED ." INVERT FAILED " then then decimal RESET cr ;
 
 \ Basic tests
 
+HEX
+
 : TESTHEX
 ." Testing HEX " 5 SPACES
-HEX 10 FF + DUP
+HEX [ hex 10 ] literal  [ hex FF ] literal + DUP
 BLUE 10F = IF ." HEX passed with output 0x10F = " . ELSE RED ." HEX FAILED with output 0x10F =  " . then RESET cr
-\ ensure other tests keep testdup2
+\ ensure other tests keep working
 DECIMAL
 ;
 
+DECIMAL
 : TESTDECIMAL
 ." Testing DECIMAL " 5 SPACES
-DECIMAL 20 DUP POSTPONE DECIMAL
-BLUE 20 = IF ." DECIMAL passed wth output 20 = " DUP . ." = " POSTPONE HEX . POSTPONE DECIMAL ELSE RED ." DECIMAL FAILED with output 20 = " DUP . ." = " POSTPONE HEX . POSTPONE DECIMAL THEN 
+[ DECIMAL 20 ] literal DUP
+DECIMAL 
+BLUE 20 = IF ." DECIMAL passed wth output 20 = " DUP . ." = " HEX . DECIMAL ELSE RED ." DECIMAL FAILED with output 20 = " DUP . ." = " HEX . DECIMAL THEN 
 RESET CR
 ;
 
 : TESTOCTAL 
-." Testing OCTAL " 5 SPACES OCTAL 20 DUP DECIMAL 16 = IF BLUE ." OCTAL passed with output 20o = " DUP OCTAL . ." = " DECIMAL .
+." Testing OCTAL " 5 SPACES [ OCTAL 20 ] literal DUP [ DECIMAL 16 ] literal  = IF BLUE ." OCTAL passed with output 20o = " DUP OCTAL . ." = " DECIMAL .
 ELSE RED ." OCTAL FAILED with 20o = " DUP OCTAL . ." = " DECIMAL . THEN RESET CR ;
 
 : VERIFYBINARY 
 ." Verifying BINARY  - " 1 2 4 8 16 32 64 128 256 512
-POSTPONE BINARY ." powers of 2 from 9 to 0 in binary... " cr
-CYAN . cr . cr . cr . cr . cr . cr . cr . cr . cr . cr RESET POSTPONE DECIMAL ;
+BINARY ." powers of 2 from 9 to 0 in binary... " cr
+CYAN . cr . cr . cr . cr . cr . cr . cr . cr . cr . cr RESET DECIMAL ;
 
 : VERIFYDOT
 ." Verifying DOT " 5 spaces 0 1 2 3 4 5
@@ -142,12 +147,12 @@ BLUE = if ." * passed " else RED ." * FAILED " then RESET cr
 
 : TESTUM*
 ." Testing UM*" 5 SPACES
-hex 7fffffffffffffff 2 um* dup fffffffffffffffe = decimal swap -2 =
+[ hex 7fffffffffffffff ] literal  2 um* dup [ hex fffffffffffffffe ] literal = decimal swap -2 =
 IF BLUE ." UM* passed" ELSE RED ." UM* FAILED" THEN RESET CR ;
 
 : TESTUM/MOD
 ." Testing UM/MOD" 5 SPACES
-hex bfffffffffffffff dup decimal 0< SWAP 4 um/mod swap 3 = swap dup 0> swap hex 2fffffffffffffff = and and and decimal
+[ hex bfffffffffffffff ] literal dup decimal 0< SWAP 4 um/mod swap 3 = swap dup 0> swap [ hex 2fffffffffffffff ] literal = and and and decimal
 IF BLUE ." UM/MOD passed" ELSE RED ." UM/MOD FAILED" THEN RESET CR ;
 
 : TESTUINEQUALITIES
@@ -156,8 +161,8 @@ decimal -1 1 U> 100 -100 U< AND IF BLUE ." U> and U< passed" ELSE RED ." U> and 
 
 : VERIFYU.
 ." Verifying U." CR
-hex 7fffffffffffffff dup decimal 2 + ." With . a negative and a positive number..." CYAN . . RESET CR
-hex 7fffffffffffffff dup decimal 2 + ." With U. two positive numbers..." CYAN U. U. RESET CR ;
+[ hex 7fffffffffffffff ] literal dup decimal 2 + ." With . a negative and a positive number..." CYAN . . RESET CR
+[ hex 7fffffffffffffff ] literal dup decimal 2 + ." With U. two positive numbers..." CYAN U. U. RESET CR ;
 
 : TESTINEQUALITIES
 ." Testing equality and inequalities..." 5 SPACES
@@ -166,6 +171,7 @@ hex 7fffffffffffffff dup decimal 2 + ." With U. two positive numbers..." CYAN U.
 IF BLUE ." Equality and Inequalities passed" ELSE RED ." Inequalities FAILED" THEN RESET CR ;
 
 : TESTDIV
+[ DECIMAL ]
 ." Testing / " 5 SPACES 99 11 / 101 11 / * 81 =
 BLUE IF ." / passed " else RED ." / FAILED " then RESET cr ;
 
@@ -258,9 +264,9 @@ if BLUE ." RSHIFT passed " ELSE RED ." RSHIFT FAILED " THEN RESET cr ;
 ." Testing LITERALNUMB .... " 213 213 = IF BLUE ." LITERALNUMB passed " ELSE RED ." LITERALNUMB FAILED " THEN RESET CR ;
 
 : TEST[CHAR]
-DECIMAL
+[ DECIMAL ]
 ." Testing [CHAR]..." 5 SPACES
-[CHAR] tEsT 116 = IF BLUE ." [CHAR] passed" ELSE RED ." [RED] FAILED" THEN RESET CR ;
+[CHAR] tEsT 116 = IF BLUE ." [CHAR] passed" ELSE RED ." [CHAR] FAILED" THEN RESET CR ;
 
 
 VARIABLE OLDGEEZER
@@ -305,8 +311,8 @@ source CYAN type RESET cr ;
 
 \ Test [ ] and LITERAL
 : TEST[]
-." Testing [, ] and LITERAL " 5 SPACES
-[ 10 5 - ] LITERAL [ 5 1 * ] LITERAL - 0= IF [ 8 4 / ] LITERAL 2 = IF BLUE ." [ ] and LITERAL passed " ELSE RED ." [ ] and LITERAL FAILED" THEN RESET ELSE RED ." [ ] and LITERAL FAILED" THEN
+." Testing [, ] and LITERAL " 5 SPACES decimal
+[ hex 10 5 - ] LITERAL [ decimal 5 1 * ] LITERAL -  6 = IF [ decimal 8 4 / ] LITERAL 2 = IF BLUE ." [ ] and LITERAL passed " ELSE RED ." [ ] and LITERAL FAILED" THEN RESET ELSE RED ." [ ] or LITERAL FAILED" THEN
 RESET CR ;
 
 \ Stuff to test EXIT
@@ -414,23 +420,24 @@ TESTUNLOOPV @ 3 = IF BLUE ." UNLOOP passed " ELSE RED ." UNLOOP FAILED" THEN RES
 ' BLUE
 : TESTINGTICK 
 ." Testing ', ['], EXECUTE and C! " 5 spaces
-hex 58 decimal ' ZZ 24 + C! ' XZ execute cr
+[ hex 58 ] literal decimal ' ZZ [ decimal 24 ] literal + C! ' XZ execute cr
 \ Change back or else subsequent tests will break
 ." Testing one more time " 5 spaces
-hex 5A decimal ' xz 24 + C! ' zZ exeCUTE  cr
+[ hex 5A ] literal ' xz [ decimal 24 ] literal + C! ' zZ exeCUTE  cr
 ['] testingtick ' testingtick = IF BLUE ." ['] passed" else RED ." ['] FAILED" THEN RESET CR 
 ." Verifying COMPILE," 5 spaces
 RED COMPILE, ." If COMPILE, works this text is blue, if FAILS THEN IN RED" RESET CR
 ;
 
 : testcfetch 
+[ decimal ]
 ." Testing C@" 5 spaces
 ' XOR 24 + c@ 88 = if BLUE ." C@ passed " else RED ." C@ FAILED " then RESET cr ;
 
 \ Dummy words to use in MOVE test
 : ZM * ;
 : ZD / ;
-: reup decimal 68 ' ZM 25 + C! ;
+: reup [ decimal 68 ] literal ' ZM 25 + C! ;
 
 : TESTINGMOVE
 ." Testing MOVE " 5 spaces
@@ -502,9 +509,9 @@ VARIABLE allocx
 : TESTRESIZE
 ." Testing RESIZE " 5 SPACES
 1 ALLOCATE DROP allocx !
-HEX BADCAFEF00D DECIMAL allocx @ !
+[ HEX BADCAFEF00D ] literal DECIMAL allocx @ !
 allocx @ 40 RESIZE 0 = FALSE AND IF RED ." RESIZE FAIL - no resize " RESET CR EXIT THEN
-@ HEX BADCAFEF00D DECIMAL = IF BLUE ." RESIZE passed " RESET ELSE RED ." RESIZE FAIL: no copy" RESET CR EXIT THEN
+@ [ HEX BADCAFEF00D ] literal DECIMAL = IF BLUE ." RESIZE passed " RESET ELSE RED ." RESIZE FAIL: no copy" RESET CR EXIT THEN
 CR ;
 
 
@@ -523,6 +530,7 @@ CELLS + ;
 100 INDEXED-ARRAY FOO
 
 : TESTDOES>
+[ DECIMAL ]
 ." Testing DOES> " 5 SPACES
 99 FOO 0 FOO - 792 = IF BLUE ." DOES> passed " ELSE RED ." DOES> FAILED " THEN RESET CR ;
 
@@ -559,6 +567,7 @@ CYAN DUP -ROT + DUP . DUP 5000000 < IF RECURSE THEN RESET ;
 
 DEFER TESTDEFER
 : VERIFYDEFERIS
+[ DECIMAL ]
 ." Verifying DEFER,  IS and ACTION-OF" CR
 ." Print ASCII characters..." ' EMIT IS TESTDEFER CYAN 128 32 DO I TESTDEFER LOOP RESET CR
 ." Now print numbers..." ' . IS TESTDEFER CYAN 128 32 DO I TESTDEFER LOOP RESET CR
@@ -591,6 +600,7 @@ PREBUFFER IF BLUE ." Reading and writing to BUFFER: passed " ELSE RED ." Reading
 1 ALLOT
 VARIABLE BITMANIP
 : TESTBITMANIP
+[ DECIMAL ]
 ." Testing CSET, CRESET, CTOGGLE " CR
 0 BITMANIP C! BITMANIP C@ 0= 2 BITMANIP CSET BITMANIP C@ 2 = AND IF BLUE ." CSET passed" ELSE RED ." CSET FAILED" THEN RESET CR
 255 BITMANIP C! BITMANIP C@ 255 = 255 BITMANIP CRESET BITMANIP C@ 0= AND IF BLUE ." CRESET passed" ELSE RED ." CRESET FAILED" THEN RESET CR
@@ -610,13 +620,15 @@ BLUE ." Verification of MS complete" RESET CR ;
 
 \ testing pictured output
 : VERIFYPICTURED
+[ DECIMAL ]
 ." Verifying pictured output" CR
 CYAN S" -£125.45" type ."  = " -12545 <# dup # # 46 hold #s 163 hold 194 hold drop sign 0 #> type RESET CR
 ." And verifying base conversion..." CR
-CYAN 324 DUP . ." in binary is..." postpone binary <# #s #> type postpone decimal RESET CR
-BLUE ." Numbered pictured output verified." RESET CR ; 
+CYAN 324 DUP . ." in binary is..." binary <# #s #> type postpone decimal RESET CR
+BLUE ." Numbered pictured output verified." RESET CR decimal ; 
 
 : TEST>NUMBER
+[ DECIMAL ]
 ." Testing >NUMBER" 5 SPACES
 10 S" 1005" >NUMBER DROP DROP 1015 = IF BLUE ." >NUMBER passed" ELSE RED ." >NUMBER FAILED" THEN RESET CR ;
 
@@ -718,7 +730,7 @@ TEST[] TESTPICK
 TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY TESTEXIT
 BLUE ." Verifying ENCSQ with this output " RESET cr
 TEST[CHAR]
-S" Verifying SQ" 2DUP TYPE 12 = IF BLUE 5 spaces ." Verified SQ" ELSE 5 spaces RED ." SQ FAILED" THEN RESET CR
+S" Verifying SQ" 2DUP TYPE [ decimal 12 ] literal = IF BLUE 5 spaces ." Verified SQ" ELSE 5 spaces RED ." SQ FAILED" THEN RESET CR
 ." Verifying CQ - look for comment" 5 SPACES BLUE C" Verified" COUNT TYPE RESET CR
 BLUE ." Verifying COMMENT " RESET cr \ ." COMMENT verification FAILED " 
 VERIFYDOT VERIFY.S 

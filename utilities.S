@@ -794,7 +794,11 @@
 			PUSH a2
 			tail NEXT
 
-			CODEHEADER _COMPTO, _NUMBER, 0x0
+			CODEHEADER _COMPWHILE, _NUMBER, 0x0
+			la t3, WA__WHILE
+			tail transitions_while_out
+
+			CODEHEADER _COMPTO, _COMPWHILE, 0x0
 			la t3, WA__TO
 			tail embed_to
 
@@ -993,8 +997,8 @@
   postpone_search_while:
 			la a5, WA_WHILE
 			bne a5, a4, postpone_search_repeat
-			POP ra
-			tail search_create_bad_ifmode
+			la a4, WA__COMPWHILE
+			j postpone_output_normal
   postpone_search_repeat:
 			la a5, WA_REPEAT
 			bne a5, a4, postpone_search_semi
