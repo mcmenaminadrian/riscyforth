@@ -110,7 +110,8 @@ to *a1*
 **[CHAR]** ("spaces\<name\>" --) At runtime: (-- char) Places value of first
 character in *name* on stack as *char*
 
-**[COMPILE]** NOT IMPLEMENTED: Word is obsolescent in Forth 2012
+**[COMPILE]** NOT IMPLEMENTED: Word is obsolescent in Forth 2012. Use 
+*POSTPONE* instead.
 
 **[']** ("spaces"\<name\>" --) At runtime: (-- xt) Please use *'* instead
 (*[']* has the same functionality)
@@ -211,7 +212,7 @@ the quotient *n4* on the stack
 
 **.S** Debug word that displays contents of stack
 
-**.(** NOT YET IMPLEMENTED
+**.(** ("ccc<paren>" --) Parse and display ccc - immediate word
 
 **."** Output the enclosed string e.g. *." Output this"*
 
@@ -349,7 +350,9 @@ continue to execute loop R:(x1 -- x2)
 
 **PICK** (xu ... x1 x0 u -- x1 x0 xu)
 
-**POSTPONE** ("\<spaces\>name" --) Compile in *name* even if *IMMEDIATE*
+**POSTPONE** ("\<spaces\>name" --) Compile in *name* even if *IMMEDIATE* -
+in general append the compilation semantics of *name* to the current
+colon definition.
 
 **+** (n1 n2 -- n3) *n3* is the sum of *n1* and *n2*
 
