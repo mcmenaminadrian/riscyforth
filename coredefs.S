@@ -846,7 +846,81 @@
 		sb t1, 0(t0)
 		tail NEXT
 
-		CODEHEADER COUNT, CSTORE, 0x01
+		CODEHEADERZ DOTR, .R, CSTORE, 0x01
+		#(n1 n2 --)
+		#field width is n2
+		#use scratch pad to store result
+		ld t0, 8(sp)
+		la t1, CURRENT_BASE
+		ld t1, 0(t1)
+		ld t2, 0(sp)
+		addi sp, sp, 16
+		la t3, SCRATCH_PAD
+		#base conversion
+		mv a0, zero
+		mv a1, zero
+		bge t0, zero, dotr_positive
+		li a0, 1		#negative
+		li a1, 1
+		neg t0, t0
+  dotr_positive:
+		mv a3, t3
+		li a2, 0x3A		#ascii 9 + 1
+		mv a4, t0
+  dotr_calculate:
+		div a5, a4, t1
+		mul a6, a5, t1
+		sub a7, a4, a6		#digit we need
+		mv a4, a5		
+		addi a7, a7, 0x30	#0x30 = 0 ascii
+		blt a7, a2, dotr_adddigit
+		addi a7, a7, 7		#rebase digit
+  dotr_adddigit:
+		sb a7, 0(a3)
+		addi a3, a3, 1
+		addi a1, a1, 1
+		bnez a4, dotr_calculate
+		#calculation finished - do we need to flush right?
+		bge a1, t2, dotr_output
+		sub t4, t2, a1
+  dotr_spaces:
+		PUSH a0
+		PUSH a1
+		WRITECHAR 0x20
+		POP a1
+		POP a0
+		addi t4, t4, -1
+		bnez t4, dotr_spaces
+  dotr_output:
+		#negative sign?
+		beqz a0, dotr_nonegative
+		PUSH a0
+		PUSH a1
+		WRITECHAR 0x2D
+		POP a1
+		POP a0
+		addi a1, a1, -1
+  dotr_nonegative:
+		mv t4, a1
+		addi t4, t4, -1
+		add t5, t3, t4
+		mv t6, t3
+		#now reverse
+  dotr_reverse:
+		ble t5, t6, dotr_reversal_done
+		lb a2, 0(t5)
+		lb a3, 0(t6)
+		sb a3, 0(t5)
+		sb a2, 0(t6)
+		addi t6, t6, 1
+		addi t5, t5, -1
+		j dotr_reverse
+  dotr_reversal_done:
+		mv a2, a1
+		WRITESTRINGR t3, a2
+		tail NEXT
+
+		CODEHEADER COUNT, DOTR, 0x01
 		#(addr1 -- addr2 u)
 		ld t0, 0(sp)
 		ld t1, 0(t0)
