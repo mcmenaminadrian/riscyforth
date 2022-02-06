@@ -26,7 +26,116 @@
   wordlist_finished:
                 tail NEXT
 
-		CODEHEADER LITERAL, WORDS, 0x01
+		CODEHEADERZ ENVIROQ, ENVIRONMENT?, WORDS, 0x01
+		#(c-addr u -- false | i * x true)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		addi sp, sp, 16
+		li t2, eq_csLen
+		bne t2, t1, enviroq_hold
+		mv a0, t1
+		la a1, eq_countedstrings
+		mv a2, t0
+		call utility_stringsmatch
+		bnez a0, enviroq_hold
+		tail utility_enviroq_countedstrings
+  enviroq_hold:
+		li t2, eq_holdLen
+		bne t2, t1, enviroq_pad
+		mv a0, t1
+		la a1, eq_hold
+		mv a2, t0
+		call utility_stringsmatch
+		bnez a0, enviroq_pad
+		tail utility_enviroq_hold
+  enviroq_pad:
+		li t2, eq_padLen
+		bne t2, t1, enviroq_aub
+		mv a0, t1
+		la a1, eq_pad
+		mv a2, t0
+		call utility_stringsmatch
+		bnez a0, enviroq_aub
+		tail utility_enviroq_pad
+  enviroq_aub:
+		li t2, eq_aubLen
+		bne t2, t1, enviroq_floored
+		mv a0, t1
+		la a1, eq_addressunitbits
+		mv a2, t0
+		call utility_stringsmatch
+		bnez a0, enviroq_floored
+		tail utility_enviroq_aub
+  enviroq_floored:
+		li t2, eq_flooredLen
+		bne t2, t1, enviroq_maxchar
+		mv a0, t1
+		la a1, eq_floored
+		mv a2, t0
+		call utility_stringsmatch
+		bnez a0, enviroq_maxchar
+		tail utility_enviroq_floored
+  enviroq_maxchar:
+		li t2, eq_maxcharLen
+		bne t2, t1, enviroq_maxd
+		mv a0, t1
+		la a1, eq_maxchar
+		mv a2, t0
+		call utility_stringsmatch
+		bnez a0, enviroq_maxd
+		tail utility_enviroq_maxchar
+  enviroq_maxd:
+		li t2, eq_maxdLen
+		bne t2, t1, enviroq_maxn
+		mv a0, t1
+		la a1, eq_maxd
+		mv a2, t0
+		call utility_stringsmatch
+		bnez a0, enviroq_maxn
+		tail utility_enviroq_maxd
+  enviroq_maxn:
+		li t2, eq_maxnLen
+		bne t2, t1, enviroq_maxud
+		mv a0, t1
+		la a1, eq_maxn
+		mv a2, t0
+		call utility_stringsmatch
+		bnez a0, enviroq_maxud
+		tail utility_enviroq_maxn
+  enviroq_maxud:
+		li t2, eq_maxudLen
+		bne t2, t1, enviroq_rsc
+		mv a0, t1
+		la a1, eq_maxud
+		mv a2, t0
+		call utility_stringsmatch
+		bnez a0, enviroq_rsc
+		tail utility_enviroq_maxud
+  enviroq_rsc:
+		li t2, eq_rscLen
+		bne t2, t1, enviroq_sc
+		mv a0, t1
+		la a1, eq_returnstackcells
+		mv a2, t0
+		call utility_stringsmatch
+		bnez a0, enviroq_sc
+		tail utility_enviroq_stackcells
+  enviroq_sc:
+		li t2, eq_scLen
+		bne t2, t1, enviroq_false
+		mv a0, t1
+		la a1, eq_stackcells
+		mv a2, t0
+		call utility_stringsmatch
+		bnez a0, enviroq_false
+		tail utility_enviroq_stackcells
+  enviroq_false:
+		addi sp, sp, -8
+		sd zero, 0(sp)
+  enviroq_next:
+		tail NEXT
+
+		CODEHEADER LITERAL, ENVIROQ, 0x01
 		#does nothing in interpretation mode
 		#(x --) : compile time - compiler will take number from stack via literalnumb
 		tail NEXT

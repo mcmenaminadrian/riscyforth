@@ -1059,3 +1059,68 @@
   utility_postpone_process_number_clear:
 			sd t1, 0(t0)
 			tail search_create_leave
+
+
+#string match function
+#a0 - address of one string
+#a1 - address of second string
+#a2 - max count
+#returns: a0 is zero on match
+  utility_stringsmatch:
+			mv t0, a0
+			li a0, 1		#fails unless explicity set to 0
+  utility_stringsmatch_nextround:
+			bnez a2, utility_stringsmatch_loadchars
+			mv a0, zero
+			ret
+  utility_stringsmatch_loadchars:
+			lb t1, 0(a0)
+			lb t2, 0(a1)
+			beq t1, t2, utility_stringsmatch_continue
+			ret
+  utility_stringsmatch_continue:
+			addi a0, a0, 1
+			addi a1, a1, 1
+			addi a2, a2, -1
+			j utility_stringsmatch_nextround
+
+#ENVIONMENT? answers
+  utility_enviroq_countedstrings:
+			li t0, -1
+			addi sp, sp, -16
+  utility_truth:
+			sd t0, 8(sp)
+			li t1, -1
+			sd t1, 0(sp)
+			tail NEXT
+
+  utility_enviroq_hold:
+  utility_enviroq_pad:
+			li t0, SYSTEMAREA
+			j utility_truth
+
+  utility_enviroq_aub:
+			li t0, 64
+			j utility_truth
+
+  utility_enviroq_floored:
+			li t0, -1
+			j utility_truth
+
+  utility_enviroq_maxchar:
+			li t0, 0xFF
+			j utility_truth
+
+  utility_enviroq_maxd:
+  utility_enviroq_maxn:
+			li t0, 0x7FFFFFFFFFFFFFFF
+			j utility_truth
+
+  utility_enviroq_maxud:
+			li t0, 0xFFFFFFFFFFFFFFFF
+			j utility_truth
+
+  utility_enviroq_rsc:
+  utility_enviroq_stackcells:
+			li t0, 0x20000
+			j utility_truth

@@ -97,6 +97,29 @@
    octalout:      	.asciz "%lloo "
    badif:		.asciz "Bad IF"
    badelse:		.asciz "Bad ELSE"
+   #ENVIRONMENT? strings
+   eq_countedstrings:	.ascii "/COUNTED-STRING"
+   .set eq_csLen, .-eq_countedstrings
+   eq_hold:		.ascii "/HOLD"
+   .set eq_holdLen, .-eq_hold
+   eq_pad:		.ascii "/PAD"
+   .set eq_padLen, .-eq_pad
+   eq_addressunitbits:	.ascii "ADDRESS-UNIT-BITS"
+   .set eq_aubLen, .-eq_addressunitbits
+   eq_floored:		.ascii "FLOORED"
+   .set eq_flooredLen, .-eq_floored
+   eq_maxchar:		.ascii "MAX-CHAR"
+   .set eq_maxcharLen, .-eq_maxchar
+   eq_maxd:		.ascii "MAX-D"
+   .set eq_maxdLen, .-eq_maxd
+   eq_maxn:		.ascii "MAX-N"
+   .set eq_maxnLen, .-eq_maxn
+   eq_maxud:		.ascii "MAX-UD"
+   .set eq_maxudLen, .-eq_maxud
+   eq_returnstackcells:	.ascii "RETURN-STACK_CELLS"
+   .set eq_rscLen, .-eq_returnstackcells
+   eq_stackcells:	.ascii "STACK-CELLS"
+   .set eq_scLen, .-eq_stackcells
 
 
   .text
