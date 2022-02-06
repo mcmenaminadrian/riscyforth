@@ -208,7 +208,7 @@ indexed array type
 **/MOD** (n1 n2 -- n3 n4) Divide *n1* by *n2*, storing the remainder *n3* and
 the quotient *n4* on the stack
 
-**.R** NOT YET IMPLEMENTED
+**.R** (n1 n2 --) Display *n1* right flushed in a field of width *n2*
 
 **.S** Debug word that displays contents of stack
 

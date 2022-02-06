@@ -123,9 +123,9 @@ RESET CR
 ELSE RED ." OCTAL FAILED with 20o = " DUP OCTAL . ." = " DECIMAL . THEN RESET CR ;
 
 : VERIFYBINARY 
-." Verifying BINARY  - " 1 2 4 8 16 32 64 128 256 512
+." Verifying BINARY and .R - " 1 2 4 8 16 32 64 128 256 512
 BINARY ." powers of 2 from 9 to 0 in binary... " cr
-CYAN . cr . cr . cr . cr . cr . cr . cr . cr . cr . cr RESET DECIMAL ;
+CYAN 10 .R  cr 10 .R cr 10 .R cr 10 .R cr 10 .R cr 10 .R cr 10 .R cr 10 .R cr 10 .R cr 10 .R cr RESET DECIMAL ;
 
 : VERIFYDOT
 ." Verifying DOT " 5 spaces 0 1 2 3 4 5
