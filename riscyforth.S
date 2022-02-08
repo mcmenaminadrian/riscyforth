@@ -114,6 +114,8 @@
    .set eq_maxdLen, .-eq_maxd
    eq_maxn:		.ascii "MAX-N"
    .set eq_maxnLen, .-eq_maxn
+   eq_maxu:		.ascii "MAX-U"
+   .set eq_maxuLen, .-eq_maxu
    eq_maxud:		.ascii "MAX-UD"
    .set eq_maxudLen, .-eq_maxud
    eq_returnstackcells:	.ascii "RETURN-STACK_CELLS"

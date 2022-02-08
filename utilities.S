@@ -1065,30 +1065,32 @@
 #a0 - address of one string
 #a1 - address of second string
 #a2 - max count
-#returns: a0 is zero on match
+#returns: a3 is zero on match
   utility_stringsmatch:
 			mv t0, a0
-			li a0, 1		#fails unless explicity set to 0
+			mv t1, a1
+			mv t2, a2
+			li a3, 1		#fails unless explicity set to 0
   utility_stringsmatch_nextround:
-			bnez a2, utility_stringsmatch_loadchars
-			mv a0, zero
+			bnez t2, utility_stringsmatch_loadchars
+			mv a3, zero
 			ret
   utility_stringsmatch_loadchars:
-			lb t1, 0(a0)
-			lb t2, 0(a1)
-			beq t1, t2, utility_stringsmatch_continue
+			lb t4, 0(t0)
+			lb t5, 0(t1)
+			beq t4, t5, utility_stringsmatch_continue
 			ret
   utility_stringsmatch_continue:
-			addi a0, a0, 1
-			addi a1, a1, 1
-			addi a2, a2, -1
+			addi t0, t0, 1
+			addi t1, t1, 1
+			addi t2, t2, -1
 			j utility_stringsmatch_nextround
 
 #ENVIONMENT? answers
   utility_enviroq_countedstrings:
 			li t0, -1
-			addi sp, sp, -16
   utility_truth:
+			addi sp, sp, -16
 			sd t0, 8(sp)
 			li t1, -1
 			sd t1, 0(sp)
@@ -1116,6 +1118,7 @@
 			li t0, 0x7FFFFFFFFFFFFFFF
 			j utility_truth
 
+  utility_enviroq_maxu:
   utility_enviroq_maxud:
 			li t0, 0xFFFFFFFFFFFFFFFF
 			j utility_truth

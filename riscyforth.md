@@ -227,7 +227,12 @@ the quotient *n4* on the stack
 **ENDOF** Mark the end of *OF .. ENDOF* clause in *CASE .. ENDCASE* control
 structure
 
-**ENVIRONMENT?** NOT YET IMPLEMENTED
+**ENVIRONMENT?** (addr u -- false | i * x true) Query the local environment.
+*addr* and *u* are the address and length of a query string. Returns false
+if query is not supported, otherwise an answer based on the query.
+Currently supported query words: /COUNTED-STRING /HOLD /PAD
+ADDRESS-UNIT-BITS FLOORED MAX-CHAR MAX-D MAX-N MAX-U MAX-UD RETURN-STACK-CELLS
+STACK-CELLS
 
 **ERASE** (addr u --) if *u* greater than zero, clear (set to zero) *u* bytes
 from address *addr*
