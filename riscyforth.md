@@ -237,7 +237,7 @@ STACK-CELLS
 **ERASE** (addr u --) if *u* greater than zero, clear (set to zero) *u* bytes
 from address *addr*
 
-**EVALUATE** NOT YET IMPLEMENTED
+**EVALUATE** ( i * x c-addr u -- j * x ) Interpret the string at *c-addr*
 
 **EXECUTE** (xt -- ?) Remove *xt* from stack and execute it
 
