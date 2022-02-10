@@ -26,7 +26,19 @@
   wordlist_finished:
                 tail NEXT
 
-		CODEHEADERZ ENVIROQ, ENVIRONMENT?, WORDS, 0x01
+		CODEHEADER EVALUATE, WORDS, 0x01
+		#(i * x addr u -- j * x)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		addi sp, sp, 16
+		#set the INPUT and OUTPUT and pass control
+		sd t1, INPUT_START, t3
+		add t0, t0, t1
+		sd t0, INPUT_END, t3
+		la s7, outer_loop_tokenize
+		tail NEXT
+
+		CODEHEADERZ ENVIROQ, ENVIRONMENT?, EVALUATE, 0x01
 		#(c-addr u -- false | i * x true)
 		ld t0, 0(sp)
 		ld t1, 8(sp)
