@@ -93,7 +93,33 @@
 		sd t2, 0(sp)
                 tail NEXT
 
-		CODEHEADER WITHIN, SLMOD, 0x01
+		CODEHEADERZ FMDIVMOD, FM/MOD, SLMOD, 0x01
+		#(d n -- n n)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		rem t3, t1, t0
+		div t4, t1, t0
+		sd t3, 8(sp)
+		sd t4, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ SMDIVREM, SM/MOD, FMDIVMOD, 0x01
+		#(d n -- n n)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		rem t3, t1, t0
+		sd t3, 8(sp)
+		div t4, t1, t0
+		srl t5, t0, 1
+		bge t3, t5, smdivrem_ceiling
+		sd t4, 0(sp)
+		tail NEXT
+  smdivrem_ceiling:
+		addi t4, t4, 1
+		sd t4, 0(sp)
+		tail NEXT
+
+		CODEHEADER WITHIN, SMDIVREM, 0x01
 		#test, low, high
 		ld t2, 0(sp)
 		ld t1, 8(sp)

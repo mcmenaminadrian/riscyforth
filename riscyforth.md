@@ -258,7 +258,8 @@ zero. If the definition is found, return its execution token xt. If the
 definition is immediate, also return one (1), otherwise also return minus-one 
 (-1).
 
-**FM/MOD** NOT YET IMPLEMENTED
+**FM/MOD** (d n2 -- n1 n0) Floored division: divide *n2* by *d* and report
+remainder in *n1* and floored quotient in *n0*
 
 **@** (addr -- x) Fetch as *x* the contents of cell at *addr* and store on
 the stack
@@ -401,7 +402,8 @@ size *u* which will be found at *addr2*
 **SIGN** (n --) if *n* is negative add a minus sign to the beginning of the
 pictured numeric output string
 
-**SM/REM** NOT YET IMPLEMENTED
+**SM/REM** (d n2 -- n1 n0) Symmetric division: divide *n2* by *d* and report
+remainder in *n1* and symmetric quotient *n0*
 
 **SOURCE-ID** NOT YET IMPLEMENTED
 
