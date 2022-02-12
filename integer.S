@@ -336,8 +336,33 @@
 		sd a0, 8(t0)
 		tail NEXT
 		
-
-		CODEHEADER HOLD, SIGN, 0x01
+		CODEHEADER HOLDS, SIGN, 0x01
+		#(c-addr u --)
+		ld t5, 0(sp)
+		ld t6, 8(sp)
+		addi sp, sp, 16
+		la t0, PICTUREDN
+		ld t1, 0(t0)
+		beqz t1, num_done
+		ld a0, 8(t0)
+		la t2, SCRATCH_PAD
+		add t3, t2, a0
+		add a0, a0, t5
+		add t1, t5, t6
+		addi t1, t1, -1
+  holds_loop:
+		beqz t5, holds_done
+		lb t2, 0(t1)
+		sb t2, 0(t3)
+		addi t3, t3, 1
+		addi t1, t1, -1
+		addi t5, t5, -1
+		j holds_loop
+  holds_done:
+		sd a0, 8(t0)
+		tail NEXT
+		
+		CODEHEADER HOLD, HOLDS, 0x01
 		#(char --)
 		POP t5
 		la t0, PICTUREDN
