@@ -277,7 +277,8 @@ the stack
 **HOLD** (char --) Add *char* to the beginning of a pictured numeric output
 string
 
-**HOLDS** NOT YET IMPLEMENTED
+**HOLDS** (caddr u --) Add counted string defined by *u* and *caddr* to the
+start of pictured numeric output
 
 **I** (-- n) Place the value of the current innermost loop counter on the stack
 
