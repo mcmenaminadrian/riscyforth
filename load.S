@@ -6,7 +6,7 @@
 	mv a0, zero
 	ld a1, 8(sp)
 	ld a2, 0(sp)
-	li a7, 63
+	li a7, 63			#sys_read
 	ecall
 	sd a0, 8(sp)
 	addi sp, sp, 8
@@ -15,7 +15,20 @@
 	sd a0, INPUT_END, t0
 	tail NEXT
 
-	CODEHEADER INCLUDE, ACCEPT, 0x01
+	CODEHEADER KEY, ACCEPT, 0x01
+	#(-- char)
+	call cbreak
+	li a0, 70000
+	call timeout
+  key_syscall:
+	call getch
+	li t0, -1
+#	beq a0, t0, key_syscall 
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	tail NEXT
+
+	CODEHEADER INCLUDE, KEY, 0x01
 	#Load a file line by line, executing each line as we go
 	addi sp, sp, -72
 	sd s0, 0(sp)

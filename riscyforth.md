@@ -264,7 +264,7 @@ remainder in *n1* and floored quotient in *n0*
 **@** (addr -- x) Fetch as *x* the contents of cell at *addr* and store on
 the stack
 
-**FREE** (addr -- ior) Free memort at *addr* (*ior* is zero on success)
+**FREE** (addr -- ior) Free memory at *addr* (*ior* is zero on success)
 
 **GETLINE** Fetch text input
 
