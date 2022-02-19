@@ -17,15 +17,34 @@
 
 	CODEHEADER KEY, ACCEPT, 0x01
 	#(-- char)
-	call cbreak
-	li a0, 70000
-	call timeout
-  key_syscall:
-	call getch
-	li t0, -1
-#	beq a0, t0, key_syscall 
+	#first of all populate termios structure
+	li a0, 0
+	la a1, termios
+	call tcgetattr
+	la a2, termios
+	lwu a3, 12(a2)
+	li a4, 0xFFFFFFED		#ICANON off ECHO off
+	and a5, a4, a3
+	sw a5, 12(a2)
+	li a0, 0
+	li a1, 0
+	call tcsetattr 
+	li a0, 0
+	la a1, SCRATCH_PAD
+	li a2, 1
+	li a7, 63
+	ecall
 	addi sp, sp, -8
-	sd a0, 0(sp)
+	lb t0, 0(a1)
+	sd t0, 0(sp)
+	la a2, termios
+	lwu a3, 12(a2)
+	li a4, 0x12			#ICANON on ECHO on
+	or a5, a4, a3
+	sw a5, 12(a2)
+	li a0, 0
+	li a1, 0
+	call tcsetattr 
 	tail NEXT
 
 	CODEHEADER INCLUDE, KEY, 0x01
