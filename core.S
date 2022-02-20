@@ -91,6 +91,9 @@
                 sd zero, TOKEN_END, t0
                 addi t1, zero, 10                   #decimal as start-up base
                 sd t1, CURRENT_BASE, t0
+		#setup termios
+		call init_termios
+		call reset_termios
   
                 la s7, outer_loop                   #set instruction register to start of outer loop
 

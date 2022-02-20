@@ -165,3 +165,5 @@
     .include "memory.S"
     .balign 8
     .include "utilities.S"
+    .balign 8
+    .include "termioscode.S"

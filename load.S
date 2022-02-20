@@ -17,34 +17,11 @@
 
 	CODEHEADER KEY, ACCEPT, 0x01
 	#(-- char)
-	#first of all populate termios structure
-	li a0, 0
-	la a1, termios
-	call tcgetattr
-	la a2, termios
-	lwu a3, 12(a2)
-	li a4, 0xFFFFFFED		#ICANON off ECHO off
-	and a5, a4, a3
-	sw a5, 12(a2)
-	li a0, 0
-	li a1, 0
-	call tcsetattr 
-	li a0, 0
-	la a1, SCRATCH_PAD
-	li a2, 1
-	li a7, 63
-	ecall
+	call reset_termios
+	call singlechar_termios
 	addi sp, sp, -8
-	lb t0, 0(a1)
-	sd t0, 0(sp)
-	la a2, termios
-	lwu a3, 12(a2)
-	li a4, 0x12			#ICANON on ECHO on
-	or a5, a4, a3
-	sw a5, 12(a2)
-	li a0, 0
-	li a1, 0
-	call tcsetattr 
+	sd a0, 0(sp)
+	call reset_termios
 	tail NEXT
 
 	CODEHEADER INCLUDE, KEY, 0x01
