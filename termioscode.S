@@ -43,7 +43,7 @@
 		la a2, termios
 		#set ECHO
 		lwu a3, 12(a2)
-		li a4, 0x10
+		li a4, 10
 		or a5, a4, a3
 		sw a5, 12(a2)
 		call tcsetattr
@@ -58,7 +58,7 @@
 		la a2, termios
 		#set ECHOE
 		lwu a3, 12(a2)
-		li a4, 0x20
+		li a4, 20
 		or a5, a4, a3
 		sw a5, 12(a2)
 		call tcsetattr
@@ -82,7 +82,8 @@
 		la a2, termios
 		#set ICANON off
 		lwu a3, 12(a2)
-		li a4, 0xFFFFFFFD
+		li a4, 0x2
+		not a4, a4
 		and a5, a4, a3
 		sw a5, 12(a2)
 		call tcsetattr
@@ -97,7 +98,8 @@
 		la a2, termios
 		#set ECHO off
 		lwu a3, 12(a2)
-		li a4, 0xFFFFFFEF
+		li a4, 10
+		not a4, a4
 		and a5, a4, a3
 		sw a5, 12(a2)
 		call tcsetattr
@@ -112,7 +114,8 @@
 		la a2, termios
 		#set ECHO off
 		lwu a3, 12(a2)
-		li a4, 0xFFFFFFDF
+		li a4, 20
+		not a4, a4
 		and a5, a4, a3
 		sw a5, 12(a2)
 		call tcsetattr
@@ -150,33 +153,20 @@
 		li a0, 0
 		li a1, 4			#F_SETFL
 		li t0, 0x4000 			#O_NONBLOCK
-		xor a2, a2, t0
+		not t0, t0
+		and a2, a2, t0
 		call fcntl
 		#now get character - returned in a0
 		li a0, 0
 		la a1, SCRATCH_PAD
-		li a7, 63
-  singlechar_redo:
 		call read
-		lb a0, 0(a1)
+		lb t0, 0(a1)
 		li a0, 0
 		li a1, 4			#F_SETFL
 		POP a2
+		PUSH t0
 		call fcntl
-		POP ra
-		ret
-
-  noecho_termios:
-		PUSH ra
-		call copy_termios_structure
-		li a0, 0
-		li a1, TCSADRAIN
-		la a2, termios
-		lwu a3, 12(a2)
-		li a4, 0xFFFFFFCF
-		and a5, a3, a4
-		sw a5, 12(a2)
-		call tcsetattr
+		POP a0
 		POP ra
 		ret
 

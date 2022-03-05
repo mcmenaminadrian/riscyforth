@@ -6,8 +6,7 @@
 	mv a0, zero
 	ld a1, 8(sp)
 	ld a2, 0(sp)
-	li a7, 63			#sys_read
-	ecall
+	call read
 	sd a0, 8(sp)
 	addi sp, sp, 8
 	la a0, INPUT_BUFFER		#ensure no tokenization
@@ -17,9 +16,14 @@
 
 	CODEHEADER KEY, ACCEPT, 0x01
 	#(-- char)
+  key_tryagain:
 	call copy_termios_structure
 	call reset_termios
 	call singlechar_termios
+	li t1, 32
+	li t2, 127
+	blt a0, t1, key_tryagain
+	bgt a0, t2, key_tryagain
 	addi sp, sp, -8
 	sd a0, 0(sp)
 	la t0, SCRATCH_PAD
@@ -27,19 +31,8 @@
 	call reset_termios
 	tail NEXT
 
-	CODEHEADER YKEY, KEY, 0x01
-	call get_termios
-	tail NEXT
 
-	CODEHEADER XXKEY, YKEY, 0x01
-	call reset_termios
-	tail NEXT
-
-	CODEHEADER XKEY, XXKEY, 0x01
-	call noecho_termios
-	tail NEXT
-
-	CODEHEADER INCLUDE, XKEY, 0x01
+	CODEHEADER INCLUDE, KEY, 0x01
 	#Load a file line by line, executing each line as we go
 	addi sp, sp, -72
 	sd s0, 0(sp)
