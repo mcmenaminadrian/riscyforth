@@ -17,14 +17,29 @@
 
 	CODEHEADER KEY, ACCEPT, 0x01
 	#(-- char)
+	call copy_termios_structure
 	call reset_termios
 	call singlechar_termios
 	addi sp, sp, -8
 	sd a0, 0(sp)
+	la t0, SCRATCH_PAD
+	sd zero, 0(t0)
 	call reset_termios
 	tail NEXT
 
-	CODEHEADER INCLUDE, KEY, 0x01
+	CODEHEADER YKEY, KEY, 0x01
+	call get_termios
+	tail NEXT
+
+	CODEHEADER XXKEY, YKEY, 0x01
+	call reset_termios
+	tail NEXT
+
+	CODEHEADER XKEY, XXKEY, 0x01
+	call noecho_termios
+	tail NEXT
+
+	CODEHEADER INCLUDE, XKEY, 0x01
 	#Load a file line by line, executing each line as we go
 	addi sp, sp, -72
 	sd s0, 0(sp)

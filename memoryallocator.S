@@ -68,7 +68,7 @@
 		li a3, 0x22
 		li a4, -1
 		li a5, 0
-		li a7, 222
+		li a7, 222			#mmap
 		ecall
 		beqz a0, memory_fail
 		mv s3, s8

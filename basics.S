@@ -17,8 +17,7 @@
 		mv a0, zero
 		la a1, INPUT_BUFFER
 		li a2, BUFFERLEN
-		li a7, 63
-		ecall
+		call read
 		li t0, 1
                 mv a2, a0                          #a2 to hold length
                 bgeu a2, t0, getnextline_imm_input
@@ -34,8 +33,7 @@
 		mv a0, zero
 		la a1, INPUT_BUFFER
 		li a2, BUFFERLEN
-		li a7, 63
-		ecall
+		call read
 		PUSH a1				#where text can be found
 		PUSH a0				#length of inputted text
 		la a0, INPUT_BUFFER		#ensure no tokenization

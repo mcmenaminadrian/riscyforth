@@ -62,7 +62,7 @@
 		li a3, 0x22
 		li a4, -1
 		li a5, 0
-		li a7, 222
+		li a7, 222			#mmap
 		ecall
 		#set up the simple stack pointer for the decision creation
 		mv t0, a0
@@ -89,10 +89,10 @@
 
                 sd zero, TOKEN_START, t0
                 sd zero, TOKEN_END, t0
-                addi t1, zero, 10                   #decimal as start-up base
+                li t1, 10                   	#decimal as start-up base
                 sd t1, CURRENT_BASE, t0
 		#setup termios
-		call init_termios
+		call copy_termios_structure
 		call reset_termios
   
                 la s7, outer_loop                   #set instruction register to start of outer loop
