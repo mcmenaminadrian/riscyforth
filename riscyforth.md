@@ -297,7 +297,7 @@ start of pictured numeric output
 
 **J** (-- n) Place the value of the next-outer loop counter on the stack
 
-**KEY** NOT YET IMPLEMENTED
+**KEY** (-- char) Receive one character from the (ASCII) chaarcter set.
 
 **LEAVE** R:(n --) Immediately leave a loop discarding control parameters
 

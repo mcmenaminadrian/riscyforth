@@ -2,7 +2,7 @@
 
 DECIMAL
 ( Verify brackets in immediate code )
-\ Stack operations tests
+\ Stack operations test
 
 : WHEN
 TIME&DATE
@@ -174,6 +174,11 @@ IF BLUE ." Equality and Inequalities passed" ELSE RED ." Inequalities FAILED" TH
 [ DECIMAL ]
 ." Testing / " 5 SPACES 99 11 / 101 11 / * 81 =
 BLUE IF ." / passed " else RED ." / FAILED " then RESET cr ;
+
+: TESTFLOORED
+[ DECIMAL ]
+." Testing floored division" 5 SPACES 
+20 7 FM/MOD 2 = SWAP 6 = AND IF BLUE ." FM/MOD passed " ELSE RED ." FM/MOD FAILED " THEN RESET CR ;
 
 : TESTSUB
 ." Testing - " 5 spaces 
@@ -672,6 +677,15 @@ C" =" FIND -1 = SWAP ' = = C" (" FIND 1 = SWAP ' ( = AND AND IF BLUE ." FIND pas
 : EXTENDPPONETEST ." Testing new words built with POSTPONE "
 5 SPACES 0 -IF BLUE ." PASSED " ALTELSE RED ." FAILED " ENDIF RESET ." COMPLETED " CR ;
 
+
+: TESTEVALUATE
+." Testing EVALUATE" CR
+S" BLUE .( If you can read this evaluate has passed) RESET CR " EVALUATE ;
+
+: TESTKEY
+." Verify KEY by entering a key" CR
+KEY BLUE ." You entered " EMIT RESET CR ;
+
 \ Test groupings
 
 \ Test facility
@@ -687,6 +701,7 @@ TESTINGTICK testcfetch testingmove testchar test@ TEST2@ testplusstore TESTPADFI
 TESTALLOCATOR TESTRESIZE TESTCREATE TESTCELLS TESTALIGN TESTCOMMA TESTDOES> TEST2!
 VERIFYDEFERIS TESTDEFER@ TESTBUFFER: TEST>BODY TEST>BODY2 TESTBITMANIP TESTQ-?
 TESTADDRPLUS TESTCOUNT TEST:NONAME TESTIMMEDIATE TESTPOSTPONE TESTFIND EXTENDPPONETEST
+TESTEVALUATE
 ." Testing of memory code complete" cr ;
 
 \ Test loops
@@ -706,13 +721,13 @@ testrstackbasics
 : LISTWORDSTESTS
 ." Running 'listwords' group of tests " CR
 VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE TESTTYPE
-VERIFYSOURCE TESTCONSTANTVALUE TESTACCEPT
+VERIFYSOURCE TESTCONSTANTVALUE TESTACCEPT TESTKEY
 ." 'listwords' group of tests complete " CR ;
 
 \ Test integer
 : INTEGERTESTS
 ." Running integer tests " cr
-TESTADD TESTMUL TESTDIV TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST0<> TEST0>
+TESTADD TESTMUL TESTDIV TESTFLOORED TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST0<> TEST0>
 TESTminus2 testplus2 test+under testminmax testabs testnegate testshifts
 TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES TEST>NUMBER
 TESTINGCASE TESTUM* TESTUM/MOD TESTUINEQUALITIES VERIFYU.
@@ -736,7 +751,7 @@ TEST[] TESTPICK
 : BASICSTESTS
 ." Running basics tests and verifications " cr
 TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY TESTEXIT
-BLUE ." Verifying ENCSQ with this output " RESET cr
+BLUE ." Verifying ENCSQ with this output " RESET cr VERIFY.(
 TEST[CHAR]
 S" Verifying SQ" 2DUP TYPE [ decimal 12 ] literal = IF BLUE 5 spaces ." Verified SQ" ELSE 5 spaces RED ." SQ FAILED" THEN RESET CR
 ." Verifying CQ - look for comment" 5 SPACES BLUE C" Verified" COUNT TYPE RESET CR
@@ -781,3 +796,4 @@ TESTDEPTH
 ENTERCONTINUE
 RED 0 ABORT" ABORTCOMM HAS FAILED"  
 RESET 1 ABORT" ABORTCOMM has passed" ;
+.( The testing suite has now loaded.)
