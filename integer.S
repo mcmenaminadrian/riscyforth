@@ -103,7 +103,7 @@
 		sd t4, 0(sp)
 		tail NEXT
 
-		CODEHEADERZ SMDIVREM, SM/MOD, FMDIVMOD, 0x01
+		CODEHEADERZ SMDIVREM, SM/REM, FMDIVMOD, 0x01
 		#(d n -- n n)
 		ld t0, 0(sp)
 		ld t1, 8(sp)
