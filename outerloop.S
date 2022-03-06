@@ -9,4 +9,3 @@ outer_loop_tokenize:
 outer_loop_ok:
           .8byte WA_OK                #fallback
           .8byte WA_OLSEMI
-

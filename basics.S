@@ -14,7 +14,7 @@
                 #Fetch a line for immediate execution
                 MARKINPUTBUFFER INPUT_BUFFER            #ensure buffer starts 'empty'
   getnextline_imm_entry:
-		mv a0, zero
+		li a0, 0
 		la a1, INPUT_BUFFER
 		li a2, BUFFERLEN
 		call read
@@ -30,12 +30,13 @@
 
 		CODEHEADER GETLINE, GETNEXTLINE_IMM, 0x01
 		#Fetch a line - not available for tokenization
-		mv a0, zero
+		li a0, 0
 		la a1, INPUT_BUFFER
 		li a2, BUFFERLEN
 		call read
-		PUSH a1				#where text can be found
-		PUSH a0				#length of inputted text
+		addi sp, sp, -16
+		sd a1, 8(sp)			#address pf text
+		sd a0, 0(sp)			#length of text
 		la a0, INPUT_BUFFER		#ensure no tokenization
 		sd a0, INPUT_START, t0
 		sd a0, INPUT_END, t0
@@ -98,6 +99,13 @@
 		la t0, LOADLINESETUP
 		sd zero, 0(t0)
   tokenize_really_all_over:
+		la t0, INEVAL				#handle EVALUATE case
+		ld t1, 0(t0)
+		beq t1, zero, tokenize_leave
+		sd zero, INEVAL, t1
+		la t0, RESUME_AFTER_EVAL
+		ld s7, 0(t0)
+  tokenize_leave:
                 tail NEXT
   tokenize_have_data:
                 mv t0, a0                             #t0 tracks start of token, t1 the end

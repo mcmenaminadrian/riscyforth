@@ -67,6 +67,8 @@
    .comm INPPONE, ADDRWIDTH
    .comm MULTILINE, ADDRWIDTH
    .comm PICTUREDN, 0x10
+   .comm INEVAL, ADDRWIDTH
+   .comm RESUME_AFTER_EVAL, ADDRWIDTH
    .comm termios, 64
    #for debugging
    .comm CYCLESTART, ADDRWIDTH

@@ -28,6 +28,9 @@
 
 		CODEHEADER EVALUATE, WORDS, 0x01
 		#(i * x addr u -- j * x)
+		li t0, 1					#mark we are in an evaluation
+		sd t0, INEVAL, t2
+		sd s7, RESUME_AFTER_EVAL, t0
 		ld t0, 0(sp)
 		ld t1, 8(sp)
 		addi sp, sp, 16

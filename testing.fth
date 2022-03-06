@@ -680,10 +680,10 @@ C" =" FIND -1 = SWAP ' = = C" (" FIND 1 = SWAP ' ( = AND AND IF BLUE ." FIND pas
 
 : TESTEVALUATE
 ." Testing EVALUATE" CR
-S" BLUE .( If you can read this evaluate has passed) RESET CR " EVALUATE ;
+S" BLUE .( If you can read this evaluate has passed) RESET CR " EVALUATE  ." EVALUATE testing complete" CR ;
 
 : TESTKEY
-." Verify KEY by entering a key" CR
+." Verify KEY by entering a key (not CR)" CR
 KEY BLUE ." You entered " EMIT RESET CR ;
 
 \ Test groupings
@@ -751,7 +751,7 @@ TEST[] TESTPICK
 : BASICSTESTS
 ." Running basics tests and verifications " cr
 TESTHEX TESTDECIMAL TESTOCTAL VERIFYBINARY TESTEXIT
-BLUE ." Verifying ENCSQ with this output " RESET cr VERIFY.(
+BLUE ." Verifying ENCSQ with this output " RESET cr 
 TEST[CHAR]
 S" Verifying SQ" 2DUP TYPE [ decimal 12 ] literal = IF BLUE 5 spaces ." Verified SQ" ELSE 5 spaces RED ." SQ FAILED" THEN RESET CR
 ." Verifying CQ - look for comment" 5 SPACES BLUE C" Verified" COUNT TYPE RESET CR
