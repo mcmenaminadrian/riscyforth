@@ -4,6 +4,9 @@ DECIMAL
 ( Verify brackets in immediate code )
 \ Stack operations test
 
+
+
+
 : WHEN
 TIME&DATE
 ." ================Running tests==================" CR
@@ -674,6 +677,12 @@ BLUE QTEST ? ." should equal " QTEST @ . RESET CR ;
 [ DECIMAL ]
 C" =" FIND -1 = SWAP ' = = C" (" FIND 1 = SWAP ' ( = AND AND IF BLUE ." FIND passed" ELSE RED ." FIND FAILED" THEN RESET CR ;
 
+
+: TESTMARKER
+." Testing MARKER " 5 SPACES
+' TEST_MARKA EXECUTE ' TEST_MARKB EXECUTE + MARKER TEST_MARKA ' TEST_MARKA EXECUTE ' TEST_MARKB EXECUTE + + 26 = IF BLUE ." MARKER passed" ELSE RED ." MARKER FAILED" THEN RESET CR ;
+
+
 \ some extended postpone tests
 : ENDIF POSTPONE THEN ; IMMEDIATE
 : ALTELSE POSTPONE ELSE ; IMMEDIATE
@@ -800,4 +809,10 @@ TESTDEPTH
 ENTERCONTINUE
 RED 0 ABORT" ABORTCOMM HAS FAILED"  
 RESET 1 ABORT" ABORTCOMM has passed" ;
+
+\ Have to put these at the end!
+: TEST_MARKA 5 ;
+: TEST_MARKB 6 ;
+: TEST_MARKA 7 ;
+: TEST_MARKB 8 ;
 .( The testing suite has now loaded.)

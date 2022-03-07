@@ -26,7 +26,50 @@
   wordlist_finished:
                 tail NEXT
 
-		CODEHEADER EVALUATE, WORDS, 0x01
+		CODEHEADER MARKER, WORDS, 0x01
+		#("<spaces>name" ---)
+		ld a0, INPUT_START
+		ld a1, INPUT_END
+		addi t0, a0, 1
+		bltu t0, a1, marker_have_data
+	        tail NEXT
+  marker_have_data:
+		call utility_find_string
+		beq a2, zero, marker_done
+		addi t0, a1, 1
+		sd t0, INPUT_START, t1		#update interpretation point
+		call utility_sanitize_string
+		#a0 has start a1 has end
+		addi t0, a1, 1
+		sub t1, t0, a0		#t1 has length
+		la t2, dictionary
+		ld t3, 0(t2)
+  marker_next_in_dictionary:
+		lb t4, 24(t3)
+		bne t4, t1, marker_tokens_do_not_match
+		add a3, t3, 32
+		mv a4, a0
+		mv a5, t1
+  marker_loop_through_token:
+		lb t5, 0(a3)
+		lb t6, 0(a4)
+		bne t5, t6, marker_tokens_do_not_match
+		addi a5, a5, -1
+		beq a5, zero, marker_tokens_matched
+		addi a3, a3, 1
+		addi a4, a4, 1
+		j marker_loop_through_token
+  marker_tokens_do_not_match:
+		ld t3, 16(t3)
+		beq t3, zero, marker_done
+		j marker_next_in_dictionary
+  marker_tokens_matched:
+		ld t3, 16(t3)
+		sd t3, 0(t2)		#update dictionary
+  marker_done:
+		tail NEXT
+
+		CODEHEADER EVALUATE, MARKER, 0x01
 		#(i * x addr u -- j * x)
 		li t0, 1					#mark we are in an evaluation
 		sd t0, INEVAL, t2
