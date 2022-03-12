@@ -170,10 +170,16 @@
 		tail embed_sq
   search_cq:
 		la t0, WA_CQ
-		bne t3, t0, search_tick
+		bne t3, t0, search_marker
 		#subsititue WA__CQ
 		la t3, WA__CQ
 		tail embed_sq
+  search_marker:
+		la t0, WA_MARKER
+		bne t3, t0, search_tick
+		#subsititue WA__MARAKER
+		la t3, WA__MARKER
+		tail embed_marker
   search_tick:
 		la t0, WA_TICK
 		bne t3, t0, search_brackettick
@@ -631,9 +637,9 @@
 		fence.i
 		tail NEXT
 
-
   embed_to:
   embed_tick:
+  embed_marker:
 		#embed string - but don't process it in any way
 		la t0, createwritepoint
 		ld t1, 0(t0)

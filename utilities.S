@@ -756,7 +756,11 @@
 			la t3, WA__TICK
 			tail embed_tick
 
-			CODEHEADER _COMPCOMPCOMMA, _TICKCOMP, 0x0
+			CODEHEADER _MARKERCOMP, _TICKCOMP, 0x0
+			la t3, WA__MARKER
+			tail embed_marker
+
+			CODEHEADER _COMPCOMPCOMMA, _MARKERCOMP, 0x0
 			POP t3
 			tail postpone_output_normal
 
@@ -864,8 +868,13 @@
 			j postpone_output_normal
   postpone_search_cq:
 			la a5, WA_CQ
-			bne a4, a5, postpone_search_tick
+			bne a4, a5, postpone_search_marker
 			la a4, WA__CQCOMP
+			j postpone_output_normal
+  postpone_search_marker:
+			la a5, WA_MARKER
+			bne a4, a5, postpone_search_tick
+			la a4, WA__MARKERCOMP
 			j postpone_output_normal
   postpone_search_tick:
 			la a5, WA_TICK

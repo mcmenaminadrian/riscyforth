@@ -310,7 +310,8 @@ continue to execute loop R:(x1 -- x2)
 
 **MAGENTA** Set terminal foreground to magenta
 
-**MARKER** NOT YET IMPLEMENTED
+**MARKER** ("name" --) Delete everything in the dictionary up to and including
+name
 
 **MAX** (n1 n2 -- n3) *n3* is the greater of *n1* and *n2*
 

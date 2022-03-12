@@ -26,7 +26,28 @@
   wordlist_finished:
                 tail NEXT
 
-		CODEHEADER MARKER, WORDS, 0x01
+		CODEHEADER _MARKER, WORDS, 0x0
+		#("<spaces>name" ---)
+		#compiled version of marker
+		ld t0, 0(s7)					#length
+		mv a0, s7
+		addi a0, a0, ADDRWIDTH
+		mv a1, a0
+		add a1, a1, t0
+		mv s7, a1					#now move s7 on to next aligned address
+		addi s7, s7, 1
+		li t1, 7
+		and t2, s7, t1
+		beqz t2, _marker_ready_to_join
+		li t3, 8
+		sub t4, t3, t2
+		add s7, t4, s7
+  _marker_ready_to_join:
+		bnez t0, marker_join_here
+		tail NEXT
+
+
+		CODEHEADER MARKER, _MARKER, 0x01
 		#("<spaces>name" ---)
 		ld a0, INPUT_START
 		ld a1, INPUT_END
@@ -38,9 +59,10 @@
 		beq a2, zero, marker_done
 		addi t0, a1, 1
 		sd t0, INPUT_START, t1		#update interpretation point
+  marker_join_here:
 		call utility_sanitize_string
 		#a0 has start a1 has end
-		addi t0, a1, 1
+		mv t0, a1
 		sub t1, t0, a0		#t1 has length
 		la t2, dictionary
 		ld t3, 0(t2)
