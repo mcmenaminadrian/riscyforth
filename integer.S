@@ -555,14 +555,14 @@ multiple_bit_calculate_signed:
 		bnez t0, mstar_test_multiplicand_bit
 		# multiplier bit is 0
 		# check carry bit
-		bnez a0, mstar_one_no_carry
-		#zero answer for this calculation - so no need to change anything
-		j mstar_increment_multiplicator_bit
+		beqz a0, mstar_increment_multiplicator_bit	#no carry - do nothing
+		li a0, 0
+		j mstar_one_no_carry
   mstar_test_multiplicand_bit:
 		and t1, a2, s1
-		bnez t1, mstar_both_bits_one		#1 result
-		bnez a0, mstar_one_no_carry		#0 result and carry
-		j mstar_increment_multiplicand_bit	#0 result and no carry
+		bnez t1, mstar_both_bits_one			#1 result
+		beqz a0, mstar_increment_multiplicand_bit	#0 result and no carry
+		li a0, 0					#0 result with carry
   mstar_one_no_carry:
 		#need to add 1 to the value here
 		add t2, a3, a4
@@ -602,15 +602,22 @@ multiple_bit_calculate_signed:
 
   mstar_increment_multiplicand_bit:
 		addi a4, a4, 1
+		slli a2, a2, 1
+		bgt a2, s1, mstar_test_carry_bit_on_increment
 		ble a4, s4, mstar_column_multiply
+  mstar_test_carry_bit_on_increment:
 		#carry bit?
 		beqz a0, mstar_increment_multiplicator_bit
 		#have a carry bit left over
+		li a0, 0
 		j mstar_one_no_carry
   mstar_increment_multiplicator_bit:
-		addi a1, a1, 1
-		bgt a1, s4, mstar_prepare_answer
+		addi a3, a3, 1
+		slli a1, a1, 1
+		bgt a1, s0, mstar_prepare_answer
+		bgt a3, s4, mstar_prepare_answer
 		li a4, 0
+		li a2, 1
 		j mstar_column_multiply
   mstar_prepare_answer:
 		#set sign if needed
