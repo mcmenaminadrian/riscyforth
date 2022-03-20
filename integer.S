@@ -16,7 +16,7 @@
 		addi sp, sp, 8
                 tail NEXT
 
-                CODEHEADERZ DIV, /, MTIMES, 0x01
+                CODEHEADERZ DIV, /, TIMES, 0x01
 		ld a1, 0(sp)
 		ld a0, 8(sp)
                 div t0, a0, a1
@@ -479,6 +479,7 @@
 		li a2, 1
   mtimes_calculate:
 		call multiple_bit_calculate_signed	# returns answer in a0 (lower) and a1 (upper)
+		tail NEXT
 
 		CODEHEADERZ UMTIMES, UM*, MTIMES, 0x01
 		#(u u -- u)
@@ -603,10 +604,10 @@ multiple_bit_calculate_signed:
 		addi a4, a4, 1
 		ble a4, s4, mstar_column_multiply
 		#carry bit?
-		beqz a0, mstar_increment_multiplier_bit
+		beqz a0, mstar_increment_multiplicator_bit
 		#have a carry bit left over
 		j mstar_one_no_carry
-  mstar_increment_multiplier_bit
+  mstar_increment_multiplicator_bit:
 		addi a1, a1, 1
 		bgt a1, s4, mstar_prepare_answer
 		li a4, 0
@@ -617,7 +618,8 @@ multiple_bit_calculate_signed:
 		li t0, 0x7FFFFFFFFFFFFFFF
 		and a6, a6, t0
 		not t1, t0
-		or a7, a7, t1		
+		or a7, a7, t1
+  mstar_unwind_stack:		
 		#unwind stack
 		ld s0, 0(sp)
 		ld s1, 8(sp)
