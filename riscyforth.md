@@ -326,7 +326,7 @@ name
 **MOVE** (addr1 addr2 u --) if *u* is greater than zero copy *u* bytes from
 *addr1* to *addr2*
 
-**M\*** NOT YET IMPLEMENTED
+**M\*** (n n -- d) Signed multiplication producing double (128 bit) result
 
 **-** (n1 n2 -- n3) *n3* is the result of *n1* minus *n2*
 

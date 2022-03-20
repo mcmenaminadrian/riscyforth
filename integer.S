@@ -16,7 +16,7 @@
 		addi sp, sp, 8
                 tail NEXT
 
-                CODEHEADERZ DIV, /, TIMES, 0x01
+                CODEHEADERZ DIV, /, MTIMES, 0x01
 		ld a1, 0(sp)
 		ld a0, 8(sp)
                 div t0, a0, a1
@@ -458,7 +458,29 @@
 		sd t3, 0(sp)
 		tail NEXT
 
-		CODEHEADERZ UMTIMES, UM*, UMDIVMOD, 0x01
+		CODEHEADERZ MTIMES, M*, UMDIVMOD, 0x01
+		#(n n -- d)
+		ld a0, 0(sp)
+		ld a1, 8(sp)
+		beqz a0, mtimes_zero
+		bnez a1, mtimes_test_sign
+  mtimes_zero:
+		sd zero, 0(sp)		#can only be zero
+		sd zero, 8(sp)
+		tail NEXT
+  mtimes_test_sign:
+		li a2, 0				#positive answer expected
+		bltz a0, mtimes_both_neg_test
+		bltz a1, mtimes_neg
+		j mtimes_calculate
+  mtimes_both_neg_test:
+		bltz a1, mtimes_calculate		#if both are negative then positive
+  mtimes_neg:
+		li a2, 1
+  mtimes_calculate:
+		call multiple_bit_calculate_signed	# returns answer in a0 (lower) and a1 (upper)
+
+		CODEHEADERZ UMTIMES, UM*, MTIMES, 0x01
 		#(u u -- u)
 		ld t0, 0(sp)
 		ld t1, 8(sp)
@@ -498,3 +520,113 @@
                 PRINT riscy_forth0
                 tail exit
 
+
+#calculate double muliplication of signed numbers
+
+multiple_bit_calculate_signed:
+		#a0 and a1 are the factors
+		#a2 sign of answer
+		#returns lower part in a0
+		#upper part in a1
+
+		#use s registers for invariants
+		addi sp, sp, -32
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s2, 16(sp)
+		sd s4, 24(sp)
+		mv s0, a0			#invariant - multiplier
+		mv s1, a1			#invariant - multiplicand
+		mv s2, a2			#invariant - sign of answer
+		li s4, 63			#max bit count
+
+		#use a registers for calculation, t registers as scratchpads
+		li a0, 0	#carry
+		li a1, 1	#bit in multiplier
+		li a2, 1	#bit in multiplicand
+		li a3, 0	#bit count in muliplier
+		li a4, 0	#bit count in muliplicand
+		li a6, 0	#lower part of answer
+		li a7, 0	#upper part of answer
+
+  mstar_column_multiply:
+		and t0, a1, s0
+		bnez t0, mstar_test_multiplicand_bit
+		# multiplier bit is 0
+		# check carry bit
+		bnez a0, mstar_one_no_carry
+		#zero answer for this calculation - so no need to change anything
+		j mstar_increment_multiplicator_bit
+  mstar_test_multiplicand_bit:
+		and t1, a2, s1
+		bnez t1, mstar_both_bits_one		#1 result
+		bnez a0, mstar_one_no_carry		#0 result and carry
+		j mstar_increment_multiplicand_bit	#0 result and no carry
+  mstar_one_no_carry:
+		#need to add 1 to the value here
+		add t2, a3, a4
+		bgt t2, s4, mstar_one_no_carry_higher_word
+		li t3, 1
+		sll t3, t3, t2
+		and t4, a6, t3
+		beqz t4, mstar_lower_word_enter_one
+		#value is already 1 so, set to zero and set carry bit
+		not t4, t3
+		and a6, a6, t4
+		li a0, 1
+		j mstar_increment_multiplicand_bit
+  mstar_lower_word_enter_one:
+		or a6, a6, t3
+		j mstar_increment_multiplicand_bit
+  mstar_one_no_carry_higher_word:
+		sub t2, t2, s4
+		#then code as above but different register
+		li t3, 1
+		sll t3, t3, t2
+		and t4, a7, t3
+		beqz t4, mstar_upper_word_enter_one
+		#value is already 1 so, set to zero and set carry bit
+		not t4, t3
+		and a7, a7, t4
+		li a0, 1
+		j mstar_increment_multiplicand_bit
+  mstar_upper_word_enter_one:
+		or a7, a7, t3
+		j mstar_increment_multiplicand_bit
+  mstar_both_bits_one:
+		beqz a0, mstar_one_no_carry		#1 result and no carry set
+		#1 result with carry set - so actually adding 10
+		#so just increment muliplicand
+		j mstar_increment_multiplicand_bit
+
+  mstar_increment_multiplicand_bit:
+		addi a4, a4, 1
+		ble a4, s4, mstar_column_multiply
+		#carry bit?
+		beqz a0, mstar_increment_multiplier_bit
+		#have a carry bit left over
+		j mstar_one_no_carry
+  mstar_increment_multiplier_bit
+		addi a1, a1, 1
+		bgt a1, s4, mstar_prepare_answer
+		li a4, 0
+		j mstar_column_multiply
+  mstar_prepare_answer:
+		#set sign if needed
+		beqz s2, mstar_unwind_stack
+		li t0, 0x7FFFFFFFFFFFFFFF
+		and a6, a6, t0
+		not t1, t0
+		or a7, a7, t1		
+		#unwind stack
+		ld s0, 0(sp)
+		ld s1, 8(sp)
+		ld s2, 16(sp)
+		ld s4, 24(sp)
+		sd a6, 32(sp)
+		sd a7, 40(sp)
+		addi sp, sp, 32
+		ret	
+		
+		
+		
