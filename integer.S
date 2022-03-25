@@ -581,6 +581,7 @@ multiple_bit_calculate_signed:
 		j mstar_increment_multiplicand_bit
   mstar_one_no_carry_higher_word:
 		sub t2, t2, s4
+		addi t2, t2, -1
 		#then code as above but different register
 		li t3, 1
 		sll t3, t3, t2
