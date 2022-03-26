@@ -470,11 +470,19 @@
 		tail NEXT
   mtimes_test_sign:
 		li a2, 0				#positive answer expected
-		bltz a0, mtimes_both_neg_test
-		bltz a1, mtimes_neg
-		j mtimes_calculate
+		bgez a0, mtimes_test_multiplicand_neg
+		#a0 is negative but we reverse this for calculation
+		neg  a0, a0
+		j mtimes_both_neg_test
+  mtimes_test_multiplicand_neg:
+		bgez a1, mtimes_calculate
+		#a1 is negative but reverse this for calculation
+		neg a1, a1
+		j mtimes_neg
   mtimes_both_neg_test:
-		bltz a1, mtimes_calculate		#if both are negative then positive
+		bgez a1, mtimes_neg		#a0 is neg, a1 is positive - negative answer required
+		neg a1, a1			#a0 and a1 both negative - hence positive answer
+		j mtimes_calculate
   mtimes_neg:
 		li a2, 1
   mtimes_calculate:
@@ -623,18 +631,23 @@ multiple_bit_calculate_signed:
   mstar_prepare_answer:
 		#set sign if needed
 		beqz s2, mstar_unwind_stack
-		li t0, 0x7FFFFFFFFFFFFFFF
-		and a6, a6, t0
-		not t1, t0
-		or a7, a7, t1
+		neg a6, a6
+		#manage issue of upper part as zero
+		beqz a7, mstar_twos_complement_zero_manage
+		neg a7, a7
+		j mstar_unwind_stack
+  mstar_twos_complement_zero_manage:
+		li a7, -1
   mstar_unwind_stack:		
 		#unwind stack
 		ld s0, 0(sp)
 		ld s1, 8(sp)
 		ld s2, 16(sp)
 		ld s4, 24(sp)
-		sd a6, 32(sp)
-		sd a7, 40(sp)
+		sd a7, 32(sp)
+		sd a6, 40(sp)
+		mv a0, a7			#put answers in registers also
+		mv a1, a6
 		addi sp, sp, 32
 		ret	
 		
