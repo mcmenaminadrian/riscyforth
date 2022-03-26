@@ -490,16 +490,14 @@
 		tail NEXT
 
 		CODEHEADERZ UMTIMES, UM*, MTIMES, 0x01
-		#(u u -- u)
-		ld t0, 0(sp)
-		ld t1, 8(sp)
-		mulhu t2, t0, t1
-		mulw t3, t0, t1
-		or t4, t2, t3
-		sd t4, 8(sp)
-		addi sp, sp, 8
+		#(u u -- d)
+		ld a0, 0(sp)
+		ld a1, 8(sp)
+		beqz a0, mtimes_zero
+		beqz a1, mtimes_zero
+		call multiple_bit_calculate_unsigned
 		tail NEXT
-
+		
 		CODEHEADERZ UMORE, U>, UMTIMES, 0x01
 		#(u u -- flag)
 		ld t0, 0(sp)
@@ -529,6 +527,111 @@
                 PRINT riscy_forth0
                 tail exit
 
+#calculate double muliplication of unsigned numbers
+multiple_bit_calculate_unsigned:
+		#a0 and a1 are the factors
+		#returns lower part in a0
+		#upper part in a1
+
+		#use s registers for invariants
+		addi sp, sp, -24
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s4, 16(sp)
+		mv s0, a0			#invariant - multiplier
+		mv s1, a1			#invariant - multiplicand
+		li s4, 63			#max bit count
+
+		#use a registers for calculation, t registers as scratchpads
+		li a0, 0	#carry
+		li a1, 1	#bit in multiplier
+		li a2, 1	#bit in multiplicand
+		li a3, 0	#bit count in multiplier
+		li a4, 0	#bit count in multiplicand
+		li a6, 0	#lower part of answer
+		li a7, 0	#upper part of answer
+
+  umstar_column_multiply:
+		and t0, a1, s0
+		bnez t0, umstar_test_multiplicand_bit
+		# multiplier bit is 0
+		# check carry bit
+		beqz a0, umstar_increment_multiplicator_bit	#no carry - do nothing
+		li a0, 0
+		j umstar_one_no_carry
+  umstar_test_multiplicand_bit:
+		and t1, a2, s1
+		bnez t1, umstar_both_bits_one			#1 result
+		beqz a0, umstar_increment_multiplicand_bit	#0 result and no carry
+		li a0, 0					#0 result with carry
+  umstar_one_no_carry:
+		#need to add 1 to the value here
+		add t2, a3, a4
+		bgtu t2, s4, umstar_one_no_carry_higher_word
+		li t3, 1
+		sll t3, t3, t2
+		and t4, a6, t3
+		beqz t4, umstar_lower_word_enter_one
+		#value is already 1 so, set to zero and set carry bit
+		not t4, t3
+		and a6, a6, t4
+		li a0, 1
+		j umstar_increment_multiplicand_bit
+  umstar_lower_word_enter_one:
+		or a6, a6, t3
+		j umstar_increment_multiplicand_bit
+  umstar_one_no_carry_higher_word:
+		sub t2, t2, s4
+		addi t2, t2, -1
+		#then code as above but different register
+		li t3, 1
+		sll t3, t3, t2
+		and t4, a7, t3
+		beqz t4, umstar_upper_word_enter_one
+		#value is already 1 so, set to zero and set carry bit
+		not t4, t3
+		and a7, a7, t4
+		li a0, 1
+		j umstar_increment_multiplicand_bit
+  umstar_upper_word_enter_one:
+		or a7, a7, t3
+		j umstar_increment_multiplicand_bit
+  umstar_both_bits_one:
+		beqz a0, umstar_one_no_carry		#1 result and no carry set
+		#1 result with carry set - so actually adding 10
+		#so just increment muliplicand
+		j umstar_increment_multiplicand_bit
+
+  umstar_increment_multiplicand_bit:
+		addi a4, a4, 1
+		slli a2, a2, 1
+		bgtu a2, s1, umstar_test_carry_bit_on_increment
+		bleu a4, s4, umstar_column_multiply
+  umstar_test_carry_bit_on_increment:
+		#carry bit?
+		beqz a0, umstar_increment_multiplicator_bit
+		#have a carry bit left over
+		li a0, 0
+		j umstar_one_no_carry
+  umstar_increment_multiplicator_bit:
+		addi a3, a3, 1
+		slli a1, a1, 1
+		bgtu a1, s0, umstar_prepare_answer
+		bgtu a3, s4, umstar_prepare_answer
+		li a4, 0
+		li a2, 1
+		j umstar_column_multiply
+  umstar_prepare_answer:
+		#unwind stack
+		ld s0, 0(sp)
+		ld s1, 8(sp)
+		ld s4, 16(sp)
+		sd a7, 24(sp)
+		sd a6, 32(sp)
+		mv a0, a7			#put answers in registers also
+		mv a1, a6
+		addi sp, sp, 24
+		ret	
 
 #calculate double muliplication of signed numbers
 
@@ -553,8 +656,8 @@ multiple_bit_calculate_signed:
 		li a0, 0	#carry
 		li a1, 1	#bit in multiplier
 		li a2, 1	#bit in multiplicand
-		li a3, 0	#bit count in muliplier
-		li a4, 0	#bit count in muliplicand
+		li a3, 0	#bit count in multiplier
+		li a4, 0	#bit count in multiplicand
 		li a6, 0	#lower part of answer
 		li a7, 0	#upper part of answer
 
