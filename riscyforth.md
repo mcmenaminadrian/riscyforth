@@ -532,7 +532,8 @@ block
 **WITHIN** (x1 x2 x3 -- flag) *flag* returns *TRUE* if *x1* is between
 *x2* and *x3*
 
-**WORD** NOT YET IMPLEMENTED
+**WORD** ( char "<chars>ccc<char>" -- c-addr ) Skip leading delimiters. 
+Parse characters ccc delimited by char (512 max length)
 
 **WORDS** Lists supported Forth words
 

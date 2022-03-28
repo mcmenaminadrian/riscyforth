@@ -150,8 +150,13 @@ BLUE = if ." * passed " else RED ." * FAILED " then RESET cr
 
 : TESTUM*
 ." Testing UM*" 5 SPACES
-[ hex 7fffffffffffffff ] literal  2 um* dup [ hex fffffffffffffffe ] literal = decimal swap -2 =
+[ hex ffffffffffffffff ] literal  2 um* [ hex 1 ] literal = TRUE = SWAP [ hex fffffffffffffffe ] literal = = 
 IF BLUE ." UM* passed" ELSE RED ." UM* FAILED" THEN RESET CR ;
+
+: TESTM*
+." Testing M*" 5 SPACES
+[hex ffffffffffffffff ] literal 2 m* [ hex ffffffffffffffff ] literal = TRUE = SWAP [ hex fffffffffffffffe ] literal = =
+IF BLUE ." M* passed" ELSE RED ." M* FAILED" THEN RESET CR ;
 
 : TESTUM/MOD
 ." Testing UM/MOD" 5 SPACES
@@ -297,6 +302,9 @@ BLUE IF ." VARIABLE, @ and ! passed " ELSE RED ." VARIABLE, @ and ! FAILED " THE
 : TESTTYPE 
 ." Verifying GETLINE, TYPE and TIB " CR YELLOW BRIGHT ." Please enter some text to be echoed back. " RESET CR
 GETLINE CR ." Echoing... " CYAN TIB SWAP TYPE RESET CR ;
+
+: VERIFYWORD
+." Verifying WORD" 5 SPACES BL WORD VERIFIED DUP @ SWAP CELL+ SWAP BLUE TYPE RESET CR ;
 
 
 create acceptpad 80 allot
@@ -733,7 +741,7 @@ testrstackbasics
 \ Test listwords
 : LISTWORDSTESTS
 ." Running 'listwords' group of tests " CR
-VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE TESTTYPE
+VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE TESTTYPE VERIFYWORD
 VERIFYSOURCE TESTCONSTANTVALUE TESTACCEPT TESTKEY TESTMARKER
 ." 'listwords' group of tests complete " CR ;
 
@@ -743,7 +751,7 @@ VERIFYSOURCE TESTCONSTANTVALUE TESTACCEPT TESTKEY TESTMARKER
 TESTADD TESTMUL TESTDIV TESTFLOORED TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST0<> TEST0>
 TESTminus2 testplus2 test+under testminmax testabs testnegate testshifts
 TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES TEST>NUMBER
-TESTINGCASE TESTUM* TESTUM/MOD TESTUINEQUALITIES VERIFYU. TESTSMDIVREM
+TESTINGCASE TESTUM* TESTM* TESTUM/MOD TESTUINEQUALITIES VERIFYU. TESTSMDIVREM
 ." Integer tests complete " CR
 ;
 

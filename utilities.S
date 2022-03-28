@@ -4,6 +4,68 @@
 #No warranty is offered
 
 
+  #INPUT 
+  #a0 - address to copy to
+  #a1 - length to copy
+  #a2 - address to copy from
+  #OUTPUT
+  #a0 - copy count
+  utility_copy_counted_string:
+			mv t0, a0
+			mv t1, a1
+			mv t2, a2
+			li a0, 0
+			sd t1, 0(t0)
+			addi t0, t0, 8
+  utility_copy_counted_copy:
+			lb t3, 0(t2)
+			sb t3, 0(t0)
+			addi a0, a0, 1
+			beq a0, t1, utility_copy_counted_done
+			addi t2, t2, 1
+			addi t0, t0, 1
+			j utility_copy_counted_copy
+  utility_copy_counted_done:
+			ret
+
+
+  #INPUT
+  #a0 start of search
+  #a1 delimiter
+  #OUTPUT
+  #a0 start of string
+  #a1 length
+  utility_parse_string:
+			li a7, 512	#max length
+			mv a6, a0
+			add a6, a6, a7
+			mv t0, a0
+			mv t1, a1
+			li a1, 0
+  utility_parse_string_look_for_open:
+			lb t2, 0(t0)
+			addi t0, t0, 1
+			bgt t0, a6, utility_parse_string_done
+			beq t2, t1, utility_parse_string_open
+			j utility_parse_string_look_for_open
+  utility_parse_string_open:
+			lb t2, 0(t0)
+			bne t2, t1, utility_parse_string_opened
+			addi t0, t0, 1
+			bgt t0, a6, utility_parse_string_done
+			j utility_parse_string_open
+  utility_parse_string_opened:
+			mv a0, t0
+  utility_parse_string_look_for_close:
+			addi t0, t0, 1
+			bgt t0, a6, utility_parse_string_done
+			lb t2, 0(t0)
+			bne t2, t1, utility_parse_string_look_for_close
+			#now reached the end
+			sub a1, t0, a0
+  utility_parse_string_done:
+			ret
+
   #INPUT
   #a0 - start of search
   #a1 - max search point

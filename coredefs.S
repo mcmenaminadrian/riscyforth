@@ -155,7 +155,61 @@
 		addi sp, sp, 16
 		tail NEXT
 
-		CODEHEADERZ ZEROLESS, 0<, TIMESDIV, 0x01
+		CODEHEADER PARSE, TIMESDIV, 0x01
+		#char "ccc<char>" -- c-addr u
+		ld t0, 0(sp)
+		la t1, INPUT_START
+		ld t1, 0(t1)
+		li t2, 0x20
+		li t3, 0x0A
+		addi a0, t1, 512
+		mv a6, zero
+		mv a7, zero
+  parse_look_for_start:
+		lb t4, 0(t1)
+		addi t1, t1, 1
+		bgt t1, a0, parse_done
+		beq t4, t2, parse_look_for_start
+		beq t4, t3, parse_look_for_start
+		mv a1, t1
+		addi a1, a1, -1
+  parse_look_for_end:
+		beq t4, t0, parse_finished
+		addi t1, t1, 1
+		bgt t1, a0, parse_finished
+		lb t4, 0(t1)
+		j parse_look_for_end
+  parse_finished:
+		sub a7, t1, a1
+		mv a6, a1
+		la t1, INPUT_START
+		add t2, a7, a6
+		addi t2, t2, 1
+		sd t2, 0(t1)
+  parse_done:
+		sd a6, 0(sp)
+		addi sp, sp, -8
+		sd a7, 0(sp)
+		tail NEXT
+
+		CODEHEADER WORD, PARSE, 0x01
+		#char "<chars>ccc<char> -- c-addr
+		ld a1, 0(sp)
+		la a0, INPUT_START
+		ld a0, 0(a0)
+		call utility_parse_string
+		la t0, INPUT_START
+		add t1, a0, a1
+		addi t1, t1, 1
+		sd t1, 0(t0)
+		mv a2, a0
+		la a0, SCRATCH_PAD
+		call utility_copy_counted_string
+		la t0, SCRATCH_PAD
+		sd t0, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ ZEROLESS, 0<, WORD, 0x01
 		#(n -- flag)
 		ld t0, 0(sp)
 		bltz t0, zeroless_true
