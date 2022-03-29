@@ -354,7 +354,8 @@ name
 
 **PARSE-NAME** NOT YET IMPLEMENTED
 
-**PARSE** NOT YET IMPLEMENTED
+**PARSE** ( char "ccc<char>" -- c-addr u ) Parse ccc delimited by the delimiter
+.char
 
 **PICK** (xu ... x1 x0 u -- x1 x0 xu)
 

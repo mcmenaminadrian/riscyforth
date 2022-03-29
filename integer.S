@@ -95,12 +95,48 @@
 
 		CODEHEADERZ FMDIVMOD, FM/MOD, SLMOD, 0x01
 		#(d n -- n n)
-		ld t0, 0(sp)
-		ld t1, 8(sp)
-		rem t3, t1, t0
-		div t4, t1, t0
+		ld t0, 0(sp)		#divisor
+		ld t1, 8(sp)		#high part dividend
+		ld t2, 16(sp)		#low part dividend
+		addi sp, sp, 8
+		bnez t1, fmdivmod_wide
+  fmdivmod_simple:
+		rem t3, t2, t0
+		div t4, t2, t0
 		sd t3, 8(sp)
 		sd t4, 0(sp)
+		tail NEXT
+  fmdivmod_wide:
+		bgez t1, fmdivmod_positive
+		#negative calculation
+		neg t1, t1
+		#only care about the remainder on upper part
+		rem t3, t1, t0
+		beqz t3, fmdivmod_simple
+		mv a0, t3
+		mv a1, t2
+		mv a2, t0
+		call long_division_signed
+		beqz a7, fmdiv_fail
+		sd a1, 8(sp)
+		neg a0, a0
+		sd a0, 0(sp)
+		tail NEXT
+  fmdivmod_positive:
+		#only care about the remainder on upper part
+		rem t3, t1, t0
+		beqz t3, fmdivmod_simple
+		mv a0, t3
+		mv a1, t2
+		mv a2, t0
+		call long_division_signed
+		beqz a7, fmdiv_fail
+		sd a1, 8(sp)
+		sd a0, 0(sp)
+		tail NEXT
+  fmdiv_fail:
+		sd zero, 8(sp)
+		sd zero, 0(sp)
 		tail NEXT
 
 		CODEHEADERZ SMDIVREM, SM/REM, FMDIVMOD, 0x01

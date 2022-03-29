@@ -4,6 +4,49 @@
 #No warranty is offered
 
 
+  #INPUT
+  #a0 - remainder
+  #a1 - dividend
+  #a2 - divisor
+  #OUTPUT
+  #a0 quotient
+  #a1 remainder
+  #a7 1 if answer valid
+  long_division_signed:
+			mv t0, a0
+			mv t1, a1
+			mv t2, a2
+			li a7, 0
+			#check validity
+			bgez a2, long_division_check_validity
+			neg a2, a2
+  long_division_check_validity:
+			blt a0, a2, long_division_continue
+			ret		#invalid initial conditions
+  long_division_continue:
+			li a7, 1
+			#set up the calculation
+			li t3, 0x8000000000000000
+			li a3, 63
+			li a0, 0
+			li a1, 0
+  long_division_calculate:
+			and t4, t1, t3
+			slli t0, t0, 1
+			add t0, t0, t4
+			div t5, t0, t2
+			beqz t5, long_division_advance
+			sll t6, t5, a3
+			or a0, a0, t6
+			rem t0, t0, t2
+  long_division_advance:
+			srli t3, t3, 1
+			beqz t3, long_division_done
+			addi a3, a3, -1
+			j long_division_calculate
+  long_division_done:
+			ret
+
   #INPUT 
   #a0 - address to copy to
   #a1 - length to copy
