@@ -32,8 +32,9 @@
 			li a1, 0
   long_division_calculate:
 			and t4, t1, t3
+			srl t5, t4, a3		#just want the bit
 			slli t0, t0, 1
-			add t0, t0, t4
+			add t0, t0, t5
 			div t5, t0, t2
 			beqz t5, long_division_advance
 			sll t6, t5, a3
@@ -45,6 +46,7 @@
 			addi a3, a3, -1
 			j long_division_calculate
   long_division_done:
+			mv a1, t0
 			ret
 
   #INPUT 

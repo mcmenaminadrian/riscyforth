@@ -185,10 +185,11 @@ BLUE IF ." / passed " else RED ." / FAILED " then RESET cr ;
 
 : TESTFLOORED
 [ DECIMAL ]
-." Testing floored division" 5 SPACES 
-20 7 FM/MOD 2 = SWAP 6 = AND IF BLUE ." FM/MOD passed " ELSE RED ." FM/MOD FAILED " THEN RESET CR ;
+." Testing floored division" 5 SPACES   
+[ hex 93 ] literal  1 4 FM/MOD [ hex 4000000000000024 ] literal = SWAP 3 = AND IF BLUE ." FM/MOD passed " ELSE RED ." FM/MOD FAILED" THEN RESET CR ;
 
 : TESTSUB
+[ DECIMAL ]
 ." Testing - " 5 spaces 
 BLUE 75 22 - 53 = IF ." - passed " else RED ." - FAILED " then RESET cr ;
 
@@ -266,7 +267,13 @@ BLUE 20 10 2dup MAX 20 = if ." MAX passed and " else RED ." MAX FAILED and " the
 
 : TESTSMDIVREM
 ." Testing SM/REM " 5 SPACES
-20 7 SM/REM 3 = SWAP 6 = AND IF BLUE ." SM/REM passed " ELSE RED ." SM/REM failed" THEN RESET CR ;
+[ hex 93 ] literal 1 4 SM/REM [ hex 4000000000000025 ] literal = SWAP 3 = AND IF BLUE ." SM/REM passed " ELSE RED ." SM/REM failed" THEN RESET CR ;
+
+: TESTS>D
+." Testing S>D " 5 spaces
+[ decimal ] 
+0 S>D 0 = SWAP 0 = AND 1 S>D 0 = SWAP 1 = AND AND 2 S>D 0 = SWAP 2 = AND AND -1 S>D -1 = SWAP -1 = AND AND -2 S>D -1 = SWAP -2 = AND AND TRUE AND
+IF BLUE ." S>D passed" ELSE RED ." S>D FAILED" THEN RESET CR ;
 
 : TESTSHIFTS
 ." Testing LSHIFT and RSHIFT" 5 spaces
@@ -302,9 +309,6 @@ BLUE IF ." VARIABLE, @ and ! passed " ELSE RED ." VARIABLE, @ and ! FAILED " THE
 : TESTTYPE 
 ." Verifying GETLINE, TYPE and TIB " CR YELLOW BRIGHT ." Please enter some text to be echoed back. " RESET CR
 GETLINE CR ." Echoing... " CYAN TIB SWAP TYPE RESET CR ;
-
-: VERIFYWORD
-." Verifying WORD" 5 SPACES BL WORD VERIFIED DUP @ SWAP CELL+ SWAP BLUE TYPE RESET CR ;
 
 
 create acceptpad 80 allot
@@ -741,7 +745,7 @@ testrstackbasics
 \ Test listwords
 : LISTWORDSTESTS
 ." Running 'listwords' group of tests " CR
-VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE TESTTYPE VERIFYWORD
+VERIFYWORDLIST TESTLITERALNUMB TESTVARIABLE TESTTYPE
 VERIFYSOURCE TESTCONSTANTVALUE TESTACCEPT TESTKEY TESTMARKER
 ." 'listwords' group of tests complete " CR ;
 
@@ -752,6 +756,7 @@ TESTADD TESTMUL TESTDIV TESTFLOORED TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST
 TESTminus2 testplus2 test+under testminmax testabs testnegate testshifts
 TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES TEST>NUMBER
 TESTINGCASE TESTUM* TESTM* TESTUM/MOD TESTUINEQUALITIES VERIFYU. TESTSMDIVREM
+TESTS>D
 ." Integer tests complete " CR
 ;
 

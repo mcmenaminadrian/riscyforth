@@ -141,18 +141,60 @@
 
 		CODEHEADERZ SMDIVREM, SM/REM, FMDIVMOD, 0x01
 		#(d n -- n n)
-		ld t0, 0(sp)
-		ld t1, 8(sp)
-		rem t3, t1, t0
+		ld t0, 0(sp)		#divisor
+		ld t1, 8(sp)		#high part dividend
+		ld t2, 16(sp)		#low part dividend
+		addi sp, sp, 8
+		bnez t1, smdivmod_wide
+  smdivmod_simple:
+		rem t3, t2, t0
+		div t4, t2, t0
+		srli t5, t0, 1
+		bgt t5, t3, smdivmod_simple_done
+		addi t4, t4, 1
+  smdivmod_simple_done:
 		sd t3, 8(sp)
-		div t4, t1, t0
-		srl t5, t0, 1
-		bge t3, t5, smdivrem_ceiling
 		sd t4, 0(sp)
 		tail NEXT
-  smdivrem_ceiling:
-		addi t4, t4, 1
-		sd t4, 0(sp)
+  smdivmod_wide:
+		bgez t1, smdivmod_positive
+		#negative calculation
+		neg t1, t1
+		#only care about the remainder on upper part
+		rem t3, t1, t0
+		beqz t3, smdivmod_simple
+		mv a0, t3
+		mv a1, t2
+		mv a2, t0
+		PUSH t0
+		call long_division_signed
+		POP t0
+		beqz a7, fmdiv_fail
+		srli t1, t0, 1
+		bgt t1, a1, smdivmod_wide_complete
+		addi a0, a0, 1
+  smdivmod_wide_complete:
+		sd a1, 8(sp)
+		neg a0, a0
+		sd a0, 0(sp)
+		tail NEXT
+  smdivmod_positive:
+		#only care about the remainder on upper part
+		rem t3, t1, t0
+		beqz t3, smdivmod_simple
+		mv a0, t3
+		mv a1, t2
+		mv a2, t0
+		PUSH t0
+		call long_division_signed
+		POP t0
+		beqz a7, fmdiv_fail
+		srli t1, t0, 1
+		bgt t1, a1, smdivmod_positive_complete
+		addi a0, a0, 1
+  smdivmod_positive_complete:
+		sd a1, 8(sp)
+		sd a0, 0(sp)
 		tail NEXT
 
 		CODEHEADER WITHIN, SMDIVREM, 0x01
@@ -188,7 +230,21 @@
 		sd t0, 0(sp)
                 tail NEXT
 
-                CODEHEADER ABS, NEGATE, 0x01
+		CODEHEADERZ STOD, S>D, NEGATE, 0x01
+		#(n -- d)
+		ld t0, 0(sp)
+		addi sp, sp, -8
+		bgez t0, stod_simple
+		#negative number
+		li t1, -1
+		sd t1, 0(sp)
+		tail NEXT
+  stod_simple:
+		sd zero, 0(sp)
+		tail NEXT
+		
+
+                CODEHEADER ABS, STOD, 0x01
 		ld t0, 0(sp)
                 li t1, 0x8000000000000000
                 or t2, t0, t1

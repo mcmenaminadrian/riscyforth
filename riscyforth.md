@@ -258,7 +258,7 @@ zero. If the definition is found, return its execution token xt. If the
 definition is immediate, also return one (1), otherwise also return minus-one 
 (-1).
 
-**FM/MOD** (d n2 -- n1 n0) Floored division: divide *n2* by *d* and report
+**FM/MOD** (d n2 -- n1 n0) Floored division: divide *d* by *n2* and report
 remainder in *n1* and floored quotient in *n0*
 
 **@** (addr -- x) Fetch as *x* the contents of cell at *addr* and store on
@@ -405,7 +405,7 @@ size *u* which will be found at *addr2*
 **SIGN** (n --) if *n* is negative add a minus sign to the beginning of the
 pictured numeric output string
 
-**SM/REM** (d n2 -- n1 n0) Symmetric division: divide *n2* by *d* and report
+**SM/REM** (d n2 -- n1 n0) Symmetric division: divide *d* by *n2* and report
 remainder in *n1* and symmetric quotient *n0*
 
 **SOURCE-ID** NOT YET IMPLEMENTED
@@ -431,7 +431,7 @@ state
 **S"** (-- addr u) *addr* contains the address of, and *u* the length of,
 the string defined in the inverted commas
 
-**S>D** NOT YET IMPLEMENTED
+**S>D** (n -- d) Convert *n* to double *d*
 
 **!** (x addr --) Store *x* at *addr*
 
