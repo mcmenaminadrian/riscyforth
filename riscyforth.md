@@ -502,7 +502,8 @@ the (data) stack
 **2>R** (x1 x2) R:(-- x1 x2) move the top two entries on the (data) stack to
 the return stack
 
-**U.R** NOT YET IMPLEMENTED
+**U.R** ( u n -- )
+Display *u* right aligned in a field *n* characters wide. 
 
 **UM/MOD** (ud u1 -- u2 u3) Divide *ud* by *u1* giving quotient *u3* and
 remainder *u2* - all arithmetic is unsigned
