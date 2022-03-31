@@ -488,7 +488,91 @@
 		sd t0, 0(sp)
                 tail NEXT
 
-		CODEHEADERZ UD, U., MAX, 0x01
+		CODEHEADERZ UDOTR, U.R, MAX, 0x01
+		#(u n --)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		addi sp, sp, 16
+		li t2, 1
+		bgt t0, t2, udotr_field_exists
+		#0 or 1 field - just call UD
+		addi sp, sp, -8
+		sd t1, 0(sp)
+		tail UD
+  udotr_field_exists:
+		#limit the width
+		li t2, SYSTEMAREA
+		ble t0, t2, udotr_field_size_good
+		mv t0, t2
+  udotr_field_size_good:
+		bnez t1, udotr_not_zero
+		#number is 0 - simple case
+		la t2, SCRATCH_PAD
+		li t4, 0x20
+		addi t3, t0, -1
+  udotr_write_space:
+		beqz t3, udotr_write_zero
+		sb t4, 0(t2)
+		addi t2, t2, 1
+		addi t3, t3, -1
+		j udotr_write_space
+  udotr_write_zero:
+		li t4, 0x30
+		sb t4, 0(t2)
+		la t2, SCRATCH_PAD
+		WRITESTRINGR t2, t0
+		tail NEXT
+  udotr_not_zero:
+		#now base conversion etc
+		la t2, CURRENT_BASE
+		ld t2, 0(t2)
+		li a0, 0x30		#0
+		li a1, 0x37		#offset 0
+		mv a2, zero		#characters written
+		li a4, 10		#do we need to use offset?
+		#use EXPANDED_BUFFER as temporary storage
+		la t3, EXPANDED_BUFFER
+  udotr_generate_characters:
+		remu t4, t1, t2
+		divu t1, t1, t2
+		bgeu t4, a4, udotr_bigger_remainder
+		add t6, t4, a0
+		j udotr_paste_in
+  udotr_bigger_remainder:
+		add t6, t4, a1
+  udotr_paste_in:
+		sb t6, 0(t3)
+		addi t3, t3, 1
+		addi a2, a2, 1
+		bnez t1, udotr_generate_characters
+		#now pad buffer if needed
+		sub t5, t0, a2
+		la t2, SCRATCH_PAD
+		blez t5, udotr_output_number
+		li t1, 0x20
+  udotr_pad_pad:
+		sb t1, 0(t2)
+		addi t2, t2, 1
+		addi t5, t5, -1
+		bgtz t5, udotr_pad_pad
+  udotr_output_number:
+		la t3, EXPANDED_BUFFER
+		add t4, t3, a2
+		addi t4, t4, -1
+  udotr_pick_next_digit:
+		lb t5, 0(t4)
+		sb t5, 0(t2)
+		addi t2, t2, 1
+		addi t4, t4, -1
+		bge t4, t3, udotr_pick_next_digit
+		ble a2, t0, udotr_final_output
+		mv t0, a2
+  udotr_final_output:
+		la t1, SCRATCH_PAD
+		WRITESTRINGR t1, t0
+		tail NEXT
+
+		CODEHEADERZ UD, U., UDOTR, 0x01
 		#(u --)
 		ld t0, 0(sp)
 		blez t0, ud_neg_to_unsigned
@@ -620,7 +704,7 @@
                 tail exit
 
 #calculate double muliplication of unsigned numbers
-multiple_bit_calculate_unsigned:
+  multiple_bit_calculate_unsigned:
 		#a0 and a1 are the factors
 		#returns lower part in a0
 		#upper part in a1

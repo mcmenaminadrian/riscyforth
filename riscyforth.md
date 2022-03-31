@@ -352,7 +352,8 @@ name
 
 **PAGE** Clear the terminal and set output to the top left
 
-**PARSE-NAME** NOT YET IMPLEMENTED
+**PARSE-NAME** ( "<spaces>name<space>" -- c-addr u )
+Skip leading space delimiters. Parse name delimited by a space.
 
 **PARSE** ( char "ccc<char>" -- c-addr u ) Parse ccc delimited by the delimiter
 .char

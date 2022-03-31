@@ -155,7 +155,21 @@
 		addi sp, sp, 16
 		tail NEXT
 
-		CODEHEADER PARSE, TIMESDIV, 0x01
+		CODEHEADERZ PARSENAME, PARSE-NAME, TIMESDIV, 0x01
+		#( "<spaces>name<space>" -- c-addr u )
+		la t0, INPUT_START
+		ld a0, 0(t0)
+		addi a1, a0, 512
+		call utility_find_string
+		addi sp, sp, -16
+		sd a0, 8(sp)
+		sd a2, 0(sp)
+		la t0, INPUT_START
+		addi a1, a1, 1
+		sd a1, 0(t0)
+		tail NEXT
+
+		CODEHEADER PARSE, PARSENAME, 0x01
 		#char "ccc<char>" -- c-addr u
 		ld t0, 0(sp)
 		la t1, INPUT_START
