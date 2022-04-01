@@ -814,8 +814,8 @@
 multiple_bit_calculate_signed:
 		#a0 and a1 are the factors
 		#a2 sign of answer
-		#returns lower part in a0
-		#upper part in a1
+		#returns upper part in a0
+		#lower part in a1
 
 		#use s registers for invariants
 		addi sp, sp, -32
