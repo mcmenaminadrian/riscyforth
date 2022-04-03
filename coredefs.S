@@ -177,12 +177,6 @@
   timesdiv_fail:
 		sd zero, 0(sp)
 		tail NEXT
-		
-
-		
-	
-		addi sp, sp, 16
-		tail NEXT
 
 		CODEHEADERZ PARSENAME, PARSE-NAME, TIMESDIV, 0x01
 		#( "<spaces>name<space>" -- c-addr u )
@@ -296,17 +290,38 @@
 
 		CODEHEADERZ TIMESDIVMOD, */MOD, TWOSTORE, 0x01
 		#(n1 n2 n3 -- n4 n5)
-		ld a0, 16(sp)
-		ld a1, 8(sp)
-		ld a2, 0(sp)
-		addi sp, sp, 8
-		mul t0, a0, a1
-		div t1, t0, a2
-		#calculate the remainder
-		mul t3, t1, a2
-		sub t4, t0, t3
-		sd t4, 8(sp)
-		sd t1, 0(sp)
+		#same code as DIVMOD - but with remainder stored
+		ld a0, 0(sp)			#n3
+		ld a1, 8(sp)			#n2
+		ld a2, 16(sp)			#n1
+		addi sp, sp, 24			#slow call, so just make stack manip clear
+		li t0, 0x8000000000000000
+		and t1, a2, t0
+		and t2, a1, t0
+		PUSH a0
+		mv a0, a2
+		xor a2, t1, t2
+		beqz a2, timesdivmod_call_multiply
+		li a2, 1
+  timesdivmod_call_multiply:
+		addi sp, sp, -16			#needed for call
+		call multiple_bit_calculate_signed
+		#a1 has lower part, a0 has upper
+		#get rid of stack
+		addi sp, sp, 16
+		#now division time
+		POP a2
+		rem t0, a0, a2
+		mv a0, t0
+		call long_division_signed
+		addi sp, sp, -16
+		beqz a7, timesdivmod_fail
+		sd a1, 8(sp)
+		sd a0, 0(sp)
+		tail NEXT
+  timesdivmod_fail:
+		sd zero, 8(sp)
+		sd zero, 0(sp)
 		tail NEXT
 
 		CODEHEADER PAGE, TIMESDIVMOD, 0x01

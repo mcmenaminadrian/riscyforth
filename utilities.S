@@ -12,13 +12,56 @@
   #a0 quotient
   #a1 remainder
   #a7 1 if answer valid
+  long_division_unsigned:
+			mv t0, a0
+			mv t1, a1
+			mv t2, a2
+			li a7, 0
+			#check validity
+			beqz a2, long_division_unsigned_done
+			li a7, 1
+			#set up the calculation
+			li t3, 0x8000000000000000
+			li a3, 63
+			li a0, 0
+			li a1, 0
+  long_division_unsigned_calculate:
+			and t4, t1, t3
+			srl t5, t4, a3		#just want the bit
+			slli t0, t0, 1
+			add t0, t0, t5
+			divu t5, t0, t2
+			beqz t5, long_division_unsigned_advance
+			sll t6, t5, a3
+			or a0, a0, t6
+			remu t0, t0, t2
+  long_division_unsigned_advance:
+			srli t3, t3, 1
+			beqz t3, long_division_unsigned_done
+			addi a3, a3, -1
+			j long_division_unsigned_calculate
+  long_division_unsigned_done:
+			mv a1, t0
+			ret
+
+
+
+  #INPUT
+  #a0 - remainder
+  #a1 - dividend
+  #a2 - divisor
+  #OUTPUT
+  #a0 quotient
+  #a1 remainder
+  #a7 1 if answer valid
   long_division_signed:
 			mv t0, a0
 			mv t1, a1
 			mv t2, a2
 			li a7, 0
 			#check validity
-			bgez a2, long_division_check_validity
+			bgtz a2, long_division_check_validity
+			beqz a2, long_division_done		#don't divide by zero
 			neg a2, a2
   long_division_check_validity:
 			blt a0, a2, long_division_continue

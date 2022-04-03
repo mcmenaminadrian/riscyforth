@@ -155,13 +155,15 @@ IF BLUE ." UM* passed" ELSE RED ." UM* FAILED" THEN RESET CR ;
 
 : TESTM*
 ." Testing M*" 5 SPACES
-[hex ffffffffffffffff ] literal 2 m* [ hex ffffffffffffffff ] literal = TRUE = SWAP [ hex fffffffffffffffe ] literal = =
+[hex 7fffffffffffffff ] literal 2 m* [ hex fffffffffffffffe ] literal = swap [ hex 7fffffffffffffff ] literal = and true =
 IF BLUE ." M* passed" ELSE RED ." M* FAILED" THEN RESET CR ;
 
 : TESTUM/MOD
 ." Testing UM/MOD" 5 SPACES
-[ hex bfffffffffffffff ] literal dup decimal 0< SWAP 4 um/mod swap 3 = swap dup 0> swap [ hex 2fffffffffffffff ] literal = and and and decimal
-IF BLUE ." UM/MOD passed" ELSE RED ." UM/MOD FAILED" THEN RESET CR ;
+[ hex ffffffffffffffff ] literal 2 um* [ hex ffffffffffffffff ] literal  um/mod 2 = swap 0= and true and true =
+IF BLUE ." UM/MOD passed - first test" ELSE RED ." UM/MOD FAILED: 1st TEST" THEN RESET CR 
+[ hex ffffffffffffffff ] literal 2 um* 2 um/mod [ hex ffffffffffffffff ] literal = swap 0= and true and true =
+IF BLUE ." UM/MOD passed - second test" ELSE RED ." UM/MOD FAILED: 2nd TEST" THEN RESET CR ;
 
 : TESTUINEQUALITIES
 ." Testing U> and U<" 5 SPACES
@@ -186,7 +188,12 @@ BLUE IF ." / passed " else RED ." / FAILED " then RESET cr ;
 : TESTFLOORED
 [ DECIMAL ]
 ." Testing floored division" 5 SPACES   
-[ hex 93 ] literal  1 4 FM/MOD [ hex 4000000000000024 ] literal = SWAP 3 = AND IF BLUE ." FM/MOD passed " ELSE RED ." FM/MOD FAILED" THEN RESET CR ;
+[ hex 7fffffffffffffff ] literal [ hex 7fffffffffffffff ] literal m* [ hex 7fffffffffffffff ] literal fm/mod
+[ hex 7fffffffffffffff ] literal = swap 0= and true =
+IF BLUE ." FM/MOD passed 1st test " ELSE RED ." FM/MOD FAILED: 1st TEST" THEN RESET CR
+[ hex 8000000000000000 ] literal [ hex 7fffffffffffffff ] literal m* [ hex 7fffffffffffffff ] literal fm/mod
+[ hex 8000000000000000 ] literal = swap 0= and true =
+IF BLUE ." FM/MOD passed 2nd test " ELSE RED ." FM/MOD FAILED: 2nd TEST" THEN RESET CR ;
 
 : TESTSUB
 [ DECIMAL ]
@@ -239,7 +246,7 @@ BLUE 13 7 /mod 1 = swap 6 = and if ." /MOD passed " else RED ." /MOD FAILED" the
 
 : TEST*/
 ." Testing */" 5 SPACES
-5 7 3 */ 11 = IF BLUE ." */ passed" ELSE RED ." */ FAILED" THEN RESET CR ;
+[ hex 7fffffffffffffff ] literal 2 [ hex 7fffffffffffffff ] literal  */ 2 = IF BLUE ." */ passed" ELSE RED ." */ FAILED" THEN RESET [ decimal ] CR ;
 
 : TEST*/MOD
 ." Testing */MOD" 5 SPACES

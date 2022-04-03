@@ -626,52 +626,39 @@
 
 		CODEHEADERZ UMDIVMOD, UM/MOD, UD, 0x01
 		#(ud u -- u u)
-		ld t0, 0(sp)
-		ld t1, 8(sp)
-		remu t2, t1, t0
-		divu t3, t1, t0
-		sd t2, 8(sp)
-		sd t3, 0(sp)
+		ld a2, 0(sp)		#divisor
+		ld a0, 8(sp)		#upper part of ud
+		ld a1, 16(sp)		#lower part of ud
+		remu a0, a0, a2
+		call long_division_unsigned
+		addi sp, sp, 8
+		beqz a7, umdivmod_failed
+		sd a1, 8(sp)
+		sd a0, 0(sp)
+		tail NEXT
+  umdivmod_failed:
+		sd zero, 8(sp)
+		sd zero, 0(sp)
 		tail NEXT
 
 		CODEHEADERZ MTIMES, M*, UMDIVMOD, 0x01
 		#(n n -- d)
-		ld a0, 0(sp)
-		ld a1, 8(sp)
-		beqz a0, mtimes_zero
-		bnez a1, mtimes_test_sign
-  mtimes_zero:
-		sd zero, 0(sp)		#can only be zero
-		sd zero, 8(sp)
-		tail NEXT
-  mtimes_test_sign:
-		li a2, 0				#positive answer expected
-		bgez a0, mtimes_test_multiplicand_neg
-		#a0 is negative but we reverse this for calculation
-		neg  a0, a0
-		j mtimes_both_neg_test
-  mtimes_test_multiplicand_neg:
-		bgez a1, mtimes_calculate
-		#a1 is negative but reverse this for calculation
-		neg a1, a1
-		j mtimes_neg
-  mtimes_both_neg_test:
-		bgez a1, mtimes_neg		#a0 is neg, a1 is positive - negative answer required
-		neg a1, a1			#a0 and a1 both negative - hence positive answer
-		j mtimes_calculate
-  mtimes_neg:
-		li a2, 1
-  mtimes_calculate:
-		call multiple_bit_calculate_signed	# returns answer in a0 (lower) and a1 (upper)
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		mulh a0, t0, t1
+		mul a1, t0, t1
+		sd a1, 8(sp)
+		sd a0, 0(sp)
 		tail NEXT
 
 		CODEHEADERZ UMTIMES, UM*, MTIMES, 0x01
 		#(u u -- d)
-		ld a0, 0(sp)
-		ld a1, 8(sp)
-		beqz a0, mtimes_zero
-		beqz a1, mtimes_zero
-		call multiple_bit_calculate_unsigned
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+		mulhu a0, t0, t1
+		mul a1, t0, t1
+		sd a1, 8(sp)
+		sd a0, 0(sp)
 		tail NEXT
 		
 		CODEHEADERZ UMORE, U>, UMTIMES, 0x01
