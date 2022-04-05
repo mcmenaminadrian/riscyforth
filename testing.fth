@@ -155,7 +155,7 @@ IF BLUE ." UM* passed" ELSE RED ." UM* FAILED" THEN RESET CR ;
 
 : TESTM*
 ." Testing M*" 5 SPACES
-[hex 7fffffffffffffff ] literal 2 m* [ hex fffffffffffffffe ] literal = swap [ hex 7fffffffffffffff ] literal = and true =
+[ hex 7fffffffffffffff ] literal 2 m* 0= swap [ hex 7fffffffffffffff ] literal 1 LSHIFT = and true =
 IF BLUE ." M* passed" ELSE RED ." M* FAILED" THEN RESET CR ;
 
 : TESTUM/MOD

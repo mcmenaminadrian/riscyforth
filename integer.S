@@ -647,6 +647,7 @@
 		ld t1, 8(sp)
 		mulh a0, t0, t1
 		mul a1, t0, t1
+		#now manipulate to get the sign right
 		sd a1, 8(sp)
 		sd a0, 0(sp)
 		tail NEXT
