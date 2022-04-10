@@ -8,7 +8,19 @@
 		addi sp, sp, 8
                 tail NEXT
 
-                CODEHEADERZ TIMES, *, PLUS, 0x01
+		CODEHEADER MAXINT, PLUS, 0x01
+		li t0, 0x7FFFFFFFFFFFFFFF
+		addi sp, sp, -8
+		sd t0, 0(sp)
+		tail NEXT
+
+		CODEHEADER MININT, MAXINT, 0x01
+		li t0, 0x8000000000000000
+		addi sp, sp, -8
+		sd t0, 0(sp)
+		tail NEXT
+
+                CODEHEADERZ TIMES, *, MININT, 0x01
 		ld a0, 0(sp)
 		ld a1, 8(sp)
                 mul t0, a0, a1
@@ -107,28 +119,12 @@
 		sd t4, 0(sp)
 		tail NEXT
   fmdivmod_wide:
-		bgez t1, fmdivmod_positive
-		#negative calculation
-		neg t1, t1
-		#only care about the remainder on upper part
 		rem t3, t1, t0
 		beqz t3, fmdivmod_simple
 		mv a0, t3
 		mv a1, t2
 		mv a2, t0
-		call long_division_signed
-		beqz a7, fmdiv_fail
-		sd a1, 8(sp)
-		neg a0, a0
-		sd a0, 0(sp)
-		tail NEXT
-  fmdivmod_positive:
-		#only care about the remainder on upper part
-		rem t3, t1, t0
-		beqz t3, fmdivmod_simple
-		mv a0, t3
-		mv a1, t2
-		mv a2, t0
+		mv a3, t1		#for sign
 		call long_division_signed
 		beqz a7, fmdiv_fail
 		sd a1, 8(sp)
@@ -160,12 +156,12 @@
 		bgez t1, smdivmod_positive
 		#negative calculation
 		neg t1, t1
-		#only care about the remainder on upper part
 		rem t3, t1, t0
 		beqz t3, smdivmod_simple
 		mv a0, t3
 		mv a1, t2
 		mv a2, t0
+		mv a3, t1
 		PUSH t0
 		call long_division_signed
 		POP t0
@@ -179,12 +175,12 @@
 		sd a0, 0(sp)
 		tail NEXT
   smdivmod_positive:
-		#only care about the remainder on upper part
 		rem t3, t1, t0
 		beqz t3, smdivmod_simple
 		mv a0, t3
 		mv a1, t2
 		mv a2, t0
+		mv a3, t1
 		PUSH t0
 		call long_division_signed
 		POP t0
@@ -647,7 +643,6 @@
 		ld t1, 8(sp)
 		mulh a0, t0, t1
 		mul a1, t0, t1
-		#now manipulate to get the sign right
 		sd a1, 8(sp)
 		sd a0, 0(sp)
 		tail NEXT

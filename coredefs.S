@@ -147,36 +147,25 @@
 		CODEHEADERZ TIMESDIV, */,  TWOFETCH, 0x01
 		#(n1 n2 n3 -- n4)
 		# n1 * n2 -> d, d / n3 -> n4
-		ld a0, 0(sp)			#n3
+		ld a0, 0(sp)			#n3 - divisor
 		ld a1, 8(sp)			#n2
 		ld a2, 16(sp)			#n1
-		addi sp, sp, 24			#slow call, so just make stack manip clear
-		li t0, 0x8000000000000000
-		and t1, a2, t0
-		and t2, a1, t0
-		PUSH a0
-		mv a0, a2
-		xor a2, t1, t2
-		beqz a2, timesdiv_call_multiply
-		li a2, 1
-  timesdiv_call_multiply:
-		addi sp, sp, -16			#needed for call
-		call multiple_bit_calculate_signed
-		#a1 has lower part, a0 has upper
-		#get rid of stack
-		addi sp, sp, 16
-		#now division time
-		POP a2
-		rem t0, a0, a2
+		addi sp, sp, 16			#
+		beqz a2, timesdiv_zero_div	#no division by zero
+		mulh t0, a1, a2
+		mul t1, a1, a2
+		rem t4, t0, a0
+		mv a1, t1
+		mv a2, a0
 		mv a0, t0
+		mv a3, t0
 		call long_division_signed
-		addi sp, sp, -8
-		beqz a7, timesdiv_fail
+		beqz a7, timesdiv_zero_div	#failure
 		sd a0, 0(sp)
 		tail NEXT
-  timesdiv_fail:
+  timesdiv_zero_div:
 		sd zero, 0(sp)
-		tail NEXT
+		tail NEXT	
 
 		CODEHEADERZ PARSENAME, PARSE-NAME, TIMESDIV, 0x01
 		#( "<spaces>name<space>" -- c-addr u )

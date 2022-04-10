@@ -188,12 +188,17 @@ BLUE IF ." / passed " else RED ." / FAILED " then RESET cr ;
 : TESTFLOORED
 [ DECIMAL ]
 ." Testing floored division" 5 SPACES   
-[ hex 7fffffffffffffff ] literal [ hex 7fffffffffffffff ] literal m* [ hex 7fffffffffffffff ] literal fm/mod
-[ hex 7fffffffffffffff ] literal = swap 0= and true =
+maxint maxint m* maxint fm/mod
+maxint = swap 0= and true =
 IF BLUE ." FM/MOD passed 1st test " ELSE RED ." FM/MOD FAILED: 1st TEST" THEN RESET CR
-[ hex 8000000000000000 ] literal [ hex 7fffffffffffffff ] literal m* [ hex 7fffffffffffffff ] literal fm/mod
-[ hex 8000000000000000 ] literal = swap 0= and true =
+minint maxint m* maxint fm/mod
+minint = swap 0= and true =
 IF BLUE ." FM/MOD passed 2nd test " ELSE RED ." FM/MOD FAILED: 2nd TEST" THEN RESET CR ;
+
+: TESTMAXINTMININT
+." Testing MAXINT and MININT constants" 5 SPACES
+[ hex 7fffffffffffffff ] literal MAXINT = IF BLUE ." MAXINT passes..." ELSE RED ." MAXINT FAILS..." THEN RESET
+[ hex 8000000000000000 ] literal MININT = IF BLUE ." MININT passes." ELSE RED ." MININT FAILS" THEN RESET CR ;
 
 : TESTSUB
 [ DECIMAL ]
@@ -246,7 +251,7 @@ BLUE 13 7 /mod 1 = swap 6 = and if ." /MOD passed " else RED ." /MOD FAILED" the
 
 : TEST*/
 ." Testing */" 5 SPACES
-[ hex 7fffffffffffffff ] literal 2 [ hex 7fffffffffffffff ] literal  */ 2 = IF BLUE ." */ passed" ELSE RED ." */ FAILED" THEN RESET [ decimal ] CR ;
+maxint 2 maxint  */ 2 = IF BLUE ." */ passed" ELSE RED ." */ FAILED" THEN RESET [ decimal ] CR ;
 
 : TEST*/MOD
 ." Testing */MOD" 5 SPACES
@@ -390,9 +395,11 @@ RED ." >R, R@ and RDROP FAILED" then RESET cr
 
 
 VARIABLE BAXX
+VARIABLE BAXXCOUNTER
 : TESTBEGINAGAIN
 ." Testing BEGIN ... AGAIN looping " 5 SPACES
-0 BAXX ! BEGIN 1 BAXX +! BAXX @ 7500000 = IF EXIT THEN AGAIN ;
+0 BAXXCOUNTER !
+0 BAXX ! BEGIN 1 BAXX +! BAXX @ 7500000 = IF CR EXIT THEN BAXX @ 75000 / BAXXCOUNTER @ = INVERT IF ." X" BAXX @ 75000 / BAXXCOUNTER ! THEN AGAIN ;
 
 : CONTROLBEGINAGAINTEST
 TESTBEGINAGAIN BAXX @ 7500000 = IF BLUE ." BEGIN ... AGAIN passed " ELSE RED ." BEGIN ... AGAIN failed" THEN RESET CR ;
@@ -763,7 +770,7 @@ TESTADD TESTMUL TESTDIV TESTFLOORED TESTSUB TEST1+ TESTMINUS1 TEST0< TEST0= TEST
 TESTminus2 testplus2 test+under testminmax testabs testnegate testshifts
 TESTMOD TESTSLMOD TEST*/ TEST*/MOD TEST2/ TEST2* TESTINEQUALITIES TEST>NUMBER
 TESTINGCASE TESTUM* TESTM* TESTUM/MOD TESTUINEQUALITIES VERIFYU. TESTSMDIVREM
-TESTS>D
+TESTS>D TESTMAXINTMININT
 ." Integer tests complete " CR
 ;
 

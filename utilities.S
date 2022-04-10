@@ -50,23 +50,25 @@
   #a0 - remainder
   #a1 - dividend
   #a2 - divisor
+  #a3 - high word (for sign)
   #OUTPUT
   #a0 quotient
   #a1 remainder
   #a7 1 if answer valid
   long_division_signed:
-			mv t0, a0
-			mv t1, a1
-			mv t2, a2
-			li a7, 0
-			#check validity
-			bgtz a2, long_division_check_validity
-			beqz a2, long_division_done		#don't divide by zero
-			neg a2, a2
-  long_division_check_validity:
-			blt a0, a2, long_division_continue
-			ret		#invalid initial conditions
-  long_division_continue:
+			mv t0, a0	#remainder
+			mv t1, a1	#dividend
+			mv t2, a2	#divisor
+			li a7, 0	#validity
+			li a6, 0	#sign (0 for positive)
+			beqz a2, long_division_out	#no division by zero
+			#calculate sign
+			li t3, 0x8000000000000000
+			and a4, a3, t3
+			srli a4, a4, 63
+			and a5, a2, t3
+			srli a5, a5, 63
+			xor a6, a4, a5
 			li a7, 1
 			#set up the calculation
 			li t3, 0x8000000000000000
@@ -78,18 +80,36 @@
 			srl t5, t4, a3		#just want the bit
 			slli t0, t0, 1
 			add t0, t0, t5
+			beqz a6, long_division_signed_unsigned
 			div t5, t0, t2
+			j long_division_continue
+  long_division_signed_unsigned:
+			divu t5, t0, t2
+  long_division_continue:
 			beqz t5, long_division_advance
 			sll t6, t5, a3
 			or a0, a0, t6
+			beqz a6, long_division_signed_rem_unsigned
 			rem t0, t0, t2
+			j long_division_advance
+  long_division_signed_rem_unsigned:
+			remu t0, t0, t2
   long_division_advance:
 			srli t3, t3, 1
 			beqz t3, long_division_done
 			addi a3, a3, -1
 			j long_division_calculate
   long_division_done:
+			#correct sign
+			li t3, 0x8000000000000000
+			and a4, a0, t3
+			srli a4, a4, 63
+			xor a5, a4, a6
+			beqz a5, long_division_leave
+			neg a0, a0
+  long_division_leave:
 			mv a1, t0
+  long_division_out:
 			ret
 
   #INPUT 
