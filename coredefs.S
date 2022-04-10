@@ -165,9 +165,27 @@
 		tail NEXT
   timesdiv_zero_div:
 		sd zero, 0(sp)
-		tail NEXT	
+		tail NEXT
 
-		CODEHEADERZ PARSENAME, PARSE-NAME, TIMESDIV, 0x01
+		CODEHEADERZ RESTOREINPUT, RESTORE-INPUT, TIMESDIV, 0x0
+		#(xn...x1 n --- flag)
+		#current this just empties the stack and posts TRUE flag
+		ld t0, 0(sp)
+		mul t0, t0, -8
+		add sp, sp, t0
+		li t0, 0xFFFFFFFFFFFFFFFF
+		sd t0, 0(sp)
+		tail NEXT
+
+		CODEHEADER REFILL, RESTOREINPUT, 0x0
+		#(-- flag)
+		#current just puts -1 (TRUE) on the stack
+		li t0, 0xFFFFFFFFFFFFFFFF
+		addi sp, sp, -8
+		sd t0, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ PARSENAME, PARSE-NAME, REFILL, 0x01
 		#( "<spaces>name<space>" -- c-addr u )
 		la t0, INPUT_START
 		ld a0, 0(t0)

@@ -315,7 +315,11 @@ name
 
 **MAX** (n1 n2 -- n3) *n3* is the greater of *n1* and *n2*
 
+**MAXINT** (-- n) Puts 0x7FFFFFFFFFFFFFFF on the stack
+
 **MIN** (n1 n2 -- n3) *n3* is the lesser of *n1* and *n2*
+
+**MININT** (-- n) Puts 0x8000000000000000 on the stack
 
 **-LOOP** (n --) R:(x -- x1) Subtract *n* from *x* and check loop limits
 
@@ -380,7 +384,7 @@ colon definition.
 
 **RED** Set terminal forground to red
 
-**REFILL** NOT YET IMPLEMENTED
+**REFILL** (-- flag) Currently just places 0xFFFFFFFFFFFFFFFF (TRUE) on stack
 
 **REPEAT** End of a *BEGIN .. WHILE .. REPEAT* block
 
@@ -389,7 +393,8 @@ colon definition.
 **RESIZE** (addr1 u -- addr2 ior) Copy data at *addr1* to new area of
 size *u* which will be found at *addr2*
 
-**RESTORE-INPUT** NOT YET IMPLEMENTED
+**RESTORE-INPUT** (xn .. x1 n -- flag) Currently shortens stack by *n* entries
+and posts TRUE (0xFFFFFFFFFFFFFFFF) only
 
 **R@** (--x) R:(x -- x) Copy x from the return stack to the (data) stack
 
