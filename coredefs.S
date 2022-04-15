@@ -161,8 +161,7 @@
 		mv s7, t0
 		tail NEXT
 	
-
-		CODEHEADERZ TIMESDIV, */,  SEQ, 0x01
+		CODEHEADERZ TIMESDIV, */,  _SEQ, 0x01
 		#(n1 n2 n3 -- n4)
 		# n1 * n2 -> d, d / n3 -> n4
 		ld a0, 0(sp)			#n3 - divisor
