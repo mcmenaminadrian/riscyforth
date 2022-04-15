@@ -704,19 +704,22 @@
 		#now count and process the string
 		addi t1, t1, 24				#WA__SEQ, advance, length, string
 		PUSH t1					#we need this for later
-		call tick_start_looking			#returns with #t0 holding start and t1 the end
+		la t0, INPUT_START
+		ld t0, 0(t0)
+		addi t0, t0, 1
 		ld a0, 0(sp)				#write address
 		li a1, 0				#characters written
 		li a2, 0x5C
+		li t1, 0x22
   embed_seq_pick_up_char:
 		lbu t2, 0(t0)
 		beq t2, a2, embed_seq_process_escape
+		beq t2, t1, embed_seq_check_alignment
   embed_seq_write_out_char:
 		sb t2, 0(a0)
 		addi a1, a1, 1
 		addi a0, a0, 1
 		addi t0, t0, 1
-		bgt t0, t1, embed_seq_check_alignment
 		j embed_seq_pick_up_char
   embed_seq_process_escape:
 		lbu t3, 1(t0)
@@ -795,12 +798,12 @@
 		mv t2, t4				#\
 		j embed_seq_process_escaped
   embed_seq_process_x:
-		li t4, 0x61
+		li t4, 0x78
 		bne t3, t4, embed_seq_process_escaped
 		#convert next two characters to hex number
-		lbu t5, 1(t0)
-		lbu t6, 2(t0)
-		li t3, 2
+		lbu t5, 2(t0)
+		lbu t6, 3(t0)
+		li t3, 0x20
 		or t5, t5, t3
 		or t6, t6, t3
 		li t3, 0x30				#0
@@ -835,7 +838,7 @@
 		addi t6, t6, -87			#a = 10
 		j embed_seq_build_low_digit
   embed_seq_process_hex_done:
-		addi t0, t0, 2
+		addi t0, t0, 3
 		mv t2, a5
 		j embed_seq_process_escaped
   embed_seq_check_alignment:
