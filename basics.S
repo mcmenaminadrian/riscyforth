@@ -433,10 +433,10 @@
 		tail NEXT
 
 		CODEHEADER SQ, _SQ, 0x01
-		/* Expands to S"
-		   (-- c-addr u)
-		In immediate mode this string
-		not guarenteed to last */
+		# Expands to S"
+		#   (-- c-addr u)
+		#In immediate mode this string
+		#not guarenteed to last
 		la t5, INPUT_END
 		ld t5, 0(t5)		#absolute end of string
 		li t3, 0
@@ -609,12 +609,26 @@
                 j NEXT
   fix_up_length_three:
 		#expand ['] --> BRACKETTICK
+		#S\" --> SEQ
 		POP a0
 		la a2, EXPANDED_BUFFER
 		mv a3, a2
 		mv a1, t1 
 		mv a5, t2
 		lbu t1, 0(a0)
+		li t3, 0xDF		#to fix to upper case
+		and t4, t1, t3
+		li t2, 0x53		#S
+		bne t4, t2, fix_up_length_three_check_bracket
+		lbu t1, 1(a0)
+		li t2, 0x5C		#\
+		bne t1, t2, fix_up_finished
+		lbu t1, 2(a0)
+		li t2, 0x22
+		bne t1, t2, fix_up_finished
+		call fix_up_seq
+		j fix_up_done
+  fix_up_length_three_check_bracket:
                 li t2, 0x5B             #[
                 bne t1, t2, fix_up_finished
                 lbu t1, 1(a0)
@@ -1095,6 +1109,16 @@
 		li t3, 0x51
 		sb t3, 1(a2)
 		addi a2, a2, 1
+		ret
+
+  fix_up_seq:
+		li t3, 0x53
+		sb t3, 0(a2)
+		li t3, 0x45
+		sb t3, 1(a2)
+		li t3, 0x51
+		sb t3, 2(a2)
+		addi a2, a2, 2
 		ret
 		
 .include "integer.S"

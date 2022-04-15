@@ -1,4 +1,4 @@
-# Copyright Adrian McMenamin, 2021
+# Copyright Adrian McMenamin, 2021 - 2022
 # Resuse licensed under version 2 of the GNU GPL
 # Words from the Forth standard core not defined somewhere else
 
@@ -144,7 +144,25 @@
 		sd t1, 0(sp)
 		tail NEXT
 
-		CODEHEADERZ TIMESDIV, */,  TWOFETCH, 0x01
+		CODEHEADER SEQ, TWOFETCH, 0x01
+		# expanded to/from S\"
+		# does nothing in interpretation
+		tail NEXT
+
+		CODEHEADER _SEQ, SEQ, 0x0
+		#( -- c-addr u)
+		ld t0, 0(s7)
+		ld t1, 8(s7)
+		mv t2, s7
+		addi t2, t2, 16
+		addi sp, sp, -16
+		sd t2, 8(sp)
+		sd t1, 0(sp)
+		mv s7, t0
+		tail NEXT
+	
+
+		CODEHEADERZ TIMESDIV, */,  SEQ, 0x01
 		#(n1 n2 n3 -- n4)
 		# n1 * n2 -> d, d / n3 -> n4
 		ld a0, 0(sp)			#n3 - divisor
@@ -171,7 +189,8 @@
 		#(xn...x1 n --- flag)
 		#current this just empties the stack and posts TRUE flag
 		ld t0, 0(sp)
-		mul t0, t0, -8
+		li t1, -8
+		mul t0, t0, t1
 		add sp, sp, t0
 		li t0, 0xFFFFFFFFFFFFFFFF
 		sd t0, 0(sp)
@@ -1362,12 +1381,27 @@
 
   tick_fix_up_length_three:
 		#expand ['] --> BRACKETTICK
+		#expand S\" --> SEQ
 		mv a0, t0
 		la a2, EXPANDED_BUFFER
 		mv a3, a2
 		mv a1, t1
 		mv a5, t2
 		lbu t1, 0(a0)
+                li t3, 0xDF             #to fix to upper case
+                and t4, t1, t3
+                li t2, 0x53             #S
+                bne t4, t2, tick_fix_up_check_bracket
+                lbu t1, 1(a0)
+                li t2, 0x5C             #\
+                bne t1, t2, tix_up_six_done
+		lbu t1, 2(a0)
+                li t2, 0x22
+                bne t1, t2, tix_up_six_done
+                call fix_up_seq
+                j tix_up_done
+
+  tick_fix_up_check_bracket:
 		li t2, 0x5B		#[
 		bne t1, t2, tix_up_six_done
 		lbu t1, 1(a0)

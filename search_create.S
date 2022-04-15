@@ -170,10 +170,16 @@
 		tail embed_sq
   search_cq:
 		la t0, WA_CQ
-		bne t3, t0, search_marker
+		bne t3, t0, search_seq
 		#subsititue WA__CQ
 		la t3, WA__CQ
 		tail embed_sq
+  search_seq:
+		la t0, WA_SEQ
+		bne t3, t0, search_marker
+		#substitute WA__SEQ
+		la t3, WA__SEQ
+		tail embed_seq
   search_marker:
 		la t0, WA_MARKER
 		bne t3, t0, search_tick
@@ -689,6 +695,169 @@
 		la s7, outer_loop_tokenize
 		fence.i
 		tail NEXT
+
+  embed_seq:
+		#embed processed string
+		la t0, createwritepoint
+		ld t1, 0(t0)
+		sd t3, 0(t1)				#write out WA__SEQ
+		#now count and process the string
+		addi t1, t1, 24				#WA__SEQ, advance, length, string
+		PUSH t1					#we need this for later
+		call tick_start_looking			#returns with #t0 holding start and t1 the end
+		ld a0, 0(sp)				#write address
+		li a1, 0				#characters written
+		li a2, 0x5C
+  embed_seq_pick_up_char:
+		lbu t2, 0(t0)
+		beq t2, a2, embed_seq_process_escape
+  embed_seq_write_out_char:
+		sb t2, 0(a0)
+		addi a1, a1, 1
+		addi a0, a0, 1
+		addi t0, t0, 1
+		bgt t0, t1, embed_seq_check_alignment
+		j embed_seq_pick_up_char
+  embed_seq_process_escape:
+		lbu t3, 1(t0)
+		li t4, 0x22				#"
+		bne t3, t4, embed_seq_process_a
+		mv t2, t4
+  embed_seq_process_escaped:
+		addi t0, t0, 1
+		j embed_seq_write_out_char
+  embed_seq_process_a:
+		li t4, 0x61
+		bne t3, t4, embed_seq_process_b
+		li t2, 7				#BEL
+		j embed_seq_process_escaped
+  embed_seq_process_b:
+		li t4, 0x62
+		bne t3, t4, embed_seq_process_e
+		li t2, 8				#BS
+		j embed_seq_process_escaped
+  embed_seq_process_e:
+		li t4, 0x65
+		bne t3, t4, embed_seq_process_f
+		li t2, 0x1B				#ESC
+		j embed_seq_process_escaped
+  embed_seq_process_f:
+		li t4, 0x66
+		bne t3, t4, embed_seq_process_l
+		li t2, 12				#Form feed
+		j embed_seq_process_escaped
+  embed_seq_process_l:
+		li t4, 0x6C
+		bne t3, t4, embed_seq_process_m
+		li t2, 10				#LF
+		j embed_seq_process_escaped
+  embed_seq_process_m:
+		li t4, 0x6D
+		bne t3, t4, embed_seq_process_n
+		li t2, 13
+		sb t2, 0(a0)
+		addi a0, a0, 1
+		li t2, 10				#CR/LF
+		j embed_seq_process_escaped
+  embed_seq_process_n:
+		li t4, 0x6E
+		bne t3, t4, embed_seq_process_q
+		li t2, 10				#LF is newline for Unix
+		j embed_seq_process_escaped
+  embed_seq_process_q:
+		li t4, 0x71
+		bne t3, t4, embed_seq_process_r
+		li t2, 0x22				#"
+		j embed_seq_process_escaped
+  embed_seq_process_r:
+		li t4, 0x72
+		bne t3, t4, embed_seq_process_t
+		li t2, 13				#CR
+		j embed_seq_process_escaped
+  embed_seq_process_t:
+		li t4, 0x74
+		bne t3, t4, embed_seq_process_v
+		li t2, 9				#horizontal tab
+		j embed_seq_process_escaped
+  embed_seq_process_v:
+		li t4, 0x76
+		bne t3, t4, embed_seq_process_z
+		li t2, 11				#vertical tab
+		j embed_seq_process_escaped
+  embed_seq_process_z:
+		li t4, 0x7A
+		bne t3, t4, embed_seq_process_slash
+		li t2, 0				#NUL
+		j embed_seq_process_escaped
+  embed_seq_process_slash:
+		li t4, 92
+		bne t3, t4, embed_seq_process_x
+		mv t2, t4				#\
+		j embed_seq_process_escaped
+  embed_seq_process_x:
+		li t4, 0x61
+		bne t3, t4, embed_seq_process_escaped
+		#convert next two characters to hex number
+		lbu t5, 1(t0)
+		lbu t6, 2(t0)
+		li t3, 2
+		or t5, t5, t3
+		or t6, t6, t3
+		li t3, 0x30				#0
+		li t4, 0x39				#9
+		li a7, 0x66				#f
+		li a6, 0x61				#a
+		li a5, 0				#character we build
+		#process highest digit
+		blt t5, t3, embed_seq_process_escaped	#failed
+		bgt t5, t4, embed_seq_process_highdigit_high
+		mv a5, t5
+		sub a5, a5, t3
+  embed_seq_build_high_digit:
+		slli a5, a5, 4				#multiply by 16
+		j embed_seq_process_low_digit
+  embed_seq_process_highdigit_high:
+		blt t5, a6, embed_seq_process_escaped
+		bgt t5, a7, embed_seq_process_escaped
+		mv a5, t5
+		addi a5, a5, -87			#a = 10
+		j embed_seq_build_high_digit
+  embed_seq_process_low_digit:
+		blt t6, t3, embed_seq_process_escaped	#failed
+		bgt t6, t4, embed_seq_process_lowdigit_high
+		sub t6, t6, t3
+  embed_seq_build_low_digit:
+		add a5, a5, t6
+		j embed_seq_process_hex_done
+  embed_seq_process_lowdigit_high:
+		blt t6, a6, embed_seq_process_escaped
+		bgt t6, a7, embed_seq_process_escaped
+		addi t6, t6, -87			#a = 10
+		j embed_seq_build_low_digit
+  embed_seq_process_hex_done:
+		addi t0, t0, 2
+		mv t2, a5
+		j embed_seq_process_escaped
+  embed_seq_check_alignment:
+		#writing done
+		POP a4
+		sd a1, -8(a4)				#length of string
+		#need to ensure alignment of output maintained
+		#a0 holds where we ended up
+		li a1, 0x07
+		li a2, 0x08
+		and a3, a1, a0
+		sub a3, a2, a3
+		add a0, a0, a3
+		la a1, createwritepoint
+		sd a0, 0(a1)				#advance writepoint
+		sd a0, -16(a4)
+		tail NEXT
+		
+		
+		
+
+
   embed_sq:
   embed_encsq:
 		#embed string - after we count how long it is
