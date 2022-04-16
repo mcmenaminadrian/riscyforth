@@ -432,7 +432,7 @@ state
 
 **;** Mark the end of a *colon word*
 
-**S\"** At compilation: ("ccc<quote>" ---) Parse string ccc
+**S\\"** At compilation: ("ccc<quote>" ---) Parse string ccc
 At runtime: (-- c-addr u) Address and length of parsed string
 
 **S"** (-- addr u) *addr* contains the address of, and *u* the length of,
