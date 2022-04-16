@@ -838,10 +838,13 @@
 		addi t6, t6, -87			#a = 10
 		j embed_seq_build_low_digit
   embed_seq_process_hex_done:
-		addi t0, t0, 3
+		addi t0, t0, 2
 		mv t2, a5
 		j embed_seq_process_escaped
   embed_seq_check_alignment:
+		la a4, INPUT_START
+		addi t0, t0, 1				#past the "
+		sd t0, 0(a4)
 		#writing done
 		POP a4
 		sd a1, -8(a4)				#length of string
@@ -855,10 +858,9 @@
 		la a1, createwritepoint
 		sd a0, 0(a1)				#advance writepoint
 		sd a0, -16(a4)
+		la s7, outer_loop_tokenize
+		fence.i
 		tail NEXT
-		
-		
-		
 
 
   embed_sq:
