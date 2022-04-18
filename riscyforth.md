@@ -596,7 +596,8 @@ at conclusion **ud2** is zero
 **>BODY** (xt -- addr) *addr* returns the data space pointer value used
 by *xt*
 
-**>IN** NOT YET IMPLEMENTED
+**>IN** (-- addr) *addr* is the address of a cell containing the offset 
+in characters from the start of the input buffer to the start of the parse area
 
 **>NUMBER** (ud1 addr1 u1 -- ud2 addr2 u2) Convert the string at *addr1* of
 length *u1* to a number, using the current radix. *ud1* may be set to a
