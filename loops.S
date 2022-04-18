@@ -323,6 +323,13 @@
                 beq t4, t3, colon_tokenize_end_token
                 j colon_tokenize_advance_search
   colon_tokenize_end_token:
+		la t5, INPUT_START
+		ld a7, 0(t5)
+		sub a6, t1, a7
+		la a5, INPUT_DISPLACE
+		ld a7, 0(a5)
+		add a7, a7, a6
+		sd a7, 0(a5)			      #update for >IN
                 sd t1, INPUT_START, t5                #update the end point for subsequent searches
                 addi t1, t1, -1                       # space or NL not part of token
                 mv t2, t0

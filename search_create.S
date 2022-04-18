@@ -95,7 +95,9 @@
 		la a0, INPUT_START
 		ld a1, 0(a0)
 		la t5, INPUT_END
+		la a5, INPUT_DISPLACE
 		ld t6, 0(t5)
+		ld a6, 0(a5)				#track >IN
 		li a2, 59				#;
 		li a7, 10				#\n
   search_create_does_copy:
@@ -103,6 +105,7 @@
 		sb a3, 0(t1)
 		addi t1, t1, 1
 		addi a1, a1, 1
+		addi a6, a6, 1
 		beq a3, a7, search_create_does_keep_on
 		beq a3, a2, search_create_does_copy_done		
 		bgt a1, t6, search_create_does_keep_on
@@ -112,6 +115,7 @@
 		sb a3, 0(t1)
 		addi t1, t1, 1
 		sd a1, 0(a0)
+		sd a6, 0(a5)
 		#check alignment for writing
 		li t5, 0x07
 		and t6, t1, t5
@@ -597,6 +601,11 @@
 		bnez a0, embed_defer_continue
 		tail search_failed
   embed_defer_continue:
+		la a5, INPUT_DISPLACE
+		ld a6, 0(a5)
+		sub a7, a1, a0
+		add a6, a6, a7
+		sd a6, 0(a5)
 		sd a1, INPUT_START, t5
 		call utility_sanitize_string
 		mv t0, a0
@@ -706,6 +715,7 @@
 		PUSH t1					#we need this for later
 		la t0, INPUT_START
 		ld t0, 0(t0)
+		mv a7, t0				#to calculate the offset later
 		addi t0, t0, 1
 		ld a0, 0(sp)				#write address
 		li a1, 0				#characters written
@@ -845,6 +855,11 @@
 		la a4, INPUT_START
 		addi t0, t0, 1				#past the "
 		sd t0, 0(a4)
+		sub a6, a7, t0
+		la a7, INPUT_DISPLACE
+		ld a5, 0(a7)
+		add a5, a5, a6
+		sd a5, 0(a7)				#update >IN
 		#writing done
 		POP a4
 		sd a1, -8(a4)				#length of string
@@ -910,10 +925,15 @@
 		li a0, 0x07
 		li a2, 0x08
 		la t1, INPUT_START
+		la t5, INPUT_DISPLACE
 		ld t0, 0(t1)
+		ld t6, 0(t5)
 		add t0, t0, a1
+		add t6, t6, a1
 		addi t0, t0, 2				#account for "
+		addi t6, t6, 2
 		sd t0, 0(t1)
+		sd t6, 0(t5)
 		and t0, a1, a0
 		beqz t0, embed_encsq_alignmentadjusted
 		sub t2, a2, t0

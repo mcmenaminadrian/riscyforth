@@ -406,7 +406,7 @@ and posts TRUE (0xFFFFFFFFFFFFFFFF) only
 
 **R>** (--x) R:(x--) Move *x* from the return stack to the (data) stack
 
-**SAVE-INPUT** NOT YET IMPLEMENTED
+**SAVE-INPUT** (-- 0) Added for completness: merely puts a zero on the stack.
 
 **SIGN** (n --) if *n* is negative add a minus sign to the beginning of the
 pictured numeric output string
@@ -414,7 +414,8 @@ pictured numeric output string
 **SM/REM** (d n2 -- n1 n0) Symmetric division: divide *d* by *n2* and report
 remainder in *n1* and symmetric quotient *n0*
 
-**SOURCE-ID** NOT YET IMPLEMENTED
+**SOURCE-ID** (-- 0|-1) Places 0 on stack for user-input device source and -1
+for string (via *EVALUATE*)
 
 **SOURCE** (-- addr u) *addr* is the address of the input buffer and *u* the
 number of caharcters it contains
@@ -523,7 +524,7 @@ arithmetic is unsigned
 
 **UNTIL** (x --) if *x* is zero return to code block starting with *BEGIN*
 
-**UNUSED** NOT YET IMPLEMENTED
+**UNUSED** (-- u) Amount of space remaining in the region addressed by *HERE*
 
 **U.** (u --) display *u* as an unsigned number
 

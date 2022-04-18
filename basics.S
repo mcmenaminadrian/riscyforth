@@ -13,6 +13,7 @@
   	        CODEHEADER GETNEXTLINE_IMM, TYPEPROMPT, 0x0
                 #Fetch a line for immediate execution
                 MARKINPUTBUFFER INPUT_BUFFER            #ensure buffer starts 'empty'
+		sd zero, INPUT_DISPLACE, t0
   getnextline_imm_entry:
 		li a0, 0
 		la a1, INPUT_BUFFER
@@ -40,6 +41,7 @@
 		la a0, INPUT_BUFFER		#ensure no tokenization
 		sd a0, INPUT_START, t0
 		sd a0, INPUT_END, t0
+		sd zero, INPUT_DISPLACE, t0 
 		tail NEXT
 
 		CODEHEADER DROPINPUT, GETLINE, 0x01
@@ -48,6 +50,7 @@
 		ld t0, 0(t0)
 		la t1, INPUT_START
 		sd t0, 0(t1)
+		sd zero, INPUT_DISPLACE, t0
 		tail NEXT
           
                 CODEHEADER OK, DROPINPUT, 0x00
@@ -90,6 +93,16 @@
 		ld a1, 0(a1)
                 la a0, INPUT_START
 		ld a0, 0(a0)
+		la a4, INFILELOAD
+		ld a4, 0(a4)
+		bnez a4, tokenize_buffer_set		#don't mess about with file loads
+		la a5, INPUT_DISPLACE
+		ld a5, 0(a5)
+		la a6, INPUT_BUFFER
+		sub a7, a0, a6
+		beq a7, a5, tokenize_buffer_set
+		add a0, a6, a5
+  tokenize_buffer_set:
                 addi t0, a0, 1                        #account for minimal input
                 bltu t0, a1, tokenize_have_data       #buffer has data
   tokenize_all_over:
@@ -105,6 +118,8 @@
 		sd zero, INEVAL, t1
 		la t0, RESUME_AFTER_EVAL
 		ld s7, 0(t0)
+		la t0, SOURCEID
+		sd zero, 0(t0)				#SOURCE-ID
   tokenize_leave:
                 tail NEXT
   tokenize_have_data:
@@ -140,6 +155,10 @@
                 j tokenize_advance_search
   tokenize_end_token:
                 sd t1, INPUT_START, t5                #update the end point for subsequent searches
+		la a5, INPUT_BUFFER
+		la a6, INPUT_DISPLACE
+		sub a7, t1, a5
+		sd a7, 0(a6)
                 addi t1, t1, -1                       # space or NL not part of token
                 mv t2, t0
 		sub a0, t1, t0			      #a0 has length of token - 1
@@ -530,6 +549,11 @@
 		addi t2, t3, 1
 		add t1, t4, t2
 		sd t1, 0(t6)
+		la a0, INPUT_DISPLACE
+		ld a1, 0(a0)
+		add a1, a1, t3
+		addi a1, a1, 1
+		sd a1, 0(a0)		#update >IN count
 		WRITESTRINGR t4, t3
 		tail NEXT
 

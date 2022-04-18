@@ -566,7 +566,6 @@
 		ld a0, 0(t0)
 		PUSH a0
 		tail NEXT
-		
 
 		CODEHEADER FREE, HERE, 0x01
 		#return a block to the free pool
@@ -582,8 +581,28 @@
 		sd a1, 8(sp)
 		sd a0, 0(sp)
 		tail NEXT
+
+		CODEHEADER UNUSED, RESIZE, 0x01
+		#(-- u)
+		la t0, dataspace
+		ld t1, 0(t0)
+		la t2, dataspaceptr
+		ld t3, 0(t2)
+		li t4, BIGGERSPACE
+		sub t5, t3, t1
+		sub t6, t4, t5
+		addi sp, sp, -8
+		sd t6, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ TOIN, >IN, UNUSED, 0x01
+		#(-- a-addr)
+		la t4, INPUT_DISPLACE
+		addi sp, sp, -8
+		sd t4, 0(sp)
+		tail NEXT
 		
-		CODEHEADER ALLOCATE, RESIZE, 0x01
+		CODEHEADER ALLOCATE, TOIN, 0x01
 		#get memory from the allocator
 		ld t0, 0(sp)
 		call get_memory_allocation

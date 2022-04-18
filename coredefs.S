@@ -184,7 +184,22 @@
 		sd zero, 0(sp)
 		tail NEXT
 
-		CODEHEADERZ RESTOREINPUT, RESTORE-INPUT, TIMESDIV, 0x0
+		CODEHEADERZ IDSOURCE, SOURCE-ID, TIMESDIV, 0x01
+		#(-- 0 | -1)
+		la t0, SOURCEID
+		ld t1, 0(t0)
+		addi sp, sp, -8
+		sd t1, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ SAVEINPUT, SAVE-INPUT, IDSOURCE, 0x0
+		#(-- 0)
+		#added for completeness, but merely puts a zero on the stack
+		addi sp, sp, -8
+		sd zero, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ RESTOREINPUT, RESTORE-INPUT, SAVEINPUT, 0x0
 		#(xn...x1 n --- flag)
 		#current this just empties the stack and posts TRUE flag
 		ld t0, 0(sp)

@@ -95,6 +95,9 @@
 		#(i * x addr u -- j * x)
 		li t0, 1					#mark we are in an evaluation
 		sd t0, INEVAL, t2
+		la t0, SOURCEID
+		li t1, -1
+		sd t1, 0(t0)					#set SOURCE-ID
 		sd s7, RESUME_AFTER_EVAL, t0
 		ld t0, 0(sp)
 		ld t1, 8(sp)

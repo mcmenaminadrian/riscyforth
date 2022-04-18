@@ -60,6 +60,8 @@
 
   load_parse_name:
 	#parse the file name
+	la s0, INPUT_DISPLACE
+	sd zero, 0(s0)
 	la s0, INPUT_START
 	ld s1, 0(s0)
 	la s2, INPUT_END

@@ -725,6 +725,7 @@ S" BLUE .( If you can read this evaluate has passed) RESET CR " EVALUATE  ." EVA
 ." Verify KEY by entering a key (not CR)" CR
 KEY BLUE ." You entered " EMIT RESET CR ;
 
+
 \ Test groupings
 
 \ Test facility
@@ -842,4 +843,13 @@ RESET 1 ABORT" ABORTCOMM has passed" ;
 : TEST_MARKB 6 ;
 : TEST_MARKA 7 ;
 : TEST_MARKB 8 ;
-.( The testing suite has now loaded.)
+
+\ TEST for >IN - runs on loading
+: >INTEST ." Testing >IN " 5 SPACES
+345 = SWAP 345 = AND IF BLUE ." >IN passes" ELSE RED ." >IN FAILS " THEN CR RESET ;
+VARIABLE SCANS
+: RESCAN? -1 SCANS +! SCANS @ IF 0 >IN ! THEN ;
+2 SCANS ! 
+BLUE .( Please run '345 RESCAN? >INTEST' to test >IN word.) CR RESET
+
+BLUE .( The testing suite has now loaded.) RESET
