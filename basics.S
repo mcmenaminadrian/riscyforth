@@ -50,7 +50,6 @@
 		ld t0, 0(t0)
 		la t1, INPUT_START
 		sd t0, 0(t1)
-		sd zero, INPUT_DISPLACE, t0
 		tail NEXT
           
                 CODEHEADER OK, DROPINPUT, 0x00
