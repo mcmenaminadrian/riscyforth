@@ -212,11 +212,11 @@
 
 		CODEHEADER REFILL, RESTOREINPUT, 0x0
 		#(-- flag)
-		#current just puts -1 (TRUE) on the stack
+		#puts -1 (TRUE) on the stack
 		li t0, 0xFFFFFFFFFFFFFFFF
 		addi sp, sp, -8
 		sd t0, 0(sp)
-		tail NEXT
+		tail OLSEMI		#pull in a line
 
 		CODEHEADERZ PARSENAME, PARSE-NAME, REFILL, 0x01
 		#( "<spaces>name<space>" -- c-addr u )
