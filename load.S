@@ -31,8 +31,43 @@
 	call reset_termios
 	tail NEXT
 
+	CODEHEADER LOADMODULE, KEY, 0x01
+	#("<module>" -- flag)
+	#load a module, setting the flag to TRUE or FALSE
+	la t0, INPUT_START
+	ld a0, 0(t0)
+	addi a1, a0, 128
+	call utility_find_string
+	la t0, INPUT_START
+	sd a1, 0(t0)
+	la t2, INPUT_DISPLACE
+	ld t3, 0(t2)
+	add t3, t3, a2
+	addi t3, t3, 1
+	sd t3, 0(t2)
+	#create a null terminated string in scartach pad
+	mv t0, a0	#start
+	mv t1, a2	#length
+	la t2, SCRATCH_PAD
+  loadmodule_copy_test:
+	beqz t1, loadmodule_call_dlopen
+	lb t3, 0(t0)
+	sb t3, 0(t2)
+	addi t0, t0, 1
+	addi t1, t1, -1
+	addi t2, t2, 1
+	j loadmodule_copy_test
+  loadmodule_call_dlopen:
+	sb zero, 0(t2)
+	la a0, SCRATCH_PAD
+	li a1, 0x102 	#RTLD_GLOBAL | RTLD_NOW (see glibc/bits/dlfcn.h)
+	call dlopen
+	bnez a0, loadmodule_done
+	call dlerror
+  loadmodule_done:
+	tail NEXT
 
-	CODEHEADER INCLUDE, KEY, 0x01
+	CODEHEADER INCLUDE, LOADMODULE, 0x01
 	#Load a file line by line, executing each line as we go
 	addi sp, sp, -72
 	sd s0, 0(sp)
