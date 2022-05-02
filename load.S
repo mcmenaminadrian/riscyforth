@@ -61,10 +61,21 @@
 	sb zero, 0(t2)
 	la a0, SCRATCH_PAD
 	li a1, 0x102 	#RTLD_GLOBAL | RTLD_NOW (see glibc/bits/dlfcn.h)
+	PUSH s11
+	PUSH s10
+	la s10, NEXT
+	la s11, dictionary
+	ld s11, 0(s11)
 	call dlopen
-	bnez a0, loadmodule_done
+	POP s10
+	bnez a0, loadmodule_success
 	call dlerror
+	j loadmodule_done
+  loadmodule_success:
+	la t0, dictionary
+	sd s11, 0(t0)
   loadmodule_done:
+	POP s11
 	tail NEXT
 
 	CODEHEADER INCLUDE, LOADMODULE, 0x01
