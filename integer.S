@@ -243,7 +243,7 @@
                 CODEHEADER ABS, STOD, 0x01
 		ld t0, 0(sp)
                 li t1, 0x8000000000000000
-                or t2, t0, t1
+                and t2, t0, t1
                 beq t2, zero, abs_return_value
                 li t1, -1
                 xor t0, t0, t1
