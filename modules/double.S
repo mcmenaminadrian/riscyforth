@@ -28,15 +28,15 @@
 	li t5, 0x7FFFFFFFFFFFFFFF
 	and t4, t1, t5
 	li t3, 0x8000000000000000
-	beqz t4, dtos_inrange
+	beqz t4, dtos_in_range
 	and t4, t1, t3
 	beqz t4, dtos_outofrange_positive
   dtos_outofrange_negative:
 	sd t3, 0(sp)
-	j dabs_done
+	j dtos_done
   dtos_outofrange_positive:
 	sd t5, 0(sp)
-	j dabs_done
+	j dtos_done
   dtos_in_range:
 	and t2, t3, t0
 	beqz t2, dtos_really_in_range
@@ -45,8 +45,9 @@
 	j dtos_outofrange_negative
   dtos_really_in_range:
 	and t1, t1, t3
-	beqz t1, dabs_done
+	beqz t1, dtos_done
 	or t0, t0, t3
+  dtos_done:
 	j dabs_done
  
 	
