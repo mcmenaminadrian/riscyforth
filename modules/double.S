@@ -53,9 +53,10 @@
 	
 
   starter:
+	PUSH ra
+	call getNextAddress	#get the address for tail return
 	la t0, NEXTMOD
-	ld t1, 0(gp)
-	sd t1, 0(t0)
+	sd a0, 0(t0)		#store the tail return address
 	la a0, DABS
 	addi a0, a0, -56
 	PUSH a0
@@ -63,16 +64,17 @@
 	and a0, a0, t3
 	li a1, 0x100
 	li a2, 0x7	#rw permissions
-	PUSH ra
 	call mprotect
-	POP ra
 	POP a0
 	addi a1, a0, 16
-	ld t1, 8(gp)
-	sd t1, 0(a1)	#update lead word
-	la t1, DTOS	#new end of dictionary
-	addi t1, t1, -56
-	sd t1, 0(gp)
+	PUSH a1
+	call getDictionaryAddress
+	POP a1
+	sd a0, 0(a1)	#update lead word
+	la a0, DTOS	#new end of dictionary
+	addi a0, a0, -56
+	call setDictionaryAddress	#return new tail of dictionary to caller
+	POP ra
 	ret
 
 

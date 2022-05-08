@@ -61,28 +61,21 @@
 	sb zero, 0(t2)
 	la a0, SCRATCH_PAD
 	li a1, 0x102 	#RTLD_GLOBAL | RTLD_NOW (see glibc/bits/dlfcn.h)
-	addi s10, s10, -16
-	la t0, dictionary
-	ld t1, 0(t0)
-	sd t1, 8(s10)	#Use Forth return stack
-	la t0, NEXT
-	sd t0, 0(s10)
-	PUSH gp
-	mv gp, s10
 	call dlopen
-	POP gp
 	bnez a0, loadmodule_success
 	call dlerror
 	mv t0, a0
-	li t1, 256
-	WRITESTRINGR t0, t1
+	li t1, 80
+	WRITESTRINGR t0, t1	#output error message
+	li t6, 0	#flag error
 	j loadmodule_done
   loadmodule_success:
+	li t6, -1	#flag success
+	call getDictionaryAddress
 	la t0, dictionary
-	ld t1, 0(s10)
-	sd t1, 0(t0)
+	sd a0, 0(t0)
   loadmodule_done:
-	addi s10, s10, 16
+	PUSH t6		#flag on to stack
 	tail NEXT
 
 	CODEHEADER INCLUDE, LOADMODULE, 0x01

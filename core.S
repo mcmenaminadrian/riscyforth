@@ -86,6 +86,8 @@
 		sd zero, VARIABLEFLAG, t0
                 la t1, TIL_ABORT	                    #start search from here
                 sd t1, dictionary, t0
+		mv a0, t1
+		call setDictionaryAddress		#set up the dictionary for modules
 
                 sd zero, TOKEN_START, t0
                 sd zero, TOKEN_END, t0
@@ -94,6 +96,9 @@
 		#setup termios
 		call copy_termios_structure
 		call reset_termios
+		#pass NEXT for modules
+		la a0, NEXT
+		call setNextAddress
   
                 la s7, outer_loop                   #set instruction register to start of outer loop
 
