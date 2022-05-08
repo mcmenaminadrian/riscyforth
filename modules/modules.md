@@ -101,15 +101,11 @@ So at line:
 
 4 - 5:    Store the returned address
 
-6 - 8:    Get the address of the currently null location we need to overwrite
-
-          (see ***CODEEND*** above) and store for efficiency
+6 - 8:    Get the address of the currently null location we need to overwrite (see ***CODEEND*** above) and store for efficiency
 
 9 - 12:   Set up call to ***mprotect*** (library call) calculataing page address,
-
-          asking for one page of protections to be changed and setting protection
-
-          to 0x07 (RWX)
+asking for one page of protections to be changed and setting protection
+to 0x07 (RWX)
 
 13:       make call
 
