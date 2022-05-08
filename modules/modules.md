@@ -27,9 +27,7 @@ directive so that calls to ***NEXT*** work.
 The example below is taken from the first module - ___double.so___
 
 > .include "../macros.S"
-
 > .section .bss
-
 >    .comm NEXTMOD, 8
 
 
