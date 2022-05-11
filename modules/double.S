@@ -22,33 +22,43 @@
 
 	CODEHEADERZ DTOS, D>S, DABS, 0x01
 	#(d -- n)
-	ld t1, 8(sp)
+	ld t1, 8(sp)		#higher range
 	ld t0, 0(sp)
 	addi sp, sp, 8
-	li t5, 0x7FFFFFFFFFFFFFFF
-	and t4, t1, t5
-	li t3, 0x8000000000000000
-	beqz t4, dtos_in_range
-	and t4, t1, t3
-	beqz t4, dtos_outofrange_positive
-  dtos_outofrange_negative:
-	sd t3, 0(sp)
-	j dtos_done
-  dtos_outofrange_positive:
-	sd t5, 0(sp)
-	j dtos_done
-  dtos_in_range:
-	and t2, t3, t0
-	beqz t2, dtos_really_in_range
-	and t1, t1, t3
-	beqz t1, dtos_outofrange_positive
-	j dtos_outofrange_negative
-  dtos_really_in_range:
-	and t1, t1, t3
-	beqz t1, dtos_done
-	or t0, t0, t3
-  dtos_done:
-	j dabs_done
+	li t2, 0x8000000000000000
+	and t3, t2, t1
+	beqz t3, dtos_positive
+	#have negative number
+	li t4, 0xFFFFFFFFFFFFFFFF
+	bne t4, t1, dtos_negative_underflow
+	and t5, t0, t2
+	beqz t5, dtos_negative_underflow
+	add t6, t4, t0
+	addi t6, t6, 1
+	sd t6, 0(sp)		#simple negative
+	la t1, NEXTMOD		
+	ld t1, 0(t1)
+	jr t1
+  dtos_negative_underflow:
+	sd t2, 0(sp)
+	la t1, NEXTMOD		
+	ld t1, 0(t1)
+	jr t1
+  dtos_positive:
+	bnez t1, dtos_positive_overflow
+	and t4, t2, t0
+	bnez t4, dtos_positive_overflow
+	sd t0, 0(sp)		#simple positive - done
+	la t1, NEXTMOD		
+	ld t1, 0(t1)
+	jr t1
+  dtos_positive_overflow:
+	li t0, 0x7FFFFFFFFFFFFFFF
+	sd t0, 0(sp)		#max positive
+	la t1, NEXTMOD		
+	ld t1, 0(t1)
+	jr t1
+
  
 	
 
@@ -75,6 +85,7 @@
 	addi a0, a0, -56
 	call setDictionaryAddress	#return new tail of dictionary to caller
 	POP ra
+	fence.i
 	ret
 
 
