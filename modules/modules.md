@@ -89,7 +89,8 @@ like this (without the line numbers obviously!)
 >      21       addi a0, a0, -56
 >      22       call setDictionaryAddress       #return new tail of dictionary to caller
 >      23       POP ra
->      24       ret
+>      24	fence.i
+>      25       ret
 
 
 
@@ -115,7 +116,7 @@ to 0x07 (RWX)
 
 21 - 22:  Pass this new end of dictionary to ___libriscy___
 
-23 - 24:  Restore return address and return
+23 - 25:  Restore return address, flush the icache and return
 
 ### Init array section
 
