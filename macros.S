@@ -149,3 +149,9 @@ end_\Name:
     li t1,  0x0A
     sd t1, 0(t0)
 .endm
+
+.macro TAILMOD reg
+    la \reg, NEXTMOD
+    ld \reg, 0(\reg)
+    jr \reg
+.endm
