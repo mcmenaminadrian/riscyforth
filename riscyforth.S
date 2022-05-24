@@ -7,28 +7,27 @@
 #           As per the terms of the GPL no warranty is offered for this code        #
 #####################################################################################
 
+.include "./riscylib/riscyvar.S"
 
-  .equ          SYSTEMAREA,   	0x100          	#for variables
-  .equ          BUFFERLEN,    	0x200
-  .equ          STACKOFFSET,   	0x08
-  .equ		ADDRWIDTH,	0x08
-  .equ          INSTWIDTH,     	0x04
-  .equ          INSTWIDTH2,    	0x08
-  .equ          INSTWIDTH3,    	0x0C
-  .equ          INSTWIDTH4,    	0x10
-  .equ          NAMEMAXLEN,    	0x18
-  .equ		BIGSPACE,      	0x100000	#1MB
-  .equ		BIGGERSPACE,    0x200000	#2MB
-  .equ		CONDITIONALBLK, 180		#size of if/else block
-  .equ		CONDITIONALSTK, 0x28		#size of conditional stack entry
-  .equ		DATASPACEMAN, 	0x14000		#to manage memory allocation lists
-  .equ		PAGESIZE,	0x1000
+#  .equ          SYSTEMAREA,   	0x100          	#for variables
+#  .equ          BUFFERLEN,    	0x200
+#  .equ          STACKOFFSET,   	0x08
+#  .equ		ADDRWIDTH,	0x08
+#  .equ          INSTWIDTH,     	0x04
+#  .equ          INSTWIDTH2,    	0x08
+#  .equ          INSTWIDTH3,    	0x0C
+#  .equ          INSTWIDTH4,    	0x10
+#  .equ          NAMEMAXLEN,    	0x18
+#  .equ		BIGSPACE,      	0x100000	#1MB
+#  .equ		BIGGERSPACE,    0x200000	#2MB
+#  .equ		CONDITIONALBLK, 180		#size of if/else block
+#  .equ		CONDITIONALSTK, 0x28		#size of conditional stack entry
+#  .equ		DATASPACEMAN, 	0x14000		#to manage memory allocation lists
+#  .equ		PAGESIZE,	0x1000
 
 
 
    .bss
-   .comm INPUT_BUFFER, BUFFERLEN
-   .comm EXPANDED_BUFFER, BUFFERLEN
    .comm SCRATCH_PAD, SYSTEMAREA
    .comm SOURCEID, ADDRWIDTH
    .comm NEWWORDENTRY, ADDRWIDTH

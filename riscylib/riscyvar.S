@@ -28,54 +28,5 @@
 # extern variables for a BSS section 
 
 
-.extern INPUT_BUFFER;
-.extern EXPANDED_BUFFER;
-.extern SCRATCH_PAD;
-.extern SOURCEID;
-.extern NEWWORDENTRY;
-.extern CREATEFLAG;
-.extern OKSTATUS;
-.extern TOKEN_START;
-.extern TOKEN_END;
-.extern CURRENT_BASE;
-.extern INPUT_START;
-.extern INPUT_END;
-.extern INPUT_DISPLACE;
-.extern CALLSTACK;
-.extern STACK;
-.extern VARIABLES;
-.extern CONSTANTS;
-.extern TOP_VARS;
-.extern BOTTOM_VARS;
-.extern TOP_CONS;
-.extern BOTTOM_CONS;
-.extern *dictionary;
-.extern newdictionary;
-.extern inputfileptr;
-.extern createwritepoint;
-.extern DECIDESTACKP;
-.extern DECIDESTACKB;
-.extern VARIABLEFLAG;
-.extern INFILELOAD;
-.extern LOADLINESETUP;
-.extern LOADINGFILE;
-.extern FILEMEMORYADDR;
-.extern STACKTOP;
-.extern datamanagement;
-.extern recycleallot;
-.extern recyclewatermark;
-.extern dataspace;
-.extern dataspaceptr;
-.extern INDOES;
-.extern INPPONE;
-.extern MULTILINE;
-.extern PICTUREDN;
-.extern INEVAL;
-.extern RESUME_AFTER_EVAL;
-.extern termios;
-# for debugging
-.extern CYCLESTART;
-.extern CYCLECOUNT;
-.extern CYCLEPINGS;
-
-#endif
+.extern INPUT_BUFFER
+.extern EXPANDED_BUFFER

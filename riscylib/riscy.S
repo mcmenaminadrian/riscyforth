@@ -1,55 +1,8 @@
 .include "riscyvar.S"
 
-.bss
+
+.section .bss
    .comm INPUT_BUFFER, BUFFERLEN
    .comm EXPANDED_BUFFER, BUFFERLEN
-   .comm SCRATCH_PAD, SYSTEMAREA
-   .comm SOURCEID, ADDRWIDTH
-   .comm NEWWORDENTRY, ADDRWIDTH
-   .comm CREATEFLAG, ADDRWIDTH
-   .comm OKSTATUS, ADDRWIDTH
-   .comm TOKEN_START, ADDRWIDTH
-   .comm TOKEN_END, ADDRWIDTH
-   .comm CURRENT_BASE, ADDRWIDTH
-   .comm INPUT_START, ADDRWIDTH
-   .comm INPUT_END, ADDRWIDTH
-   .comm INPUT_DISPLACE, ADDRWIDTH
-   .comm CALLSTACK, BIGSPACE
-   .comm STACK, BIGSPACE
-   .comm VARIABLES, BIGSPACE
-   .comm CONSTANTS, BIGSPACE
-   .comm TOP_VARS, ADDRWIDTH
-   .comm BOTTOM_VARS, ADDRWIDTH
-   .comm TOP_CONS, ADDRWIDTH
-   .comm BOTTOM_CONS, ADDRWIDTH
-   .comm dictionary, ADDRWIDTH 
-   .comm newdictionary, ADDRWIDTH
-   .comm inputfileptr, ADDRWIDTH
-   .comm createwritepoint, ADDRWIDTH
-   .comm DECIDESTACKP, ADDRWIDTH
-   .comm DECIDESTACKB, ADDRWIDTH
-   .comm VARIABLEFLAG, ADDRWIDTH
-   .comm INFILELOAD, ADDRWIDTH
-   .comm LOADLINESETUP, ADDRWIDTH
-   .comm LOADINGFILE, ADDRWIDTH
-   .comm FILEMEMORYADDR, ADDRWIDTH
-   .comm STACKTOP, ADDRWIDTH
-   .comm datamanagement, ADDRWIDTH
-   .comm recycleallot, ADDRWIDTH
-   .comm recyclewatermark, ADDRWIDTH
-   .comm dataspace, ADDRWIDTH
-   .comm dataspaceptr, ADDRWIDTH
-   .comm INDOES, ADDRWIDTH
-   .comm INPPONE, ADDRWIDTH
-   .comm MULTILINE, ADDRWIDTH
-   .comm PICTUREDN, 0x10
-   .comm INEVAL, ADDRWIDTH
-   .comm RESUME_AFTER_EVAL, ADDRWIDTH
-   .comm termios, 64
-   #for debugging
-   .comm CYCLESTART, ADDRWIDTH
-   .comm CYCLECOUNT, ADDRWIDTH
-   .comm CYCLEPINGS, ADDRWIDTH
 
-.data
 

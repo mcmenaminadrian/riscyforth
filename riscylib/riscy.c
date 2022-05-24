@@ -3,8 +3,9 @@
 /** Copyright (C) Adrian McMenamin, 2022                **/
 /** Licenced for reuse under the terms of v2 of GNU GPL **/
 
-unsigned long nextAddress = 0;
-unsigned long dictionaryAddress = 0;
+
+unsigned long nextAddress;
+unsigned long dictionaryAddress;
 
 unsigned long getNextAddress(void)
 {
