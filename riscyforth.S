@@ -9,23 +9,6 @@
 
 .include "./riscylib/riscyvar.S"
 
-#  .equ          SYSTEMAREA,   	0x100          	#for variables
-#  .equ          BUFFERLEN,    	0x200
-#  .equ          STACKOFFSET,   	0x08
-#  .equ		ADDRWIDTH,	0x08
-#  .equ          INSTWIDTH,     	0x04
-#  .equ          INSTWIDTH2,    	0x08
-#  .equ          INSTWIDTH3,    	0x0C
-#  .equ          INSTWIDTH4,    	0x10
-#  .equ          NAMEMAXLEN,    	0x18
-#  .equ		BIGSPACE,      	0x100000	#1MB
-#  .equ		BIGGERSPACE,    0x200000	#2MB
-#  .equ		CONDITIONALBLK, 180		#size of if/else block
-#  .equ		CONDITIONALSTK, 0x28		#size of conditional stack entry
-#  .equ		DATASPACEMAN, 	0x14000		#to manage memory allocation lists
-#  .equ		PAGESIZE,	0x1000
-
-
 
    .bss
    .comm SCRATCH_PAD, SYSTEMAREA
@@ -36,8 +19,6 @@
    .comm TOKEN_START, ADDRWIDTH
    .comm TOKEN_END, ADDRWIDTH
    .comm CURRENT_BASE, ADDRWIDTH
-   .comm INPUT_START, ADDRWIDTH
-   .comm INPUT_END, ADDRWIDTH
    .comm INPUT_DISPLACE, ADDRWIDTH
    .comm CALLSTACK, BIGSPACE
    .comm STACK, BIGSPACE
@@ -47,10 +28,7 @@
    .comm BOTTOM_VARS, ADDRWIDTH
    .comm TOP_CONS, ADDRWIDTH
    .comm BOTTOM_CONS, ADDRWIDTH
-   .comm dictionary, ADDRWIDTH 
-   .comm newdictionary, ADDRWIDTH
    .comm inputfileptr, ADDRWIDTH
-   .comm createwritepoint, ADDRWIDTH
    .comm DECIDESTACKP, ADDRWIDTH
    .comm DECIDESTACKB, ADDRWIDTH
    .comm VARIABLEFLAG, ADDRWIDTH

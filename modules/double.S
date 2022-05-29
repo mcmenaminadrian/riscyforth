@@ -1,8 +1,13 @@
 # experimental double module
 .include "../macros.S"
+#.include "../riscylib/riscyvar.S"
 .section .bss
     .comm NEXTMOD, 8
+    .comm LOCAL_INPUT_START, 8
+    .comm LOCAL_INPUT_END, 8
 
+
+.extern INPUT_START
 .section .text
 .balign 8
 	CODEEND DABS, 0x01
@@ -28,9 +33,48 @@
 
 	CODEHEADERZ TWOCONSTANT, 2CONSTANT, DABS, 0x01
 	#( x1 x2 "<spaces>name --)
+	li a5, 0x200	#0x200 for a 2constant
+	ld t1, 8(sp)
+	ld t0, 0(sp)
+	call getInputStart		#a0 has INPUT_START
+	la t0, LOCAL_INPUT_START
+	sd a0, 0(t0)
+	sd a0, 8(sp)
+	call getInputEnd
+	la t0, LOCAL_INPUT_END
+	sd a0, 0(t0)
+	sd a0, 0(sp)
+	li a0, 0x61	#a
+	li a1, 0x7B	#z + 1
+	li a2, 0x20	#space/xor
+	li a3, 0	#have we started
+	la t0, LOCAL_INPUT_START
+	ld t1, 0(t0)
+	la t2, LOCAL_INPUT_END
+	ld t3, 0(t2)
+  twoconstant_sanitize_load:
+	bgt t1, t3, twoconstant_sanitize_done
+	lb t4, 0(t1)
+	beq t4, a3, twoconstant_check_started
+	li a3, 1	#started
+	blt t4, a0, twoconstant_sanitize_advance
+	li t5, 0xFFF
+	blt t4, a1, twoconstant_sanitize_process
+  twoconstant_sanitize_advance:
+	addi t1, t1, 1
+	j twoconstant_sanitize_load
+  twoconstant_sanitize_process:
+	li t5, 0xFFFF
+	xor t4, t4, a2
+	li t5, 0xFFFFF
+	sb t4, 0(t1)
+	j twoconstant_sanitize_advance
+  twoconstant_sanitize_check_started:
+	beqz a3, twoconstant_sanitize_advance
+  twoconstant_sanitize_done:
 	TAILMOD t1
 
-	CODEHEADERZ DPLUS, D+, DABS, 0x01
+	CODEHEADERZ DPLUS, D+, TWOCONSTANT, 0x01
 	#(d1 d2 -- d3)
 	ld t0, 24(sp)
 	ld t1, 16(sp)

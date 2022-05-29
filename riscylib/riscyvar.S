@@ -30,3 +30,12 @@
 
 .extern INPUT_BUFFER
 .extern EXPANDED_BUFFER
+.extern dictionary
+.extern newdictionary
+.extern createwritepoint
+.extern TOKEN_START
+.extern TOKEN_END
+.extern INPUT_START
+.extern INPUT_END
+
+#endif
