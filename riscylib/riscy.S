@@ -12,69 +12,14 @@
    .comm INPUT_END, ADDRWIDTH
    .comm TOKEN_START, ADDRWIDTH
    .comm TOKEN_END, ADDRWIDTH
+   .comm LOADINGFILE, ADDRWIDTH
+   .comm FILEMEMORYADDR, ADDRWIDTH
+   .comm LOADLINESETUP, ADDRWIDTH
+   .comm INFILELOAD, ADDRWIDTH
+   .comm MULTILINE, ADDRWIDTH
+   .comm PULLINANOTHER, ADDRWIDTH
 
 .section .text
-
- .globl load_get_next_line
- load_get_next_line:
-	#setup to pull a line in
-	addi sp, sp, -8
-	sd ra, 0(sp)
-	la t0, LOADLINESETUP
-	li t1, 1
-	sd t1, 0(t0)
-	la t1, FILEMEMORYADDR
-	ld a0, 0(t1)
-	li a1, 512
-	la t1, LOADINGFILE
-	ld a2, 0(t1)
-	call fgets
-	beqz a0, load_free_malloc #nothing returned
-	PUSH a0
-	#output the read in line
-	call puts
-	#now process the line
-	#start by looking for tokens
-	la t0, INPUT_START
-	POP t1
-	sd t1, 0(t0)
-	addi t1, t1, 512
-	la t0, INPUT_END
-	sd t1, 0(t0)
-	fence.i
-	ld ra, 0(sp)
-	addi sp, sp, 8
-	ret		#go back
-  load_free_malloc:
-	la t0, LOADINGFILE
-	ld a0, 0(t0)
-	beqz a0, load_check_out_memory
-	call fclose			#close file
-	la t0, LOADINGFILE
-	sd zero, 0(t0)
-  load_check_out_memory:
-	la t1, FILEMEMORYADDR
-	ld a0, 0(t1)
-	beqz a0, load_finish_free
-	call free
-	la t1, FILEMEMORYADDR
-	sd zero, 0(t1)
-  load_finish_free:
-	fence.i
-	la t0, INFILELOAD
-	sd zero, 0(t0)
-	la t0, LOADLINESETUP
-	sd zero, 0(t0)
-	la s7, outer_loop_ok
-	ld ra, 0(sp)
-	addi sp, sp, 8
-	la a0, INPUT_START			#ensure we don't process junk bytes
-	la a1, INPUT_END
-	ld a2, 0(a1)
-	sd a2, 0(a0)
-	ret			
-
-
 
  .globl do_fix_up_semi
  do_fix_up_semi:
@@ -138,9 +83,10 @@
 		la t0, INFILELOAD
 		ld t0, 0(t0)
 		beqz t0, keep_fixing_up_comment
-		PUSH ra
-		call load_get_next_line		      #suck in a line
-		POP ra
+		#pull in another line
+		la t0, PULLINANOTHER
+		ld t1, 0(t0)
+		jr t1
   keep_fixing_up_comment:
 		ret
 
@@ -153,9 +99,9 @@
                 # =  --> EQUALS
 		# '  --> TICK
 		# ,  --> COMMA
-		ld a0, 0(sp)			#unexpanded token address
-		ld s10, 16(sp)
-		addi sp, sp, 8
+		ld t1, 0(sp)
+		ld a0, 8(sp)			#unexpanded token address
+		addi sp, sp, 16			#fix up stack so return address at top
 		la a2, EXPANDED_BUFFER 		#store expanded token
 		mv a3, a2
 		mv a1, t1
@@ -182,8 +128,7 @@
   fix_up_comment:
 		call do_fix_up_comment
 		ld ra, 0(sp)		# address of tokenize_finished_sanitization
-		ld s10, 8(sp)		# restore saved register
-		addi sp, sp, 16		# restore stack pointer
+		addi sp, sp, 8		# restore stack pointer
 		mv t0, a0
 		mv t1, a1
 		mv t2, a5
@@ -197,17 +142,13 @@
 
   .globl fix_up_done		
   fix_up_done:
-		ld ra, 0(sp)		# address of tokenize_finished_sanitization
-		ld s10, 8(sp)		# restore saved register
-		addi sp, sp, 16		# restore stack pointer
+		POP ra
 		mv t0, a3
 		mv t1, a2	
                 ret		# call tokenize_finished_sanitization
 
-
-  .globl fix_up_finished
   fix_up_finished:
-		POP ra
+		addi sp, sp, 8
 		mv t0, a0
 		mv t1, a1
 		mv t2, a5
@@ -664,7 +605,6 @@
   .globl fix_up_compilecomma
   fix_up_compilecomma:
 		ld ra, 0(sp)
-		ld s10, 8(sp)
 		addi sp, sp, 16
   fix_up_compilecomma_internal:
 		#copy 0 - 6 then expand ,

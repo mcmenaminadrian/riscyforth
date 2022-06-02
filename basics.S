@@ -81,7 +81,7 @@
 		ld t0, 0(t0)
 		bnez t0, tokenize_normal
   pull_in_another:
-		call load_get_next_line		      #suck in a line
+		jal load_get_next_line		      #suck in a line
   tokenize_normal:
 		la t3, INDOES				#check if we are still doing DOES>
 		ld t4, 0(t3)
@@ -180,10 +180,12 @@
 		j tokenize_prepare_sanity_test
   tokenize_fix_up_single:
 		addi sp, sp, -24
-		sd s10, 16(sp)
+		sd s10, 0(sp)
 		la s10, tokenize_finished_sanitization
-		sd s10, 8(sp)
-		sd t0, 0(sp)
+		sd s10, 16(sp)
+		sd t0, 8(sp)
+		ld s10, 0(sp)
+		sd t1, 0(sp)			      #preserve t1 across call
 		call fix_up_input		      #one character token so check for expansion
 		j tokenize_prepare_sanity_test
   tokenize_test_length_three:
@@ -634,6 +636,18 @@
 		WRITESTRINGR t5, t1		
                 WRITECHAR 0x20            #space
                 tail NEXT
+
+  fix_up_finished_local:
+		mv t0, a0
+		mv t1, a1
+		mv t2, a5
+		ret
+
+  fix_up_done_local:
+		mv t0, a3
+		mv t1, a2	
+                j tokenize_finished_sanitization 
+
   fix_up_length_three:
 		#expand ['] --> BRACKETTICK
 		#S\" --> SEQ
@@ -650,45 +664,38 @@
 		lbu t1, 1(a0)
 		li t2, 0x5C		#\
 		beq t1, t2, fix_up_length_three_continue
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_three_continue:
 		lbu t1, 2(a0)
 		li t2, 0x22
 		beq t1, t2, fix_up_length_three__continue
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_three__continue:
 		call fix_up_seq
 		addi sp, sp, -16
 		sd s10, 8(sp)
 		la s10, tokenize_finished_sanitization
 		sd s10, 0(sp)
+		ld s10, 8(sp)
+		addi sp, sp, 8
 		tail fix_up_done
   fix_up_length_three_check_bracket:
                 li t2, 0x5B             #[
 		beq t1, t2, fix_up_length_three_check_bracket_continue
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_three_check_bracket_continue:
                 lbu t1, 1(a0)
                 li t2, 0x27             #'
 		beq t1, t2, fix_up_length_three_check_bracket_continue_more
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_three_check_bracket_continue_more:
                 lbu t1, 2(a0)
                 li t2, 0x5D             #]
 		beq t1, t2, fix_up_length_three_check_bracket_continue_final
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_three_check_bracket_continue_final:
 		call fix_up_brackettick
-		addi sp, sp, -16
-		sd s10, 8(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 0(sp)
-		tail fix_up_done
+		j fix_up_done_local
 
   fix_up_length_eight:
 		#expand COMPILE, --> COMPILECOMMA
@@ -703,61 +710,54 @@
 		lbu t1, 0(a0)
 		andi t1, t1, 0x5F
 		beq t1, t2, fix_up_length_eight_continue_A
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_eight_continue_A:
 		li t2, 0x4F		#O
 		lbu t1, 1(a0)
 		andi t1, t1, 0x5F
 		beq t1, t2, fix_up_length_eight_continue_B
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_eight_continue_B:
 		li t2, 0x4D		#M
 		lbu t1, 2(a0)
 		andi t1, t1, 0x5F
 		beq t1, t2, fix_up_length_eight_continue_C
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_eight_continue_C:
 		li t2, 0x50		#P
 		lbu t1, 3(a0)
 		andi t1, t1, 0x5F
 		beq t1, t2, fix_up_length_eight_continue_D
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_eight_continue_D:
 		li t2, 0x49		#I
 		lbu t1, 4(a0)
 		andi t1, t1, 0x5F
 		beq t1, t2, fix_up_length_eight_continue_E
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_eight_continue_E:
 		li t2, 0x4C		#L
 		lbu t1, 5(a0)
 		andi t1, t1, 0x5F
 		beq t1, t2, fix_up_length_eight_continue_F
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_eight_continue_F:
 		li t2, 0x45		#E
 		lbu t1, 6(a0)
 		andi t1, t1, 0x5F
 		beq t1, t2, fix_up_length_eight_continue_G
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_length_eight_continue_G:
 		li t2, 0x2C		#,
 		lbu t1, 7(a0)
 		beq t1, t2, fix_up_call_compilecomma
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
   fix_up_call_compilecomma:
 		addi sp, sp, -16
 		sd s10, 8(sp)
 		la s10, tokenize_finished_sanitization
 		sd s10, 0(sp)
+		ld s10, 8(sp)
 		tail fix_up_compilecomma
 
 					
@@ -794,14 +794,9 @@
 		li t2, 0x22		 #"
 		bne t1, t2, fix_up_six_done
 		call fix_up_acomma
-		addi sp, sp, -16
-		sd s10, 8(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 0(sp)
-		tail fix_up_done
+		j fix_up_done_local
   fix_up_six_done:
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
 		
   fix_up_length_two:
                 #code to expand, if needed, two character input
@@ -836,49 +831,32 @@
 		
 		
   fix_up_length_two_finished:
-		PUSH ra
-		tail fix_up_finished
+		j fix_up_finished_local
 
   length_two_begin0:
 		lb t1, 1(a0)
 		li t2, 0x3D			#=
 		bne t1, t2, length_two_begindot_done
  		call fix_up_zeroequal
-		addi sp, sp, -16
-		sd s10, 8(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 0(sp)
-		tail fix_up_done	
+		j fix_up_done_local
   length_two_begindot:
 		lb t1, 1(a0)
 		li t2, 0x22			#"
 		bne t1, t2, length_two_begindot_done
                 call fix_up_encsq
-		addi sp, sp, -16
-		sd s10, 8(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 0(sp)
-		tail fix_up_done
+		j fix_up_done_local
   length_two_begingt:
 		lb t1, 1(a0)
 		li t2, 0x3D			#>
 		bne t1, t2, length_two_begindot_done
  		call fix_up_gteq
-		addi sp, sp, -16
-		sd s10, 8(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 0(sp)
-		tail fix_up_done	
+		j fix_up_done_local
   length_two_beginlt:
 		lb t1, 1(a0)
 		li t2, 0x3D			#<
 		bne t1, t2, length_two_begindot_done
  		call fix_up_lteq
-		addi sp, sp, -16
-		sd s10, 8(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 0(sp)
-		tail fix_up_done	
+		j fix_up_done_local
 		
   length_two_begindot_done:
 		j fix_up_length_two_finished
@@ -889,20 +867,12 @@
 		li t2, 0x2C			#,
 		bne t1, t2, length_two_c_q
 		call fix_up_ccomma
-		addi sp, sp, -16
-		sd s10, 8(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 0(sp)
-		tail fix_up_done
+		j fix_up_done_local
   length_two_c_q:
 		li t2, 0x22			#"
 		bne t1, t2, length_two_c_done
 		call fix_up_cq
-		addi sp, sp, -16
-		sd s10, 8(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 0(sp)
-		tail fix_up_done
+		j fix_up_done_local
 		
   length_two_c_done:
 		j fix_up_length_two_finished
@@ -913,11 +883,7 @@
 		bne t1, t2, length_two_c_done
 		addi sp, sp, 8
 		call fix_up_squote
-		addi sp, sp, -16
-		sd s10, 8(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 0(sp)
-		tail fix_up_done
+		j fix_up_done_local
 
 
 		

@@ -5,6 +5,9 @@
                 #s7 as I
 .balign 8
   launchRISCYFORTH:
+		la t0, pull_in_another
+		la t1, PULLINANOTHER
+		sd t0, 0(t1)			#for library code
                 PRINT riscy_forth0
                 PRINT riscy_forth1
                 PRINT riscy_forth2

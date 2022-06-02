@@ -37,5 +37,11 @@
 .extern TOKEN_END
 .extern INPUT_START
 .extern INPUT_END
+.extern LOADLINESETUP
+.extern INFILELOAD
+.extern FILEMEMORYADDR
+.extern LOADINGFILE
+.extern MULTILINE
+.extern PULLINANOTHER
 
 #endif

@@ -47,31 +47,38 @@
 	li a0, 0x61	#a
 	li a1, 0x7B	#z + 1
 	li a2, 0x20	#space/xor
-	li a3, 0	#have we started
 	la t0, LOCAL_INPUT_START
 	ld t1, 0(t0)
 	la t2, LOCAL_INPUT_END
 	ld t3, 0(t2)
+  twoconstant_look_for_start:
+	bgt t1, t3, twoconstant_sanitize_fail
+	lb t4, 0(t1)
+	bne t4, a2, twoconstant_ready_to_sanitize
+	addi t1, t1, 1
+	j twoconstant_look_for_start
+  towconstant_ready_to_sanitize:
+	sd t1, 0(t0)
+	j twoconstant_jump_start_sanitize
   twoconstant_sanitize_load:
 	bgt t1, t3, twoconstant_sanitize_done
 	lb t4, 0(t1)
-	beq t4, a3, twoconstant_check_started
-	li a3, 1	#started
+	beq t4, a2, twoconstant_sanitize_done
+  twoconstant_jump_start_sanitize:
 	blt t4, a0, twoconstant_sanitize_advance
-	li t5, 0xFFF
 	blt t4, a1, twoconstant_sanitize_process
   twoconstant_sanitize_advance:
 	addi t1, t1, 1
 	j twoconstant_sanitize_load
   twoconstant_sanitize_process:
-	li t5, 0xFFFF
 	xor t4, t4, a2
-	li t5, 0xFFFFF
 	sb t4, 0(t1)
 	j twoconstant_sanitize_advance
   twoconstant_sanitize_check_started:
 	beqz a3, twoconstant_sanitize_advance
   twoconstant_sanitize_done:
+	#now check we aren't overwriting a dictionary word
+	
 	TAILMOD t1
 
 	CODEHEADERZ DPLUS, D+, TWOCONSTANT, 0x01

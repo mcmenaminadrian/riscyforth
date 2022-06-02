@@ -166,6 +166,69 @@
 	ld s0, 0(sp)
 	addi sp, sp, 72
 	tail NEXT
+
+
+  load_get_next_line:
+	#setup to pull a line in
+	addi sp, sp, -8
+	sd ra, 0(sp)
+	la t0, LOADLINESETUP
+	li t1, 1
+	sd t1, 0(t0)
+	la t1, FILEMEMORYADDR
+	ld a0, 0(t1)
+	li a1, 512
+	la t1, LOADINGFILE
+	ld a2, 0(t1)
+	call fgets
+	beqz a0, load_free_malloc #nothing returned
+	PUSH a0
+	#output the read in line
+	call puts
+	#now process the line
+	#start by looking for tokens
+	la t0, INPUT_START
+	POP t1
+	sd t1, 0(t0)
+	addi t1, t1, 512
+	la t0, INPUT_END
+	sd t1, 0(t0)
+	fence.i
+	ld ra, 0(sp)
+	addi sp, sp, 8
+	ret		#go back
+       	 
+
+  load_free_malloc:
+	la t0, LOADINGFILE
+	ld a0, 0(t0)
+	beqz a0, load_check_out_memory
+	call fclose			#close file
+	la t0, LOADINGFILE
+	sd zero, 0(t0)
+  load_check_out_memory:
+	la t1, FILEMEMORYADDR
+	ld a0, 0(t1)
+	beqz a0, load_finish_free
+	call free
+	la t1, FILEMEMORYADDR
+	sd zero, 0(t1)
+  load_finish_free:
+	fence.i
+	la t0, INFILELOAD
+	sd zero, 0(t0)
+	la t0, LOADLINESETUP
+	sd zero, 0(t0)
+	la s7, outer_loop_ok
+	ld ra, 0(sp)
+	addi sp, sp, 8
+	la a0, INPUT_START			#ensure we don't process junk bytes
+	la a1, INPUT_END
+	ld a2, 0(a1)
+	sd a2, 0(a0)
+	ret				
+
+
   
   load_malloc_failed:
 	add sp, sp, 24
