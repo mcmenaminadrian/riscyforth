@@ -84,6 +84,7 @@
 		ld t0, 0(t0)
 		beqz t0, keep_fixing_up_comment
 		#pull in another line
+		POP zero
 		la t0, PULLINANOTHER
 		ld t1, 0(t0)
 		jr t1
@@ -596,17 +597,14 @@
 			lbu t1, 11(a0)
 			bne t1, t2, utilities_expand_six_done
 			PUSH ra
-			call fix_up_compilecomma_internal
+			call fix_up_compilecomma
 			POP ra
 			j utility_expand_done
 
 
 		#now the fix up
-  .globl fix_up_compilecomma
+  .global fix_up_compilecomma
   fix_up_compilecomma:
-		ld ra, 0(sp)
-		addi sp, sp, 16
-  fix_up_compilecomma_internal:
 		#copy 0 - 6 then expand ,
 		lb t3, 0(a0)
 		andi t3, t3, 0x5F

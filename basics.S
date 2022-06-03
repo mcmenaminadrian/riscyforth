@@ -243,7 +243,7 @@
 		la t2, CREATEFLAG
 		ld t2, 0(t2)
 		beq t2, zero, search_continue	      #we are in immediate mode
-                j search_create_continue
+                j search_create_continue	      #jump to search_create code
   search_no_token:
                 li t0, 2                      #should never get here - so warn if we do
                 sd t0, OKSTATUS, t1
@@ -753,12 +753,8 @@
 		beq t1, t2, fix_up_call_compilecomma
 		j fix_up_finished_local
   fix_up_call_compilecomma:
-		addi sp, sp, -16
-		sd s10, 8(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 0(sp)
-		ld s10, 8(sp)
-		tail fix_up_compilecomma
+		call fix_up_compilecomma
+		j tokenize_finished_sanitization
 
 					
 
