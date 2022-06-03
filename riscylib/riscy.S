@@ -638,6 +638,8 @@
 		li t3, 0x41
 		sb t3, 11(a2)
 		addi a2, a2, 11
+		mv t0, a3	#fix_up_done code
+		mv t1, a2
 		ret
 
 
