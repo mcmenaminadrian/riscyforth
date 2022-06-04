@@ -10,6 +10,7 @@ extern unsigned long INPUT_END;
 extern unsigned long dictionary;
 extern unsigned long newdictionary;
 extern unsigned long createwritepoint;
+extern unsigned long INPUT_DISPLACE;
 
 unsigned long nextAddress;
 unsigned long dictionaryAddress;
@@ -79,3 +80,7 @@ void setCreateWritePoint(unsigned long addressIn)
 	createwritepoint = addressIn;
 }
 
+void incrementInputDisplace(unsigned long increment)
+{
+	INPUT_DISPLACE += increment;
+}

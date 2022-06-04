@@ -47,7 +47,7 @@
 	la t2, LOCAL_INPUT_END
 	ld t3, 0(t2)
   twoconstant_look_for_start:
-	bgt t1, t3, twoconstant_sanitize_fail
+	bgt t1, t3, twoconstant_out
 	lb t4, 0(t1)
 	bne t4, a2, twoconstant_ready_to_sanitize
 	addi t1, t1, 1
@@ -85,9 +85,16 @@
 	call setInputStart
 	ld a1, 0(sp)
 	ld a0, 8(sp)
-	addi sp, sp, 16
 	#length in a2
 	sub a2, a1, a0
+	PUSH a2
+	mv a0, a2
+	addi a0, a0, 1
+	call incrementInputDisplace
+	ld a2, 0(sp)
+	ld a1, 8(sp)
+	ld a0, 16(sp)
+	addi sp, sp, 24
 	call utility_check_dictionary_match
 	bnez a3, twoconstant_done
 	#not in dictionary
@@ -116,7 +123,6 @@
 	POP a0
 	call setNewDictionary
   twoconstant_out:
-	ebreak
 	addi sp, sp, 16		#fix stack
 	TAILMOD t1
 

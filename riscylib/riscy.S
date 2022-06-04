@@ -10,6 +10,7 @@
    .comm dictionary, ADDRWIDTH
    .comm INPUT_START, ADDRWIDTH
    .comm INPUT_END, ADDRWIDTH
+   .comm INPUT_DISPLACE, ADDRWIDTH
    .comm TOKEN_START, ADDRWIDTH
    .comm TOKEN_END, ADDRWIDTH
    .comm LOADINGFILE, ADDRWIDTH
@@ -758,15 +759,15 @@
 			sw t0, 8(a0)						#ld t2, 40(t0)
 			li t0, 0xFF010113
 			sw t0, 12(a0)						#addi sp, sp, -16
-			li t0, 0x61C023
+			li t0, 0x613423
 			sw t0, 16(a0)						#sd t1, 8(sp)
 			li t0, 0x713023
 			sw t0, 20(a0)						#sd t2, 0(sp)
 			#now jump to next
 			li t0, 0x302B303
-			sw t0, 16(a0)						#ld t1, 48(t0)
+			sw t0, 24(a0)						#ld t1, 48(t0)
 			li t0, 0x30067
-			sw t0, 20(a0)						#jr t1
+			sw t0, 28(a0)						#jr t1
 			sd a2, 32(a0)						#hi						
 			sd a1, 40(a0)						#low
 			sd a3, 48(a0)						#NEXT
