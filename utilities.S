@@ -339,58 +339,7 @@
 			addi sp, sp, 56
 			fence.i
 			ret
-			
-				
-  #a0 holds start of name
-  #a1 holds length of name
-  #a5 holds value of header
-  #a0 returns write point
-  utility_write_function_header:
-			addi sp, sp, -56
-			sd ra, 0(sp)
-			sd s0, 8(sp)
-			sd s1, 16(sp)
-			sd s2, 24(sp)
-			sd s3, 32(sp)
-			sd s4, 40(sp)
-			sd s5, 48(sp)
-			la s1, newdictionary
-			ld s3, 0(s1)
-			mv s2, a5
-			sd s2, 0(s3)				#flag
-			addi s2, s3, 0x38			#word address of new word
-			sd s2, 8(s3)
-			la s0, dictionary
-			ld s1, 0(s0)
-			sd s1, 16(s3)				#words address of previous word
-			sd a1, 24(s3)				#length
-			li s2, 0XFFFFFFFFFFFFFFFF		#now fill in name space
-			sd s2, 32(s3)
-			sd s2, 40(s3)
-			sd s2, 48(s3)
-			addi s4, s3, 32
-  utility_write_header_write_out_name:
-			lbu s5, 0(a0)
-			sb s5, 0(s4)
-			addi a1, a1, -1
-			beqz a1, utility_write_header_name_written
-			addi a0, a0, 1
-			addi s4, s4, 1
-			j utility_write_header_write_out_name
-  utility_write_header_name_written:
-			add a0, s3, 56
-			ld ra, 0(sp)
-			ld s0, 8(sp)
-			ld s1, 16(sp)
-			ld s2, 24(sp)
-			ld s3, 32(sp)
-			ld s4, 40(sp)
-			ld s5, 48(sp)
-			addi sp, sp, 56
-			fence.i
-			ret
-
-
+	
   utility_constant_code:
 			#a0 holds address to start writing
 			#a1 holds number

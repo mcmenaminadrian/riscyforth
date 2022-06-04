@@ -3,8 +3,13 @@
 /** Copyright (C) Adrian McMenamin, 2022                **/
 /** Licenced for reuse under the terms of v2 of GNU GPL **/
 
+#include <string.h>
+
 extern unsigned long INPUT_START;
 extern unsigned long INPUT_END;
+extern unsigned long dictionary;
+extern unsigned long newdictionary;
+extern unsigned long createwritepoint;
 
 unsigned long nextAddress;
 unsigned long dictionaryAddress;
@@ -38,3 +43,39 @@ unsigned long getInputEnd(void)
 {
 	return INPUT_END;
 }
+
+void setInputStart(unsigned long addressIn)
+{
+	INPUT_START = addressIn;
+}
+
+unsigned long getDictionary(void)
+{
+	return dictionary;
+}
+
+unsigned long getNewDictionary(void)
+{
+	return newdictionary;
+}
+
+unsigned long getCreateWritePoint(void)
+{
+	return createwritepoint;
+}
+
+void setDictionary(unsigned long addressIn)
+{
+	dictionary = addressIn;
+}
+
+void setNewDictionary(unsigned long addressIn)
+{
+	newdictionary = addressIn;
+}
+
+void setCreateWritePoint(unsigned long addressIn)
+{
+	createwritepoint = addressIn;
+}
+

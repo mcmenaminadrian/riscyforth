@@ -7,7 +7,7 @@
     .comm LOCAL_INPUT_END, 8
 
 
-.extern INPUT_START
+#.extern INPUT_START
 .section .text
 .balign 8
 	CODEEND DABS, 0x01
@@ -33,17 +33,12 @@
 
 	CODEHEADERZ TWOCONSTANT, 2CONSTANT, DABS, 0x01
 	#( x1 x2 "<spaces>name --)
-	li a5, 0x200	#0x200 for a 2constant
-	ld t1, 8(sp)
-	ld t0, 0(sp)
 	call getInputStart		#a0 has INPUT_START
 	la t0, LOCAL_INPUT_START
 	sd a0, 0(t0)
-	sd a0, 8(sp)
 	call getInputEnd
 	la t0, LOCAL_INPUT_END
 	sd a0, 0(t0)
-	sd a0, 0(sp)
 	li a0, 0x61	#a
 	li a1, 0x7B	#z + 1
 	li a2, 0x20	#space/xor
@@ -57,7 +52,7 @@
 	bne t4, a2, twoconstant_ready_to_sanitize
 	addi t1, t1, 1
 	j twoconstant_look_for_start
-  towconstant_ready_to_sanitize:
+  twoconstant_ready_to_sanitize:
 	sd t1, 0(t0)
 	j twoconstant_jump_start_sanitize
   twoconstant_sanitize_load:
@@ -78,7 +73,51 @@
 	beqz a3, twoconstant_sanitize_advance
   twoconstant_sanitize_done:
 	#now check we aren't overwriting a dictionary word
-	
+	#start in a0
+	ld a0, 0(t0)
+	#end in a1
+	ld a1, 0(t2)
+	addi sp, sp, -16
+	addi a1, a1, -1
+	sd a0, 8(sp)
+	sd a1, 0(sp)
+	mv a0, a1
+	call setInputStart
+	ld a1, 0(sp)
+	ld a0, 8(sp)
+	addi sp, sp, 16
+	#length in a2
+	sub a2, a1, a0
+	call utility_check_dictionary_match
+	bnez a3, twoconstant_done
+	#not in dictionary
+	#now write out header for new function that will return value
+	mv a1, a2
+	li a5, 0x200	#0x200 for a 2constant
+	call utility_write_function_header
+	la a3, NEXTMOD		#set the call up
+	ld a3, 0(a3)
+	ld a2, 8(sp)
+	ld a1, 0(sp)
+	call utility_two_constant_code
+	#and get out
+	#now check if we are 8 bit aligned on writing address
+	li t0, 0x07
+	li t2, 0x08
+	and t1, a0, t0
+	beqz t1, twoconstant_done
+	sub t3, t2, t1
+	add a0, a0, t3
+  twoconstant_done:
+	PUSH a0
+	call setCreateWritePoint
+	call getNewDictionary
+	call setDictionary
+	POP a0
+	call setNewDictionary
+  twoconstant_out:
+	ebreak
+	addi sp, sp, 16		#fix stack
 	TAILMOD t1
 
 	CODEHEADERZ DPLUS, D+, TWOCONSTANT, 0x01
