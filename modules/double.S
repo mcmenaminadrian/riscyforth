@@ -192,12 +192,12 @@
 	POP a0
 	addi a1, a0, 16
 	PUSH a1
-	call getDictionaryAddress
+	call getDictionary
 	POP a1
 	sd a0, 0(a1)	#update lead word
 	la a0, DTOS	#new end of dictionary
 	addi a0, a0, -56
-	call setDictionaryAddress	#return new tail of dictionary to caller
+	call setDictionary	#return new tail of dictionary to caller
 	POP ra
 	fence.i
 	ret

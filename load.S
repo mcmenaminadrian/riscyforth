@@ -71,9 +71,6 @@
 	j loadmodule_done
   loadmodule_success:
 	li t6, -1	#flag success
-	call getDictionaryAddress
-	la t0, dictionary
-	sd a0, 0(t0)
   loadmodule_done:
 	PUSH t6		#flag on to stack
 	tail NEXT
