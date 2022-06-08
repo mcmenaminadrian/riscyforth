@@ -89,8 +89,6 @@
 		sd zero, VARIABLEFLAG, t0
                 la t1, TIL_ABORT	                    #start search from here
                 sd t1, dictionary, t0
-		mv a0, t1
-		call setDictionaryAddress		#set up the dictionary for modules
 
                 sd zero, TOKEN_START, t0
                 sd zero, TOKEN_END, t0

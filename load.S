@@ -45,7 +45,7 @@
 	add t3, t3, a2
 	addi t3, t3, 1
 	sd t3, 0(t2)
-	#create a null terminated string in scartach pad
+	#create a null terminated string in scratch pad
 	mv t0, a0	#start
 	mv t1, a2	#length
 	la t2, SCRATCH_PAD
