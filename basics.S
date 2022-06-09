@@ -50,6 +50,7 @@
 		ld t0, 0(t0)
 		la t1, INPUT_START
 		sd t0, 0(t1)
+		sd zero, INPUT_DISPLACE, t0
 		tail NEXT
           
                 CODEHEADER OK, DROPINPUT, 0x00
@@ -179,14 +180,8 @@
 		jal fix_up_length_two
 		j tokenize_prepare_sanity_test
   tokenize_fix_up_single:
-		addi sp, sp, -24
-		sd s10, 0(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 16(sp)
-		sd t0, 8(sp)
-		ld s10, 0(sp)
-		sd t1, 0(sp)			      #preserve t1 across call
-		call fix_up_input		      #one character token so check for expansion
+		PUSH t0
+		jal fix_up_input		      #one character token so check for expansion
 		j tokenize_prepare_sanity_test
   tokenize_test_length_three:
 		li a1, 2
@@ -243,7 +238,7 @@
 		la t2, CREATEFLAG
 		ld t2, 0(t2)
 		beq t2, zero, search_continue	      #we are in immediate mode
-                j search_create_continue	      #jump to search_create code
+                j search_create_continue
   search_no_token:
                 li t0, 2                      #should never get here - so warn if we do
                 sd t0, OKSTATUS, t1
@@ -635,19 +630,7 @@
 		mv t1, a3
 		WRITESTRINGR t5, t1		
                 WRITECHAR 0x20            #space
-                tail NEXT
-
-  fix_up_finished_local:
-		mv t0, a0
-		mv t1, a1
-		mv t2, a5
-		ret
-
-  fix_up_done_local:
-		mv t0, a3
-		mv t1, a2	
-                j tokenize_finished_sanitization 
-
+                j NEXT
   fix_up_length_three:
 		#expand ['] --> BRACKETTICK
 		#S\" --> SEQ
@@ -663,39 +646,23 @@
 		bne t4, t2, fix_up_length_three_check_bracket
 		lbu t1, 1(a0)
 		li t2, 0x5C		#\
-		beq t1, t2, fix_up_length_three_continue
-		j fix_up_finished_local
-  fix_up_length_three_continue:
+		bne t1, t2, fix_up_finished
 		lbu t1, 2(a0)
 		li t2, 0x22
-		beq t1, t2, fix_up_length_three__continue
-		j fix_up_finished_local
-  fix_up_length_three__continue:
+		bne t1, t2, fix_up_finished
 		call fix_up_seq
-		addi sp, sp, -16
-		sd s10, 8(sp)
-		la s10, tokenize_finished_sanitization
-		sd s10, 0(sp)
-		ld s10, 8(sp)
-		addi sp, sp, 8
-		tail fix_up_done
+		j fix_up_done
   fix_up_length_three_check_bracket:
                 li t2, 0x5B             #[
-		beq t1, t2, fix_up_length_three_check_bracket_continue
-		j fix_up_finished_local
-  fix_up_length_three_check_bracket_continue:
+                bne t1, t2, fix_up_finished
                 lbu t1, 1(a0)
                 li t2, 0x27             #'
-		beq t1, t2, fix_up_length_three_check_bracket_continue_more
-		j fix_up_finished_local
-  fix_up_length_three_check_bracket_continue_more:
+                bne t1, t2, fix_up_finished
                 lbu t1, 2(a0)
                 li t2, 0x5D             #]
-		beq t1, t2, fix_up_length_three_check_bracket_continue_final
-		j fix_up_finished_local
-  fix_up_length_three_check_bracket_continue_final:
+                bne t1, t2, fix_up_finished
 		call fix_up_brackettick
-		j fix_up_done_local
+		j fix_up_done
 
   fix_up_length_eight:
 		#expand COMPILE, --> COMPILECOMMA
@@ -709,53 +676,69 @@
 		li t2, 0x43		#C
 		lbu t1, 0(a0)
 		andi t1, t1, 0x5F
-		beq t1, t2, fix_up_length_eight_continue_A
-		j fix_up_finished_local
-  fix_up_length_eight_continue_A:
+		bne t1, t2, fix_up_finished
 		li t2, 0x4F		#O
 		lbu t1, 1(a0)
 		andi t1, t1, 0x5F
-		beq t1, t2, fix_up_length_eight_continue_B
-		j fix_up_finished_local
-  fix_up_length_eight_continue_B:
+		bne t1, t2, fix_up_finished
 		li t2, 0x4D		#M
 		lbu t1, 2(a0)
 		andi t1, t1, 0x5F
-		beq t1, t2, fix_up_length_eight_continue_C
-		j fix_up_finished_local
-  fix_up_length_eight_continue_C:
+		bne t1, t2, fix_up_finished
 		li t2, 0x50		#P
 		lbu t1, 3(a0)
 		andi t1, t1, 0x5F
-		beq t1, t2, fix_up_length_eight_continue_D
-		j fix_up_finished_local
-  fix_up_length_eight_continue_D:
+		bne t1, t2, fix_up_finished
 		li t2, 0x49		#I
 		lbu t1, 4(a0)
 		andi t1, t1, 0x5F
-		beq t1, t2, fix_up_length_eight_continue_E
-		j fix_up_finished_local
-  fix_up_length_eight_continue_E:
+		bne t1, t2, fix_up_finished
 		li t2, 0x4C		#L
 		lbu t1, 5(a0)
 		andi t1, t1, 0x5F
-		beq t1, t2, fix_up_length_eight_continue_F
-		j fix_up_finished_local
-  fix_up_length_eight_continue_F:
+		bne t1, t2, fix_up_finished
 		li t2, 0x45		#E
 		lbu t1, 6(a0)
 		andi t1, t1, 0x5F
-		beq t1, t2, fix_up_length_eight_continue_G
-		j fix_up_finished_local
-  fix_up_length_eight_continue_G:
+		bne t1, t2, fix_up_finished
 		li t2, 0x2C		#,
 		lbu t1, 7(a0)
-		beq t1, t2, fix_up_call_compilecomma
-		j fix_up_finished_local
-  fix_up_call_compilecomma:
-		call fix_up_compilecomma
-		j tokenize_finished_sanitization
+		bne t1, t2, fix_up_finished
 
+		#now the fix up
+  fix_up_compilecomma:
+		#copy 0 - 6 then expand ,
+		lb t3, 0(a0)
+		andi t3, t3, 0x5F
+		sb t3, 0(a2)
+		lb t3, 1(a0)
+		andi t3, t3, 0x5F
+		sb t3, 1(a2)
+		lb t3, 2(a0)
+		andi t3, t3, 0x5F
+		sb t3, 2(a2)
+		lb t3, 3(a0)
+		andi t3, t3, 0x5F
+		sb t3, 3(a2)
+		lb t3, 4(a0)
+		andi t3, t3, 0x5F
+		sb t3, 4(a2)
+		lb t3, 5(a0)
+		andi t3, t3, 0x5F
+		sb t3, 5(a2)
+		lb t3, 6(a0)
+		andi t3, t3, 0x5F
+		sb t3, 6(a2)
+		li t3, 0x43
+		sb t3, 7(a2)
+		li t3, 0x4F
+		sb t3, 8(a2)
+		li t3, 0x4D4D
+		sh t3, 9(a2)
+		li t3, 0x41
+		sb t3, 11(a2)
+		addi a2, a2, 11
+		j fix_up_done
 					
 
   fix_up_length_six:
@@ -790,9 +773,9 @@
 		li t2, 0x22		 #"
 		bne t1, t2, fix_up_six_done
 		call fix_up_acomma
-		j fix_up_done_local
+		j fix_up_done
   fix_up_six_done:
-		j fix_up_finished_local
+		j fix_up_finished
 		
   fix_up_length_two:
                 #code to expand, if needed, two character input
@@ -827,32 +810,32 @@
 		
 		
   fix_up_length_two_finished:
-		j fix_up_finished_local
+		j fix_up_finished
 
   length_two_begin0:
 		lb t1, 1(a0)
 		li t2, 0x3D			#=
 		bne t1, t2, length_two_begindot_done
  		call fix_up_zeroequal
-		j fix_up_done_local
+		j fix_up_done	
   length_two_begindot:
 		lb t1, 1(a0)
 		li t2, 0x22			#"
 		bne t1, t2, length_two_begindot_done
                 call fix_up_encsq
-		j fix_up_done_local
+		j fix_up_done
   length_two_begingt:
 		lb t1, 1(a0)
 		li t2, 0x3D			#>
 		bne t1, t2, length_two_begindot_done
  		call fix_up_gteq
-		j fix_up_done_local
+		j fix_up_done	
   length_two_beginlt:
 		lb t1, 1(a0)
 		li t2, 0x3D			#<
 		bne t1, t2, length_two_begindot_done
  		call fix_up_lteq
-		j fix_up_done_local
+		j fix_up_done	
 		
   length_two_begindot_done:
 		j fix_up_length_two_finished
@@ -863,12 +846,12 @@
 		li t2, 0x2C			#,
 		bne t1, t2, length_two_c_q
 		call fix_up_ccomma
-		j fix_up_done_local
+		j fix_up_done
   length_two_c_q:
 		li t2, 0x22			#"
 		bne t1, t2, length_two_c_done
 		call fix_up_cq
-		j fix_up_done_local
+		j fix_up_done
 		
   length_two_c_done:
 		j fix_up_length_two_finished
@@ -879,13 +862,291 @@
 		bne t1, t2, length_two_c_done
 		addi sp, sp, 8
 		call fix_up_squote
-		j fix_up_done_local
+		j fix_up_done
 
 
+  fix_up_input:
+		#code to expand standard FORTH commands
+		#to things we can use in RISC-V assembly
+		#CURRENT EXPANSIONS
+		# ;  --> SEMI
+                # =  --> EQUALS
+		# '  --> TICK
+		# ,  --> COMMA
+		POP a0				#unexpanded token address
+		la a2, EXPANDED_BUFFER 		#store expanded token
+		mv a3, a2
+  fix_up_start:
+		mv a1, t1
+		mv a5, t2
+		lbu t1, 0(a0)
+		li t2, 0x3B
+		beq t2, t1, fix_up_semi
+		li t2, 0x3D
+		beq t2, t1, fix_up_equals
+		li t2, 0x27
+		beq t2, t1, fix_up_tick
+		li t2, 0x2C
+		beq t2, t1, fix_up_comma
+		li t2, 0x5C
+		beq t2, t1, fix_up_comment
+		j fix_up_finished
+
+  fix_up_semi:
+		call do_fix_up_semi
+		j fix_up_done
+  fix_up_equals:
+		call do_fix_up_equals
+		j fix_up_done
+  fix_up_comment:
+		call do_fix_up_comment
+		mv t0, a0
+		mv t1, a1
+		mv t2, a5
+		j tokenize_finished_sanitization	#no expansion
+  fix_up_tick:
+		call do_fix_up_tick
+		j fix_up_done
+  fix_up_comma:
+		call do_fix_up_comma
+		j fix_up_done
+		
+  fix_up_done:
+		mv t0, a3
+		mv t1, a2	
+                j tokenize_finished_sanitization 
+
+  fix_up_finished:
+		mv t0, a0
+		mv t1, a1
+		mv t2, a5
+		ret
+
+  fix_up_acomma:
+		#copy 0 - 5 then expand "
+		lb t3, 0(a0)
+		andi t3, t3, 0x5F
+		sb t3, 0(a2)
+		lb t3, 1(a0)
+		andi t3, t3, 0x5F
+		sb t3, 1(a2)
+		lb t3, 2(a0)
+		andi t3, t3, 0x5F
+		sb t3, 2(a2)
+		lb t3, 3(a0)
+		andi t3, t3, 0x5F
+		sb t3, 3(a2)
+		lb t3, 4(a0)
+		andi t3, t3, 0x5F
+		sb t3, 4(a2)
+		li t3, 0x43
+		sb t3, 5(a2)
+		li t3, 0x4F
+		sb t3, 6(a2)
+		li t3, 0x4D4D
+		sh t3, 7(a2)
+		addi a2, a2, 8
+		ret
+
+  do_fix_up_semi:
+		li t3, 0x53
+		sb t3, 0(a2)
+		li t3, 0x45
+		sb t3, 1(a2)
+		li t3, 0x4D
+		sb t3, 2(a2)
+		li t3, 0x49
+		sb t3, 3(a2)
+		addi a2, a2, 3
+		ret
+
+  do_fix_up_equals:
+		li t3, 0x45
+		sb t3, 0(a2)
+		li t3, 0x51
+		sb t3, 1(a2)
+		li t3, 0x55
+		sb t3, 2(a2)
+		li t3, 0x41
+		sb t3, 3(a2)
+		li t3, 0x4C
+		sb t3, 4(a2)
+		addi a2, a2, 4
+		ret
+
+  fix_up_encsq:				#DOTQ called encsq for historical (!) reasons
+		li t3, 0x44
+		sb t3, 0(a2)
+		li t3, 0x4F
+		sb t3, 1(a2)
+		li t3, 0x54
+		sb t3, 2(a2)
+		li t3, 0x51
+		sb t3, 3(a2)
+		addi a2, a2, 3
+		ret
+
+  do_fix_up_comment:
+		la t1, MULTILINE
+		ld t2, 0(t1)
+		bnez t2, keep_fixing_up_comment
+		la t0, INFILELOAD
+		ld t0, 0(t0)
+		beqz t0, keep_fixing_up_comment
+		j pull_in_another		      #suck in a line
+  keep_fixing_up_comment:
+		ret
+
+  fix_up_brackettick:
+		#BRACKETTICK
+		#0x42 0x52 0x41 0x43 0x4B 0x45 0x54 0x54 0x49 0x43 0x4B
+		li t0, 0x54		#T
+		li t1, 0x4B		#K
+		li t4, 0x43		#C
+		li t3, 0x42
+		sb t3, 0(a2)
+		li t3, 0x52
+		sb t3, 1(a2)
+		li t3, 0x41
+		sb t3, 2(a2)
+		sb t4, 3(a2)
+		sb t1, 4(a2)
+		li t3, 0x45
+		sb t3, 5(a2)
+		sb t0, 6(a2)
+		sb t0, 7(a2)
+		li t3, 0x49
+		sb t3, 8(a2)
+		sb t4, 9(a2)
+		sb t1, 10(a2)
+		addi a2, a2, 10
+		ret
+
+  do_fix_up_tick:
+  		li t3, 0x54
+		sb t3, 0(a2)
+		li t3, 0x49
+		sb t3, 1(a2)
+		li t3, 0x43
+		sb t3, 2(a2)
+		li t3, 0x4B
+		sb t3, 3(a2)
+		addi a2, a2, 3
+		ret
+
+  do_fix_up_comma:
+		li t3, 0x43
+		sb t3, 0(a2)
+		li t3, 0x4F
+		sb t3, 1(a2)
+		li t3, 0x4D
+		sb t3, 2(a2)
+		sb t3, 3(a2)
+		li t3, 0x41
+		sb t3, 4(a2)
+		addi a2, a2, 4
+		ret
+
+  fix_up_zeroless:
+		li t3, 0x5A
+		sb t3, 0(a2)
+		li t3, 0x45
+		sb t3, 1(a2)
+		li t3, 0x52
+		sb t3, 2(a3)
+		li t3, 0x4F
+		sb t3, 3(a3)
+		li t3, 0x4C
+		sb t3, 4(a3)
+		li t3, 0x45
+		sb t3, 5(a3)
+		li t3, 0x53
+		sb t3, 6(a3)
+		sb t3, 7(a3)
+		addi a2, a2, 7
+		ret
+
+  fix_up_zeroequal:
+		li t3, 0x5A
+		sb t3, 0(a2)
+		li t3, 0x45
+		sb t3, 1(a2)
+		li t3, 0x52
+		sb t3, 2(a3)
+		li t3, 0x4F
+		sb t3, 3(a3)
+		li t3, 0x45
+		sb t3, 4(a3)
+		li t3, 0x51
+		sb t3, 5(a3)
+		li t3, 0x55
+		sb t3, 6(a3)
+		li t3, 0x41
+		sb t3, 7(a3)
+		li t3, 0x4C
+		sb t3, 8(a3)
+		addi a2, a2, 8
+		ret
+
+  fix_up_gteq:
+		li t3, 0x47
+  gteq_to_lteq:
+		sb t3, 0(a2)
+		li t3, 0x54
+		sb t3, 1(a2)
+		li t3, 0x45
+		sb t3, 2(a2)
+		li t3, 0x51
+		sb t3, 3(a2)
+		addi a2, a2, 3
+		ret
+
+  fix_up_lteq:
+		li t3, 0x4C
+		j gteq_to_lteq
+		
+  fix_up_ccomma:
+		li t3, 0x43
+		sb t3, 0(a2)
+		sb t3, 1(a2)
+		li t3, 0x4F
+		sb t3, 2(a2)
+		li t3, 0x4D
+		sb t3, 3(a2)
+		sb t3, 4(a2)
+		li t3, 0x41
+		sb t3, 5(a2)
+		addi a2, a2, 5
+		ret
+
+  fix_up_cq:
+		li t3, 0x43		#C
+		sb t3, 0(a2)
+		li t3, 0x51		#Q
+		sb t3, 1(a2)
+		addi a2, a2, 1
+		ret
+
+  fix_up_squote:
+		li t3, 0x53
+		sb t3, 0(a2)
+		li t3, 0x51
+		sb t3, 1(a2)
+		addi a2, a2, 1
+		ret
+
+  fix_up_seq:
+		li t3, 0x53
+		sb t3, 0(a2)
+		li t3, 0x45
+		sb t3, 1(a2)
+		li t3, 0x51
+		sb t3, 2(a2)
+		addi a2, a2, 2
+		ret
 		
 .include "integer.S"
 .include "stackop.S"
 .include "listwords.S"
 .include "loops.S"
 .include "facility.S"
-

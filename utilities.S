@@ -273,7 +273,319 @@
 			ret
 
 
+  #a0 has start
+  #a1 has end
+  #a2 returns length
+  utility_expand_word:
+			#returns expanded word if required
+			addi sp, sp, -56
+			sd ra, 0(sp)
+			sd s0, 8(sp)
+			sd s1, 16(sp)
+			sd s2, 24(sp)
+			sd s3, 32(sp)
+			mv s0, a2
+			bleu a0, a1, utility_expand_word_size_fine
+			add a1, a0, a2
+  utility_expand_word_size_fine:
+			addi s0, s0, -1
+			beqz s0, utility_expand_word_test1
+			li s1, 3
+			li s2, 5
+			blt s0, s1, utility_expand_word_test2
+			blt s0, s2, utility_expand_complete
+			beq s0, s2, utility_expand_word_test6
+			li s2, 7
+			beq s0, s2, utility_expand_word_test8
+			j utility_expand_complete
+  utility_expand_word_test1:
+			call utility_expand_one
+			j utility_expand_complete
+  utility_expand_word_test2:
+			li s1, 1
+			bne s0, s1, utility_expand_word_test3
+			call utility_expand_two
+			j utility_expand_complete
+  utility_expand_word_test3:
+			#should only get here if length is 3
+			call utility_expand_three
+			j utility_expand_complete
+  utility_expand_word_test6:
+			call utility_expand_six
+			j utility_expand_complete
+  utility_expand_word_test8:
+			call utility_expand_eight
+			j utility_expand_complete
+   utility_expand_complete:
+			ld s5, 48(sp)
+			ld s4, 40(sp)
+			ld s3, 32(sp)
+			ld s2, 24(sp)
+			ld s1, 16(sp)
+			ld s0, 8(sp)
+			ld ra, 0(sp)
+			addi sp, sp, 56
+			ret
 
+
+  utility_expand_one:
+			la a2, EXPANDED_BUFFER
+			mv a3, a2
+			lbu t1, 0(a0)
+			li t2, 0x3B
+			beq t2, t1, utility_expand_semi
+			li t2, 0x3D
+			beq t2, t1, utility_expand_equals
+			li t2, 0x27
+			beq t2, t1, utility_expand_tick
+			li t2, 0x2C
+			beq t2, t1, utility_expand_comma
+			sub a2, a1, a0
+			ret
+  utility_expand_semi:
+			PUSH ra
+			call do_fix_up_semi
+			POP ra
+			j utility_expand_done
+  utility_expand_equals:
+			PUSH ra
+			call do_fix_up_equals
+			POP ra
+			j utility_expand_done
+  utility_expand_tick:
+			PUSH ra
+			call do_fix_up_tick
+			POP ra
+			j utility_expand_done
+  utility_expand_comma:
+			PUSH ra
+			call do_fix_up_comma
+			POP ra
+
+  utility_expand_done:
+			mv a0, a3
+			mv a1, a2
+			sub a2, a1, a0
+			addi a2, a2, 1
+			ret
+
+  utility_expand_two:
+			la a2, EXPANDED_BUFFER 		#store expanded token
+			mv a3, a2
+			lbu t1, 0(a0)
+			li t2, 0x30			#0
+			beq t1, t2, utility_expand_two_beginzero
+			li t2, 0x2E			#.
+			beq t1, t2, utility_expand_two_begindot
+			li t2, 0x3E			#>
+			beq t1, t2, utility_expand_two_begingt
+			li t2, 0x3C			#<
+			beq t1, t2, utility_expand_two_beginlt
+			PUSH t1
+			andi t1, t1, 0x5F		#character based tests all in here
+			li t2, 0x43
+			beq t1, t2, utility_expand_two_beginC
+			li t2, 0x53
+			beq t1, t2, utility_expand_two_beginS
+			POP t1
+  utility_expand_two_bail:
+			sub a2, a1, a0
+			ret
+  utility_expand_two_finished:
+			j utility_expand_done
+
+  utility_expand_two_begindot:
+			lbu t1, 1(a0)
+			li t2, 0x22			#"
+			bne t1, t2, utility_expand_two_bail
+			PUSH ra
+                	call fix_up_encsq
+			POP ra
+  utility_expand_two_begindot_done:
+			j utility_expand_two_finished
+		
+  utility_expand_two_beginzero:
+			lbu t1, 1(a0)
+			li t2, 0x3D			#=
+			bne t1, t2, utility_expand_two_bail
+			PUSH ra
+                	call fix_up_zeroequal
+			POP ra
+			j utility_expand_done
+  utility_expand_two_begingt:
+			lbu t1, 1(a0)
+			li t2, 0x3D			#=
+			bne t1, t2, utility_expand_two_bail
+			PUSH ra
+                	call fix_up_gteq
+			POP ra
+			j utility_expand_done
+  utility_expand_two_beginlt:
+			lbu t1, 1(a0)
+			li t2, 0x3D			#=
+			bne t1, t2, utility_expand_two_bail
+			PUSH ra
+                	call fix_up_lteq
+			POP ra
+			j utility_expand_done
+  utility_expand_two_beginC:
+			sb t1, 0(a2)
+			addi sp, sp, 8
+			lbu t1, 1(a0)
+			li t2, 0x2C
+			bne t1, t2, tick_length_two_cq
+			PUSH ra
+			call fix_up_ccomma		#,
+			POP ra
+			j utility_expand_done
+  utility_expand_two_cq:
+			li t2, 0x22			#"
+			bne t1, t2, utility_expand_two_bail
+			PUSH ra
+			call fix_up_cq
+			POP ra
+			j utility_expand_done
+  utility_expand_two_c_done:
+			j utility_expand_two_finished
+
+
+  utility_expand_two_beginS:
+			sb t1, 0(a2)
+			addi sp, sp, 8
+			lbu t1, 1(a0)
+			li t2, 0x22			#"
+			bne t1, t2, utility_expand_two_bail
+			PUSH ra
+			call fix_up_squote
+			POP ra
+			j utility_expand_done
+ utility_expand_three:
+			#expand ['] --> BRACKETTICK
+			la a2, EXPANDED_BUFFER
+			mv a3, a2
+			lbu t1, 0(a0)
+			li t2, 0x5B		#[
+			bne t1, t2, utility_expand_three_done
+			lbu t1, 1(a0)
+			li t2, 0x27		#'
+			bne t1, t2, utility_expand_three_done
+			lbu t1, 2(a0)
+			li t2, 0x5D		#]
+			bne t1, t2, utility_expand_three_done
+			PUSH ra
+			call fix_up_brackettick
+			POP ra
+			j utility_expand_done
+  utility_expand_three_done:
+			sub a2, a1, a0
+			ret
+  utility_expand_six:
+			#expand the following
+			# ABORT" --> ABORTCOMM
+			la a2, EXPANDED_BUFFER
+			mv a3, a2
+			lbu t1, 5(a0)
+			li t2, 0x22		 #"
+			bne t1, t2, utilities_expand_six_done
+			PUSH ra
+			call fix_up_acomma
+			POP ra
+			j utility_expand_done
+  utilities_expand_six_done:
+			sub a2, a1, a0
+			ret
+  utility_expand_eight:
+			#expand COMPILE, --> COMPILECOMMA
+			#COMPILE: 0x43 0x4F 0x4D 0x50 0x49 0x4C 0x45
+			#COMMA: 0x43 0x4F 0x4D 0x4D 0x41
+			la a2, EXPANDED_BUFFER
+			mv a3, a2
+			li t2, 0x43		#C
+			lbu t1, 0(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, utilities_expand_six_done
+			li t2, 0x4F		#O
+			lbu t1, 1(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, utilities_expand_six_done
+			li t2, 0x4D		#M
+			lbu t1, 2(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, utilities_expand_six_done
+			li t2, 0x50		#P
+			lbu t1, 3(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, utilities_expand_six_done
+			li t2, 0x49		#I
+			lbu t1, 4(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, utilities_expand_six_done
+			li t2, 0x4C		#L
+			lbu t1, 5(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, utilities_expand_six_done
+			li t2, 0x45		#E
+			lbu t1, 6(a0)
+			andi t1, t1, 0x5F
+			bne t1, t2, utilities_expand_six_done
+			li t2, 0x2C		#,
+			lbu t1, 11(a0)
+			bne t1, t2, tix_up_six_done
+			PUSH ra
+			call fix_up_compilecomma
+			POP ra
+			j utility_expand_done
+  #a0 has start
+  #a1 has end
+  #a2 has length
+  #a3 returns 1 on success
+  #a4 holds address
+  utility_check_dictionary_match:
+			addi sp, sp, -56
+			sd ra, 0(sp)
+			sd s0, 8(sp)
+			sd s1, 16(sp)
+			sd s2, 24(sp)
+			sd s3, 32(sp)
+			sd s4, 40(sp)
+			sd s5, 48(sp)
+			call utility_expand_word
+			li a3, 1
+			# check we don't exceed max length - in which case we fail anyway
+			li s0, NAMEMAXLEN
+			bgt a2, s0, utility_check_dictionary_match_done
+			#now scan dictionary
+			la s0, dictionary
+			ld s1, 0(s0)
+  utility_check_dictionary_match_check_word:
+			mv a4, s1
+			ld s2, 24(s1)		#check length
+			bne s2, a2, utility_check_dictionary_match_nomatch
+			addi s3, s1, 32		#s3 now points at name in dictionary
+			mv s4, a0		#s4 points to the token
+  utility_check_dictionary_match_loop:
+			lbu s0, 0(s4)
+			lbu s5, 0(s3)
+			bne s0, s5, utility_check_dictionary_match_nomatch
+			addi s2, s2, -1
+			beqz s2, utility_check_dictionary_match_done		#failed
+			addi s4, s4, 1
+			addi s3, s3, 1
+			j utility_check_dictionary_match_loop
+  utility_check_dictionary_match_nomatch:
+			ld s1, 16(s1)
+			bnez s1, utility_check_dictionary_match_check_word
+			li a3, 0						#success
+  utility_check_dictionary_match_done:
+			ld s5, 48(sp)
+			ld s4, 40(sp)
+			ld s3, 32(sp)
+			ld s2, 24(sp)
+			ld s1, 16(sp)
+			ld s0, 8(sp)
+			ld ra, 0(sp)
+			addi sp, sp, 56
+			ret
   #a0 holds address to start writing
   #a1 holds address of function
   utility_write_out_call_function:
@@ -339,7 +651,56 @@
 			addi sp, sp, 56
 			fence.i
 			ret
-	
+			
+				
+  #a0 holds start of name
+  #a1 holds length of name
+  #a5 holds value of header
+  #a0 returns write point
+  utility_write_function_header:
+			addi sp, sp, -56
+			sd ra, 0(sp)
+			sd s0, 8(sp)
+			sd s1, 16(sp)
+			sd s2, 24(sp)
+			sd s3, 32(sp)
+			sd s4, 40(sp)
+			sd s5, 48(sp)
+			la s1, newdictionary
+			ld s3, 0(s1)
+			mv s2, a5
+			sd s2, 0(s3)				#flag
+			addi s2, s3, 0x38			#word address of new word
+			sd s2, 8(s3)
+			la s0, dictionary
+			ld s1, 0(s0)
+			sd s1, 16(s3)				#words address of previous word
+			sd a1, 24(s3)				#length
+			li s2, 0XFFFFFFFFFFFFFFFF		#now fill in name space
+			sd s2, 32(s3)
+			sd s2, 40(s3)
+			sd s2, 48(s3)
+			addi s4, s3, 32
+  utility_write_header_write_out_name:
+			lbu s5, 0(a0)
+			sb s5, 0(s4)
+			addi a1, a1, -1
+			beqz a1, utility_write_header_name_written
+			addi a0, a0, 1
+			addi s4, s4, 1
+			j utility_write_header_write_out_name
+  utility_write_header_name_written:
+			add a0, s3, 56
+			ld ra, 0(sp)
+			ld s0, 8(sp)
+			ld s1, 16(sp)
+			ld s2, 24(sp)
+			ld s3, 32(sp)
+			ld s4, 40(sp)
+			ld s5, 48(sp)
+			addi sp, sp, 56
+			fence.i
+			ret
   utility_constant_code:
 			#a0 holds address to start writing
 			#a1 holds number
@@ -362,7 +723,6 @@
 			addi a0, a0, 40
 			fence.i
 			ret
-
   utility_jump_next:
 			#a0 holds address to write to
 			#a2 holds NEXT address
@@ -376,7 +736,6 @@
 			addi a0, a0, 20
 			fence.i
 			ret
-
   utility_do_colon:
 			#a0 holds address to start writing
 			#a1 holds number for s7
@@ -399,11 +758,9 @@
 			addi a0, a0, 40
 			fence.i
 			ret
-
 			#COMPILE ONLY WORDS
 			CODEHEADER _COMPSEMI, INCLUDE, 0x0
 			tail search_create_test_postpone_semi
-
 			CODEHEADER _COMPUNTIL, _COMPSEMI, 0x0a
 			#(x --)
 			POP t0
@@ -436,7 +793,6 @@
   _comp_until_prime_jump:
 			mv s7, t4
 			tail NEXT
-
 			CODEHEADER _COMPAGAIN, _COMPUNTIL, 0x0
 			#(--)
 			li t0, 0
@@ -466,10 +822,8 @@
 			mv s7, t6
 			tail NEXT
   
-
 			CODEHEADER _COMPREPEAT, _COMPAGAIN, 0x0
 			j _comp_until_look_begin
-
 			CODEHEADER _COMPTHEN, _COMPREPEAT, 0x0
 			#(--)			
 			#Look for an IF or WHILE and update
@@ -479,91 +833,70 @@
 			ld t1, 0(t0)
 			addi t1, t1, -8
 			tail transitions_then_out_postpone
-
 			CODEHEADER _COMPELSE, _COMPTHEN, 0x0
 			#(--)
 			la t3, WA__ELSE
 			j transitions_else_out
-
 			CODEHEADER _COMPIF, _COMPELSE, 0x0
 			#(--)
 			la t3, WA__IF
 			tail transitions_if_out
-
 			CODEHEADER _COMPMINUSLOOP, _COMPIF, 0x0
 			la t3, WA__MINUSLOOP
 			tail transitions_loop_out
-
 			CODEHEADER _COMPPLUSLOOP, _COMPMINUSLOOP, 0x0
 			la t3, WA__PLUSLOOP
 			tail transitions_loop_out
-
 			CODEHEADER _COMPLOOP, _COMPPLUSLOOP, 0x0
 			la t3, WA__LOOP
 			tail transitions_loop_out
-
 			CODEHEADER _COMPQDO, _COMPLOOP, 0x0
 			la t3, WA__QDO
 			tail transitions_do_out
-
 			CODEHEADER _COMPDO, _COMPQDO, 0x0
 			la t3, WA__DO
 			tail transitions_do_out
-
 			CODEHEADER _COMPACTIONOF, _COMPDO, 0x0
 			la t3, WA__ACTIONOF
 			tail embed_defer
-
 			CODEHEADER _COMPCHAR, _COMPACTIONOF, 0x0
 			la t3, WA__CHAR
 			tail embed_tick
-
 			CODEHEADER _COMPBRACKETCHAR, _COMPCHAR, 0x0
 			la t3, WA__BRACKETCHAR
 			tail embed_tick
-
 			CODEHEADER _LITERALCOMP, _COMPBRACKETCHAR, 0x0
 			POP a2
 			la t3, WA_LITERALNUMB
 			tail search_create_literal_out
-
 			CODEHEADER _DOESCOMP, _LITERALCOMP, 0x0
 			la t3, WA_DOES_
 			tail search_create_keep_does_
-
 			CODEHEADER _ABORTCOMP, _DOESCOMP, 0x0
 			la t3, WA__ABORTCOMM
 			addi a5, a5, 4
 			tail embed_encsq
-
 			CODEHEADER _DOTQCOMP, _ABORTCOMP, 0x0
 			la t3, WA__DOTQ
 			tail embed_encsq
-
 			CODEHEADER _SQCOMP, _DOTQCOMP, 0x0
 			la t3, WA__SQ
 			tail embed_sq
-
 			CODEHEADER _CQCOMP, _SQCOMP, 0x0
 			la t3, WA__CQ
 			tail embed_sq
-
 			CODEHEADER _TICKCOMP, _CQCOMP, 0x0
 			la t3, WA__TICK
 			tail embed_tick
-
 			CODEHEADER _MARKERCOMP, _TICKCOMP, 0x0
 			la t3, WA__MARKER
 			tail embed_marker
-
 			CODEHEADER _COMPCOMPCOMMA, _MARKERCOMP, 0x0
 			POP t3
 			tail postpone_output_normal
-
 			CODEHEADER _COMPIS, _COMPCOMPCOMMA, 0x0
 			la t3, WA__IS
 			tail embed_tick
-
 			CODEHEADER _COMPPPONE, _COMPIS, 0x0
 			#write out embedded word address
 			ld t0, 0(s7)
@@ -574,7 +907,6 @@
 			addi t2, t2, 8
 			sd t2, 0(t1)
 			tail NEXT
-
 			CODEHEADER _NUMBER, _COMPPPONE, 0x0
 			#(-- x)
 			ld t0, 0(s7)			#how many bytes?
@@ -593,15 +925,12 @@
 			call func_test_hex
 			PUSH a2
 			tail NEXT
-
 			CODEHEADER _COMPWHILE, _NUMBER, 0x0
 			la t3, WA__WHILE
 			tail transitions_while_out
-
 			CODEHEADER _COMPTO, _COMPWHILE, 0x0
 			la t3, WA__TO
 			tail embed_to
-
   utility_process_postpone:
 			#find word
 			#find token
@@ -636,7 +965,6 @@
 			sd zero, 0(t0)
 			addi sp, sp, 8
 			tail search_failed
-
   postpone_check_literal:
 			la a5, WA_LITERAL
 			bne a4, a5, postpone_check_does
@@ -833,7 +1161,6 @@
 			mv t3, a4
 			POP ra
 			ret
-
   utility_postpone_process_number:
 			#not special compile words but still have some checking to do
 			addi sp, sp, 8		#not returning
@@ -864,8 +1191,6 @@
   utility_postpone_process_number_clear:
 			sd t1, 0(t0)
 			tail search_create_leave
-
-
 #string match function
 #a0 - address of one string
 #a1 - address of second string
@@ -890,7 +1215,6 @@
 			addi t1, t1, 1
 			addi t2, t2, -1
 			j utility_stringsmatch_nextround
-
 #ENVIONMENT? answers
   utility_enviroq_countedstrings:
 			li t0, -1
@@ -900,34 +1224,27 @@
 			li t1, -1
 			sd t1, 0(sp)
 			tail NEXT
-
   utility_enviroq_hold:
   utility_enviroq_pad:
 			li t0, SYSTEMAREA
 			j utility_truth
-
   utility_enviroq_aub:
 			li t0, 64
 			j utility_truth
-
   utility_enviroq_floored:
 			li t0, -1
 			j utility_truth
-
   utility_enviroq_maxchar:
 			li t0, 0xFF
 			j utility_truth
-
   utility_enviroq_maxd:
   utility_enviroq_maxn:
 			li t0, 0x7FFFFFFFFFFFFFFF
 			j utility_truth
-
   utility_enviroq_maxu:
   utility_enviroq_maxud:
 			li t0, 0xFFFFFFFFFFFFFFFF
 			j utility_truth
-
   utility_enviroq_rsc:
   utility_enviroq_stackcells:
 			li t0, 0x20000
