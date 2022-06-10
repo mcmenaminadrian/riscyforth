@@ -171,3 +171,141 @@
 			ld s0, 0(sp)
 			addi sp, sp, 64
 			ret
+
+  .global scan_floats
+  scan_floats:
+			#on input:
+			#a0 points to start of string
+			#on output:
+			#a0 holds FP
+			#a1 0 on success
+			#can we interpret the string as FP?
+			#must have digit and at least one of E or .
+			li a0, 0x30	#0
+			li a1, 0x39	#9
+			li a2, 0x45	#E
+			li a3, 0x2E	#.
+			mv a4, zero	#count of matches
+			li a5, 0x20	#space
+			li a6, 0x0A	#CR
+			li a7, 0x2B	#+
+			li t6, 0x2d	#-
+			mv t1, a0
+			mv t0, a0
+			mv t3, zero	#count length
+			mv t4, zero	#don't keep counting numbers
+	 scan_float_scan:
+			lbu t5, 0(t1)
+			bne t5, a2, scan_float_notE
+			#cannot start with an E
+			beqz t3, scan_float_done_out
+			addi a4, a4, 1
+			addi t3, t3, 1
+			j scan_float_next
+	  scan_float_notE:
+			bne t5, a3, scan_float_notDot
+			addi a4, a4, 1
+			j scan_float_next
+	  scan_float_notDot:
+			beq t5, a5, scan_float_done
+			beq t5, a6, scan_float_done
+			beq t5, a7, scan_float_continue
+			beq t5, t6, scan_float_continue
+			blt t5, a0, scan_float_done_out
+			bgt t5, a1, scan_float_done_out
+	  scan_float_continue:
+			addi t3, t3, 1
+			bnez t4, scan_float_next
+			addi a4, a4, 1
+			addi t4, t4, 1
+	  scan_float_next:
+			addi t1, t1, 1
+			j scan_float_scan
+	  scan_float_done:
+			li t4, 2	#min
+			li t5, 3	#max
+			blt a4, t4, scan_float_done_out
+			bgt a4, t5, scan_float_done_out
+			j process_float	#have a real one
+	  scan_float_done_out:
+			li a1, 1
+			ret
+	  process_float:
+			mv t1, t0
+			#first of all - check the sign
+			addi s9, s9, -32	#store on return stack
+			sd zero, 0(s9)		#ensure exponent default is zero
+			li t6, 0x2D		#negative sign
+			lb t5, 0(t1)
+			beq t5, t6, process_float_negative
+			sd zero, 24(s9)
+			j process_float_check_mantissa
+	 process_float_negative:
+			li t6, 1
+			sd t6, 24(s9)
+			addi t1, t1, 1
+			addi t3, t3, -1
+	 process_float_check_mantissa:
+			li t4, 0	#correction for decimal point
+			li t6, 0	#number
+			li a4, 10	#for multiplying
+			li a7, 0	#found dot
+	  process_float_calculate_mantissa:
+			lb t5, 0(t1)
+			beq t5, a3, process_float_check_mantissa_dot
+			beq t5, a2, process_float_check_mantissa_e
+			beq t5, a5, process_float_check_mantissa_done
+			beq t5, a6, process_float_check_mantissa_done
+			sub t5, t5, a0
+			mul t6, t6, a4
+			beqz a7, process_float_check_bigger
+			addi t4, t4, -1
+			j process_float_check_addin
+	  process_float_check_bigger:
+			bnez t6, process_float_process_bigger
+			#not yet broken zero
+			beqz t5, process_float_process_on
+	  process_float_process_bigger:
+			#get here because we've got a mantissa >= 1
+			addi t4, t4, 1
+	  process_float_check_addin:
+			add t6, t6, t5
+	  process_float_process_on:
+			addi t1, t1, 1
+			addi t3, t3, -1
+			j process_float_calculate_mantissa
+	  process_float_check_mantissa_dot:
+			li a7, 1
+			j process_float_process_on
+	  process_float_check_mantissa_e:
+			#store mantissa and correction count
+			#and check exponent
+			sd t6, 16(s9)
+			sd t4, 8(s9)
+			j process_float_search_exponent
+	  process_float_check_mantissa_done:
+			#store mantissa and correction count
+			sd t6, 16(s9)
+			sd t4, 8(s9)
+			j process_float_transfer_to_stack
+	  process_float_search_exponent:
+			li t6, 0	#count of exponent
+			PUSH ra
+			addi a0, t1, 1	#start of string
+			mv a1, t3
+			call sumstring
+			POP ra
+			li a1, -1
+			beq a0, a1, process_float_exponent_fail
+			mv t6, a0
+	  process_float_save_exponent:
+			sd t6, 0(s9)
+	  process_float_transfer_to_stack:
+			#TODO: Implement this - place number on stack
+			addi s9, s9, 32
+			li a1, 0
+			ret
+	  process_float_exponent_fail:
+			addi s9, s9, 32
+			li a1, 1
+			ret
