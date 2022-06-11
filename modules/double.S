@@ -152,7 +152,34 @@
 	sd t4, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER DMAX, DEQUAL, 0x01
+	#another one with = sign
+	#CODEHEADERZ DZEROEQUAL, D0=, DEQUAL, 0x01
+	#(d -- flag)
+  TIL_DZEROEQUAL:
+	.8byte 0x01
+  WA_DZEROEQUAL:
+	.8byte DZEROEQUAL
+  ptr_DEQUAL:
+	.8byte TIL_DEQUAL
+  length_ASCII_DZEROEQUAL:
+	.8byte 0x03
+  beg_DZEROEQUAL:
+	.ascii "D0="
+  end_DZEROEQUAL:
+	.fill 21, 1, 0xFF
+  DZEROEQUAL:
+	ld t0, 0(sp)
+	ld t1, 8(sp)
+	li t2, 0
+	addi sp, sp, 8
+	bnez t0, dzeroequal_done
+	bnez t1, dzeroequal_done
+	li t2, -1
+  dzeroequal_done:
+	sd t2, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER DMAX, DZEROEQUAL, 0x01
 	ld t0, 24(sp)	#lo
 	ld t1, 16(sp)	#hi
 	ld t2, 8(sp)	#lo
@@ -270,9 +297,23 @@
 	sd t0, 8(sp)
 	sd t5, 0(sp)
 	TAILMOD t1
-	
 
-	CODEHEADERZ DTOS, D>S, DTWODIV, 0x01
+	CODEHEADERZ DULESS, DU<, DTWODIV, 0x01
+	#(ud ud -- flag)
+	ld t0, 24(sp)	#lo
+	ld t1, 16(sp)	#hi
+	ld t2, 8(sp)	#lo
+	ld t3, 0(sp)	#hi
+	li t4, 0
+	bgtu t1, t3, duless_done
+	bgeu t0, t2, duless_done
+	li t4, -1
+  duless_done:
+	addi sp, sp, 24
+	sd t4, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ DTOS, D>S, DULESS, 0x01
 	#(d -- n)
 	ld t1, 0(sp)		#higher range
 	ld t0, 8(sp)
