@@ -60,45 +60,46 @@ I.e., load the address into the register and then jump to the register (under th
 hood this and a ***tail*** call are likely to be very similar so this may look
 more inefficient but may not be and certainly won't be by much.)
 
+The TAILMOD macro will also do this for you (eg add __TAILMOD t1__ at the end of
+your word.)
+
 
 ### Initialisation code for your module
 
 You need to write specific initialisation code for your module which should look
 like this (without the line numbers obviously!)
 
->       1      starter:
->       2       PUSH ra
->       3       call getNextAddress     #get the address for tail return
->       4       la t0, NEXTMOD
->       5       sd a0, 0(t0)            #store the tail return address
->       6       la a0, DABS
->       7       addi a0, a0, -56
->       8       PUSH a0
->       9       li t3, 0xFFFFFFFFFFFFF000
->      10       and a0, a0, t3
->      11       li a1, 0x100
->      12       li a2, 0x7      #rw permissions
->      13       call mprotect
->      14       POP a0
->      15       addi a1, a0, 16
->      16       PUSH a1
->      17       call getDictionaryAddress
->      18       POP a1
->      19       sd a0, 0(a1)    #update lead word
->      20       la a0, DTOS     #new end of dictionary
->      21       addi a0, a0, -56
->      22       call setDictionaryAddress       #return new tail of dictionary to caller
->      23       POP ra
->      24	fence.i
->      25       ret
-
-
+>       1   starter:
+>       2         PUSH ra
+>       3         call getNextAddress     #get the address for tail return
+>       4         la t0, NEXTMOD
+>       5         sd a0, 0(t0)            #store the tail return address
+>       6         la a0, DABS
+>       7         addi a0, a0, -56
+>       8         PUSH a0
+>       9         li t3, 0xFFFFFFFFFFFFF000
+>      10         and a0, a0, t3
+>      11         li a1, 0x100
+>      12         li a2, 0x7      #rw permissions
+>      13         call mprotect
+>      14         POP a0
+>      15         addi a1, a0, 16
+>      16         PUSH a1
+>      17         call getDictionary
+>      18         POP a1
+>      19         sd a0, 0(a1)    #update lead word
+>      20         la a0, DTOS     #new end of dictionary
+>      21         addi a0, a0, -56
+>      22         call setDictionary      #return new tail of dictionary to caller
+>      23         POP ra
+>      24         fence.i
+>      25         ret
 
 So at line:
 
-1:        Save the return address
+2:        Save the return address
 
-2:        Get the address for ***NEXT*** (returned in register a0)
+3:        Get the address for ***NEXT*** (returned in register a0)
 
 4 - 5:    Store the returned address
 
