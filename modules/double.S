@@ -122,7 +122,72 @@
 	addi sp, sp, 16		#fix stack
 	TAILMOD t1
 
-	CODEHEADERZ DPLUS, D+, TWOCONSTANT, 0x01
+
+	#have to write out D= by hand as cannot access expansions here
+	#CODEHEADERZ DEQUAL, D=, TWOCONSTANT, 0x01
+	#(xd1 xd2 -- flag)
+  TIL_DEQUAL:
+	.8byte 0x01	#flags
+  WA_DEQUAL:
+	.8byte DEQUAL
+  ptr_TWOCONSTANT:
+	.8byte TIL_TWOCONSTANT
+  length_ASCII_DEQUAL:
+	.8byte 0x02
+  beg_DEQUAL:
+	.ascii "D="
+  end_DEQUAL:
+	.fill 22, 1, 0xFF
+  DEQUAL:
+	ld t0, 24(sp)
+	ld t1, 16(sp)
+	ld t2, 8(sp)
+	ld t3, 0(sp)
+	addi sp, sp, 24
+	li t4, 0
+	bne t0, t2, dequal_done
+	bne t1, t3, dequal_done
+	li t4, -1
+  dequal_done:
+	sd t4, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER DMAX, DEQUAL, 0x01
+	ld t0, 24(sp)	#lo
+	ld t1, 16(sp)	#hi
+	ld t2, 8(sp)	#lo
+	ld t3, 0(sp)	#hi
+	addi sp, sp, 16
+	bgt t3, t1, dmax_second
+	bgt t1, t3, dmax_first
+	#hi parts equal
+	bgtu t2, t0, dmax_second
+  dmax_first:
+	TAILMOD t1
+  dmax_second:
+	sd t2, 8(sp)
+	sd t3, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER DMIN, DMAX, 0x01
+	ld t0, 24(sp)	#lo
+	ld t1, 16(sp)	#hi
+	ld t2, 8(sp)	#lo
+	ld t3, 0(sp)	#hi
+	addi sp, sp, 16
+	blt t3, t1, dmin_second
+	blt t1, t3, dmin_first
+	#hi parts equal
+	bgtu t0, t2, dmin_second
+  dmin_first:
+	TAILMOD t1
+  dmin_second:
+	sd t2, 8(sp)
+	sd t3, 0(sp)
+	TAILMOD t1
+	
+
+	CODEHEADERZ DPLUS, D+, DMIN, 0x01
 	#(d1 d2 -- d3)
 	ld t0, 24(sp)	#lo
 	ld t1, 16(sp)	#hi
