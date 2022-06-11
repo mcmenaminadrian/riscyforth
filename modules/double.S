@@ -185,9 +185,25 @@
 	sd t2, 8(sp)
 	sd t3, 0(sp)
 	TAILMOD t1
+
+	CODEHEADERZ DMINUS, D-, DMIN, 0x01
+	#(d1 d2 -- d3)
+	ld t0, 24(sp)	#lo
+	ld t1, 16(sp)	#hi
+	ld t2, 8(sp)	#lo
+	ld t3, 0(sp)	#hi
+	addi sp, sp, 16
+	sub t4, t0, t2
+	bleu t4, t0, dminus_nooverflow
+	addi t3, t3, 1
+  dminus_nooverflow:
+	sub t5, t1, t3
+	sd t4, 8(sp)
+	sd t5, 0(sp)
+	TAILMOD t1
 	
 
-	CODEHEADERZ DPLUS, D+, DMIN, 0x01
+	CODEHEADERZ DPLUS, D+, DMINUS, 0x01
 	#(d1 d2 -- d3)
 	ld t0, 24(sp)	#lo
 	ld t1, 16(sp)	#hi
@@ -206,7 +222,57 @@
 	sd t5, 0(sp)
 	TAILMOD t1
 
-	CODEHEADERZ DTOS, D>S, DPLUS, 0x01
+	CODEHEADER DNEGATE, DPLUS, 0x01
+	#(d -- d)
+	ld t0, 8(sp)	#lo
+	ld t1, 0(sp)	#hi
+	li t2, -1
+	xor t3, t2, t0
+	xor t4, t2, t1
+	addi t5, t3, 1
+	bgtu t5, t3, dnegate_nooverflow
+	addi t4, t4, 1
+  dnegate_nooverflow:
+	sd t4, 0(sp)
+	sd t5, 8(sp)
+	TAILMOD t1
+
+	CODEHEADERZ DTWOTIMES, D2*, DNEGATE, 0x1
+	#(d -- d)
+	ld t0, 8(sp)	#lo
+	ld t1, 0(sp)	#hi
+	li t2, 0x8000000000000000
+	and t3, t0, t2	#test for carry
+	slli t0, t0, 1
+	slli t1, t1, 1
+	beqz t3, dtwotimes_nooverflow
+	addi t1, t1, 1
+  dtwotimes_nooverflow:
+	sd t0, 8(sp)
+	sd t1, 0(sp)
+	la t1, NEXTMOD
+	ld t1, 0(t1)
+	jr t1
+
+	CODEHEADERZ DTWODIV, D2/, DTWOTIMES, 0x01
+	#(d -- d)
+	ld t0, 8(sp)	#lo
+	ld t1, 0(sp)	#hi
+	li t2, 0x1
+	and t3, t1, t2	#will there be carry?
+	li t4, 2
+	div t5, t1, t4
+	srli t0, t0, 1
+	beqz t3, dtwodiv_nooverflow
+	li t6, 0x8000000000000000	#handle carry
+	or t0, t0, t6
+  dtwodiv_nooverflow:
+	sd t0, 8(sp)
+	sd t5, 0(sp)
+	TAILMOD t1
+	
+
+	CODEHEADERZ DTOS, D>S, DTWODIV, 0x01
 	#(d -- n)
 	ld t1, 0(sp)		#higher range
 	ld t0, 8(sp)
