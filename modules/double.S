@@ -12,20 +12,20 @@
 .balign 8
 	CODEEND DABS, 0x01
 	#(d -- d)
-	ld t1, 8(sp)
-	ld t0, 0(sp)
+	ld t0, 8(sp)	#low
+	ld t1, 0(sp)	#hi
 	li t2, 0x8000000000000000
 	and t3, t2, t1
-	beqz t3, dabs_done
+	beqz t3, dabs_done	#not a negative number
 	li t3, -1
-	xor t1, t1, t3
-	xor t2, t0, t3
-	addi t2, t2, 1
-	bnez t0, dabs_store
-	addi t1, t1, 1
+	xor t4, t0, t3	#low
+	xor t5, t1, t3	#hi
+	addi t6, t4, 1	#low
+	bgt t6, t4, dabs_store	#no overflow
+	addi t5, t5, 1
   dabs_store:
-	sd t1, 8(sp)
-	sd t2, 0(sp)
+	sd t6, 8(sp)
+	sd t5, 0(sp)
   dabs_done:
 	la t1, NEXTMOD
 	ld t1, 0(t1)
@@ -124,26 +124,27 @@
 
 	CODEHEADERZ DPLUS, D+, TWOCONSTANT, 0x01
 	#(d1 d2 -- d3)
-	ld t0, 24(sp)
-	ld t1, 16(sp)
-	ld t2, 8(sp)
-	ld t3, 0(sp)
+	ld t0, 24(sp)	#lo
+	ld t1, 16(sp)	#hi
+	ld t2, 8(sp)	#lo
+	ld t3, 0(sp)	#hi
 	addi sp, sp, 16
-	li t4, 0xFFFFFFFFFFFFFFFF
-	sub t5, t4, t3
-	bgt t3, t5, dplus_past_overflow
-	addi t0, t0, 1
-  dplus_past_overflow:
 	add t4, t0, t2
-	add t5, t1, t3
+	blt t4, t0, dplus_do_overflow
+	blt t4, t2, dplus_do_overflow
+	j dplus_past_overflow
+  dplus_do_overflow:
+	addi t3, t3, 1
+  dplus_past_overflow:
+	add t5, t3, t1
 	sd t4, 8(sp)
 	sd t5, 0(sp)
 	TAILMOD t1
 
 	CODEHEADERZ DTOS, D>S, DPLUS, 0x01
 	#(d -- n)
-	ld t1, 8(sp)		#higher range
-	ld t0, 0(sp)
+	ld t1, 0(sp)		#higher range
+	ld t0, 8(sp)
 	addi sp, sp, 8
 	li t2, 0x8000000000000000
 	and t3, t2, t1
