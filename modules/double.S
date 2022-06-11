@@ -72,7 +72,6 @@
   twoconstant_sanitize_check_started:
 	beqz a3, twoconstant_sanitize_advance
   twoconstant_sanitize_done:
-	#now check we aren't overwriting a dictionary word
 	#start in a0
 	ld a0, 0(t0)
 	#end in a1
@@ -91,22 +90,19 @@
 	mv a0, a2
 	addi a0, a0, 1
 	call incrementInputDisplace
-	ld a2, 0(sp)
-	ld a1, 8(sp)
-	ld a0, 16(sp)
+	ld a2, 0(sp)		#length
+	ld a1, 8(sp)		#end
+	ld a0, 16(sp)		#start
 	addi sp, sp, 24
-	call utility_check_dictionary_match
-	bnez a3, twoconstant_done
-	#not in dictionary
 	#now write out header for new function that will return value
 	mv a1, a2
 	li a5, 0x200	#0x200 for a 2constant
-	call utility_write_function_header
+	call lib_write_function_header
 	la a3, NEXTMOD		#set the call up
 	ld a3, 0(a3)
 	ld a2, 8(sp)
 	ld a1, 0(sp)
-	call utility_two_constant_code
+	call double_two_constant_code
 	#and get out
 	#now check if we are 8 bit aligned on writing address
 	li t0, 0x07
@@ -202,6 +198,34 @@
 	fence.i
 	ret
 
+ #a0 address to start writing
+ #a1 low part of number to write
+ #a2 high part of number to write
+ #a3 next address
+  double_two_constant_code:
+			li t0, 0x297
+			sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
+			li t0, 0x202B303
+			sw t0, 4(a0)						#ld t1, 32(t0)
+			li t0, 0x282B383
+			sw t0, 8(a0)						#ld t2, 40(t0)
+			li t0, 0xFF010113
+			sw t0, 12(a0)						#addi sp, sp, -16
+			li t0, 0x613423
+			sw t0, 16(a0)						#sd t1, 8(sp)
+			li t0, 0x713023
+			sw t0, 20(a0)						#sd t2, 0(sp)
+			#now jump to next
+			li t0, 0x302B303
+			sw t0, 24(a0)						#ld t1, 48(t0)
+			li t0, 0x30067
+			sw t0, 28(a0)						#jr t1
+			sd a2, 32(a0)						#hi						
+			sd a1, 40(a0)						#low
+			sd a3, 48(a0)						#NEXT
+			addi a0, a0, 56
+			fence.i
+			ret
 
 
 .section .init_array

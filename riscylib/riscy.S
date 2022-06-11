@@ -76,8 +76,8 @@
  #a1 low part of number to write
  #a2 high part of number to write
  #a3 next address
- .globl utility_two_constant_code
- utility_two_constant_code:
+ .globl lib_two_constant_code
+ lib_two_constant_code:
 			li t0, 0x297
 			sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
 			li t0, 0x202B303
