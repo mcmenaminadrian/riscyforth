@@ -298,7 +298,24 @@
 	sd t5, 0(sp)
 	TAILMOD t1
 
-	CODEHEADERZ DULESS, DU<, DTWODIV, 0x01
+	CODEHEADERZ DLESS, D<, DTWODIV, 0x01
+	#(d d -- flag)
+	ld t0, 24(sp)	#lo
+	ld t1, 16(sp)	#hi
+	ld t2, 8(sp)	#lo
+	ld t3, 0(sp)	#hi
+	li t4, 0	#flag
+	bgt t1, t3, dless_done
+	bne t1, t3, dless_pass
+	bge t0, t2, dless_done
+  dless_pass:
+	li t4, -1
+  dless_done:
+	addi sp, sp, 24
+	sd t4, 0(sp)
+	TAILMOD t1
+	
+	CODEHEADERZ DULESS, DU<, DLESS, 0x01
 	#(ud ud -- flag)
 	ld t0, 24(sp)	#lo
 	ld t1, 16(sp)	#hi
@@ -306,7 +323,9 @@
 	ld t3, 0(sp)	#hi
 	li t4, 0
 	bgtu t1, t3, duless_done
+	bne t1, t3, duless_pass
 	bgeu t0, t2, duless_done
+  duless_pass:
 	li t4, -1
   duless_done:
 	addi sp, sp, 24
