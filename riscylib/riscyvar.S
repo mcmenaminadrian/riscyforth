@@ -43,5 +43,7 @@
 .extern LOADINGFILE
 .extern MULTILINE
 .extern PULLINANOTHER
+.extern SCRATCH_PAD
+.extern CURRENT_BASE
 
 #endif

@@ -228,9 +228,107 @@
 	sd t4, 8(sp)
 	sd t5, 0(sp)
 	TAILMOD t1
+
+	CODEHEADERZ DD, D., DMINUS, 0x01
+	#(d -- )
+	ld t0, 8(sp)
+	ld t1, 0(sp)
+	addi sp, sp, 16
+	li t2, 0x8000000000000000
+	and t3, t2, t1
+	PUSH t3		#save for later use
+	beqz t3, dd_positive
+	#handling a negative number
+	li t2, -1	
+	xor t3, t2, t0
+	xor t4, t2, t1
+	addi t5, t3, 1
+	bgtu t5, t3, dd_negate_nooverflow
+	addi t4, t4, 1
+  dd_negate_nooverflow:
+	mv t0, t5	#lo
+	mv t1, t4	#hi
+  dd_positive:
+	la t2, SCRATCH_PAD
+	la t3, CURRENT_BASE
+	ld t3, 0(t3)	#base
+	li t5, 10	#for rebasing
+	li a0, 0x30	#0
+	li a1, 0x37	#0 rebased for bases > 10
+	li t4, 0	#count
+  dd_generate_characters_hi:
+	beqz t1, dd_process_lo	#don't want a leading 0
+	remu a2, t1, t3
+	divu t1, t1, t3
+	bgeu a2, t5, dd_bigger_remainder_hi
+	add t6, a2, a0
+	call dd_paste_in
+	j dd_generate_characters_hi
+  dd_bigger_remainder_hi:
+	add t6, a2, a1
+	call dd_paste_in
+	j dd_generate_characters_hi
+  dd_process_lo:
+	remu a2, t0, t3
+	divu t0, t0, t3
+	bgeu a2, t5, dd_bigger_remainder_lo
+	add t6, a2, a0
+	call dd_paste_in
+	j dd_check_lo_exhausted
+  dd_bigger_remainder_lo:
+	add t6, a2, a1
+	call dd_paste_in
+  dd_check_lo_exhausted:
+	bnez t0, dd_process_lo
+	#now output string
+	#adding minus sign if needed
+	POP t0
+	beqz t0, dd_reverse
+	call dd_paste_minus
+  dd_reverse:
+	la t0, SCRATCH_PAD
+	mv t5, t0
+	mv t6, t2
+	addi t2, t2, -1
+  dd_reverse_loop:
+	bgeu t0, t2, dd_reverse_done
+	lb t1, 0(t0)
+	lb t3, 0(t2)
+	sb t1, 0(t2)
+	sb t3, 0(t0)
+	addi t0, t0, 1
+	addi t2, t2, -1
+	j dd_reverse_loop
+  dd_reverse_done:
+	li t4, 0x20 #space for padding
+	sb t4, 0(t6)
+	addi t4, t4, 0
+	WRITESTRINGR t5, t4
+	TAILMOD t1
+  dd_paste_minus:
+	li t6, 45
+  dd_paste_in:
+	#t6 has character
+	sb t6, 0(t2)
+	addi t4, t4, 1
+	addi t2, t2, 1
+	ret
+
+	CODEHEADERZ DZEROLESS, D0<, DD, 0x01
+	#(d -- flag)
+	ld t0, 0(sp)
+	addi sp, sp, 8
+	li t1, 0x8000000000000000
+	and t2, t0, t1
+	li t3, 0	#flag
+	beqz t2, dzeroless_done
+	li t3, -1
+  dzeroless_done:
+	sd t3, 0(sp)
+	TAILMOD t1
 	
 
-	CODEHEADERZ DPLUS, D+, DMINUS, 0x01
+	CODEHEADERZ DPLUS, D+, DZEROLESS, 0x01
 	#(d1 d2 -- d3)
 	ld t0, 24(sp)	#lo
 	ld t1, 16(sp)	#hi
@@ -395,29 +493,29 @@
  #a2 high part of number to write
  #a3 next address
   double_two_constant_code:
-			li t0, 0x297
-			sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
-			li t0, 0x202B303
-			sw t0, 4(a0)						#ld t1, 32(t0)
-			li t0, 0x282B383
-			sw t0, 8(a0)						#ld t2, 40(t0)
-			li t0, 0xFF010113
-			sw t0, 12(a0)						#addi sp, sp, -16
-			li t0, 0x613423
-			sw t0, 16(a0)						#sd t1, 8(sp)
-			li t0, 0x713023
-			sw t0, 20(a0)						#sd t2, 0(sp)
-			#now jump to next
-			li t0, 0x302B303
-			sw t0, 24(a0)						#ld t1, 48(t0)
-			li t0, 0x30067
-			sw t0, 28(a0)						#jr t1
-			sd a2, 32(a0)						#hi						
-			sd a1, 40(a0)						#low
-			sd a3, 48(a0)						#NEXT
-			addi a0, a0, 56
-			fence.i
-			ret
+	li t0, 0x297
+	sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
+	li t0, 0x202B303
+	sw t0, 4(a0)						#ld t1, 32(t0)
+	li t0, 0x282B383
+	sw t0, 8(a0)						#ld t2, 40(t0)
+	li t0, 0xFF010113
+	sw t0, 12(a0)						#addi sp, sp, -16
+	li t0, 0x613423
+	sw t0, 16(a0)						#sd t1, 8(sp)
+	li t0, 0x713023
+	sw t0, 20(a0)						#sd t2, 0(sp)
+	#now jump to next
+	li t0, 0x302B303
+	sw t0, 24(a0)						#ld t1, 48(t0)
+	li t0, 0x30067
+	sw t0, 28(a0)						#jr t1
+	sd a2, 32(a0)						#hi						
+	sd a1, 40(a0)						#low
+	sd a3, 48(a0)						#NEXT
+	addi a0, a0, 56
+	fence.i
+	ret
 
 
 .section .init_array
