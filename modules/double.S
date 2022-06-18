@@ -231,44 +231,51 @@
 
 	CODEHEADERZ DD, D., DMINUS, 0x01
 	#(d -- )
-	ld t0, 8(sp)
-	ld t1, 0(sp)
-	addi sp, sp, 16
-	li t2, 0x8000000000000000
-	and t3, t2, t1
-	PUSH t3		#save for later use
-	beqz t3, dd_positive
+	call getScratchPad
+	PUSH a0
+	call getCurrentBase
+	mv t3, a0	#t3 - CURRENT_BASE
+	ld t2, 0(sp)	#t2 - SCRATCH_PAD
+	ld t0, 16(sp)	#t0 - lo
+	ld t1, 8(sp)	#t1 - hi
+	addi sp, sp, 24
+	li t4, 0x8000000000000000
+	and t5, t3, t1
+	PUSH t2		#scratch_pad saved
+	PUSH t5		#save for later use
+	beqz t5, dd_positive
 	#handling a negative number
-	li t2, -1	
-	xor t3, t2, t0
-	xor t4, t2, t1
-	addi t5, t3, 1
-	bgtu t5, t3, dd_negate_nooverflow
-	addi t4, t4, 1
+	li t5, -1
+	xor t4, t5, t0
+	xor t6, t5, t1
+	addi a0, t4, 1
+	bgtu a0, t3, dd_negate_nooverflow
+	addi a1, t6, 1
   dd_negate_nooverflow:
-	mv t0, t5	#lo
-	mv t1, t4	#hi
+	mv t0, a0	#lo
+	mv t1, a1	#hi
   dd_positive:
-	la t2, SCRATCH_PAD
-	la t3, CURRENT_BASE
-	ld t3, 0(t3)	#base
 	li t5, 10	#for rebasing
 	li a0, 0x30	#0
 	li a1, 0x37	#0 rebased for bases > 10
 	li t4, 0	#count
-  dd_generate_characters_hi:
-	beqz t1, dd_process_lo	#don't want a leading 0
-	remu a2, t1, t3
-	divu t1, t1, t3
-	bgeu a2, t5, dd_bigger_remainder_hi
+	bnez t1, dd_wide
+	#simplest case
+	addi sp, sp, 8	#can't be negative
+  dd_generate_characters_simple:
+	remu a2, t0, t3
+	divu t0, t0, t3
+	bgeu a2, t5, dd_simple_remainder
 	add t6, a2, a0
 	call dd_paste_in
-	j dd_generate_characters_hi
-  dd_bigger_remainder_hi:
+	beqz t0, dd_reverse	#0
+	j dd_generate_characters_simple
+  dd_simple_remainder:
 	add t6, a2, a1
 	call dd_paste_in
-	j dd_generate_characters_hi
-  dd_process_lo:
+	j dd_generate_characters_simple
+
+  dd_wide:
 	remu a2, t0, t3
 	divu t0, t0, t3
 	bgeu a2, t5, dd_bigger_remainder_lo
@@ -285,8 +292,9 @@
 	POP t0
 	beqz t0, dd_reverse
 	call dd_paste_minus
+
   dd_reverse:
-	la t0, SCRATCH_PAD
+	POP t0		#SCRATCH_PAD
 	mv t5, t0
 	mv t6, t2
 	addi t2, t2, -1

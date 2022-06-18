@@ -11,9 +11,10 @@ extern unsigned long dictionary;
 extern unsigned long newdictionary;
 extern unsigned long createwritepoint;
 extern unsigned long INPUT_DISPLACE;
+extern unsigned long SCRATCH_PAD;
+extern unsigned long CURRENT_BASE;
 
 unsigned long nextAddress;
-unsigned long dictionaryAddress;
 
 unsigned long getNextAddress(void)
 {
@@ -23,16 +24,6 @@ unsigned long getNextAddress(void)
 void setNextAddress(unsigned long addressIn)
 {
 	nextAddress = addressIn;
-}
-
-unsigned long getDictionaryAddress(void)
-{
-	return dictionaryAddress;
-}
-
-void setDictionaryAddress(unsigned long addressIn)
-{
-	dictionaryAddress = addressIn;
 }
 
 unsigned long getInputStart(void)
@@ -83,4 +74,14 @@ void setCreateWritePoint(unsigned long addressIn)
 void incrementInputDisplace(unsigned long increment)
 {
 	INPUT_DISPLACE += increment;
+}
+
+unsigned long *getScratchPad(void)
+{
+	return &SCRATCH_PAD;
+}
+
+unsigned long getCurrentBase(void)
+{
+	return CURRENT_BASE;
 }
