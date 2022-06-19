@@ -229,7 +229,102 @@
 	sd t5, 0(sp)
 	TAILMOD t1
 
-	CODEHEADERZ DD, D., DMINUS, 0x01
+	CODEHEADERZ DDOTR, D.R, DMINUS, 0x01
+	#(d n --)
+	call getScratchPad
+	PUSH a0
+	call getCurrentBase
+	mv t3, a0	#t3 - CURRENT_BASE
+	ld t2, 0(sp)	#t2 - SCRATCH_PAD
+	ld a6, 8(sp)	#a6 - field width
+	ld t0, 24(sp)	#t0 - lo
+	ld t1, 16(sp)	#t1 - hi
+	addi sp, sp, 32
+	li t4, 0x8000000000000000
+	and t5, t4, t1
+	PUSH t2		#scratch_pad saved
+	PUSH t5		#save for later use
+	beqz t5, ddotr_positive
+	#handling a negative number
+	li t5, -1
+	xor t4, t5, t0
+	xor t6, t5, t1
+	addi a0, t4, 1
+	bgtu a0, t3, ddotr_negate_nooverflow
+	addi a1, t6, 1
+  ddotr_negate_nooverflow:
+	mv t0, a0	#lo
+	mv t1, a1	#hi
+  ddotr_positive:
+	li t5, 10	#for rebasing
+	li a0, 0x30	#0
+	li a1, 0x37	#0 rebased for bases > 10
+	li t4, 0	#count
+	bnez t1, ddotr_wide_setup
+	#simplest case - lo cell only
+	addi sp, sp, 8	#can't be negative
+  ddotr_generate_characters_simple:
+	remu a2, t0, t3
+	divu t0, t0, t3
+	bgeu a2, t5, ddotr_simple_remainder
+	add t6, a2, a0
+	call dd_paste_in
+	beqz t0, ddotr_reverse	#0
+	j ddotr_generate_characters_simple
+  ddotr_simple_remainder:
+	add t6, a2, a1
+	call dd_paste_in
+	j ddotr_generate_characters_simple
+  ddotr_wide_setup:
+	#preserve numbers for character mapping
+	addi sp, sp, -16
+	sd a0, 0(sp)
+	sd a1, 8(sp)
+  ddotr_wide:
+	#general case both cells
+	remu a0, t1, t3
+	mv a2, t3
+	mv a1, t0
+	call dd_long_division_unsigned
+	beqz a7, ddotr_reverse
+	mv t0, a0
+	mv t6, a1
+	bgeu t6, t5, ddotr_wide_remainder
+	ld a0, 0(sp)
+	add t6, t6, a0
+	call dd_paste_in
+  ddotr_update_double:
+	divu t1, t1, t3
+	bnez t1, ddotr_wide
+	beqz t0, ddotr_reverse_setup
+	j ddotr_wide
+  ddotr_wide_remainder:
+	ld a1, 8(sp)
+	add t6, t6, a1
+	call dd_paste_in
+  ddotr_reverse_setup:
+	addi sp, sp, 16		#drop storage
+ 	#process sign
+	POP t0
+	beqz t0, ddotr_reverse
+	call dd_paste_minus
+  ddotr_reverse:
+	POP t0		#SCRATCH_PAD
+	mv t5, t0
+	mv t6, t2
+	sub a5, t2, t0	#length
+	bgeu a5, a6, dd_ddotr_join
+	#inject spaces
+	sub a5, a6, a5
+	li t6, 0x020
+  ddotr_pad:
+	call dd_paste_in
+	addi a5, a5, -1
+	bnez a5, ddotr_pad
+	mv a5, a6
+	j dd_ddotr_join
+
+	CODEHEADERZ DD, D., DDOTR, 0x01
 	#(d -- )
 	call getScratchPad
 	PUSH a0
@@ -313,6 +408,7 @@
 	mv t5, t0
 	mv t6, t2
 	sub a5, t2, t0	#length
+  dd_ddotr_join:
 	addi t2, t2, -1
   dd_reverse_loop:
 	bgeu t0, t2, dd_reverse_done
@@ -324,10 +420,8 @@
 	addi t2, t2, -1
 	j dd_reverse_loop
   dd_reverse_done:
-	li t4, 0x20 #space for padding
-	sb t4, 0(t6)
-	addi a5, a5, 1
 	WRITESTRINGR t5, a5
+	WRITECHAR 0x20	#pad with space
 	TAILMOD t1
   dd_paste_minus:
 	li t6, 45
