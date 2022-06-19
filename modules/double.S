@@ -240,7 +240,7 @@
 	ld t1, 8(sp)	#t1 - hi
 	addi sp, sp, 24
 	li t4, 0x8000000000000000
-	and t5, t3, t1
+	and t5, t4, t1
 	PUSH t2		#scratch_pad saved
 	PUSH t5		#save for later use
 	beqz t5, dd_positive
@@ -259,8 +259,8 @@
 	li a0, 0x30	#0
 	li a1, 0x37	#0 rebased for bases > 10
 	li t4, 0	#count
-	bnez t1, dd_wide
-	#simplest case
+	bnez t1, dd_wide_setup
+	#simplest case - lo cell only
 	addi sp, sp, 8	#can't be negative
   dd_generate_characters_simple:
 	remu a2, t0, t3
@@ -274,29 +274,45 @@
 	add t6, a2, a1
 	call dd_paste_in
 	j dd_generate_characters_simple
-
+  dd_wide_setup:
+	#preserve numbers for charaqter mapping
+	addi sp, sp, -16
+	sd a0, 0(sp)
+	sd a1, 8(sp)
   dd_wide:
-	remu a2, t0, t3
-	divu t0, t0, t3
-	bgeu a2, t5, dd_bigger_remainder_lo
-	add t6, a2, a0
+	#general case both cells
+	remu a0, t1, t3
+	mv a2, t3
+	mv a1, t0
+	call dd_long_division_unsigned
+	beqz a7, dd_reverse
+	mv t0, a0
+	mv t6, a1
+	bgeu t6, t5, dd_wide_remainder
+	ld a0, 0(sp)
+	add t6, t6, a0
 	call dd_paste_in
-	j dd_check_lo_exhausted
-  dd_bigger_remainder_lo:
-	add t6, a2, a1
+  dd_update_double:
+	divu t1, t1, t3
+	bnez t1, dd_wide
+	beqz t0, dd_reverse_setup
+	j dd_wide
+  dd_wide_remainder:
+	ld a1, 8(sp)
+	add t6, t6, a1
 	call dd_paste_in
-  dd_check_lo_exhausted:
-	bnez t0, dd_process_lo
-	#now output string
-	#adding minus sign if needed
+	j dd_update_double
+  dd_reverse_setup:
+	addi sp, sp, 16		#drop storage
+ 	#process sign
 	POP t0
 	beqz t0, dd_reverse
 	call dd_paste_minus
-
   dd_reverse:
 	POP t0		#SCRATCH_PAD
 	mv t5, t0
 	mv t6, t2
+	sub a5, t2, t0	#length
 	addi t2, t2, -1
   dd_reverse_loop:
 	bgeu t0, t2, dd_reverse_done
@@ -310,8 +326,8 @@
   dd_reverse_done:
 	li t4, 0x20 #space for padding
 	sb t4, 0(t6)
-	addi t4, t4, 0
-	WRITESTRINGR t5, t4
+	addi a5, a5, 1
+	WRITESTRINGR t5, a5
 	TAILMOD t1
   dd_paste_minus:
 	li t6, 45
@@ -321,6 +337,64 @@
 	addi t4, t4, 1
 	addi t2, t2, 1
 	ret
+
+  dd_long_division_unsigned:
+  #a0 - remainder
+  #a1 - dividend
+  #a2 - divisor
+  #OUTPUT
+  #a0 quotient
+  #a1 remainder
+  #a7 1 if answer valid
+	li a7, 0
+	#check validity
+	beqz a2, long_division_unsigned_quit
+	#get extra registers
+	addi sp, sp, -56
+	sd s0, 0(sp)
+	sd s1, 8(sp)
+	sd s2, 16(sp)
+	sd s3, 24(sp)
+	sd s4, 32(sp)
+	sd s5, 40(sp)
+	sd s6, 48(sp)
+	mv s0, a0
+	mv s1, a1
+	mv s2, a2
+	li a7, 1
+	#set up the calculation
+	li s3, 0x8000000000000000
+	li a3, 63
+	li a0, 0
+	li a1, 0
+  dd_long_division_unsigned_calculate:
+	and s4, s1, s3
+	srl s5, s4, a3		#just want the bit
+	slli s0, s0, 1
+	add s0, s0, s5
+	divu s5, s0, s2
+	beqz s5, dd_long_division_unsigned_advance
+	sll s6, s5, a3
+	or a0, a0, s6
+	remu s0, s0, s2
+  dd_long_division_unsigned_advance:
+	srli s3, s3, 1
+	beqz s3, dd_long_division_unsigned_done
+	addi a3, a3, -1
+	j dd_long_division_unsigned_calculate
+  dd_long_division_unsigned_done:
+	mv a1, s0
+	ld s0, 0(sp)
+	ld s1, 8(sp)
+	ld s2, 16(sp)
+	ld s3, 24(sp)
+	ld s4, 32(sp)
+	ld s5, 40(sp)
+	ld s6, 48(sp)
+	addi sp, sp, 56
+  dd_long_division_unsigned_quit:
+	ret
+
 
 	CODEHEADERZ DZEROLESS, D0<, DD, 0x01
 	#(d -- flag)
