@@ -489,7 +489,6 @@
   dd_long_division_unsigned_quit:
 	ret
 
-
 	CODEHEADERZ DZEROLESS, D0<, DD, 0x01
 	#(d -- flag)
 	ld t0, 0(sp)
@@ -502,15 +501,29 @@
   dzeroless_done:
 	sd t3, 0(sp)
 	TAILMOD t1
-	
 
-	CODEHEADERZ DPLUS, D+, DZEROLESS, 0x01
+	CODEHEADERZ MPLUS, M+, DZEROLESS, 0x01
+	#(d n -- d)
+	ld t2, 0(sp)	#lo
+	li t3, 0	#hi - zero
+	ld t1, 8(sp)	#hi
+	ld t0, 16(sp)	#lo
+	addi sp, sp, 8
+	bltz t2, mplus_process_negative
+	j dplus_mplus_join
+  mplus_process_negative:
+	#sign extend
+	li t3, -1
+	j dplus_mplus_join
+	
+	CODEHEADERZ DPLUS, D+, MPLUS, 0x01
 	#(d1 d2 -- d3)
 	ld t0, 24(sp)	#lo
 	ld t1, 16(sp)	#hi
 	ld t2, 8(sp)	#lo
 	ld t3, 0(sp)	#hi
 	addi sp, sp, 16
+  dplus_mplus_join:
 	add t4, t0, t2
 	blt t4, t0, dplus_do_overflow
 	blt t4, t2, dplus_do_overflow
