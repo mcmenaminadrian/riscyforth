@@ -502,7 +502,29 @@
 	sd t3, 0(sp)
 	TAILMOD t1
 
-	CODEHEADERZ MPLUS, M+, DZEROLESS, 0x01
+	CODEHEADERZ MTIMESDIV, M*/, DZEROLESS, 0x01
+	#(d n1 n2 -- d)
+	ld t0, 0(sp)	#n2
+	ld t1, 8(sp)    #n1
+	ld t2, 16(sp)	#hi
+	ld t3, 24(sp)	#lo
+	mulhsu t4, t1, t3
+	mul t3, t3, t1
+	mulh t5, t2, t1
+	mul t2, t2, t1
+	add t2, t2, t4
+	rem t5, t5, t0
+	add t2, t2, t5
+	rem t5, t2, t0
+	div t2, t2, t0
+	add t3, t3, t5
+	div t3, t3, t0
+	addi sp, sp, 16
+	sd t3, 8(sp)
+	sd t2, 0(sp)
+	TAILMOD t1
+	
+	CODEHEADERZ MPLUS, M+, MTIMESDIV, 0x01
 	#(d n -- d)
 	ld t2, 0(sp)	#lo
 	li t3, 0	#hi - zero
