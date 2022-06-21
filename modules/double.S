@@ -508,17 +508,34 @@
 	ld t1, 8(sp)    #n1
 	ld t2, 16(sp)	#hi
 	ld t3, 24(sp)	#lo
+	#get sign for multiplication
+	li a0, 0	#positive sign required
+	bgez t1, mtimesdiv_check_double_sign
+	li a0, 1	#negative sign required
+  mtimesdiv_check_double_sign:
+	bgez t2, mtimesdiv_begin_calculation
+	addi a0, a0, -1
+  mtimesdiv_begin_calculation:
+	#produce intermediate first
 	mulhsu t4, t1, t3
 	mul t3, t3, t1
 	mulh t5, t2, t1
 	mul t2, t2, t1
 	add t2, t2, t4
+	#intermediate is now (hi)t5-t2-t3(lo)
 	rem t5, t5, t0
 	add t2, t2, t5
 	rem t5, t2, t0
 	div t2, t2, t0
 	add t3, t3, t5
 	div t3, t3, t0
+	#check sign
+	beqz t2, mtimesdiv_check_sign_extension
+	j mtimesdiv_store
+ mtimesdiv_check_sign_extension:
+	beqz a0, mtimesdiv_store
+	li t2, -1
+ mtimesdiv_store:
 	addi sp, sp, 16
 	sd t3, 8(sp)
 	sd t2, 0(sp)
