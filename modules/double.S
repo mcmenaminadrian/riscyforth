@@ -344,11 +344,11 @@
 	xor t4, t5, t0
 	xor t6, t5, t1
 	addi a0, t4, 1
-	bgtu a0, t3, dd_negate_nooverflow
-	addi a1, t6, 1
+	bgt a0, t4, dd_negate_nooverflow
+	addi t6, t6, 1
   dd_negate_nooverflow:
 	mv t0, a0	#lo
-	mv t1, a1	#hi
+	mv t1, t6	#hi
   dd_positive:
 	li t5, 10	#for rebasing
 	li a0, 0x30	#0
@@ -356,21 +356,20 @@
 	li t4, 0	#count
 	bnez t1, dd_wide_setup
 	#simplest case - lo cell only
-	addi sp, sp, 8	#can't be negative
   dd_generate_characters_simple:
 	remu a2, t0, t3
 	divu t0, t0, t3
 	bgeu a2, t5, dd_simple_remainder
 	add t6, a2, a0
 	call dd_paste_in
-	beqz t0, dd_reverse	#0
+	beqz t0, dd_prepare_reverse	#0
 	j dd_generate_characters_simple
   dd_simple_remainder:
 	add t6, a2, a1
 	call dd_paste_in
 	j dd_generate_characters_simple
   dd_wide_setup:
-	#preserve numbers for charaqter mapping
+	#preserve numbers for character mapping
 	addi sp, sp, -16
 	sd a0, 0(sp)
 	sd a1, 8(sp)
@@ -399,6 +398,7 @@
 	j dd_update_double
   dd_reverse_setup:
 	addi sp, sp, 16		#drop storage
+  dd_prepare_reverse:
  	#process sign
 	POP t0
 	beqz t0, dd_reverse
@@ -544,7 +544,7 @@
 	xor t3, t2, t0
 	xor t4, t2, t1
 	addi t5, t3, 1
-	bgtu t5, t3, dnegate_nooverflow
+	bgt t5, t3, dnegate_nooverflow
 	addi t4, t4, 1
   dnegate_nooverflow:
 	sd t4, 0(sp)
