@@ -523,12 +523,18 @@
 	mul t2, t2, t1
 	add t2, t2, t4
 	#intermediate is now (hi)t5-t2-t3(lo)
-	rem t5, t5, t0
-	add t2, t2, t5
-	rem t5, t2, t0
-	div t2, t2, t0
-	add t3, t3, t5
-	div t3, t3, t0
+	#now implement long division
+	rem a0, t5, t0
+	mv a1, t2
+	mv a2, t0
+	call dd_long_division_unsigned
+	#store result and go again
+	mv t2, a0
+	mv a0, a1
+	mv a1, t2
+	mv a2, t0
+	call dd_long_division_unsigned
+	mv t2, a0
 	#check sign
 	beqz t2, mtimesdiv_check_sign_extension
 	j mtimesdiv_store
