@@ -442,7 +442,7 @@
   #a7 1 if answer valid
 	li a7, 0
 	#check validity
-	beqz a2, long_division_unsigned_quit
+	beqz a2, dd_long_division_unsigned_quit
 	#get extra registers
 	addi sp, sp, -56
 	sd s0, 0(sp)
@@ -527,25 +527,110 @@
 	rem a0, t5, t0
 	mv a1, t2
 	mv a2, t0
-	call dd_long_division_unsigned
+	mv a3, t5
+	call mtimesdiv_long_division_signed
+	sd a0, 8(sp)
 	#store result and go again
 	mv t2, a0
 	mv a0, a1
 	mv a1, t2
 	mv a2, t0
-	call dd_long_division_unsigned
+	mv a3, t5
+	call mtimesdiv_long_division_signed
+	sd a0, 0(sp)
 	mv t2, a0
 	#check sign
 	beqz t2, mtimesdiv_check_sign_extension
 	j mtimesdiv_store
- mtimesdiv_check_sign_extension:
+  mtimesdiv_check_sign_extension:
 	beqz a0, mtimesdiv_store
 	li t2, -1
- mtimesdiv_store:
+  mtimesdiv_store:
 	addi sp, sp, 16
-	sd t3, 8(sp)
-	sd t2, 0(sp)
+#	sd t3, 8(sp)
+#	sd t2, 0(sp)
 	TAILMOD t1
+  mtimesdiv_long_division_signed:
+  #a0 - remainder
+  #a1 - dividend
+  #a2 - divisor
+  #a3 - hi word (for sign)
+  #OUTPUT
+  #a0 quotient
+  #a1 remainder
+  #a7 1 if answer valid
+	li a7, 0
+	#check validity
+	beqz a2, mtimesdiv_long_division_signed_quit
+	#get extra registers
+	addi sp, sp, -56
+	sd s0, 0(sp)
+	sd s1, 8(sp)
+	sd s2, 16(sp)
+	sd s3, 24(sp)
+	sd s4, 32(sp)
+	sd s5, 40(sp)
+	sd s6, 48(sp)
+	mv s0, a0	#s0 - remainder in
+	mv s1, a1	#s1 - dividend in
+	mv s2, a2	#s2 - divisor in
+	li a7, 1
+	li a6, 0 	#sign - 0 for positive
+	#calculate sign
+	li s3, 0x8000000000000000
+	and s4, a3, s3
+	srli s4, s4, 63
+	and s5, a2, s3
+	srli s5, s5, 63
+	xor a6, s4, s5
+	#set up the calculation
+	li a3, 63
+	li a0, 0
+	li a1, 0
+  mtimesdiv_long_division_signed_calculate:
+	and s4, s1, s3
+	srl s5, s4, a3		#just want the bit
+	slli s0, s0, 1
+	add s0, s0, s5
+	beqz a6, mtimesdiv_long_division_signed_unsigned
+	div s5, s0, s2
+	j mtimesdiv_long_division_signed_continue
+  mtimesdiv_long_division_signed_unsigned:
+	divu s5, s0, s2
+  mtimesdiv_long_division_signed_continue:
+	beqz s5, mtimesdiv_long_division_signed_advance
+	sll s6, s5, a3
+	or a0, a0, s6
+	beqz a0, mtimesdiv_long_division_signed_rem_unsigned
+	rem s0, s0, s2
+	j mtimesdiv_long_division_signed_advance
+  mtimesdiv_long_division_signed_rem_unsigned:
+	remu s0, s0, s2
+  mtimesdiv_long_division_signed_advance:
+	srli s3, s3, 1
+	beqz s3, mtimesdiv_long_division_signed_done
+	addi a3, a3, -1
+	j mtimesdiv_long_division_signed_calculate
+  mtimesdiv_long_division_signed_done:
+	#correct sign
+	li s3, 0x8000000000000000
+	and s4, a0, s3
+	srli s4, s4, 63
+	xor s5, s4, a6
+	beqz s5, mtimesdiv_long_division_signed_leave
+	neg a0, a0
+  mtimesdiv_long_division_signed_leave:
+	mv a1, s0
+	ld s0, 0(sp)
+	ld s1, 8(sp)
+	ld s2, 16(sp)
+	ld s3, 24(sp)
+	ld s4, 32(sp)
+	ld s5, 40(sp)
+	ld s6, 48(sp)
+	addi sp, sp, 56
+  mtimesdiv_long_division_signed_quit:
+	ret
 	
 	CODEHEADERZ MPLUS, M+, MTIMESDIV, 0x01
 	#(d n -- d)
