@@ -508,6 +508,7 @@
 	ld t1, 8(sp)    #n1
 	ld t2, 16(sp)	#hi
 	ld t3, 24(sp)	#lo
+	addi sp, sp, 16
 	#get sign for multiplication
 	li a0, 0	#positive sign required
 	bgez t1, mtimesdiv_check_double_sign
@@ -528,17 +529,10 @@
 	mv a1, t2
 	mv a2, t0
 	mv a3, t5
-	call mtimesdiv_long_division_signed
-	sd a0, 8(sp)
-	#store result and go again
-	mv t2, a0
-	mv a0, a1
-	mv a1, t2
-	mv a2, t0
-	mv a3, t5
-	call mtimesdiv_long_division_signed
+	mv a4, t3
+	call mtimesdiv_very_long_division
+	sd a1, 8(sp)
 	sd a0, 0(sp)
-	mv t2, a0
 	#check sign
 	beqz t2, mtimesdiv_check_sign_extension
 	j mtimesdiv_store
@@ -546,18 +540,18 @@
 	beqz a0, mtimesdiv_store
 	li t2, -1
   mtimesdiv_store:
-	addi sp, sp, 16
 #	sd t3, 8(sp)
 #	sd t2, 0(sp)
 	TAILMOD t1
-  mtimesdiv_long_division_signed:
+  mtimesdiv_very_long_division:
   #a0 - remainder
-  #a1 - dividend
+  #a1 - dividend hi
+  #a4 - dividend lo
   #a2 - divisor
   #a3 - hi word (for sign)
   #OUTPUT
-  #a0 quotient
-  #a1 remainder
+  #a0 quotient -hi
+  #a1 quotient - lo
   #a7 1 if answer valid
 	li a7, 0
 	#check validity
@@ -601,7 +595,7 @@
 	beqz s5, mtimesdiv_long_division_signed_advance
 	sll s6, s5, a3
 	or a0, a0, s6
-	beqz a0, mtimesdiv_long_division_signed_rem_unsigned
+	beqz a6, mtimesdiv_long_division_signed_rem_unsigned
 	rem s0, s0, s2
 	j mtimesdiv_long_division_signed_advance
   mtimesdiv_long_division_signed_rem_unsigned:
@@ -612,6 +606,41 @@
 	addi a3, a3, -1
 	j mtimesdiv_long_division_signed_calculate
   mtimesdiv_long_division_signed_done:
+        # have now calculated hi quotient - in a0
+	# now repeat
+	mv s1, a4
+	PUSH a0
+	li s3, 0x8000000000000000
+	li a3, 63
+	li a0, 0
+	li a1, 0
+  very_long_division_calculate:
+	and s4, s1, s3
+	srl s5, s4, a3		#just want the bit
+	slli s0, s0, 1
+	add s0, s0, s5
+	beqz a6, very_long_division_unsigned
+	div s5, s0, s2
+	j very_long_division_continue
+  very_long_division_unsigned:
+	divu s5, s0, s2
+  very_long_division_continue:
+	beqz s5, very_long_division_advance
+	sll s6, s5, a3
+	or a0, a0, s6
+	beqz a6, very_long_division_remainder_unsigned
+	rem s0, s0, s2
+	j very_long_division_advance
+  very_long_division_remainder_unsigned:
+	remu s0, s0, s2
+  very_long_division_advance:
+	srli s3, s3, 1
+	beqz s3, very_long_division_done
+	addi a3, a3, -1
+	j very_long_division_calculate
+  very_long_division_done:
+	mv a1, a0
+	POP a0
 	#correct sign
 	li s3, 0x8000000000000000
 	and s4, a0, s3
@@ -619,8 +648,8 @@
 	xor s5, s4, a6
 	beqz s5, mtimesdiv_long_division_signed_leave
 	neg a0, a0
+	neg a1, a1
   mtimesdiv_long_division_signed_leave:
-	mv a1, s0
 	ld s0, 0(sp)
 	ld s1, 8(sp)
 	ld s2, 16(sp)
