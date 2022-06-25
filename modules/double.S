@@ -520,12 +520,17 @@
 	#produce intermediate first
 	mulhsu t4, t1, t3
 	mul t3, t3, t1
-	mulh t5, t2, t1
+	mulh t5, t1, t2
 	mul t2, t2, t1
 	add t2, t2, t4
+	#handle sign issue
+	bnez t5, mtimesdiv_got_long_form
+	beqz a0, mtimesdiv_got_long_form
+	li t5, -1
+  mtimesdiv_got_long_form:
 	#intermediate is now (hi)t5-t2-t3(lo)
 	#now implement long division
-	rem a0, t5, t0
+	mv a0, t5
 	mv a1, t2
 	mv a2, t0
 	mv a3, t5
@@ -533,18 +538,9 @@
 	call mtimesdiv_very_long_division
 	sd a1, 8(sp)
 	sd a0, 0(sp)
-	#check sign
-	beqz t2, mtimesdiv_check_sign_extension
-	j mtimesdiv_store
-  mtimesdiv_check_sign_extension:
-	beqz a0, mtimesdiv_store
-	li t2, -1
-  mtimesdiv_store:
-#	sd t3, 8(sp)
-#	sd t2, 0(sp)
 	TAILMOD t1
   mtimesdiv_very_long_division:
-  #a0 - remainder
+  #a0 - hiword
   #a1 - dividend hi
   #a4 - dividend lo
   #a2 - divisor
@@ -565,7 +561,7 @@
 	sd s4, 32(sp)
 	sd s5, 40(sp)
 	sd s6, 48(sp)
-	mv s0, a0	#s0 - remainder in
+	mv s0, a0	#s0 - hiword - later remainder
 	mv s1, a1	#s1 - dividend in
 	mv s2, a2	#s2 - divisor in
 	li a7, 1
@@ -577,7 +573,33 @@
 	and s5, a2, s3
 	srli s5, s5, 63
 	xor a6, s4, s5
+	beqz a6, mtimesdiv_long_division_setup
+	#want everything to be positive
+	and s6, s3, s2
+	beqz s6, mtimesdiv_correct_dividend
+	li s6, -1
+	xor s2, s2, s6
+	addi s2, s2, 1
+	j mtimesdiv_long_division_setup
+  mtimesdiv_correct_dividend:
+	li s6, -1
+	xor s5, a4, s6
+	xor a1, s1, s6
+	xor a0, s0, s6
+	addi a4, s5, 1
+	bgt a4, s5, mtimesdiv_long_division_setup_full
+  mtimesdiv_correct_upper:
+	addi s1, a1, 1
+	bgt s1, a1, mtimesdiv_long_division_half_full
+	addi s0, a0, 1
+	j mtimesdiv_long_division_setup
+  mtimesdiv_long_division_setup_full:
+	mv s1, a1
+  mtimesdiv_long_division_setup_half_full:
+	mv s0, a0
+  mtimesdiv_long_division_setup:
 	#set up the calculation
+	rem s0, s0, s2
 	li a3, 63
 	li a0, 0
 	li a1, 0
@@ -586,18 +608,11 @@
 	srl s5, s4, a3		#just want the bit
 	slli s0, s0, 1
 	add s0, s0, s5
-	beqz a6, mtimesdiv_long_division_signed_unsigned
-	div s5, s0, s2
-	j mtimesdiv_long_division_signed_continue
   mtimesdiv_long_division_signed_unsigned:
 	divu s5, s0, s2
   mtimesdiv_long_division_signed_continue:
-	beqz s5, mtimesdiv_long_division_signed_advance
 	sll s6, s5, a3
 	or a0, a0, s6
-	beqz a6, mtimesdiv_long_division_signed_rem_unsigned
-	rem s0, s0, s2
-	j mtimesdiv_long_division_signed_advance
   mtimesdiv_long_division_signed_rem_unsigned:
 	remu s0, s0, s2
   mtimesdiv_long_division_signed_advance:
@@ -619,18 +634,12 @@
 	srl s5, s4, a3		#just want the bit
 	slli s0, s0, 1
 	add s0, s0, s5
-	beqz a6, very_long_division_unsigned
-	div s5, s0, s2
-	j very_long_division_continue
   very_long_division_unsigned:
 	divu s5, s0, s2
   very_long_division_continue:
 	beqz s5, very_long_division_advance
 	sll s6, s5, a3
 	or a0, a0, s6
-	beqz a6, very_long_division_remainder_unsigned
-	rem s0, s0, s2
-	j very_long_division_advance
   very_long_division_remainder_unsigned:
 	remu s0, s0, s2
   very_long_division_advance:
@@ -641,14 +650,14 @@
   very_long_division_done:
 	mv a1, a0
 	POP a0
-	#correct sign
-	li s3, 0x8000000000000000
-	and s4, a0, s3
-	srli s4, s4, 63
-	xor s5, s4, a6
-	beqz s5, mtimesdiv_long_division_signed_leave
-	neg a0, a0
-	neg a1, a1
+	beqz a6, mtimesdiv_long_division_signed_leave
+  mtimesdiv_negate:
+	li s1, -1
+	xor s2, a1, s1
+	xor a0, a0, s1
+	addi a1, s2, 1
+	bgt a1, s2, mtimesdiv_long_division_signed_leave
+	addi a0, a0, 1
   mtimesdiv_long_division_signed_leave:
 	ld s0, 0(sp)
 	ld s1, 8(sp)
