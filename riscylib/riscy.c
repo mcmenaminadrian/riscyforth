@@ -13,6 +13,8 @@ extern unsigned long createwritepoint;
 extern unsigned long INPUT_DISPLACE;
 extern unsigned long SCRATCH_PAD;
 extern unsigned long CURRENT_BASE;
+extern unsigned long CREATEFLAG;
+extern unsigned long outerLoopTokenizeAddress;
 
 unsigned long nextAddress;
 
@@ -85,3 +87,19 @@ unsigned long getCurrentBase(void)
 {
 	return CURRENT_BASE;
 }
+
+unsigned long getCreateFlag(void)
+{
+	return CREATEFLAG;
+}
+
+void setCreateFlag(unsigned long flagValue)
+{
+	CREATEFLAG = flagValue;
+}
+
+unsigned long getOuterLoopTokenize(void)
+{
+	return outerLoopTokenizeAddress;
+}
+

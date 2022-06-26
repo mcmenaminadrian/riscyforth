@@ -5,6 +5,9 @@
                 #s7 as I
 .balign 8
   launchRISCYFORTH:
+		la a0, outerLoopTokenizeAddress
+		la a1, outer_loop_tokenize
+		sd a1, 0(a0)
 		la t0, pull_in_another
 		la t1, PULLINANOTHER
 		sd t0, 0(t1)			#for library code

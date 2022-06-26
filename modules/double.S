@@ -31,7 +31,35 @@
 	ld t1, 0(t1)
 	jr t1
 
-	CODEHEADERZ TWOCONSTANT, 2CONSTANT, DABS, 0x01
+	CODEHEADERZ TWOLITERAL, 2LITERAL, DABS, 0x01
+	#Compile time: (x1 x2 --)
+	#Run time: (-- x1 x2)
+	call getCreateFlag
+	bnez a0, twoliteral_out
+	#this is runtime code
+	ld t0, 0(s7)
+	ld t1, 8(s7)
+	addi sp, sp, -16
+	sd t0, 8(sp)
+	sd t1, 0(sp)
+	addi s7, s7, 16
+	TAILMOD t1
+  twoliteral_out:
+	#this is compile time code
+	call getCreateWritePoint
+	ld t1, 0(sp)
+	ld t0, 8(sp)
+	addi sp, sp, 16
+	sd t0, 0(a0)
+	sd t1, 8(a0)
+	addi a0, a0, 16
+	call setCreateWritePoint
+	call getOuterLoopTokenize
+	mv s7, a0
+	fence.i
+	TAILMOD t1
+
+	CODEHEADERZ TWOCONSTANT, 2CONSTANT, TWOLITERAL, 0x01
 	#( x1 x2 "<spaces>name --)
 	call getInputStart		#a0 has INPUT_START
 	la t0, LOCAL_INPUT_START

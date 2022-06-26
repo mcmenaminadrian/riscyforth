@@ -45,5 +45,7 @@
 .extern PULLINANOTHER
 .extern SCRATCH_PAD
 .extern CURRENT_BASE
+.extern CREATEFLAG
+.extern outerLoopTokenizeAddress
 
 #endif

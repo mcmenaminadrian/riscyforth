@@ -21,6 +21,8 @@
    .comm PULLINANOTHER, ADDRWIDTH
    .comm SCRATCH_PAD, SYSTEMAREA
    .comm CURRENT_BASE, ADDRWIDTH
+   .comm CREATEFLAG, ADDRWIDTH
+   .comm outerLoopTokenizeAddress, ADDRWIDTH
 
 .section .text
 
