@@ -587,10 +587,10 @@
 	xor a1, s1, s6
 	xor a0, s0, s6
 	addi a4, s5, 1
-	bgt a4, s5, mtimesdiv_long_division_setup_full
+	bgtu a4, s5, mtimesdiv_long_division_setup_full
   mtimesdiv_correct_upper:
 	addi s1, a1, 1
-	bgt s1, a1, mtimesdiv_long_division_half_full
+	bgtu s1, a1, mtimesdiv_long_division_half_full
 	addi s0, a0, 1
 	j mtimesdiv_long_division_setup
   mtimesdiv_long_division_setup_full:
@@ -656,7 +656,7 @@
 	xor s2, a1, s1
 	xor a0, a0, s1
 	addi a1, s2, 1
-	bgt a1, s2, mtimesdiv_long_division_signed_leave
+	bgtu a1, s2, mtimesdiv_long_division_signed_leave
 	addi a0, a0, 1
   mtimesdiv_long_division_signed_leave:
 	ld s0, 0(sp)
@@ -712,7 +712,7 @@
 	xor t3, t2, t0
 	xor t4, t2, t1
 	addi t5, t3, 1
-	bgt t5, t3, dnegate_nooverflow
+	bgtu t5, t3, dnegate_nooverflow
 	addi t4, t4, 1
   dnegate_nooverflow:
 	sd t4, 0(sp)
