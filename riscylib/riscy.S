@@ -23,6 +23,8 @@
    .comm CURRENT_BASE, ADDRWIDTH
    .comm CREATEFLAG, ADDRWIDTH
    .comm outerLoopTokenizeAddress, ADDRWIDTH
+   .comm EXTENDERS, PAGESIZE
+   .comm EXTENDERSPTR, ADDRWIDTH
 
 .section .text
 

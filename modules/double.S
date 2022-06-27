@@ -34,17 +34,10 @@
 	CODEHEADERZ TWOLITERAL, 2LITERAL, DABS, 0x01
 	#Compile time: (x1 x2 --)
 	#Run time: (-- x1 x2)
-	call getCreateFlag
-	bnez a0, twoliteral_out
-	#this is runtime code
-	ld t0, 0(s7)
-	ld t1, 8(s7)
-	addi sp, sp, -16
-	sd t0, 8(sp)
-	sd t1, 0(sp)
-	addi s7, s7, 16
+	#but actually this does nothing!
 	TAILMOD t1
-  twoliteral_out:
+
+  extender_2literal:
 	#this is compile time code
 	call getCreateWritePoint
 	ld t1, 0(sp)
@@ -58,8 +51,18 @@
 	mv s7, a0
 	fence.i
 	TAILMOD t1
+	
+ 	CODEHEADERZ _TWOLITERAL _2LITERAL, TWOLITERAL, 0x0
+	#this is runtime code
+	ld t0, 0(s7)
+	ld t1, 8(s7)
+	addi sp, sp, -16
+	sd t0, 8(sp)
+	sd t1, 0(sp)
+	addi s7, s7, 16
+	TAILMOD t1
 
-	CODEHEADERZ TWOCONSTANT, 2CONSTANT, TWOLITERAL, 0x01
+	CODEHEADERZ TWOCONSTANT, 2CONSTANT, _TWOLITERAL, 0x01
 	#( x1 x2 "<spaces>name --)
 	call getInputStart		#a0 has INPUT_START
 	la t0, LOCAL_INPUT_START
@@ -869,6 +872,10 @@
 	la a0, DTOS	#new end of dictionary
 	addi a0, a0, -56
 	call setDictionary	#return new tail of dictionary to caller
+	#setup extension writing
+	la a0, WA_TWOLITERAL
+	la a1, extender_2literal
+	call  setExtenders
 	POP ra
 	fence.i
 	ret

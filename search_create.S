@@ -351,6 +351,18 @@
   search_create_add_until_backcount:
 		j transitions_until_out
   search_create_continue_inscription:
+		#search through the extenders
+		la a0, EXTENDERS
+  search_create_pick_extender:
+		ld a1, 0(a0)
+		beqz a1, search_create_no_extender
+		beq a1, t3, search_create_extender_found
+		addi a0, a0, 16
+		j search_create_pick_extender
+  search_create_extender_found:
+		ld a0, 8(a0)
+		jr a0
+  search_create_no_extender:
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)			      #write out word address in definition
