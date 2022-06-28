@@ -15,8 +15,9 @@ extern unsigned long SCRATCH_PAD;
 extern unsigned long CURRENT_BASE;
 extern unsigned long CREATEFLAG;
 extern unsigned long outerLoopTokenizeAddress;
-extern unsigned long EXTENDERS;
-extern unsigned long EXTENDERSPTR;
+
+static unsigned long EXTENDERS[512];
+static unsigned long EXTENDERSINDEX = 0;
 
 unsigned long nextAddress;
 
@@ -105,19 +106,27 @@ unsigned long getOuterLoopTokenize(void)
 	return outerLoopTokenizeAddress;
 }
 
-unsigned long getExtenders(void)
-{
-	return EXTENDERS;
-}
-
 unsigned long setExtenders(unsigned long extendThis, unsigned long extendFunc)
 {
 	unsigned long success = 0;
-	if (EXTENDERSPTR - (unsigned long)&EXTENDERS < 4096) {
-		*(unsigned long *)(EXTENDERSPTR) = extendThis;
-		*(unsigned long *)(EXTENDERSPTR + 8) = extendFunc;
-		EXTENDERSPTR += 16;
+	if (EXTENDERSINDEX < 255) {
+		EXTENDERS[EXTENDERSINDEX * 2] = extendThis;
+		EXTENDERS[(EXTENDERSINDEX * 2) + 1] = extendFunc;
+		++EXTENDERSINDEX;
 		success = 1;
 	}
 	return success;
+}
+
+unsigned long getExtenders(unsigned long extendThis)
+{
+	unsigned long returnFn = 0;
+	for (unsigned long i = 0; i < EXTENDERSINDEX; i++)
+	{
+		if (EXTENDERS[i * 2] == extendThis) {
+			returnFn = EXTENDERS[(i * 2) + 1];
+			break;
+		}
+	}
+	return returnFn;
 }

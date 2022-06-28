@@ -47,7 +47,5 @@
 .extern CURRENT_BASE
 .extern CREATEFLAG
 .extern outerLoopTokenizeAddress
-.extern EXTENDERS
-.extern EXTENDERSPTR
 
 #endif

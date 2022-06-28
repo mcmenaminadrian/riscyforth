@@ -40,12 +40,14 @@
   extender_2literal:
 	#this is compile time code
 	call getCreateWritePoint
-	ld t1, 0(sp)
-	ld t0, 8(sp)
-	addi sp, sp, 16
-	sd t0, 0(a0)
+	la t2, WA__TWOLITERAL
+	sd t2, 0(a0)
+	ld t1, 8(sp)
 	sd t1, 8(a0)
-	addi a0, a0, 16
+	ld t0, 0(sp)
+	sd t0, 16(a0)
+	addi sp, sp, 16
+	addi a0, a0, 24
 	call setCreateWritePoint
 	call getOuterLoopTokenize
 	mv s7, a0
@@ -850,7 +852,7 @@
 	TAILMOD t1
 
 
-  starter:
+  starter_double:
 	PUSH ra
 	call getNextAddress	#get the address for tail return
 	la t0, NEXTMOD
@@ -912,5 +914,5 @@
 
 .section .init_array
 .balign 8
-.8byte starter
+.8byte starter_double
 

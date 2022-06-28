@@ -352,16 +352,12 @@
 		j transitions_until_out
   search_create_continue_inscription:
 		#search through the extenders
-		la a0, EXTENDERS
-  search_create_pick_extender:
-		ld a1, 0(a0)
-		beqz a1, search_create_no_extender
-		beq a1, t3, search_create_extender_found
-		addi a0, a0, 16
-		j search_create_pick_extender
-  search_create_extender_found:
-		ld a0, 8(a0)
-		jr a0
+		PUSH t3
+		mv a0, t3
+		call getExtenders
+		POP t3
+		beqz a0, search_create_no_extender
+		jr a0					#shift control to extender code
   search_create_no_extender:
 		la t0, createwritepoint
 		ld t1, 0(t0)
