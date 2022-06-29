@@ -820,7 +820,23 @@
 	sd t4, 0(sp)
 	TAILMOD t1
 
-	CODEHEADERZ DTOS, D>S, DULESS, 0x01
+	CODEHEADERZ TWOROT, 2ROT, DULESS, 0x01
+	#(x1 x2 x3 x4 x5 x6 -- x3 x4 x5 x6 x1 x2)
+	ld t6, 0(sp)
+	ld t5, 8(sp)
+	ld t4, 16(sp)
+	ld t3, 24(sp)
+	ld t2, 32(sp)
+	ld t1, 40(sp)
+	sd t1, 8(sp)
+	sd t2, 0(sp)
+	sd t6, 16(sp)
+	sd t5, 24(sp)
+	sd t4, 32(sp)
+	sd t3, 40(sp)
+	TAILMOD t1
+
+	CODEHEADERZ DTOS, D>S, TWOROT, 0x01
 	#(d -- n)
 	ld t1, 0(sp)		#higher range
 	ld t0, 8(sp)
