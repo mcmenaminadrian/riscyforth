@@ -64,8 +64,70 @@
 	addi s7, s7, 16
 	TAILMOD t1
 
-	CODEHEADERZ TWOCONSTANT, 2CONSTANT, _TWOLITERAL, 0x01
-	#( x1 x2 "<spaces>name --)
+	CODEHEADER TO, _TWOLITERAL, 0x01
+	#surplants standard TO
+	#(x1 x2 "spaces<name>--) or (x1 "spaces<name>"--)
+	call getInputStart
+	PUSH a0
+	call getInputEnd
+	mv a1, a0
+	POP a0
+	addi t0, a0, 1
+	bltu t0, a1, to2_have_data
+  to2_bail:
+	TAILMOD t1		#nothing, so bail
+  to2_have_data:
+	#sanitize
+	call lib_sanitize_string
+	#now check for string
+	li t0, 0x20	#space
+	li t1, 0x0A	#CR
+	lb t2, 0(a0)
+  to2_check_start:
+	beq t2, t0, to2_advance
+	beq t2, t1, to2_gone
+	j to2_check_end
+  to2_advance:
+	addi a0, a0, 1
+	bgt a0, a1, to2_gone
+	j to2_check_start
+  to2_check_end:
+	mv a1, a0
+  to2_move_on:
+	addi a1, a1, 1
+	lb t2, 0(a1)
+	beq t2, t0, to2_found_end
+	beq t2, t1, to2_found_end
+	j to2_move_on
+  to2_found_end:
+	sub a2, a1, a0
+	addi a1, a1, -1
+	call lib_check_dictionary
+	beqz a0, to2_bail
+	li t0, 0x04
+	beq a1, t0, to2_old_to
+	li t0, 0x204
+	beq a1, to, to2_new_to
+	#not a match, so bail
+	j to2_bail
+  to2_old_to:
+	ld t0, 0(sp)
+	addi sp, sp, 8
+	sd t0, 24(a2)
+	j to2_bail
+	
+
+	CODEHEADERZ TWOVALUE, 2VALUE, _TWOLITERAL, 0x01
+	#(x1 x2 "<spaces>name" --)
+	li a5, 0x204			#204 for double value
+	PUSH a5
+	j twoconstant_common_code
+
+	CODEHEADERZ TWOCONSTANT, 2CONSTANT, TWOVALUE, 0x01
+	#( x1 x2 "<spaces>name" --)
+	li a5, 0x200	#0x200 for a 2CONSTANT
+	PUSH a5
+  twoconstant_common_code:
 	call getInputStart		#a0 has INPUT_START
 	la t0, LOCAL_INPUT_START
 	sd a0, 0(t0)
@@ -129,7 +191,7 @@
 	addi sp, sp, 24
 	#now write out header for new function that will return value
 	mv a1, a2
-	li a5, 0x200	#0x200 for a 2constant
+	POP a5
 	call lib_write_function_header
 	la a3, NEXTMOD		#set the call up
 	ld a3, 0(a3)
