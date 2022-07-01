@@ -128,6 +128,7 @@
 			sd s4, 32(sp)
 			sd s5, 40(sp)
 			sd s6, 48(sp)
+			mv s4, a0
 			li a0, 0
 			li s0, 24	#MAXNAMELEN
 			bgt a2, s0, lib_check_dictionary_bail
@@ -138,7 +139,6 @@
 			bne s2, a2, lib_check_dictionary_get_next
 			addi s3, s1, 32	#s3 points to word in dictionary
 			mv s0, a2
-			mv s4, a0
   lib_check_dictionary_loop_word:
 			lb s5, 0(s3)	#dictionary letter
 			lb s6, 0(s4)

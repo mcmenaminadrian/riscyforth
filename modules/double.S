@@ -82,8 +82,8 @@
 	#now check for string
 	li t0, 0x20	#space
 	li t1, 0x0A	#CR
-	lb t2, 0(a0)
   to2_check_start:
+	lb t2, 0(a0)
 	beq t2, t0, to2_advance
 	beq t2, t1, to2_bail
 	j to2_check_end
