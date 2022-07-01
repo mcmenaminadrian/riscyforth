@@ -119,6 +119,7 @@
   #a1 type
   #a2 address	
   .global lib_check_dictionary
+  lib_check_dictionary:
 			addi sp, sp, -56
 			sd s0, 0(sp)
 			sd s1, 8(sp)

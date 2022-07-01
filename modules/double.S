@@ -85,11 +85,11 @@
 	lb t2, 0(a0)
   to2_check_start:
 	beq t2, t0, to2_advance
-	beq t2, t1, to2_gone
+	beq t2, t1, to2_bail
 	j to2_check_end
   to2_advance:
 	addi a0, a0, 1
-	bgt a0, a1, to2_gone
+	bgt a0, a1, to2_bail
 	j to2_check_start
   to2_check_end:
 	mv a1, a0
@@ -107,7 +107,7 @@
 	li t0, 0x04
 	beq a1, t0, to2_old_to
 	li t0, 0x204
-	beq a1, to, to2_new_to
+	beq a1, t0, to2_new_to
 	#not a match, so bail
 	j to2_bail
   to2_old_to:
@@ -115,9 +115,16 @@
 	addi sp, sp, 8
 	sd t0, 24(a2)
 	j to2_bail
+  to2_new_to:
+	ld t0, 0(sp)
+	ld t1, 8(sp)
+	addi sp, sp, 16
+	sd t1, 80(a2)
+	sd t0, 88(a2)
+	j to2_bail
 	
 
-	CODEHEADERZ TWOVALUE, 2VALUE, _TWOLITERAL, 0x01
+	CODEHEADERZ TWOVALUE, 2VALUE, TO, 0x01
 	#(x1 x2 "<spaces>name" --)
 	li a5, 0x204			#204 for double value
 	PUSH a5
