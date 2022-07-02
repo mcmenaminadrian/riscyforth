@@ -88,9 +88,9 @@
   	j extender_2to_start_found
   extender_2to_advance:
 	addi a0, a0, 1
-	bgtu a1, a0, to2_bail
+	bgtu a0, a1, to2_bail
 	j extender_2to_look_for_start
-  extender_2to_found_start:
+  extender_2to_start_found:
 	mv a2, a0
   extender_2to_look_for_end:
 	addi a2, a2, 1
@@ -138,6 +138,7 @@
 	#(x1 x2 "spaces<name-- etc)
 	#we are compiled into a word
 	#so we pull the token
+	test_to:
 	mv a0, s7
 	lb a2, 0(a0)
 	addi a0, a0, 8
@@ -152,8 +153,7 @@
 	call to2__to_join	
 
 
-
-	CODEHEADER TO, _TWOLITERAL, 0x0
+	CODEHEADER TO, _TO, 0x0
 	#surplants standard TO
 	#(x1 x2 "spaces<name>--) or (x1 "spaces<name>"--)
 	call getInputStart
@@ -188,10 +188,10 @@
 	beq t2, t0, to2_found_end
 	beq t2, t1, to2_found_end
 	j to2_move_on
+  to2__to_join:
   to2_found_end:
 	sub a2, a1, a0
 	addi a1, a1, -1
-  to2__to_join:
 	call lib_check_dictionary
 	beqz a0, to2_bail
 	li t0, 0x04

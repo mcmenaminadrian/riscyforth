@@ -120,7 +120,7 @@
   #a2 address	
   .global lib_check_dictionary
   lib_check_dictionary:
-			addi sp, sp, -56
+			addi sp, sp, -64
 			sd s0, 0(sp)
 			sd s1, 8(sp)
 			sd s2, 16(sp)
@@ -128,13 +128,15 @@
 			sd s4, 32(sp)
 			sd s5, 40(sp)
 			sd s6, 48(sp)
-			mv s4, a0
+			sd s7, 56(sp)
+			mv s7, a0
 			li a0, 0
 			li s0, 24	#MAXNAMELEN
 			bgt a2, s0, lib_check_dictionary_bail
 			la s0, dictionary
 			ld s1, 0(s0)
   lib_check_dictionary_length_match:
+			mv s4, s7
 			ld s2, 24(s1)
 			bne s2, a2, lib_check_dictionary_get_next
 			addi s3, s1, 32	#s3 points to word in dictionary
@@ -157,6 +159,7 @@
 			ld a1, 0(s1)
 			mv a2, s1
   lib_check_dictionary_bail:
+			ld s7, 56(sp)
 			ld s6, 48(sp)
 			ld s5, 40(sp)
 			ld s4, 32(sp)
@@ -164,5 +167,5 @@
 			ld s2, 16(sp)
 			ld s1, 8(sp)
 			ld s0, 0(sp)
-			addi sp, sp, 56
+			addi sp, sp, 64
 			ret
