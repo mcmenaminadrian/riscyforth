@@ -154,7 +154,7 @@
 			j lib_check_dictionary_bail
   lib_check_dictionary_got_match:
 			li a0, 1
-			ld a1, -8(s1)
+			ld a1, 0(s1)
 			mv a2, s1
   lib_check_dictionary_bail:
 			ld s6, 48(sp)

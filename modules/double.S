@@ -64,7 +64,7 @@
 	addi s7, s7, 16
 	TAILMOD t1
 
-	CODEHEADER TO, _TWOLITERAL, 0x01
+	CODEHEADER TO, _TWOLITERAL, 0x0
 	#surplants standard TO
 	#(x1 x2 "spaces<name>--) or (x1 "spaces<name>"--)
 	call getInputStart
