@@ -113,14 +113,16 @@
   to2_old_to:
 	ld t0, 0(sp)
 	addi sp, sp, 8
-	sd t0, 24(a2)
+	sd t0, 80(a2)
+	fence.i
 	j to2_bail
   to2_new_to:
 	ld t0, 0(sp)
 	ld t1, 8(sp)
 	addi sp, sp, 16
-	sd t1, 80(a2)
-	sd t0, 88(a2)
+	sd t1, 88(a2)
+	sd t0, 96(a2)
+	fence.i
 	j to2_bail
 	
 
