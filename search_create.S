@@ -704,10 +704,6 @@
 		add t1, t1, a1
 		la a0, createwritepoint
 		sd t1, 0(a0)				#advance writepoint
-		beqz a0, embed_tick_done
-		#increment the conditionals
-		addi a1, a1, 16				#command and length
-		srli a5, a1, 3
   embed_tick_done:
 		la s7, outer_loop_tokenize
 		fence.i

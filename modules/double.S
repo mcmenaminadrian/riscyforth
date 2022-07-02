@@ -64,6 +64,95 @@
 	addi s7, s7, 16
 	TAILMOD t1
 
+  extender_2to:
+	call getCreateWritePoint
+	PUSH a0
+	la t2, WA__TO
+	sd t2, 0(a0)
+	#now have to embed (sanitized) string
+	call getInputStart
+	PUSH a0
+	call getInputEnd
+	mv a1, a0
+	POP a0
+	addi t0, a0, 1
+	bltu t0, a1, extender_2to_have_data
+	j to2_bail
+  extender_2to_have_data:
+	li t0, 0x20
+	li t1, 0x0A
+  extender_2to_look_for_start:
+	lb t2, 0(a0)
+	beq t2, t0, extender_2to_advance
+	beq t2, t1, to2_bail
+  	j extender_2to_start_found
+  extender_2to_advance:
+	addi a0, a0, 1
+	bgtu a1, a0, to2_bail
+	j extender_2to_look_for_start
+  extender_2to_found_start:
+	mv a2, a0
+  extender_2to_look_for_end:
+	addi a2, a2, 1
+	lb t2, 0(a2)
+	beq t2, t0, extender_2to_found_end
+	beq t2, t1, extender_2to_found_end
+	bgtu a2, a1, to2_bail
+	j extender_2to_look_for_end
+  extender_2to_found_end:
+	mv a1, a2
+	#embed length
+	sub a3, a2, a0
+	ld t0, 0(sp)		#earlier push of a0
+	sd a3, 8(t0)
+	call lib_sanitize_string
+	POP a5			#pop ealier push of a0
+	addi a5, a5, 16		#a5 points to where we start to embed string
+  extender_2to_embed:
+	lb t0, 0(a0)
+	sb t0, 0(a5)
+	addi a5, a5, 1
+	addi a3, a3, -1
+	beqz a3, extender_2to_test_alignment
+	addi a0, a0, 1
+	j extender_2to_embed
+  extender_2to_test_alignment:
+	#may have to add to a5 before updating createWritePoint
+	li t0, 0x07
+	and t3, a5, t0
+	beqz t3, extender_2to_update_write_point
+	li t2, 0x08
+	sub t4, t2, t3
+	add a5, a5, t4
+  extender_2to_update_write_point:
+	mv a0, a5
+	call setCreateWritePoint
+	call getOuterLoopTokenize
+	mv s7, a0
+	fence.i
+	TAILMOD t1
+
+	CODEHEADER _TO, _TWOLITERAL, 0x0
+	#supercede the old _TO
+	#essentially the same code with different labelled jump
+	#(x1 x2 "spaces<name-- etc)
+	#we are compiled into a word
+	#so we pull the token
+	mv a0, s7
+	lb a2, 0(a0)
+	addi a0, a0, 8
+	add a1, a0, a2
+	#update s7 to stay aligned
+	li t0, 7
+	li t1, 8
+	and t2, t0, a2
+	sub t3, t1, t2
+	mv s7, a1
+	add s7, s7, t3
+	call to2__to_join	
+
+
+
 	CODEHEADER TO, _TWOLITERAL, 0x0
 	#surplants standard TO
 	#(x1 x2 "spaces<name>--) or (x1 "spaces<name>"--)
@@ -102,6 +191,7 @@
   to2_found_end:
 	sub a2, a1, a0
 	addi a1, a1, -1
+  to2__to_join:
 	call lib_check_dictionary
 	beqz a0, to2_bail
 	li t0, 0x04
@@ -965,6 +1055,9 @@
 	la a0, WA_TWOLITERAL
 	la a1, extender_2literal
 	call  setExtenders
+	la a0, WA_TO
+	la a1, extender_2to
+	call setExtenders
 	POP ra
 	fence.i
 	ret
