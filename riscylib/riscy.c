@@ -47,6 +47,13 @@ void setInputStart(unsigned long addressIn)
 	INPUT_START = addressIn;
 }
 
+void setInputStartIncrement(unsigned long addressIn)
+{
+	unsigned long increment = addressIn - INPUT_START;
+	INPUT_START = addressIn;
+	INPUT_DISPLACE += increment;
+}
+
 unsigned long getDictionary(void)
 {
 	return dictionary;

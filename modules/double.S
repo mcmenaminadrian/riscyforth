@@ -105,7 +105,7 @@
 	sd a0, 0(sp)
 	sd a2, 8(sp)
 	mv a0, a2
-	call setInputStart
+	call setInputStartIncrement
 	ld a2, 8(sp)
 	ld a0, 0(sp)
 	addi sp, sp, 16
@@ -208,7 +208,7 @@
 	sd a1, 8(sp)
 	sd a2, 16(sp)
 	mv a0, a1
-	call setInputStart
+	call setInputStartIncrement
 	ld s2, 16(sp)
 	ld s1, 8(sp)
 	ld s0, 0(sp)
@@ -278,7 +278,7 @@
 	sd a0, 0(sp)
 	sd a1, 8(sp)
 	mv a0, a1
-	call setInputStart
+	call setInputStartIncrement
 	ld a0, 0(sp)
 	ld a1, 8(sp)
 	addi sp, sp, 16
@@ -321,7 +321,7 @@
 	call setNewDictionary
 	#get the hell out of dodge
 	TAILMOD t1
-	
+
 
 	CODEHEADERZ TWOVALUE, 2VALUE, TWOVARIABLE, 0x01
 	#(x1 x2 "<spaces>name" --)
@@ -382,7 +382,7 @@
 	sd a0, 8(sp)
 	sd a1, 0(sp)
 	mv a0, a1
-	call setInputStart
+	call setInputStartIncrement
 	ld a1, 0(sp)
 	ld a0, 8(sp)
 	#length in a2
