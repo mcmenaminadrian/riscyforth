@@ -15,6 +15,7 @@ extern unsigned long SCRATCH_PAD;
 extern unsigned long CURRENT_BASE;
 extern unsigned long CREATEFLAG;
 extern unsigned long outerLoopTokenizeAddress;
+extern unsigned long dataspaceptr;
 
 static unsigned long EXTENDERS[512];
 static unsigned long EXTENDERSINDEX = 0;
@@ -129,4 +130,14 @@ unsigned long getExtenders(unsigned long extendThis)
 		}
 	}
 	return returnFn;
+}
+
+unsigned long getDataspacePtr(void)
+{
+	return dataspaceptr;
+}
+
+void setDataspacePtr(unsigned long dataPtrIn)
+{
+	dataspaceptr = dataPtrIn;
 }

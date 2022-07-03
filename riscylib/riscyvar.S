@@ -47,5 +47,6 @@
 .extern CURRENT_BASE
 .extern CREATEFLAG
 .extern outerLoopTokenizeAddress
+.extern dataspaceptr
 
 #endif

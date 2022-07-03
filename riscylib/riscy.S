@@ -23,6 +23,7 @@
    .comm CURRENT_BASE, ADDRWIDTH
    .comm CREATEFLAG, ADDRWIDTH
    .comm outerLoopTokenizeAddress, ADDRWIDTH
+   .comm dataspaceptr, ADDRWIDTH
 
 .section .text
 
