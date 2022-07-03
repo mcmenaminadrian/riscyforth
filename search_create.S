@@ -351,6 +351,14 @@
   search_create_add_until_backcount:
 		j transitions_until_out
   search_create_continue_inscription:
+		#search through the extenders
+		PUSH t3
+		mv a0, t3
+		call getExtenders
+		POP t3
+		beqz a0, search_create_no_extender
+		jr a0					#shift control to extender code
+  search_create_no_extender:
 		la t0, createwritepoint
 		ld t1, 0(t0)
 		sd t3, 0(t1)			      #write out word address in definition
@@ -696,10 +704,6 @@
 		add t1, t1, a1
 		la a0, createwritepoint
 		sd t1, 0(a0)				#advance writepoint
-		beqz a0, embed_tick_done
-		#increment the conditionals
-		addi a1, a1, 16				#command and length
-		srli a5, a1, 3
   embed_tick_done:
 		la s7, outer_loop_tokenize
 		fence.i

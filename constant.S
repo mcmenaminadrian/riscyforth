@@ -4,6 +4,7 @@
 		CODEHEADER TO, VARIABLE, 0x01
 		#get the word
 		#does it exist and is it a constant
+		#(x "<spaces>word" -- )
 		ld a1, INPUT_END
 		ld a0, INPUT_START
 		addi t0, a0, 1
@@ -24,8 +25,9 @@
 		bne t0, t1, constant_gone_bad
 		#now over-write code
 		ld a0, 8(a4)
-		mv a1, t6
-		sd a1, 24(a0)
+		ld t6, 0(sp)
+		addi sp, sp, 8
+		sd t6, 24(a0)
 		fence.i
 		tail NEXT
 
@@ -67,8 +69,6 @@
 		tail NEXT
 
 		CODEHEADER _TO, CTOGGLE, 0x0
-		ld t6, 0(sp)
-		addi sp, sp, 8
 		#we are compiled into a word
 		#so we pull the token
 		mv a0, s7

@@ -11,9 +11,16 @@ extern unsigned long dictionary;
 extern unsigned long newdictionary;
 extern unsigned long createwritepoint;
 extern unsigned long INPUT_DISPLACE;
+extern unsigned long SCRATCH_PAD;
+extern unsigned long CURRENT_BASE;
+extern unsigned long CREATEFLAG;
+extern unsigned long outerLoopTokenizeAddress;
+extern unsigned long dataspaceptr;
+
+static unsigned long EXTENDERS[512];
+static unsigned long EXTENDERSINDEX = 0;
 
 unsigned long nextAddress;
-unsigned long dictionaryAddress;
 
 unsigned long getNextAddress(void)
 {
@@ -23,16 +30,6 @@ unsigned long getNextAddress(void)
 void setNextAddress(unsigned long addressIn)
 {
 	nextAddress = addressIn;
-}
-
-unsigned long getDictionaryAddress(void)
-{
-	return dictionaryAddress;
-}
-
-void setDictionaryAddress(unsigned long addressIn)
-{
-	dictionaryAddress = addressIn;
 }
 
 unsigned long getInputStart(void)
@@ -48,6 +45,13 @@ unsigned long getInputEnd(void)
 void setInputStart(unsigned long addressIn)
 {
 	INPUT_START = addressIn;
+}
+
+void setInputStartIncrement(unsigned long addressIn)
+{
+	unsigned long increment = addressIn - INPUT_START;
+	INPUT_START = addressIn;
+	INPUT_DISPLACE += increment;
 }
 
 unsigned long getDictionary(void)
@@ -83,4 +87,64 @@ void setCreateWritePoint(unsigned long addressIn)
 void incrementInputDisplace(unsigned long increment)
 {
 	INPUT_DISPLACE += increment;
+}
+
+unsigned long *getScratchPad(void)
+{
+	return &SCRATCH_PAD;
+}
+
+unsigned long getCurrentBase(void)
+{
+	return CURRENT_BASE;
+}
+
+unsigned long getCreateFlag(void)
+{
+	return CREATEFLAG;
+}
+
+void setCreateFlag(unsigned long flagValue)
+{
+	CREATEFLAG = flagValue;
+}
+
+unsigned long getOuterLoopTokenize(void)
+{
+	return outerLoopTokenizeAddress;
+}
+
+unsigned long setExtenders(unsigned long extendThis, unsigned long extendFunc)
+{
+	unsigned long success = 0;
+	if (EXTENDERSINDEX < 255) {
+		EXTENDERS[EXTENDERSINDEX * 2] = extendThis;
+		EXTENDERS[(EXTENDERSINDEX * 2) + 1] = extendFunc;
+		++EXTENDERSINDEX;
+		success = 1;
+	}
+	return success;
+}
+
+unsigned long getExtenders(unsigned long extendThis)
+{
+	unsigned long returnFn = 0;
+	for (unsigned long i = 0; i < EXTENDERSINDEX; i++)
+	{
+		if (EXTENDERS[i * 2] == extendThis) {
+			returnFn = EXTENDERS[(i * 2) + 1];
+			break;
+		}
+	}
+	return returnFn;
+}
+
+unsigned long getDataspacePtr(void)
+{
+	return dataspaceptr;
+}
+
+void setDataspacePtr(unsigned long dataPtrIn)
+{
+	dataspaceptr = dataPtrIn;
 }

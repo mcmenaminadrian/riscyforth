@@ -303,6 +303,9 @@ start of pictured numeric output
 
 **LITERAL** (-- x) Place *x* on the stack e.g. *[ x ] LITERAL*
 
+**LOADMODULE** ("\<spaces\>name" -- x) Load the module *name*, leave *TRUE*
+on stack on success
+
 **LOOP** Evaluate loop parameters and either terminate loop R:(x --) or
 continue to execute loop R:(x1 -- x2)
 

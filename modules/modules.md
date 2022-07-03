@@ -91,9 +91,14 @@ like this (without the line numbers obviously!)
 >      20         la a0, DTOS     #new end of dictionary
 >      21         addi a0, a0, -56
 >      22         call setDictionary      #return new tail of dictionary to caller
->      23         POP ra
->      24         fence.i
->      25         ret
+>      23         #setup extension writing
+>      24         la a0, WA_TWOLITERAL
+>      25         la a1, extender_2literal
+>      26         call setExtenders
+>      ...
+>      30         POP ra
+>      31         fence.i
+>      32         ret
 
 So at line:
 
@@ -117,7 +122,12 @@ to 0x07 (RWX)
 
 21 - 22:  Pass this new end of dictionary to ___libriscy___
 
-23 - 25:  Restore return address, flush the icache and return
+23 - 26:  This fills the array of extension functions. When code needs to be handled differently
+when being executed as compiled as opposed to interpreted then an extender function should be used.
+In this case the word __2LITERAL__ (expanded to __TWOLITERAL__) is replaced in compilation and the function 
+__extender_2literal__ handles this.
+
+30 - 31:  Pop the return address from the stack, force update the instruction cache and return
 
 ### Init array section
 

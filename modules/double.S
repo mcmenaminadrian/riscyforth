@@ -31,8 +31,309 @@
 	ld t1, 0(t1)
 	jr t1
 
-	CODEHEADERZ TWOCONSTANT, 2CONSTANT, DABS, 0x01
-	#( x1 x2 "<spaces>name --)
+	CODEHEADERZ TWOLITERAL, 2LITERAL, DABS, 0x01
+	#Compile time: (x1 x2 --)
+	#Run time: (-- x1 x2)
+	#but actually this does nothing!
+	TAILMOD t1
+
+  extender_2literal:
+	#this is compile time code
+	call getCreateWritePoint
+	la t2, WA__TWOLITERAL
+	sd t2, 0(a0)
+	ld t1, 8(sp)
+	sd t1, 8(a0)
+	ld t0, 0(sp)
+	sd t0, 16(a0)
+	addi sp, sp, 16
+	addi a0, a0, 24
+	call setCreateWritePoint
+	call getOuterLoopTokenize
+	mv s7, a0
+	fence.i
+	TAILMOD t1
+	
+ 	CODEHEADERZ _TWOLITERAL _2LITERAL, TWOLITERAL, 0x0
+	#this is runtime code
+	ld t0, 0(s7)
+	ld t1, 8(s7)
+	addi sp, sp, -16
+	sd t0, 8(sp)
+	sd t1, 0(sp)
+	addi s7, s7, 16
+	TAILMOD t1
+
+  extender_2to:
+	call getCreateWritePoint
+	PUSH a0
+	la t2, WA__TO_
+	sd t2, 0(a0)
+	#now have to embed (sanitized) string
+	call getInputStart
+	PUSH a0
+	call getInputEnd
+	mv a1, a0
+	POP a0
+	addi t0, a0, 1
+	bltu t0, a1, extender_2to_have_data
+	j to2_bail
+  extender_2to_have_data:
+	li t0, 0x20
+	li t1, 0x0A
+  extender_2to_look_for_start:
+	lb t2, 0(a0)
+	beq t2, t0, extender_2to_advance
+	beq t2, t1, to2_bail
+  	j extender_2to_start_found
+  extender_2to_advance:
+	addi a0, a0, 1
+	bgtu a0, a1, to2_bail
+	j extender_2to_look_for_start
+  extender_2to_start_found:
+	mv a2, a0
+  extender_2to_look_for_end:
+	addi a2, a2, 1
+	lb t2, 0(a2)
+	beq t2, t0, extender_2to_found_end
+	beq t2, t1, extender_2to_found_end
+	bgtu a2, a1, to2_bail
+	j extender_2to_look_for_end
+  extender_2to_found_end:
+	#update read-in point
+	addi sp, sp, -16
+	sd a0, 0(sp)
+	sd a2, 8(sp)
+	mv a0, a2
+	call setInputStartIncrement
+	ld a2, 8(sp)
+	ld a0, 0(sp)
+	addi sp, sp, 16
+	mv a1, a2
+	#embed length
+	sub a3, a2, a0
+	ld t0, 0(sp)		#earlier push of a0
+	sd a3, 8(t0)
+	call lib_sanitize_string
+	POP a5			#pop ealier push of a0
+	addi a5, a5, 16		#a5 points to where we start to embed string
+  extender_2to_embed:
+	lb t0, 0(a0)
+	sb t0, 0(a5)
+	addi a5, a5, 1
+	addi a3, a3, -1
+	beqz a3, extender_2to_test_alignment
+	addi a0, a0, 1
+	j extender_2to_embed
+  extender_2to_test_alignment:
+	#may have to add to a5 before updating createWritePoint
+	li t0, 0x07
+	and t3, a5, t0
+	beqz t3, extender_2to_update_write_point
+	li t2, 0x08
+	sub t4, t2, t3
+	add a5, a5, t4
+  extender_2to_update_write_point:
+	mv a0, a5
+	call setCreateWritePoint
+	call getOuterLoopTokenize
+	mv s7, a0
+	fence.i
+	TAILMOD t1
+
+	CODEHEADER _TO_, _TWOLITERAL, 0x0
+	#supercede the old _TO
+	#essentially the same code with different labelled jump
+	#(x1 x2 "spaces<name-- etc)
+	#we are compiled into a word
+	#so we pull the token
+	mv a0, s7
+	lb a2, 0(a0)
+	addi a0, a0, 8
+	add a1, a0, a2
+	#update s7 to stay aligned
+	li t0, 7
+	li t1, 8
+	and t2, t0, a2
+	sub t3, t1, t2
+	mv s7, a1
+	add s7, s7, t3
+	li a6, 0		#marker for input update
+	call to2__to_join	
+
+
+	CODEHEADER TO, _TO_, 0x0
+	#surplants standard TO
+	#(x1 x2 "spaces<name>--) or (x1 "spaces<name>"--)
+	call getInputStart
+	PUSH a0
+	call getInputEnd
+	mv a1, a0
+	POP a0
+	addi t0, a0, 1
+	bltu t0, a1, to2_have_data
+  to2_bail:
+	TAILMOD t1		#nothing, so bail
+  to2_have_data:
+	#sanitize
+	call lib_sanitize_string
+	#now check for string
+	li t0, 0x20	#space
+	li t1, 0x0A	#CR
+  to2_check_start:
+	lb t2, 0(a0)
+	beq t2, t0, to2_advance
+	beq t2, t1, to2_bail
+	j to2_check_end
+  to2_advance:
+	addi a0, a0, 1
+	bgt a0, a1, to2_bail
+	j to2_check_start
+  to2_check_end:
+	mv a1, a0
+  to2_move_on:
+	addi a1, a1, 1
+	lb t2, 0(a1)
+	beq t2, t0, to2_found_end
+	beq t2, t1, to2_found_end
+	j to2_move_on
+  to2_found_end:
+	li a6, 1		#marker for input update
+  to2__to_join:
+	sub a2, a1, a0
+	beqz a6, to2_continue
+	#in immediate mode here, so update input point
+	addi sp, sp, -24
+	sd a0, 0(sp)
+	sd a1, 8(sp)
+	sd a2, 16(sp)
+	mv a0, a1
+	call setInputStartIncrement
+	ld s2, 16(sp)
+	ld s1, 8(sp)
+	ld s0, 0(sp)
+	addi sp, sp, 24 	
+  to2_continue:	
+	addi a1, a1, -1
+	call lib_check_dictionary
+	beqz a0, to2_bail
+	li t0, 0x04
+	beq a1, t0, to2_old_to
+	li t0, 0x204
+	beq a1, t0, to2_new_to
+	#not a match, so bail
+	j to2_bail
+  to2_old_to:
+	ld t0, 0(sp)
+	addi sp, sp, 8
+	sd t0, 80(a2)
+	fence.i
+	j to2_bail
+  to2_new_to:
+	ld t0, 0(sp)
+	ld t1, 8(sp)
+	addi sp, sp, 16
+	sd t1, 88(a2)
+	sd t0, 96(a2)
+	fence.i
+	j to2_bail
+
+	CODEHEADERZ TWOVARIABLE, 2VARIABLE, TO, 0x01
+	#("spaces<name> ---)
+	call getInputStart
+	PUSH a0
+	call getInputEnd
+	mv a1, a0
+	POP a0
+	addi t0, a0, 1
+	bltu t0, a1, tov_have_data
+  tov_bail:
+	TAILMOD t1		#nothing, so bail
+  tov_have_data:
+	#sanitize
+	call lib_sanitize_string
+	#now check for string
+	li t0, 0x20	#space
+	li t1, 0x0A	#CR
+  tov_check_start:
+	lb t2, 0(a0)
+	beq t2, t0, tov_advance
+	beq t2, t1, tov_bail
+	j tov_check_end
+  tov_advance:
+	addi a0, a0, 1
+	bgt a0, a1, tov_bail
+	j tov_check_start
+  tov_check_end:
+	mv a1, a0
+  tov_move_on:
+	addi a1, a1, 1
+	lb t2, 0(a1)
+	beq t2, t0, tov_found_end
+	beq t2, t1, tov_found_end
+	j tov_move_on
+  tov_found_end:
+	#first of all update the input
+	addi sp, sp, -16
+	sd a0, 0(sp)
+	sd a1, 8(sp)
+	mv a0, a1
+	call setInputStartIncrement
+	ld a0, 0(sp)
+	ld a1, 8(sp)
+	addi sp, sp, 16
+	sub a1, a1, a0
+	li a5, 0x08			#8 for a variable
+	call lib_write_function_header
+	PUSH a0
+	#now get dataspace ptr - check 8 byte aligned
+	call getDataspacePtr
+	li t0, 0x07
+	and t2, a0, t0
+	beqz t2, tov_reserve_space
+	li t1, 0x08
+	sub t4, t1, t2
+	add a0, a0, t4
+  tov_reserve_space:
+	#reserve two cells
+	addi a0, a0, 16
+	#update dataspaceptr
+	call setDataspacePtr
+	#write code to return this address
+	addi a1, a0, -8
+	POP a0
+	la a2, NEXTMOD
+	ld a2, 0(a2)
+	call double_constant_code
+	#then check if we are aligned for next word
+	li t0, 0x07
+	and t2, a0, t0
+	beqz t2, tov_done
+	li t1, 0x08
+	sub t3, t1, t2
+	add a0, a0, t3
+  tov_done:
+	PUSH a0
+	call setCreateWritePoint
+	call getNewDictionary
+	call setDictionary
+	POP a0
+	call setNewDictionary
+	#get the hell out of dodge
+	TAILMOD t1
+
+
+	CODEHEADERZ TWOVALUE, 2VALUE, TWOVARIABLE, 0x01
+	#(x1 x2 "<spaces>name" --)
+	li a5, 0x204			#204 for double value
+	PUSH a5
+	j twoconstant_common_code
+
+	CODEHEADERZ TWOCONSTANT, 2CONSTANT, TWOVALUE, 0x01
+	#( x1 x2 "<spaces>name" --)
+	li a5, 0x200	#0x200 for a 2CONSTANT
+	PUSH a5
+  twoconstant_common_code:
 	call getInputStart		#a0 has INPUT_START
 	la t0, LOCAL_INPUT_START
 	sd a0, 0(t0)
@@ -81,7 +382,7 @@
 	sd a0, 8(sp)
 	sd a1, 0(sp)
 	mv a0, a1
-	call setInputStart
+	call setInputStartIncrement
 	ld a1, 0(sp)
 	ld a0, 8(sp)
 	#length in a2
@@ -96,7 +397,7 @@
 	addi sp, sp, 24
 	#now write out header for new function that will return value
 	mv a1, a2
-	li a5, 0x200	#0x200 for a 2constant
+	POP a5
 	call lib_write_function_header
 	la a3, NEXTMOD		#set the call up
 	ld a3, 0(a3)
@@ -152,7 +453,34 @@
 	sd t4, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER DMAX, DEQUAL, 0x01
+	#another one with = sign
+	#CODEHEADERZ DZEROEQUAL, D0=, DEQUAL, 0x01
+	#(d -- flag)
+  TIL_DZEROEQUAL:
+	.8byte 0x01
+  WA_DZEROEQUAL:
+	.8byte DZEROEQUAL
+  ptr_DEQUAL:
+	.8byte TIL_DEQUAL
+  length_ASCII_DZEROEQUAL:
+	.8byte 0x03
+  beg_DZEROEQUAL:
+	.ascii "D0="
+  end_DZEROEQUAL:
+	.fill 21, 1, 0xFF
+  DZEROEQUAL:
+	ld t0, 0(sp)
+	ld t1, 8(sp)
+	li t2, 0
+	addi sp, sp, 8
+	bnez t0, dzeroequal_done
+	bnez t1, dzeroequal_done
+	li t2, -1
+  dzeroequal_done:
+	sd t2, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER DMAX, DZEROEQUAL, 0x01
 	ld t0, 24(sp)	#lo
 	ld t1, 16(sp)	#hi
 	ld t2, 8(sp)	#lo
@@ -185,15 +513,486 @@
 	sd t2, 8(sp)
 	sd t3, 0(sp)
 	TAILMOD t1
-	
 
-	CODEHEADERZ DPLUS, D+, DMIN, 0x01
+	CODEHEADERZ DMINUS, D-, DMIN, 0x01
 	#(d1 d2 -- d3)
 	ld t0, 24(sp)	#lo
 	ld t1, 16(sp)	#hi
 	ld t2, 8(sp)	#lo
 	ld t3, 0(sp)	#hi
 	addi sp, sp, 16
+	sub t4, t0, t2
+	bleu t4, t0, dminus_nooverflow
+	addi t3, t3, 1
+  dminus_nooverflow:
+	sub t5, t1, t3
+	sd t4, 8(sp)
+	sd t5, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ DDOTR, D.R, DMINUS, 0x01
+	#(d n --)
+	call getScratchPad
+	PUSH a0
+	call getCurrentBase
+	mv t3, a0	#t3 - CURRENT_BASE
+	ld t2, 0(sp)	#t2 - SCRATCH_PAD
+	ld a6, 8(sp)	#a6 - field width
+	ld t0, 24(sp)	#t0 - lo
+	ld t1, 16(sp)	#t1 - hi
+	addi sp, sp, 32
+	li t4, 0x8000000000000000
+	and t5, t4, t1
+	PUSH t2		#scratch_pad saved
+	PUSH t5		#save for later use
+	beqz t5, ddotr_positive
+	#handling a negative number
+	li t5, -1
+	xor t4, t5, t0
+	xor t6, t5, t1
+	addi a0, t4, 1
+	bgtu a0, t3, ddotr_negate_nooverflow
+	addi a1, t6, 1
+  ddotr_negate_nooverflow:
+	mv t0, a0	#lo
+	mv t1, a1	#hi
+  ddotr_positive:
+	li t5, 10	#for rebasing
+	li a0, 0x30	#0
+	li a1, 0x37	#0 rebased for bases > 10
+	li t4, 0	#count
+	bnez t1, ddotr_wide_setup
+	#simplest case - lo cell only
+	addi sp, sp, 8	#can't be negative
+  ddotr_generate_characters_simple:
+	remu a2, t0, t3
+	divu t0, t0, t3
+	bgeu a2, t5, ddotr_simple_remainder
+	add t6, a2, a0
+	call dd_paste_in
+	beqz t0, ddotr_reverse	#0
+	j ddotr_generate_characters_simple
+  ddotr_simple_remainder:
+	add t6, a2, a1
+	call dd_paste_in
+	j ddotr_generate_characters_simple
+  ddotr_wide_setup:
+	#preserve numbers for character mapping
+	addi sp, sp, -16
+	sd a0, 0(sp)
+	sd a1, 8(sp)
+  ddotr_wide:
+	#general case both cells
+	remu a0, t1, t3
+	mv a2, t3
+	mv a1, t0
+	call dd_long_division_unsigned
+	beqz a7, ddotr_reverse
+	mv t0, a0
+	mv t6, a1
+	bgeu t6, t5, ddotr_wide_remainder
+	ld a0, 0(sp)
+	add t6, t6, a0
+	call dd_paste_in
+  ddotr_update_double:
+	divu t1, t1, t3
+	bnez t1, ddotr_wide
+	beqz t0, ddotr_reverse_setup
+	j ddotr_wide
+  ddotr_wide_remainder:
+	ld a1, 8(sp)
+	add t6, t6, a1
+	call dd_paste_in
+  ddotr_reverse_setup:
+	addi sp, sp, 16		#drop storage
+ 	#process sign
+	POP t0
+	beqz t0, ddotr_reverse
+	call dd_paste_minus
+  ddotr_reverse:
+	POP t0		#SCRATCH_PAD
+	mv t5, t0
+	mv t6, t2
+	sub a5, t2, t0	#length
+	bgeu a5, a6, dd_ddotr_join
+	#inject spaces
+	sub a5, a6, a5
+	li t6, 0x020
+  ddotr_pad:
+	call dd_paste_in
+	addi a5, a5, -1
+	bnez a5, ddotr_pad
+	mv a5, a6
+	j dd_ddotr_join
+
+	CODEHEADERZ DD, D., DDOTR, 0x01
+	#(d -- )
+	call getScratchPad
+	PUSH a0
+	call getCurrentBase
+	mv t3, a0	#t3 - CURRENT_BASE
+	ld t2, 0(sp)	#t2 - SCRATCH_PAD
+	ld t0, 16(sp)	#t0 - lo
+	ld t1, 8(sp)	#t1 - hi
+	addi sp, sp, 24
+	li t4, 0x8000000000000000
+	and t5, t4, t1
+	PUSH t2		#scratch_pad saved
+	PUSH t5		#save for later use
+	beqz t5, dd_positive
+	#handling a negative number
+	li t5, -1
+	xor t4, t5, t0
+	xor t6, t5, t1
+	addi a0, t4, 1
+	bgt a0, t4, dd_negate_nooverflow
+	addi t6, t6, 1
+  dd_negate_nooverflow:
+	mv t0, a0	#lo
+	mv t1, t6	#hi
+  dd_positive:
+	li t5, 10	#for rebasing
+	li a0, 0x30	#0
+	li a1, 0x37	#0 rebased for bases > 10
+	li t4, 0	#count
+	bnez t1, dd_wide_setup
+	#simplest case - lo cell only
+  dd_generate_characters_simple:
+	remu a2, t0, t3
+	divu t0, t0, t3
+	bgeu a2, t5, dd_simple_remainder
+	add t6, a2, a0
+	call dd_paste_in
+	beqz t0, dd_prepare_reverse	#0
+	j dd_generate_characters_simple
+  dd_simple_remainder:
+	add t6, a2, a1
+	call dd_paste_in
+	j dd_generate_characters_simple
+  dd_wide_setup:
+	#preserve numbers for character mapping
+	addi sp, sp, -16
+	sd a0, 0(sp)
+	sd a1, 8(sp)
+  dd_wide:
+	#general case both cells
+	remu a0, t1, t3
+	mv a2, t3
+	mv a1, t0
+	call dd_long_division_unsigned
+	beqz a7, dd_reverse
+	mv t0, a0
+	mv t6, a1
+	bgeu t6, t5, dd_wide_remainder
+	ld a0, 0(sp)
+	add t6, t6, a0
+	call dd_paste_in
+  dd_update_double:
+	divu t1, t1, t3
+	bnez t1, dd_wide
+	beqz t0, dd_reverse_setup
+	j dd_wide
+  dd_wide_remainder:
+	ld a1, 8(sp)
+	add t6, t6, a1
+	call dd_paste_in
+	j dd_update_double
+  dd_reverse_setup:
+	addi sp, sp, 16		#drop storage
+  dd_prepare_reverse:
+ 	#process sign
+	POP t0
+	beqz t0, dd_reverse
+	call dd_paste_minus
+  dd_reverse:
+	POP t0		#SCRATCH_PAD
+	mv t5, t0
+	mv t6, t2
+	sub a5, t2, t0	#length
+  dd_ddotr_join:
+	addi t2, t2, -1
+  dd_reverse_loop:
+	bgeu t0, t2, dd_reverse_done
+	lb t1, 0(t0)
+	lb t3, 0(t2)
+	sb t1, 0(t2)
+	sb t3, 0(t0)
+	addi t0, t0, 1
+	addi t2, t2, -1
+	j dd_reverse_loop
+  dd_reverse_done:
+	WRITESTRINGR t5, a5
+	WRITECHAR 0x20	#pad with space
+	TAILMOD t1
+  dd_paste_minus:
+	li t6, 45
+  dd_paste_in:
+	#t6 has character
+	sb t6, 0(t2)
+	addi t4, t4, 1
+	addi t2, t2, 1
+	ret
+
+  dd_long_division_unsigned:
+  #a0 - remainder
+  #a1 - dividend
+  #a2 - divisor
+  #OUTPUT
+  #a0 quotient
+  #a1 remainder
+  #a7 1 if answer valid
+	li a7, 0
+	#check validity
+	beqz a2, dd_long_division_unsigned_quit
+	#get extra registers
+	addi sp, sp, -56
+	sd s0, 0(sp)
+	sd s1, 8(sp)
+	sd s2, 16(sp)
+	sd s3, 24(sp)
+	sd s4, 32(sp)
+	sd s5, 40(sp)
+	sd s6, 48(sp)
+	mv s0, a0
+	mv s1, a1
+	mv s2, a2
+	li a7, 1
+	#set up the calculation
+	li s3, 0x8000000000000000
+	li a3, 63
+	li a0, 0
+	li a1, 0
+  dd_long_division_unsigned_calculate:
+	and s4, s1, s3
+	srl s5, s4, a3		#just want the bit
+	slli s0, s0, 1
+	add s0, s0, s5
+	divu s5, s0, s2
+	beqz s5, dd_long_division_unsigned_advance
+	sll s6, s5, a3
+	or a0, a0, s6
+	remu s0, s0, s2
+  dd_long_division_unsigned_advance:
+	srli s3, s3, 1
+	beqz s3, dd_long_division_unsigned_done
+	addi a3, a3, -1
+	j dd_long_division_unsigned_calculate
+  dd_long_division_unsigned_done:
+	mv a1, s0
+	ld s0, 0(sp)
+	ld s1, 8(sp)
+	ld s2, 16(sp)
+	ld s3, 24(sp)
+	ld s4, 32(sp)
+	ld s5, 40(sp)
+	ld s6, 48(sp)
+	addi sp, sp, 56
+  dd_long_division_unsigned_quit:
+	ret
+
+	CODEHEADERZ DZEROLESS, D0<, DD, 0x01
+	#(d -- flag)
+	ld t0, 0(sp)
+	addi sp, sp, 8
+	li t1, 0x8000000000000000
+	and t2, t0, t1
+	li t3, 0	#flag
+	beqz t2, dzeroless_done
+	li t3, -1
+  dzeroless_done:
+	sd t3, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ MTIMESDIV, M*/, DZEROLESS, 0x01
+	#(d n1 n2 -- d)
+	ld t0, 0(sp)	#n2
+	ld t1, 8(sp)    #n1
+	ld t2, 16(sp)	#hi
+	ld t3, 24(sp)	#lo
+	addi sp, sp, 16
+	#get sign for multiplication
+	li a0, 0	#positive sign required
+	bgez t1, mtimesdiv_check_double_sign
+	li a0, 1	#negative sign required
+  mtimesdiv_check_double_sign:
+	bgez t2, mtimesdiv_begin_calculation
+	addi a0, a0, -1
+  mtimesdiv_begin_calculation:
+	#produce intermediate first
+	mulhsu t4, t1, t3
+	mul t3, t3, t1
+	mulh t5, t1, t2
+	mul t2, t2, t1
+	add t2, t2, t4
+	#handle sign issue
+	bnez t5, mtimesdiv_got_long_form
+	beqz a0, mtimesdiv_got_long_form
+	li t5, -1
+  mtimesdiv_got_long_form:
+	#intermediate is now (hi)t5-t2-t3(lo)
+	#now implement long division
+	mv a0, t5
+	mv a1, t2
+	mv a2, t0
+	mv a3, t5
+	mv a4, t3
+	call mtimesdiv_very_long_division
+	sd a1, 8(sp)
+	sd a0, 0(sp)
+	TAILMOD t1
+  mtimesdiv_very_long_division:
+  #a0 - hiword
+  #a1 - dividend hi
+  #a4 - dividend lo
+  #a2 - divisor
+  #a3 - hi word (for sign)
+  #OUTPUT
+  #a0 quotient -hi
+  #a1 quotient - lo
+  #a7 1 if answer valid
+	li a7, 0
+	#check validity
+	beqz a2, mtimesdiv_long_division_signed_quit
+	#get extra registers
+	addi sp, sp, -56
+	sd s0, 0(sp)
+	sd s1, 8(sp)
+	sd s2, 16(sp)
+	sd s3, 24(sp)
+	sd s4, 32(sp)
+	sd s5, 40(sp)
+	sd s6, 48(sp)
+	mv s0, a0	#s0 - hiword - later remainder
+	mv s1, a1	#s1 - dividend in
+	mv s2, a2	#s2 - divisor in
+	li a7, 1
+	li a6, 0 	#sign - 0 for positive
+	#calculate sign
+	li s3, 0x8000000000000000
+	and s4, a3, s3
+	srli s4, s4, 63
+	and s5, a2, s3
+	srli s5, s5, 63
+	xor a6, s4, s5
+	beqz a6, mtimesdiv_long_division_setup
+	#want everything to be positive
+	and s6, s3, s2
+	beqz s6, mtimesdiv_correct_dividend
+	li s6, -1
+	xor s2, s2, s6
+	addi s2, s2, 1
+	j mtimesdiv_long_division_setup
+  mtimesdiv_correct_dividend:
+	li s6, -1
+	xor s5, a4, s6
+	xor a1, s1, s6
+	xor a0, s0, s6
+	addi a4, s5, 1
+	bgtu a4, s5, mtimesdiv_long_division_setup_full
+  mtimesdiv_correct_upper:
+	addi s1, a1, 1
+	bgtu s1, a1, mtimesdiv_long_division_half_full
+	addi s0, a0, 1
+	j mtimesdiv_long_division_setup
+  mtimesdiv_long_division_setup_full:
+	mv s1, a1
+  mtimesdiv_long_division_setup_half_full:
+	mv s0, a0
+  mtimesdiv_long_division_setup:
+	#set up the calculation
+	rem s0, s0, s2
+	li a3, 63
+	li a0, 0
+	li a1, 0
+  mtimesdiv_long_division_signed_calculate:
+	and s4, s1, s3
+	srl s5, s4, a3		#just want the bit
+	slli s0, s0, 1
+	add s0, s0, s5
+  mtimesdiv_long_division_signed_unsigned:
+	divu s5, s0, s2
+  mtimesdiv_long_division_signed_continue:
+	sll s6, s5, a3
+	or a0, a0, s6
+  mtimesdiv_long_division_signed_rem_unsigned:
+	remu s0, s0, s2
+  mtimesdiv_long_division_signed_advance:
+	srli s3, s3, 1
+	beqz s3, mtimesdiv_long_division_signed_done
+	addi a3, a3, -1
+	j mtimesdiv_long_division_signed_calculate
+  mtimesdiv_long_division_signed_done:
+        # have now calculated hi quotient - in a0
+	# now repeat
+	mv s1, a4
+	PUSH a0
+	li s3, 0x8000000000000000
+	li a3, 63
+	li a0, 0
+	li a1, 0
+  very_long_division_calculate:
+	and s4, s1, s3
+	srl s5, s4, a3		#just want the bit
+	slli s0, s0, 1
+	add s0, s0, s5
+  very_long_division_unsigned:
+	divu s5, s0, s2
+  very_long_division_continue:
+	beqz s5, very_long_division_advance
+	sll s6, s5, a3
+	or a0, a0, s6
+  very_long_division_remainder_unsigned:
+	remu s0, s0, s2
+  very_long_division_advance:
+	srli s3, s3, 1
+	beqz s3, very_long_division_done
+	addi a3, a3, -1
+	j very_long_division_calculate
+  very_long_division_done:
+	mv a1, a0
+	POP a0
+	beqz a6, mtimesdiv_long_division_signed_leave
+  mtimesdiv_negate:
+	li s1, -1
+	xor s2, a1, s1
+	xor a0, a0, s1
+	addi a1, s2, 1
+	bgtu a1, s2, mtimesdiv_long_division_signed_leave
+	addi a0, a0, 1
+  mtimesdiv_long_division_signed_leave:
+	ld s0, 0(sp)
+	ld s1, 8(sp)
+	ld s2, 16(sp)
+	ld s3, 24(sp)
+	ld s4, 32(sp)
+	ld s5, 40(sp)
+	ld s6, 48(sp)
+	addi sp, sp, 56
+  mtimesdiv_long_division_signed_quit:
+	ret
+	
+	CODEHEADERZ MPLUS, M+, MTIMESDIV, 0x01
+	#(d n -- d)
+	ld t2, 0(sp)	#lo
+	li t3, 0	#hi - zero
+	ld t1, 8(sp)	#hi
+	ld t0, 16(sp)	#lo
+	addi sp, sp, 8
+	bltz t2, mplus_process_negative
+	j dplus_mplus_join
+  mplus_process_negative:
+	#sign extend
+	li t3, -1
+	j dplus_mplus_join
+	
+	CODEHEADERZ DPLUS, D+, MPLUS, 0x01
+	#(d1 d2 -- d3)
+	ld t0, 24(sp)	#lo
+	ld t1, 16(sp)	#hi
+	ld t2, 8(sp)	#lo
+	ld t3, 0(sp)	#hi
+	addi sp, sp, 16
+  dplus_mplus_join:
 	add t4, t0, t2
 	blt t4, t0, dplus_do_overflow
 	blt t4, t2, dplus_do_overflow
@@ -206,7 +1005,106 @@
 	sd t5, 0(sp)
 	TAILMOD t1
 
-	CODEHEADERZ DTOS, D>S, DPLUS, 0x01
+	CODEHEADER DNEGATE, DPLUS, 0x01
+	#(d -- d)
+	ld t0, 8(sp)	#lo
+	ld t1, 0(sp)	#hi
+	li t2, -1
+	xor t3, t2, t0
+	xor t4, t2, t1
+	addi t5, t3, 1
+	bgtu t5, t3, dnegate_nooverflow
+	addi t4, t4, 1
+  dnegate_nooverflow:
+	sd t4, 0(sp)
+	sd t5, 8(sp)
+	TAILMOD t1
+
+	CODEHEADERZ DTWOTIMES, D2*, DNEGATE, 0x1
+	#(d -- d)
+	ld t0, 8(sp)	#lo
+	ld t1, 0(sp)	#hi
+	li t2, 0x8000000000000000
+	and t3, t0, t2	#test for carry
+	slli t0, t0, 1
+	slli t1, t1, 1
+	beqz t3, dtwotimes_nooverflow
+	addi t1, t1, 1
+  dtwotimes_nooverflow:
+	sd t0, 8(sp)
+	sd t1, 0(sp)
+	la t1, NEXTMOD
+	ld t1, 0(t1)
+	jr t1
+
+	CODEHEADERZ DTWODIV, D2/, DTWOTIMES, 0x01
+	#(d -- d)
+	ld t0, 8(sp)	#lo
+	ld t1, 0(sp)	#hi
+	li t2, 0x1
+	and t3, t1, t2	#will there be carry?
+	li t4, 2
+	div t5, t1, t4
+	srli t0, t0, 1
+	beqz t3, dtwodiv_nooverflow
+	li t6, 0x8000000000000000	#handle carry
+	or t0, t0, t6
+  dtwodiv_nooverflow:
+	sd t0, 8(sp)
+	sd t5, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ DLESS, D<, DTWODIV, 0x01
+	#(d d -- flag)
+	ld t0, 24(sp)	#lo
+	ld t1, 16(sp)	#hi
+	ld t2, 8(sp)	#lo
+	ld t3, 0(sp)	#hi
+	li t4, 0	#flag
+	bgt t1, t3, dless_done
+	bne t1, t3, dless_pass
+	bge t0, t2, dless_done
+  dless_pass:
+	li t4, -1
+  dless_done:
+	addi sp, sp, 24
+	sd t4, 0(sp)
+	TAILMOD t1
+	
+	CODEHEADERZ DULESS, DU<, DLESS, 0x01
+	#(ud ud -- flag)
+	ld t0, 24(sp)	#lo
+	ld t1, 16(sp)	#hi
+	ld t2, 8(sp)	#lo
+	ld t3, 0(sp)	#hi
+	li t4, 0
+	bgtu t1, t3, duless_done
+	bne t1, t3, duless_pass
+	bgeu t0, t2, duless_done
+  duless_pass:
+	li t4, -1
+  duless_done:
+	addi sp, sp, 24
+	sd t4, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ TWOROT, 2ROT, DULESS, 0x01
+	#(x1 x2 x3 x4 x5 x6 -- x3 x4 x5 x6 x1 x2)
+	ld t6, 0(sp)
+	ld t5, 8(sp)
+	ld t4, 16(sp)
+	ld t3, 24(sp)
+	ld t2, 32(sp)
+	ld t1, 40(sp)
+	sd t1, 8(sp)
+	sd t2, 0(sp)
+	sd t6, 16(sp)
+	sd t5, 24(sp)
+	sd t4, 32(sp)
+	sd t3, 40(sp)
+	TAILMOD t1
+
+	CODEHEADERZ DTOS, D>S, TWOROT, 0x01
 	#(d -- n)
 	ld t1, 0(sp)		#higher range
 	ld t0, 8(sp)
@@ -238,7 +1136,7 @@
 	TAILMOD t1
 
 
-  starter:
+  starter_double:
 	PUSH ra
 	call getNextAddress	#get the address for tail return
 	la t0, NEXTMOD
@@ -260,6 +1158,13 @@
 	la a0, DTOS	#new end of dictionary
 	addi a0, a0, -56
 	call setDictionary	#return new tail of dictionary to caller
+	#setup extension writing
+	la a0, WA_TWOLITERAL
+	la a1, extender_2literal
+	call  setExtenders
+	la a0, WA_TO
+	la a1, extender_2to
+	call setExtenders
 	POP ra
 	fence.i
 	ret
@@ -269,32 +1174,54 @@
  #a2 high part of number to write
  #a3 next address
   double_two_constant_code:
-			li t0, 0x297
-			sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
-			li t0, 0x202B303
-			sw t0, 4(a0)						#ld t1, 32(t0)
-			li t0, 0x282B383
-			sw t0, 8(a0)						#ld t2, 40(t0)
-			li t0, 0xFF010113
-			sw t0, 12(a0)						#addi sp, sp, -16
-			li t0, 0x613423
-			sw t0, 16(a0)						#sd t1, 8(sp)
-			li t0, 0x713023
-			sw t0, 20(a0)						#sd t2, 0(sp)
-			#now jump to next
-			li t0, 0x302B303
-			sw t0, 24(a0)						#ld t1, 48(t0)
-			li t0, 0x30067
-			sw t0, 28(a0)						#jr t1
-			sd a2, 32(a0)						#hi						
-			sd a1, 40(a0)						#low
-			sd a3, 48(a0)						#NEXT
-			addi a0, a0, 56
-			fence.i
-			ret
+	li t0, 0x297
+	sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
+	li t0, 0x202B303
+	sw t0, 4(a0)						#ld t1, 32(t0)
+	li t0, 0x282B383
+	sw t0, 8(a0)						#ld t2, 40(t0)
+	li t0, 0xFF010113
+	sw t0, 12(a0)						#addi sp, sp, -16
+	li t0, 0x613423
+	sw t0, 16(a0)						#sd t1, 8(sp)
+	li t0, 0x713023
+	sw t0, 20(a0)						#sd t2, 0(sp)
+	#now jump to next
+	li t0, 0x302B303
+	sw t0, 24(a0)						#ld t1, 48(t0)
+	li t0, 0x30067
+	sw t0, 28(a0)						#jr t1
+	sd a2, 32(a0)						#hi						
+	sd a1, 40(a0)						#low
+	sd a3, 48(a0)						#NEXT
+	addi a0, a0, 56
+	fence.i
+	ret
 
+ double_constant_code:
+	#a0 holds address to start writing
+	#a1 holds number
+	#a2 holds NEXT address
+	li t0, 0x297
+	sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
+	li t0, 0x182B303
+	sw t0, 4(a0)						#ld t1, 24(t0)
+	li t0, 0xFF810113
+	sw t0, 8(a0)						#addi sp, sp, -8
+	li t0, 0x613023
+	sw t0, 12(a0)						#sd t1, 0(sp)
+	#now jump to next
+	li t0, 0x202B303
+	sw t0, 16(a0)						#ld t1, 32(t0)
+	li t0, 0x30067
+	sw t0, 20(a0)						#jr t1
+	sd a1, 24(a0)
+	sd a2, 32(a0)
+	addi a0, a0, 40
+	fence.i
+	ret
 
 .section .init_array
 .balign 8
-.8byte starter
+.8byte starter_double
 
