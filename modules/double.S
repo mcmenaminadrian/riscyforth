@@ -277,7 +277,7 @@
 	addi sp, sp, -16
 	sd a0, 0(sp)
 	sd a1, 8(sp)
-	mv a1, a0
+	mv a0, a1
 	call setInputStart
 	ld a0, 0(sp)
 	ld a1, 8(sp)
@@ -313,6 +313,12 @@
 	sub t3, t1, t2
 	add a0, a0, t3
   tov_done:
+	PUSH a0
+	call setCreateWritePoint
+	call getNewDictionary
+	call setDictionary
+	POP a0
+	call setNewDictionary
 	#get the hell out of dodge
 	TAILMOD t1
 	
