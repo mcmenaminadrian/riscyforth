@@ -67,7 +67,7 @@
   extender_2to:
 	call getCreateWritePoint
 	PUSH a0
-	la t2, WA__TO
+	la t2, WA__TO_
 	sd t2, 0(a0)
 	#now have to embed (sanitized) string
 	call getInputStart
@@ -100,6 +100,15 @@
 	bgtu a2, a1, to2_bail
 	j extender_2to_look_for_end
   extender_2to_found_end:
+	#update read-in point
+	addi sp, sp, -16
+	sd a0, 0(sp)
+	sd a2, 8(sp)
+	mv a0, a2
+	call setInputStart
+	ld a2, 8(sp)
+	ld a0, 0(sp)
+	addi sp, sp, 16
 	mv a1, a2
 	#embed length
 	sub a3, a2, a0
@@ -132,13 +141,12 @@
 	fence.i
 	TAILMOD t1
 
-	CODEHEADER _TO, _TWOLITERAL, 0x0
+	CODEHEADER _TO_, _TWOLITERAL, 0x0
 	#supercede the old _TO
 	#essentially the same code with different labelled jump
 	#(x1 x2 "spaces<name-- etc)
 	#we are compiled into a word
 	#so we pull the token
-	test_to:
 	mv a0, s7
 	lb a2, 0(a0)
 	addi a0, a0, 8
@@ -153,7 +161,7 @@
 	call to2__to_join	
 
 
-	CODEHEADER TO, _TO, 0x0
+	CODEHEADER TO, _TO_, 0x0
 	#surplants standard TO
 	#(x1 x2 "spaces<name>--) or (x1 "spaces<name>"--)
 	call getInputStart
