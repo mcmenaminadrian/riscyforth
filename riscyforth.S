@@ -31,7 +31,6 @@
    .comm recycleallot, ADDRWIDTH
    .comm recyclewatermark, ADDRWIDTH
    .comm dataspace, ADDRWIDTH
-   .comm dataspaceptr, ADDRWIDTH
    .comm INDOES, ADDRWIDTH
    .comm INPPONE, ADDRWIDTH
    .comm PICTUREDN, 0x10
