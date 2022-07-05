@@ -1,6 +1,5 @@
 # experimental double module
-.include "../macros.S"
-#.include "../riscylib/riscyvar.S"
+.include "../../macros.S"
 .section .bss
     .comm NEXTMOD, 8
     .comm LOCAL_INPUT_START, 8
