@@ -8,10 +8,33 @@
 
 	CODEEND DFALIGN, 0x01
 	#(--)
+	call getDataspacePtr
+	li t0, 0x07
+	and t1, a0, t0
+	beqz t1, dfalign_done
+	li t2, 0x08
+	sub t3, t2, t1
+	add a0, a0, t3
+	call setDataspacePtr
+  dfalign_done:
 	TAILMOD t1
 
-	CODEHEADER DFALIGNED, DFALIGN, 0x01
+	CODEHEADER DFLOATS, DFALIGN, 0x01
+	#(n -- n)
+	TAILMOD t1
+	
+
+	CODEHEADER DFALIGNED, DFLOATS, 0x01
 	#(addr -- df-addr)
+	ld t0, 0(sp)
+	li t1, 0x07
+	and t2, t1, t0
+	beqz t2, dfaligned_done
+	li t3, 0x08
+	sub t4, t3, t2
+	add t5, t4, t0
+	sd t5, 0(sp)
+  dfaligned_done:
 	TAILMOD t1
 
 
