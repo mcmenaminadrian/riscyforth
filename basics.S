@@ -280,8 +280,133 @@
                 PUSH t3                               #store word address on the call stack
                 tail EXE
 
+
+  sumstring:
+	#input
+	#a0 has start of string
+	#a1 has length
+		addi sp, sp, -40
+		sd s1, 0(sp)
+		sd s2, 8(sp)
+		sd s3, 16(sp)
+		sd s4, 24(sp)
+		sd s5, 32(sp)
+		li s1, 0x10	#10
+		li s2, 0x30	#0
+		li s3, 0x39	#9
+		mv s6, zero	#count
+  sumstring_read:
+		lbu s4, 0(a0)
+		blt s4, s2, sumstring_fail
+		bgt s4, s3, sumstring_fail
+		sub s4, s4, s2
+		mul s6, s6, s1
+		add s6, s6, s4
+		addi a1, a1, -1
+		beqz a1, sumstring_done
+		addi a0, a0, 1
+		j sumstring_read
+  sumstring_done:
+		mv a0, s6
+  sumstring_return:
+		ld s5, 32(sp)
+		ld s4, 24(sp)
+		ld s3, 16(sp)
+		ld s2, 8(sp)
+		ld s1, 0(sp)
+		addi sp, sp, 40
+		ret
+  sumstring_fail:
+		li a0, -1
+		j sumstring_return
+
+  scan_floats:
+		#can we interpret the string as FP?
+		#must have digit and at least one of E or .
+		li a0, 0x30	#0
+		li a1, 0x39	#9
+		li a2, 0x45	#E
+		li a3, 0x2E	#.
+		mv a4, zero	#count of matches
+		li a5, 0x20	#space
+		li a6, 0x0A	#CR
+		PUSH t1		#start of string
+		mv t3, zero	#count length
+		mv t4, zero	#don't keep counting numbers
+ scan_float_scan:
+		lbu t5, 0(t1)
+		bne t5, a2, scan_float_notE
+		#cannot start with an E
+		beqz t3, scan_float_done_out
+		addi a4, a4, 1
+		addi t3, t3, 1
+		j scan_float_next
+  scan_float_notE:
+		bne t5, a3, scan_float_notDot
+		addi a4, a4, 1
+		j scan_float_next
+  scan_float_notDot:
+		beq t5, a5, scan_float_done
+		beq t5, a6, scan_float_done
+		blt t5, a0, scan_float_done_out
+		bgt t5, a1, scan_float_done_out
+		addi t3, t3, 1
+		bnez t4, scan_float_next
+		addi a4, a4, 1
+		addi t4, t4, 1
+  scan_float_next:
+		addi t1, t1, 1
+		j scan_float_scan
+  scan_float_done:
+		li t4, 2	#min
+		li t5, 3	#max
+		blt a4, t4, scan_float_done_out
+		bgt a4, t5, scan_float_done_out
+		j process_float	#have a real one
+  scan_float_done_out:
+		POP t1
+		ret
+  process_float:
+		ld t1 0(sp)
+		PUSH t3		#save length
+		#first of all - look for exponent
+  process_float_search_exponent:
+		mv t6, 0	#count of exponent
+		lbu t5, 0(t1)
+		addi t3, t3, -1
+		beq t5, a2, process_float_count_exponent
+		beqz t3, process_float_save_exponent
+		j process_float_search_exponent
+  process_float_count_exponent:
+		addi sp, sp, -24
+		sd a0, 0(sp)
+		sd a1, 8(sp)
+		sd ra, 16(sp)
+		addi a0, t1, 1	#start of string
+		mv a1, t3
+		call sumString
+		li a1, -1
+		beq a0, a1, process_float_exponent_fail
+		mv t6, a0
+		ld a0, 0(sp)
+		ld a1, 8(sp)
+		ld ra, 16(sp)
+		addi sp, sp, 24
+  process_float_save_exponent:
+		PUSH t6
+		
+		
+		#TODO: Implement this - place number on stack
+		tail EXE
+
+
   search_exhausted:
 		#not a keyword - so can we interpret it as a number?
+		la a0, FP_AVAILABLE
+		ld a1, 0(a0)
+		beqz a1, scan_integers
+		call scan_floats
+  scan_integers:
 		#t0 points to start
 		#modified version of code used in >NUMBER here
 		mv t1, t0				#t1 points to characters

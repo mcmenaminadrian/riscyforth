@@ -24,6 +24,7 @@
    .comm CREATEFLAG, ADDRWIDTH
    .comm outerLoopTokenizeAddress, ADDRWIDTH
    .comm dataspaceptr, ADDRWIDTH
+   .comm FP_AVAILABLE, ADDRWIDTH
 
 .section .text
 

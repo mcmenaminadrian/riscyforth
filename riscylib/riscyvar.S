@@ -48,5 +48,6 @@
 .extern CREATEFLAG
 .extern outerLoopTokenizeAddress
 .extern dataspaceptr
+.extern FP_AVAILABLE
 
 #endif
