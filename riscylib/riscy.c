@@ -16,6 +16,7 @@ extern unsigned long CURRENT_BASE;
 extern unsigned long CREATEFLAG;
 extern unsigned long outerLoopTokenizeAddress;
 extern unsigned long dataspaceptr;
+extern unsigned long FP_AVAILABLE;
 
 static unsigned long EXTENDERS[512];
 static unsigned long EXTENDERSINDEX = 0;
@@ -147,4 +148,9 @@ unsigned long getDataspacePtr(void)
 void setDataspacePtr(unsigned long dataPtrIn)
 {
 	dataspaceptr = dataPtrIn;
+}
+
+void setFPAvailable(void)
+{
+	FP_AVAILABLE = 1;
 }

@@ -64,6 +64,7 @@
 #	la a0, WA_TWOLITERAL
 #	la a1, extender_2literal
 #	call  setExtenders
+	call setFPAvailable
 	POP ra
 	fence.i
 	ret

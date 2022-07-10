@@ -367,11 +367,65 @@
 		POP t1
 		ret
   process_float:
-		ld t1 0(sp)
-		PUSH t3		#save length
-		#first of all - look for exponent
+		POP t1
+		#first of all - check the sign
+		addi s9, s9, -32	#store on return stack
+		sd zero, 0(s9)		#ensure exponent default is zero
+		li t6, 0x2D		#negative sign
+		lb t5, 0(t1)
+		beq t5, t6, process_float_negative
+		sd zero, 24(s9)
+		j process_float_check_mantissa
+ process_float_negative:
+		li t6, 1
+		sd t6, 24(s9)
+ process_float_check_mantissa:
+		li t4, 0	#correction for decimal point
+		li t6, 0	#number
+		li a4, 10	#for multiplying
+		li a7, 0	#found dot
+		addi t1, t1, 1
+		addi t3, t3, -1
+  process_float_calculate_mantissa:
+		lb t5, 0(t1)
+		beq t5, a3, process_float_check_mantissa_dot
+		beq t5, a2, process_float_check_mantissa_e
+		beq t5, a5, process_float_check_mantissa_done
+		beq t5, a6, process_float_check_mantissa_done
+		sub t5, t5, a1
+		mul t6, t6, a4
+		beqz a7, process_float_check_bigger
+		addi t4, t4, -1
+		j process_float_check_addin
+  process_float_check_bigger:
+		bnez t6, process_float_process_bigger
+		#not yet broken zero
+		beqz t5, process_float_process_on
+  process_float_process_bigger:
+		#get here because we've got a mantissa >= 1
+		addi t4, t4, 1
+  process_float_check_addin:
+		add t6, t6, t5
+  process_float_process_on:
+		addi t1, t1, 1
+		addi t3, t3, -1
+		j process_float_calculate_mantissa
+  process_float_check_mantissa_dot:
+		li a7, 1
+		j process_float_process_on
+  process_float_check_mantissa_e:
+		#store mantissa and correction count
+		#and check exponent
+		sd t6, 16(s9)
+		sd t4, 8(s9)
+		j process_float_search_exponent
+  process_float_check_mantissa_done:
+		#store mantissa and correction count
+		sd t6, 16(s9)
+		sd t4, 8(s9)
+		j process_float_transfer_to_stack
   process_float_search_exponent:
-		mv t6, 0	#count of exponent
+		li t6, 0	#count of exponent
 		lbu t5, 0(t1)
 		addi t3, t3, -1
 		beq t5, a2, process_float_count_exponent
@@ -384,7 +438,7 @@
 		sd ra, 16(sp)
 		addi a0, t1, 1	#start of string
 		mv a1, t3
-		call sumString
+		call sumstring
 		li a1, -1
 		beq a0, a1, process_float_exponent_fail
 		mv t6, a0
@@ -393,11 +447,14 @@
 		ld ra, 16(sp)
 		addi sp, sp, 24
   process_float_save_exponent:
-		PUSH t6
-		
-		
+		sd t6, 0(s9)
+  process_float_transfer_to_stack:
 		#TODO: Implement this - place number on stack
+		addi s9, s9, 32
 		tail EXE
+  process_float_exponent_fail:
+		addi s9, s9, 32
+		ret
 
 
   search_exhausted:
