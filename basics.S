@@ -280,67 +280,7 @@
                 PUSH t3                               #store word address on the call stack
                 tail EXE
 
-
-  sumstring:
-	#input
-	#a0 has start of string
-	#a1 has length
-	#output a0 - exponent
-		addi sp, sp, -48
-		sd s1, 0(sp)
-		sd s2, 8(sp)
-		sd s3, 16(sp)
-		sd s4, 24(sp)
-		sd s5, 32(sp)
-		sd s6, 40(sp)
-		li s1, 0x0A	#10
-		li s2, 0x30	#0
-		li s3, 0x39	#9
-		#test for sign
-		li s4, 0x2B	#+
-		li s5, 0x2D	#-
-		lbu s6, 0(a0)
-		beq s6, s5, sumstring_negative
-		bne s6, s4, sumstring_positive
-		addi a0, a0, 1
-		addi a1, a1, -1
-		j sumstring_positive
-  sumstring_negative:
-		li s6, 0
-		addi a0, a0, 1
-		addi a1, a1, -1
-		li s5, -1
-		j sumstring_read
-  sumstring_positive:
-		li s6, 0
-		li s5, 1
-  sumstring_read:
-		lbu s4, 0(a0)
-		blt s4, s2, sumstring_fail
-		bgt s4, s3, sumstring_fail
-		sub s4, s4, s2
-		mul s6, s6, s1
-		add s6, s6, s4
-		addi a1, a1, -1
-		beqz a1, sumstring_done
-		addi a0, a0, 1
-		j sumstring_read
-  sumstring_done:
-		mv a0, s6
-		mul a0, a0, s5
-  sumstring_return:
-		ld s6, 40(sp)
-		ld s5, 32(sp)
-		ld s4, 24(sp)
-		ld s3, 16(sp)
-		ld s2, 8(sp)
-		ld s1, 0(sp)
-		addi sp, sp, 48
-		ret
-  sumstring_fail:
-		li a0, -1
-		j sumstring_return
-
+  search_exhausted:
 		#not a keyword - so can we interpret it as a number?
 		la a0, FP_AVAILABLE
 		ld a1, 0(a0)

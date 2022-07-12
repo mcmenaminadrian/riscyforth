@@ -3,7 +3,8 @@
 /** Copyright (C) Adrian McMenamin, 2022                **/
 /** Licenced for reuse under the terms of v2 of GNU GPL **/
 
-#include <string.h>
+//#include <string.h>
+#include <stdlib.h>
 
 extern unsigned long INPUT_START;
 extern unsigned long INPUT_END;
@@ -20,6 +21,9 @@ extern unsigned long FP_AVAILABLE;
 
 static unsigned long EXTENDERS[512];
 static unsigned long EXTENDERSINDEX = 0;
+//FPSTACK only created if we load FP module
+static unsigned long *FPSTACK = NULL;
+static unsigned long FPSTACKCOUNT = 0;
 
 unsigned long nextAddress;
 
@@ -137,6 +141,7 @@ unsigned long getExtenders(unsigned long extendThis)
 			break;
 		}
 	}
+	
 	return returnFn;
 }
 
@@ -153,4 +158,32 @@ void setDataspacePtr(unsigned long dataPtrIn)
 void setFPAvailable(void)
 {
 	FP_AVAILABLE = 1;
+	FPSTACK = (unsigned long*) malloc(4096);
 }
+
+unsigned long *getFPStack(void)
+{
+	return FPSTACK;
+}
+
+unsigned long pushFPStack(unsigned long fpToStack)
+{
+	unsigned long retVal = 1;
+	if (FPSTACKCOUNT < 511) {
+		*(FPSTACK + FPSTACKCOUNT * 8) = fpToStack;
+		FPSTACKCOUNT++;
+		retVal = 0;
+	}
+	//do nothing if stack is bust
+	return retVal;
+}
+
+unsigned long popFPStack(void)
+{
+	unsigned long retVal = 0;
+	if (FPSTACKCOUNT > 0) {
+		retVal = *(FPSTACK + FPSTACKCOUNT * 8);
+		FPSTACKCOUNT--;
+	}
+	return retVal;
+}		
