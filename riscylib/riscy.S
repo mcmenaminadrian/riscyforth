@@ -173,7 +173,7 @@
 			ret
 
   .global scan_floats
-  scan_floats:
+	 scan_floats:
 			#on input:
 			#a0 points to start of string
 			#on output:
@@ -181,6 +181,7 @@
 			#a1 0 on success
 			#can we interpret the string as FP?
 			#must have digit and at least one of E or .
+			mv t0, a0
 			li a0, 0x30	#0
 			li a1, 0x39	#9
 			li a2, 0x45	#E
@@ -190,8 +191,7 @@
 			li a6, 0x0A	#CR
 			li a7, 0x2B	#+
 			li t6, 0x2d	#-
-			mv t1, a0
-			mv t0, a0
+			mv t1, t0
 			mv t3, zero	#count length
 			mv t4, zero	#don't keep counting numbers
 	 scan_float_scan:
@@ -294,7 +294,6 @@
 			addi a0, t1, 1	#start of string
 			mv a1, t3
 			call sumstring
-			POP ra
 			li a1, -1
 			beq a0, a1, process_float_exponent_fail
 			mv t6, a0
@@ -302,13 +301,30 @@
 			sd t6, 0(s9)
 	  process_float_transfer_to_stack:
 			#TODO: Implement this - place number on stack
+			li a0, 0
+			ld t0, 24(s9)	#sign
+			beqz t0, process_float_handle_mantissa_binary
+			li a0, 0x8000000000000000
+	  process_float_handle_mantissa_binary:
+			ld a1, 16(s9)
+			ld a2, 8(s9)
+			call mantissa_division
 			addi s9, s9, 32
 			li a1, 0
+			POP ra
 			ret
 	  process_float_exponent_fail:
+			POP ra
 			addi s9, s9, 32
 			li a1, 1
 			ret
+
+ mantissa_division:
+	#input a1 has mantissa
+	#input a2 has current scaling
+	#output a3 has divided number
+	#output a4 has new scaling
+			ret	
 
  sumstring:
 	#input

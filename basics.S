@@ -286,10 +286,11 @@
 		ld a1, 0(a0)
 		beqz a1, scan_integers
 		PUSH t0
+		mv a0, t0
 		call scan_floats
 		POP t0
 		bnez a1, scan_integers
-		tail EXE
+		tail scan_integers	#TODO: something useful
   scan_integers:
 		#t0 points to start
 		#modified version of code used in >NUMBER here
