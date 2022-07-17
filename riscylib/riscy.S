@@ -173,7 +173,7 @@
 			ret
 
   .global scan_floats
-	 scan_floats:
+  scan_floats:
 			#on input:
 			#a0 points to start of string
 			#on output:
@@ -194,7 +194,7 @@
 			mv t1, t0
 			mv t3, zero	#count length
 			mv t4, zero	#don't keep counting numbers
-	 scan_float_scan:
+  scan_float_scan:
 			lbu t5, 0(t1)
 			bne t5, a2, scan_float_notE
 			#cannot start with an E
@@ -202,35 +202,35 @@
 			addi a4, a4, 1
 			addi t3, t3, 1
 			j scan_float_next
-	  scan_float_notE:
+  scan_float_notE:
 			bne t5, a3, scan_float_notDot
 			addi a4, a4, 1
 			j scan_float_next
-	  scan_float_notDot:
+  scan_float_notDot:
 			beq t5, a5, scan_float_done
 			beq t5, a6, scan_float_done
 			beq t5, a7, scan_float_continue
 			beq t5, t6, scan_float_continue
 			blt t5, a0, scan_float_done_out
 			bgt t5, a1, scan_float_done_out
-	  scan_float_continue:
+  scan_float_continue:
 			addi t3, t3, 1
 			bnez t4, scan_float_next
 			addi a4, a4, 1
 			addi t4, t4, 1
-	  scan_float_next:
+  scan_float_next:
 			addi t1, t1, 1
 			j scan_float_scan
-	  scan_float_done:
+  scan_float_done:
 			li t4, 2	#min
 			li t5, 3	#max
 			blt a4, t4, scan_float_done_out
 			bgt a4, t5, scan_float_done_out
 			j process_float	#have a real one
-	  scan_float_done_out:
+  scan_float_done_out:
 			li a1, 1
 			ret
-	  process_float:
+  process_float:
 			mv t1, t0
 			#first of all - check the sign
 			addi s9, s9, -32	#store on return stack
@@ -240,17 +240,17 @@
 			beq t5, t6, process_float_negative
 			sd zero, 24(s9)
 			j process_float_check_mantissa
-	 process_float_negative:
+  process_float_negative:
 			li t6, 1
 			sd t6, 24(s9)
 			addi t1, t1, 1
 			addi t3, t3, -1
-	 process_float_check_mantissa:
-			li t4, 0	#correction for decimal point
+  process_float_check_mantissa:
+			li t4, 0	#count of numbers to right of DP
 			li t6, 0	#number
 			li a4, 10	#for multiplying
 			li a7, 0	#found dot
-	  process_float_calculate_mantissa:
+  process_float_calculate_mantissa:
 			lb t5, 0(t1)
 			beq t5, a3, process_float_check_mantissa_dot
 			beq t5, a2, process_float_check_mantissa_e
@@ -259,36 +259,35 @@
 			sub t5, t5, a0
 			mul t6, t6, a4
 			beqz a7, process_float_check_bigger
-			addi t4, t4, -1
+			addi t4, t4, 1
 			j process_float_check_addin
-	  process_float_check_bigger:
+  process_float_check_bigger:
 			bnez t6, process_float_process_bigger
 			#not yet broken zero
 			beqz t5, process_float_process_on
-	  process_float_process_bigger:
+  process_float_process_bigger:
 			#get here because we've got a mantissa >= 1
-			addi t4, t4, 1
-	  process_float_check_addin:
+  process_float_check_addin:
 			add t6, t6, t5
-	  process_float_process_on:
+  process_float_process_on:
 			addi t1, t1, 1
 			addi t3, t3, -1
 			j process_float_calculate_mantissa
-	  process_float_check_mantissa_dot:
+  process_float_check_mantissa_dot:
 			li a7, 1
 			j process_float_process_on
-	  process_float_check_mantissa_e:
+  process_float_check_mantissa_e:
 			#store mantissa and correction count
 			#and check exponent
 			sd t6, 16(s9)
 			sd t4, 8(s9)
 			j process_float_search_exponent
-	  process_float_check_mantissa_done:
+  process_float_check_mantissa_done:
 			#store mantissa and correction count
 			sd t6, 16(s9)
 			sd t4, 8(s9)
 			j process_float_transfer_to_stack
-	  process_float_search_exponent:
+  process_float_search_exponent:
 			li t6, 0	#count of exponent
 			PUSH ra
 			addi a0, t1, 1	#start of string
@@ -297,23 +296,20 @@
 			li a1, -1
 			beq a0, a1, process_float_exponent_fail
 			mv t6, a0
-	  process_float_save_exponent:
+  process_float_save_exponent:
 			sd t6, 0(s9)
-	  process_float_transfer_to_stack:
+  process_float_transfer_to_stack:
 			#TODO: Implement this - place number on stack
-			li a0, 0
-			ld t0, 24(s9)	#sign
-			beqz t0, process_float_handle_mantissa_binary
-			li a0, 0x8000000000000000
-	  process_float_handle_mantissa_binary:
-			ld a1, 16(s9)
-			ld a2, 8(s9)
-			call mantissa_division
+			#process mantissa
+			ld t0, 16(s9)	#number
+			ld t1, 8(s9)	#offset
+			mv a0, t0
+			call process_mantissa	
 			addi s9, s9, 32
 			li a1, 0
 			POP ra
 			ret
-	  process_float_exponent_fail:
+  process_float_exponent_fail:
 			POP ra
 			addi s9, s9, 32
 			li a1, 1
@@ -350,16 +346,16 @@
 			addi a0, a0, 1
 			addi a1, a1, -1
 			j sumstring_positive
-	  sumstring_negative:
+  sumstring_negative:
 			li s6, 0
 			addi a0, a0, 1
 			addi a1, a1, -1
 			li s5, -1
 			j sumstring_read
-	  sumstring_positive:
+  sumstring_positive:
 			li s6, 0
 			li s5, 1
-	  sumstring_read:
+  sumstring_read:
 			lbu s4, 0(a0)
 			blt s4, s2, sumstring_fail
 			bgt s4, s3, sumstring_fail
@@ -370,10 +366,10 @@
 			beqz a1, sumstring_done
 			addi a0, a0, 1
 			j sumstring_read
-	  sumstring_done:
+  sumstring_done:
 			mv a0, s6
 			mul a0, a0, s5
-	  sumstring_return:
+  sumstring_return:
 			ld s6, 40(sp)
 			ld s5, 32(sp)
 			ld s4, 24(sp)
@@ -382,6 +378,74 @@
 			ld s1, 0(sp)
 			addi sp, sp, 48
 			ret
-	  sumstring_fail:
+  sumstring_fail:
 			li a0, -1
 			j sumstring_return
+
+
+  process_mantissa:
+	#INPUT  a0 - fractional number to be processed 
+	#OUTPUT a0 - processed number
+	#	a1 - bit count in output
+			bnez a0, process_mantissa_continue
+			ret					#just return 0
+  process_mantissa_continue:
+			addi sp, sp, -64
+			sd s0, 0(sp)
+			sd s1, 8(sp)
+			sd s2, 16(sp)
+			sd s3, 24(sp)
+			sd s4, 32(sp)
+			sd s5, 40(sp)
+			sd s6, 48(sp)
+			sd s7, 56(sp)
+			mv s0, a0
+			li s1, 10
+			li s2, 10
+			li s3, 1
+  process_mantissa_test_scale:
+			#find position of max 1
+			div s0, s0, s1
+			beqz s0, process_mantissa_found_scale
+			mul s1, s1, s2
+			addi s3, s3, 1
+			j process_mantissa_test_scale
+  process_mantissa_found_scale:
+			#s3 holds power of 10
+			#s1 has scale
+			mv s0, a0
+			li s7, 1	#to OR in
+			li s2, 63	#max bits
+			li s4, 0	#answer
+			li s5, 0	#count of bits
+  process_mantissa_multiply:
+			slli s0, s0, 1	#multiply by 2
+			div s6, s0, s1
+			slli s4, s4, 1
+			addi s5, s5, 1
+			beqz s6, process_mantissa_div_zero
+			or s4, s4, s7
+			bgt s5, s2, process_mantissa_done
+			remu s0, s0, s1
+			beqz s0, process_mantissa_done
+			j process_mantissa_multiply
+  process_mantissa_div_zero:
+			bgt s5, s2, process_mantissa_done
+			j process_mantissa_multiply
+  process_mantissa_done:
+			mv a0, s4
+			li a1, 64
+			sub a1, a1, s5
+			sll a0, a0, a1	
+			mv a1, s5
+			ld s0, 0(sp)
+			ld s1, 8(sp)
+			ld s2, 16(sp)
+			ld s3, 24(sp)
+			ld s4, 32(sp)
+			ld s5, 40(sp)
+			ld s6, 48(sp)
+			ld s7, 56(sp)
+			addi sp, sp, 64
+			ret
+						
