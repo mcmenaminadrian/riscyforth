@@ -300,13 +300,16 @@
 			sd t6, 0(s9)
   process_float_transfer_to_stack:
 			#TODO: Implement this - place number on stack
+			#process exponent
+			ld a0, 0(s9)
+			call process_index
 			#process mantissa
 			ld t0, 16(s9)	#number
 			ld t1, 8(s9)	#offset
 			mv a0, t0
 			call process_mantissa	
 			addi s9, s9, 32
-			li a1, 0
+			li a1, 1		#TODO: return 0 when code works
 			POP ra
 			ret
   process_float_exponent_fail:
@@ -448,4 +451,70 @@
 			ld s7, 56(sp)
 			addi sp, sp, 64
 			ret
+
+  process_index:
+	#INPUT: 	a0	index - base 10
+	#OUTPUT:	a0	index - base 2
+	#		a1	to add to mantissa
+			bnez a0, process_index_continue
+			ret
+  process_index_continue:
+			#handle transformation of a0
+			li t0, 19		#biggest number in signed 64 bit ~9x10^18
+			div a2, a0, t0
+			li a3, 0		#to handle overflow
+			addi sp, sp, -40
+			sd s0, 0(sp)
+			sd s1, 8(sp)
+			sd s2, 16(sp)
+			sd s3, 24(sp)
+			sd s4, 32(sp)
+  process_index_setup:
+			mv s0, a0
+			li s1, 0				#count max bit
+			li s2, 0				#store current result
+			li s3, 0				#bit we are operating on
+			li t2, 1
+			li t4, -1
+			li a1, 63				#max shift
+  process_index_set_up_number:
+			
+  process_index_shifting:
+			srli t0, s0, 1
+			slli t1, t0, 1
+			sll t3, t2, s3
+			beq s0, t1, process_index_addzero	#0 bit
+			#we need to add 1 to the result
+			or s2, s2, t3
+			j process_index_update_counts
+  process_index_addzero:
+			#ensure bit set to zero
+			xor t5, t4, t3
+			and s2, s2, t5
+  process_index_update_counts:
+			slli s0, s0, 1
+			beqz s0, process_index_div_done
+			addi s1, s1, 1
+			addi s3, s3, 1
+			bgt s3, a1, process_index_shifting
+			li s3, 63
+			srl s2, s2, 1
+			j process_index_shifting
+  process_index_div_done:
+			mv a0, s1
+			xor t5, t4, t3
+			and s2, s2, t5
+			mv a1, s2
+			ld s0, 0(sp)
+			ld s1, 8(sp)
+			ld s2, 16(sp)
+			ld s3, 24(sp)
+			addi sp, sp, 40
+			ret
+			
+		
+			
+			
+			
+				
 						
