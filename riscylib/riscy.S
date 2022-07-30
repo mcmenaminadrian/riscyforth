@@ -460,51 +460,54 @@
 			ret
   process_index_continue:
 			#handle transformation of a0
-			li t0, 19		#biggest number in signed 64 bit ~9x10^18
-			div a2, a0, t0
-			li a3, 0		#to handle overflow
-			addi sp, sp, -40
 			sd s0, 0(sp)
 			sd s1, 8(sp)
 			sd s2, 16(sp)
 			sd s3, 24(sp)
 			sd s4, 32(sp)
-  process_index_setup:
-			mv s0, a0
-			li s1, 0				#count max bit
-			li s2, 0				#store current result
-			li s3, 0				#bit we are operating on
-			li t2, 1
-			li t4, -1
-			li a1, 63				#max shift
-  process_index_set_up_number:
-			
-  process_index_shifting:
-			srli t0, s0, 1
-			slli t1, t0, 1
-			sll t3, t2, s3
-			beq s0, t1, process_index_addzero	#0 bit
-			#we need to add 1 to the result
-			or s2, s2, t3
-			j process_index_update_counts
-  process_index_addzero:
-			#ensure bit set to zero
-			xor t5, t4, t3
-			and s2, s2, t5
-  process_index_update_counts:
-			slli s0, s0, 1
-			beqz s0, process_index_div_done
-			addi s1, s1, 1
-			addi s3, s3, 1
-			bgt s3, a1, process_index_shifting
-			li s3, 63
-			srl s2, s2, 1
-			j process_index_shifting
-  process_index_div_done:
+			#multiply number out - handle simple case of 1
+			li t1, 1
+			li s0, 10
+			bne a0, t1, process_index_standard
+			li s1, 3	#1010b - highest index is three
+			j process_index_calc_comp
+  process_index_standard:
+			mv s2, a0
+			addi s2, s2, -1
+			li t0, 10	#invariant
+  process_index_not1:
+			mulh s3, s0, t0
+			addi s2, s2, -1
+			beqz s3, process_index_bitcount
+			#handle overflow here
+  process_index_bitcount:
+			mul s0, s0, t0
+			li t1, 0x80000000000000
+			li t2, 63
+  process_index_bitcount_check:
+			and t3, s0, t1
+			bnez t3, process_index_bitcount_found
+			srli t1, t1, 1
+			addi t2, t2, -1
+			bltz t2, process_index_error
+			j process_index_bitcount_check
+  process_index_bitcount_found:
+			mv s1, t2
+			bnez s2, process_index_not1
+  process_index_calc_comp:
+			#get here with s0 as number - but do not need to divide as
+			#s1 has bitcount - needed if > 63
+			#but have to return a0 and a1
 			mv a0, s1
-			xor t5, t4, t3
-			and s2, s2, t5
-			mv a1, s2
+			li s2, 1
+			mv a1, s1
+			li a2, 63
+			ble a1, a2, process_index_bitcount_adjusted
+			li a1, 63
+ process_index_bitcount_adjusted:
+			sll s2, s2, a1
+			xor a1, s0, s2
+ process_index_error:			#TODO: fix label	
 			ld s0, 0(sp)
 			ld s1, 8(sp)
 			ld s2, 16(sp)
