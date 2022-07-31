@@ -465,6 +465,7 @@
 			sd s2, 16(sp)
 			sd s3, 24(sp)
 			sd s4, 32(sp)
+			blt a0, zero, process_index_negative_continue
 			#multiply number out - handle simple case of 1
 			li t1, 1
 			li s0, 10
@@ -514,6 +515,29 @@
 			ld s3, 24(sp)
 			addi sp, sp, 40
 			ret
+  process_index_negative_continue:
+			#handle negative index
+			neg a0, a0	#reverse index
+			mv s0, a0
+			li s1, 0
+			li t0, 10	#invariant
+			li t1, 1
+			
+  process_index_negative_look:
+			div s2, t1, t0
+			beqz s2, process_index_negative_shift
+			#have hit first number
+			li s3, 0x8000000000000000
+			j process_index_negative_fill
+  process_index_negative_shift:
+			slli t1, t1, 1
+			j process_index_negative_look
+  process_index_negative_fill:
+			li t2, 62
+			sub t1, t1, t0
+			
+			
+			
 			
 		
 			
