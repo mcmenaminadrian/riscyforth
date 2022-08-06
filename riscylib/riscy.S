@@ -546,20 +546,20 @@
 			bnez a4, process_index_negative_div_factor
 			j process_index_negative_div_process
   process_index_negative_div_factor:
-			sll t2, s6, a7
+			sll t2, a6, a7
 			or a5, a5, t2
 			mul a4, a4, t0
 			sub s2, s2, a4
 			bnez s2, process_index_negative_div_process
   process_index_negative_div_done:
 			#a5 has current value
-			#s2 has index
+			#s1 has index
 			addi s0, s0, -1
 			beqz s0, process_index_negative_result
 			mv s2, a5
 			j process_index_negative_look
   process_index_negative_result:
-			mv a0, s2
+			mv a0, s1
 			li t0, 0x8000000000000000
 			xor a1, a5, t0
 			j process_index_error
