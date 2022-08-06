@@ -517,31 +517,49 @@
 			ret
   process_index_negative_continue:
 			#handle negative index
-			neg a0, a0	#reverse index
+			#divide 1 by 10 by number of times indicated by index
 			mv s0, a0
-			li s1, 0
+			neg s0, s0
 			li t0, 10	#invariant
-			li t1, 1
 			
+  			#set up counts
+			li s1, 0	#depth of first 1
+			li s2, 1	#starting number
   process_index_negative_look:
-			div s2, t1, t0
-			beqz s2, process_index_negative_shift
-			#have hit first number
-			li s3, 0x8000000000000000
-			j process_index_negative_fill
-  process_index_negative_shift:
-			slli t1, t1, 1
+			div t1, s2, t0
+			beqz t1, process_index_negative_advance_search
+			j process_index_negative_divide_out_number
+  process_index_negative_advance_search:
+			addi s1, s1, 1
+			slli s2, s2, 1
 			j process_index_negative_look
-  process_index_negative_fill:
-			li t2, 62
-			sub t1, t1, t0
-			
-			
-			
-			
-		
-			
-			
-			
-				
-						
+  process_index_negative_divide_out_number:
+			li a7, 63
+			li a6, 1
+			sll a5, a6, a7		#a5 holds number
+  process_index_negative_div_process:
+			beqz a7, process_index_negative_div_done
+			rem s2, s2, t0
+			slli s2, s2, 1
+			addi a7, a7, -1
+			div a4, s2, t0
+			bnez a4, process_index_negative_div_factor
+			j process_index_negative_div_process
+  process_index_negative_div_factor:
+			sll t2, s6, a7
+			or a5, a5, t2
+			mul a4, a4, t0
+			sub s2, s2, a4
+			bnez s2, process_index_negative_div_process
+  process_index_negative_div_done:
+			#a5 has current value
+			#s2 has index
+			addi s0, s0, -1
+			beqz s0, process_index_negative_result
+			mv s2, a5
+			j process_index_negative_look
+  process_index_negative_result:
+			mv a0, s2
+			li t0, 0x8000000000000000
+			xor a1, a5, t0
+			j process_index_error
