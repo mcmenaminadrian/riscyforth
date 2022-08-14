@@ -415,15 +415,14 @@
 			bnez a0, process_mantissa_continue
 			ret					#just return 0
   process_mantissa_continue:
-			addi sp, sp, -64
-			sd s0, 0(sp)
-			sd s1, 8(sp)
-			sd s2, 16(sp)
-			sd s3, 24(sp)
-			sd s4, 32(sp)
-			sd s5, 40(sp)
-			sd s6, 48(sp)
-			sd s7, 56(sp)
+			sd s0, 64(s9)
+			sd s1, 72(s9)
+			sd s2, 80(s9)
+			sd s3, 88(s9)
+			sd s4, 96(s9)
+			sd s5, 104(s9)
+			sd s6, 112(s9)
+			sd s7, 120(s9)
 			mv s0, a0
 			li s1, 10
 			li s2, 10
@@ -463,15 +462,14 @@
 			sub a1, a1, s5
 			sll a0, a0, a1	
 			mv a1, s5
-			ld s0, 0(sp)
-			ld s1, 8(sp)
-			ld s2, 16(sp)
-			ld s3, 24(sp)
-			ld s4, 32(sp)
-			ld s5, 40(sp)
-			ld s6, 48(sp)
-			ld s7, 56(sp)
-			addi sp, sp, 64
+			ld s0, 64(s9)
+			ld s1, 72(s9)
+			ld s2, 80(s9)
+			ld s3, 88(s9)
+			ld s4, 96(s9)
+			ld s5, 104(s9)
+			ld s6, 112(s9)
+			ld s7, 120(s9)
 			ret
 
   process_index:
