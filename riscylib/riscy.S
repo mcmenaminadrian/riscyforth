@@ -194,11 +194,16 @@
 			mv t1, t0
 			mv t3, zero	#count length
 			mv t4, zero	#don't keep counting numbers
+			#cannot start with E
+			lbu t5, 0(t1)
+			beq t5, a2, scan_float_done_out
+			j scan_float_notE
   scan_float_scan:
 			lbu t5, 0(t1)
 			bne t5, a2, scan_float_notE
-			#cannot start with an E
-			beqz t3, scan_float_done_out
+			bnez a4, scan_float_scan_E
+			addi a4, a4, 1	#number with E is sufficient for match eg 2E5
+  scan_float_scan_E:
 			addi a4, a4, 1
 			addi t3, t3, 1
 			j scan_float_next
@@ -230,23 +235,33 @@
   scan_float_done_out:
 			li a1, 1
 			ret
+
+  #code to handle mantissa and index
   process_float:
+			#set up stack area on return stack
+			PUSH ra
+			call float_stack_up
+			POP ra
 			mv t1, t0
 			#first of all - check the sign
-			addi s9, s9, -32	#store on return stack
-			sd zero, 0(s9)		#ensure exponent default is zero
-			li t6, 0x2D		#negative sign
+			sd zero, 144(s9)	#zero as default exponent
 			lb t5, 0(t1)
 			beq t5, t6, process_float_negative
-			sd zero, 24(s9)
+			bne t5, a7, process_float_positive
+			addi t1, t1, 1
+			addi t3, t3, -1
+  process_float_positive:
+			sd zero, 128(s9)	#positive number
 			j process_float_check_mantissa
   process_float_negative:
 			li t6, 1
-			sd t6, 24(s9)
+			sd t6, 128(s9)		#negative number
 			addi t1, t1, 1
 			addi t3, t3, -1
   process_float_check_mantissa:
 			li t4, 0	#count of numbers to right of DP
+			sd s0, 64(s9)	#use return stack space
+			li s0, 0	#count of numbers to left of DP
 			li t6, 0	#number
 			li a4, 10	#for multiplying
 			li a7, 0	#found dot
@@ -267,6 +282,7 @@
 			beqz t5, process_float_process_on
   process_float_process_bigger:
 			#get here because we've got a mantissa >= 1
+			addi s0, s0, 1
   process_float_check_addin:
 			add t6, t6, t5
   process_float_process_on:
@@ -279,34 +295,42 @@
   process_float_check_mantissa_e:
 			#store mantissa and correction count
 			#and check exponent
-			sd t6, 16(s9)
-			sd t4, 8(s9)
+			sd t6, 136(s9)
+			sd t4, 152(s9)	#right of DP
+			sd s0, 160(s9)	#left of DP
+			ld s0, 64(s9)	#restore s0
 			j process_float_search_exponent
   process_float_check_mantissa_done:
 			#store mantissa and correction count
-			sd t6, 16(s9)
-			sd t4, 8(s9)
+			sd t6, 136(s9)
+			sd t4, 152(s9)
+			sd s0, 160(s9)
+			ld s0, 64(s9)
 			j process_float_transfer_to_stack
   process_float_search_exponent:
 			li t6, 0	#count of exponent
 			PUSH ra
 			addi a0, t1, 1	#start of string
 			mv a1, t3
-			call sumstring
+			call sumstring	#returns with a0 holding exponent
 			li a1, -1
 			beq a0, a1, process_float_exponent_fail
-			mv t6, a0
+			#now adjust to account for left or right
+			ld t0, 152(s9)
+			sub a0, a0, t0
+			ld t0, 160(s9)
+			addi t0, t0, -1
+			blez t0, process_float_save_exponent
+			add a0, a0, t0
   process_float_save_exponent:
-			sd t6, 0(s9)
+			sd a0, 144(s9)	#store base 10 index
   process_float_transfer_to_stack:
-			#TODO: Implement this - place number on stack
 			#process exponent
-			ld a0, 0(s9)
 			call process_index
+			sd a0, 144(s9)	#store base 2 index
+			sd a1, 152(s9)	#store add
 			#process mantissa
-			ld t0, 16(s9)	#number
-			ld t1, 8(s9)	#offset
-			mv a0, t0
+			ld a0, 136(s9)	#number
 			call process_mantissa	
 			addi s9, s9, 32
 			li a1, 1		#TODO: return 0 when code works
@@ -330,13 +354,12 @@
 	#a0 has start of string
 	#a1 has length
 	#output a0 - exponent
-			addi sp, sp, -48
-			sd s1, 0(sp)
-			sd s2, 8(sp)
-			sd s3, 16(sp)
-			sd s4, 24(sp)
-			sd s5, 32(sp)
-			sd s6, 40(sp)
+			sd s1, 72(s9)
+			sd s2, 80(s9)
+			sd s3, 88(s9)
+			sd s4, 96(s9)
+			sd s5, 104(s9)
+			sd s6, 112(s9)
 			li s1, 0x0A	#10
 			li s2, 0x30	#0
 			li s3, 0x39	#9
@@ -373,13 +396,12 @@
 			mv a0, s6
 			mul a0, a0, s5
   sumstring_return:
-			ld s6, 40(sp)
-			ld s5, 32(sp)
-			ld s4, 24(sp)
-			ld s3, 16(sp)
-			ld s2, 8(sp)
-			ld s1, 0(sp)
-			addi sp, sp, 48
+			ld s6, 112(s9)
+			ld s5, 104(s9)
+			ld s4, 96(s9)
+			ld s3, 88(s9)
+			ld s2, 80(s9)
+			ld s1, 72(s9)
 			ret
   sumstring_fail:
 			li a0, -1
@@ -526,7 +548,7 @@
 			li s1, 0	#depth of first 1
 			li s2, 1	#starting number
   process_index_negative_look:
-			div t1, s2, t0
+			divu t1, s2, t0
 			beqz t1, process_index_negative_advance_search
 			j process_index_negative_divide_out_number
   process_index_negative_advance_search:
@@ -542,7 +564,7 @@
 			rem s2, s2, t0
 			slli s2, s2, 1
 			addi a7, a7, -1
-			div a4, s2, t0
+			divu a4, s2, t0
 			bnez a4, process_index_negative_div_factor
 			j process_index_negative_div_process
   process_index_negative_div_factor:
@@ -554,12 +576,39 @@
   process_index_negative_div_done:
 			#a5 has current value
 			#s1 has index
+			mv s2, a5
+			#now process second and subsequent divisions
+			li a7, 0x8000000000000000
+  process_index_negative_scan:
+			and a6, a7, s2
+			bnez a6, process_index_negative_look_second
+			slli s2, s2, 1
+			addi s1, s1, 1
+			j process_index_negative_scan
+  process_index_negative_look_second:
 			addi s0, s0, -1
 			beqz s0, process_index_negative_result
-			mv s2, a5
-			j process_index_negative_look
+			divu s2, s2, t0
+			j process_index_negative_scan
   process_index_negative_result:
 			mv a0, s1
 			li t0, 0x8000000000000000
-			xor a1, a5, t0
+			xor a1, s2, t0
 			j process_index_error
+
+
+  float_stack_up:
+			#use 0 - 127 for register storage (16 registers at most)
+			#Fixed locations
+			#a0 - a7: 0 - 56
+			#s0 - s7: 64 - 120
+			#128 - 255 for scratch pad
+			#128 - sign
+			#136 - mantissa
+			#144 - exponent
+			addi s9, s9, -256
+			ret
+
+  float_stack_down:
+			addi s9, s9, 256
+			ret
