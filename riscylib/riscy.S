@@ -327,12 +327,46 @@
   process_float_transfer_to_stack:
 			#process exponent
 			call process_index
+  y:
 			sd a0, 144(s9)	#store base 2 index
 			sd a1, 152(s9)	#store add
+			sd a2, 160(s9)	#offset for addition
 			#process mantissa
 			ld a0, 136(s9)	#number
-			call process_mantissa	
-			addi s9, s9, 32
+			call process_mantissa
+  x:
+			ld a2, 144(s9)		#a2 now has index
+			add a2, a2, a1		#adjust for power
+			ld a3, 152(s9)		#a3 now has addition
+			ld a4, 160(s9)		#a4 has any additional offset
+			#get size of add
+			bnez a3, process_float_calculate_addition
+			j process_float_recover 
+  process_float_calculate_addition:
+			#how many bits in the addition?
+			li t0, 1
+			li t1, 63
+  process_float_lookfor_max_addition:
+			sll t2, t0, t1
+			and t3, t2, a3
+			bnez t3, process_float_max_add_found
+			addi t1, t1, -1
+			j process_float_lookfor_max_addition
+  process_float_max_add_found:
+			#t1 holds length of addition
+			#a1 holds length of mantissa - 1
+			#a4 has additional offset
+			add t4, a1, 1
+			add t1, t1, a4
+			bge t4, t1, process_float_add_simple
+			sub t5, t1, t4
+			sll a0, a0, t5
+  process_float_add_simple:
+			add a0, a0, a3
+			#now check for overflow
+			
+  process_float_recover:	
+			call float_stack_down
 			li a1, 1		#TODO: return 0 when code works
 			POP ra
 			ret
@@ -342,12 +376,195 @@
 			li a1, 1
 			ret
 
- mantissa_division:
-	#input a1 has mantissa
-	#input a2 has current scaling
-	#output a3 has divided number
-	#output a4 has new scaling
-			ret	
+
+  process_mantissa:
+	#INPUT  a0 - fractional number to be processed 
+	#OUTPUT a0 - processed number
+	#	a1 - power count
+			bnez a0, process_mantissa_continue
+			ret					#just return 0
+  process_mantissa_continue:
+			sd s0, 64(s9)
+			sd s1, 72(s9)
+			sd s2, 80(s9)
+			sd s3, 88(s9)
+			sd s4, 96(s9)
+			mv s0, a0
+			li s1, 63
+			li s3, 1
+  process_mantissa_test_scale:
+			sll s2, s3, s1
+			and s4, s0, s2
+			bnez s4, process_mantissa_found_scale
+			addi s1, s1, -1
+			j process_mantissa_test_scale
+  process_mantissa_found_scale:
+			#find position of max 1 - in s1
+			#how process input number
+			addi s2, s2, -1
+			and a0, a0, s2
+  process_mantissa_done:
+			mv a1, s1
+			ld s0, 64(s9)
+			ld s1, 72(s9)
+			ld s2, 80(s9)
+			ld s3, 88(s9)
+			ld s4, 96(s9)
+			ret
+
+  process_index:
+	#INPUT: 	a0	index - base 10
+	#OUTPUT:	a0	index - base 2
+	#		a1	to add to mantissa
+	#		a2	offset to addition
+			bnez a0, process_index_continue
+			ret
+  process_index_continue:
+			#handle transformation of a0
+			sd s0, 64(s9)
+			sd s1, 72(s9)
+			sd s2, 80(s9)
+			sd s3, 88(s9)
+			sd s4, 96(s9)
+			blt a0, zero, process_index_negative_continue
+			#multiply number out - handle simple case of 1
+			li t1, 1
+			li s0, 10
+			bne a0, t1, process_index_standard
+			li s1, 3	#1010b - highest index is three
+			j process_index_calc_comp
+  process_index_standard:
+			mv s2, a0
+			addi s2, s2, -1
+			li t0, 10	#invariant
+  process_index_not1:
+			mulh s3, s0, t0
+			addi s2, s2, -1
+			beqz s3, process_index_bitcount
+			#handle overflow here
+  process_index_bitcount:
+			mul s0, s0, t0
+			li t1, 0x80000000000000
+			li t2, 63
+  process_index_bitcount_check:
+			and t3, s0, t1
+			bnez t3, process_index_bitcount_found
+			srli t1, t1, 1
+			addi t2, t2, -1
+			bltz t2, process_index_error
+			j process_index_bitcount_check
+  process_index_bitcount_found:
+			mv s1, t2
+			bnez s2, process_index_not1
+  process_index_calc_comp:
+			#get here with s0 as number - but do not need to divide as
+			#s1 has bitcount - needed if > 63
+			#but have to return a0 and a1
+			mv a0, s1
+			li s2, 1
+			mv a1, s1
+			li a2, 63
+			ble a1, a2, process_index_bitcount_adjusted
+			li a1, 63
+ process_index_bitcount_adjusted:
+			sll s2, s2, a1
+			xor a1, s0, s2
+ process_index_error:			#TODO: fix label	
+			ld s0, 64(s9)
+			ld s1, 72(s9)
+			ld s2, 80(s9)
+			ld s3, 88(s9)
+			ld s4, 96(s9)
+			ret
+  process_index_negative_continue:
+			#handle negative index
+			#divide 1 by 10 by number of times indicated by index
+			mv s0, a0
+			neg s0, s0
+			li t0, 10	#invariant
+			
+  			#set up counts
+			li s1, 0	#depth of first 1
+			li s2, 1	#starting number
+  process_index_negative_look:
+			divu t1, s2, t0
+			beqz t1, process_index_negative_advance_search
+			j process_index_negative_divide_out_number
+  process_index_negative_advance_search:
+			addi s1, s1, 1
+			slli s2, s2, 1
+			j process_index_negative_look
+  process_index_negative_divide_out_number:
+			li a7, 63
+			li a6, 1
+			sll a5, a6, a7		#a5 holds number
+  process_index_negative_div_process:
+			beqz a7, process_index_negative_div_done
+			rem s2, s2, t0
+			slli s2, s2, 1
+			addi a7, a7, -1
+			divu a4, s2, t0
+			bnez a4, process_index_negative_div_factor
+			j process_index_negative_div_process
+  process_index_negative_div_factor:
+			sll t2, a6, a7
+			or a5, a5, t2
+			mul a4, a4, t0
+			sub s2, s2, a4
+			bnez s2, process_index_negative_div_process
+  process_index_negative_div_done:
+			#a5 has current value
+			#s1 has index
+			mv s2, a5
+			#now process second and subsequent divisions
+			li a7, 0x8000000000000000
+  process_index_negative_scan:
+			and a6, a7, s2
+			bnez a6, process_index_negative_look_second
+			slli s2, s2, 1
+			addi s1, s1, 1
+			j process_index_negative_scan
+  process_index_negative_look_second:
+			addi s0, s0, -1
+			beqz s0, process_index_negative_result
+			divu s2, s2, t0
+			j process_index_negative_scan
+  process_index_negative_result:
+			#calculate any additional offset for addition
+			li a2, 0
+			li t0, 62
+			li t1, 1
+  process_index_negative_test_additional_offset:
+			sll t3, t1, t0
+			and t4, s2, t3
+			bnez t4, process_index_negative_additional_offset_d
+			addi t0, t0, -1
+			bltz t0, process_index_negative_additional_offset_d
+			addi a2, a2, 1
+			j process_index_negative_test_additional_offset
+  process_index_negative_additional_offset_d:
+			mv a0, s1
+			li t0, 0x8000000000000000
+			xor a1, s2, t0
+			neg a0, a0
+			j process_index_error
+
+
+  float_stack_up:
+			#use 0 - 127 for register storage (16 registers at most)
+			#Fixed locations
+			#a0 - a7: 0 - 56
+			#s0 - s7: 64 - 120
+			#128 - 255 for scratch pad
+			#128 - sign
+			#136 - mantissa
+			#144 - exponent
+			addi s9, s9, -256
+			ret
+
+  float_stack_down:
+			addi s9, s9, 256
+			ret
 
  sumstring:
 	#input
@@ -406,207 +623,3 @@
   sumstring_fail:
 			li a0, -1
 			j sumstring_return
-
-
-  process_mantissa:
-	#INPUT  a0 - fractional number to be processed 
-	#OUTPUT a0 - processed number
-	#	a1 - bit count in output
-			bnez a0, process_mantissa_continue
-			ret					#just return 0
-  process_mantissa_continue:
-			sd s0, 64(s9)
-			sd s1, 72(s9)
-			sd s2, 80(s9)
-			sd s3, 88(s9)
-			sd s4, 96(s9)
-			sd s5, 104(s9)
-			sd s6, 112(s9)
-			sd s7, 120(s9)
-			mv s0, a0
-			li s1, 10
-			li s2, 10
-			li s3, 1
-  process_mantissa_test_scale:
-			#find position of max 1
-			div s0, s0, s1
-			beqz s0, process_mantissa_found_scale
-			mul s1, s1, s2
-			addi s3, s3, 1
-			j process_mantissa_test_scale
-  process_mantissa_found_scale:
-			#s3 holds power of 10
-			#s1 has scale
-			mv s0, a0
-			li s7, 1	#to OR in
-			li s2, 63	#max bits
-			li s4, 0	#answer
-			li s5, 0	#count of bits
-  process_mantissa_multiply:
-			slli s0, s0, 1	#multiply by 2
-			div s6, s0, s1
-			slli s4, s4, 1
-			addi s5, s5, 1
-			beqz s6, process_mantissa_div_zero
-			or s4, s4, s7
-			bgt s5, s2, process_mantissa_done
-			remu s0, s0, s1
-			beqz s0, process_mantissa_done
-			j process_mantissa_multiply
-  process_mantissa_div_zero:
-			bgt s5, s2, process_mantissa_done
-			j process_mantissa_multiply
-  process_mantissa_done:
-			mv a0, s4
-			li a1, 64
-			sub a1, a1, s5
-			sll a0, a0, a1	
-			mv a1, s5
-			ld s0, 64(s9)
-			ld s1, 72(s9)
-			ld s2, 80(s9)
-			ld s3, 88(s9)
-			ld s4, 96(s9)
-			ld s5, 104(s9)
-			ld s6, 112(s9)
-			ld s7, 120(s9)
-			ret
-
-  process_index:
-	#INPUT: 	a0	index - base 10
-	#OUTPUT:	a0	index - base 2
-	#		a1	to add to mantissa
-			bnez a0, process_index_continue
-			ret
-  process_index_continue:
-			#handle transformation of a0
-			sd s0, 0(sp)
-			sd s1, 8(sp)
-			sd s2, 16(sp)
-			sd s3, 24(sp)
-			sd s4, 32(sp)
-			blt a0, zero, process_index_negative_continue
-			#multiply number out - handle simple case of 1
-			li t1, 1
-			li s0, 10
-			bne a0, t1, process_index_standard
-			li s1, 3	#1010b - highest index is three
-			j process_index_calc_comp
-  process_index_standard:
-			mv s2, a0
-			addi s2, s2, -1
-			li t0, 10	#invariant
-  process_index_not1:
-			mulh s3, s0, t0
-			addi s2, s2, -1
-			beqz s3, process_index_bitcount
-			#handle overflow here
-  process_index_bitcount:
-			mul s0, s0, t0
-			li t1, 0x80000000000000
-			li t2, 63
-  process_index_bitcount_check:
-			and t3, s0, t1
-			bnez t3, process_index_bitcount_found
-			srli t1, t1, 1
-			addi t2, t2, -1
-			bltz t2, process_index_error
-			j process_index_bitcount_check
-  process_index_bitcount_found:
-			mv s1, t2
-			bnez s2, process_index_not1
-  process_index_calc_comp:
-			#get here with s0 as number - but do not need to divide as
-			#s1 has bitcount - needed if > 63
-			#but have to return a0 and a1
-			mv a0, s1
-			li s2, 1
-			mv a1, s1
-			li a2, 63
-			ble a1, a2, process_index_bitcount_adjusted
-			li a1, 63
- process_index_bitcount_adjusted:
-			sll s2, s2, a1
-			xor a1, s0, s2
- process_index_error:			#TODO: fix label	
-			ld s0, 0(sp)
-			ld s1, 8(sp)
-			ld s2, 16(sp)
-			ld s3, 24(sp)
-			addi sp, sp, 40
-			ret
-  process_index_negative_continue:
-			#handle negative index
-			#divide 1 by 10 by number of times indicated by index
-			mv s0, a0
-			neg s0, s0
-			li t0, 10	#invariant
-			
-  			#set up counts
-			li s1, 0	#depth of first 1
-			li s2, 1	#starting number
-  process_index_negative_look:
-			divu t1, s2, t0
-			beqz t1, process_index_negative_advance_search
-			j process_index_negative_divide_out_number
-  process_index_negative_advance_search:
-			addi s1, s1, 1
-			slli s2, s2, 1
-			j process_index_negative_look
-  process_index_negative_divide_out_number:
-			li a7, 63
-			li a6, 1
-			sll a5, a6, a7		#a5 holds number
-  process_index_negative_div_process:
-			beqz a7, process_index_negative_div_done
-			rem s2, s2, t0
-			slli s2, s2, 1
-			addi a7, a7, -1
-			divu a4, s2, t0
-			bnez a4, process_index_negative_div_factor
-			j process_index_negative_div_process
-  process_index_negative_div_factor:
-			sll t2, a6, a7
-			or a5, a5, t2
-			mul a4, a4, t0
-			sub s2, s2, a4
-			bnez s2, process_index_negative_div_process
-  process_index_negative_div_done:
-			#a5 has current value
-			#s1 has index
-			mv s2, a5
-			#now process second and subsequent divisions
-			li a7, 0x8000000000000000
-  process_index_negative_scan:
-			and a6, a7, s2
-			bnez a6, process_index_negative_look_second
-			slli s2, s2, 1
-			addi s1, s1, 1
-			j process_index_negative_scan
-  process_index_negative_look_second:
-			addi s0, s0, -1
-			beqz s0, process_index_negative_result
-			divu s2, s2, t0
-			j process_index_negative_scan
-  process_index_negative_result:
-			mv a0, s1
-			li t0, 0x8000000000000000
-			xor a1, s2, t0
-			j process_index_error
-
-
-  float_stack_up:
-			#use 0 - 127 for register storage (16 registers at most)
-			#Fixed locations
-			#a0 - a7: 0 - 56
-			#s0 - s7: 64 - 120
-			#128 - 255 for scratch pad
-			#128 - sign
-			#136 - mantissa
-			#144 - exponent
-			addi s9, s9, -256
-			ret
-
-  float_stack_down:
-			addi s9, s9, 256
-			ret
