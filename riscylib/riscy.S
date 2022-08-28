@@ -251,6 +251,7 @@
 			addi t1, t1, 1
 			addi t3, t3, -1
   process_float_positive:
+			addi t3, t3, -1		#prepare for 1st read
 			sd zero, 128(s9)	#positive number
 			j process_float_check_mantissa
   process_float_negative:
@@ -567,10 +568,10 @@
 			ret
 
  sumstring:
-	#input
-	#a0 has start of string
-	#a1 has length
-	#output a0 - exponent
+			#input
+			#a0 has start of string
+			#a1 has length
+			#output a0 - exponent
 			sd s1, 72(s9)
 			sd s2, 80(s9)
 			sd s3, 88(s9)
@@ -621,5 +622,5 @@
 			ld s1, 72(s9)
 			ret
   sumstring_fail:
-			li a0, -1
+	 		li a0, -1
 			j sumstring_return
