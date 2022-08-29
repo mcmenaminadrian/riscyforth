@@ -315,7 +315,7 @@
 			mv a1, t3
 			call sumstring	#returns with a0 holding exponent
 			li a1, -1
-			beq a0, a1, process_float_exponent_fail
+			beq a3, a1, process_float_exponent_fail
 			#now adjust to account for left or right
 			ld t0, 152(s9)
 			sub a0, a0, t0
@@ -328,18 +328,18 @@
   process_float_transfer_to_stack:
 			#process exponent
 			call process_index
-  y:
 			sd a0, 144(s9)	#store base 2 index
-			sd a1, 152(s9)	#store add
-			sd a2, 160(s9)	#offset for addition
+			sd a1, 152(s9)	#store adjustment
+			sd a2, 160(s9)	#offset for adjustment
 			#process mantissa
 			ld a0, 136(s9)	#number
 			call process_mantissa
-  x:
 			ld a2, 144(s9)		#a2 now has index
 			add a2, a2, a1		#adjust for power
 			ld a3, 152(s9)		#a3 now has addition
 			ld a4, 160(s9)		#a4 has any additional offset
+			#sum up the mantissa
+			call sum_up_mantissa
 			#get size of add
 			bnez a3, process_float_calculate_addition
 			j process_float_recover 
@@ -396,14 +396,9 @@
   process_mantissa_test_scale:
 			sll s2, s3, s1
 			and s4, s0, s2
-			bnez s4, process_mantissa_found_scale
+			bnez s4, process_mantissa_done
 			addi s1, s1, -1
 			j process_mantissa_test_scale
-  process_mantissa_found_scale:
-			#find position of max 1 - in s1
-			#how process input number
-			addi s2, s2, -1
-			and a0, a0, s2
   process_mantissa_done:
 			mv a1, s1
 			ld s0, 64(s9)
@@ -467,10 +462,10 @@
 			li a2, 63
 			ble a1, a2, process_index_bitcount_adjusted
 			li a1, 63
- process_index_bitcount_adjusted:
+  process_index_bitcount_adjusted:
 			sll s2, s2, a1
 			xor a1, s0, s2
- process_index_error:			#TODO: fix label	
+  process_index_error:			#TODO: fix label	
 			ld s0, 64(s9)
 			ld s1, 72(s9)
 			ld s2, 80(s9)
@@ -561,23 +556,100 @@
 			#136 - mantissa
 			#144 - exponent
 			addi s9, s9, -256
-			ret
-
-  float_stack_down:
-			addi s9, s9, 256
-			ret
-
- sumstring:
-			#input
-			#a0 has start of string
-			#a1 has length
-			#output a0 - exponent
+			sd s0, 64(s9)
 			sd s1, 72(s9)
 			sd s2, 80(s9)
 			sd s3, 88(s9)
 			sd s4, 96(s9)
 			sd s5, 104(s9)
 			sd s6, 112(s9)
+			sd s7, 120(s9)
+			ret
+
+  float_stack_down:	
+			ld s0, 64(s9)
+			ld s1, 72(s9)
+			ld s2, 80(s9)
+			ld s3, 88(s9)
+			ld s4, 96(s9)
+			ld s5, 104(s9)
+			ld s6, 112(s9)
+			ld s7, 120(s9)
+			addi s9, s9, 256
+			ret
+
+ sum_up_mantissa:
+			#input 	a0 - mantissa
+			#	a1 - length in
+			#	a3 - addition
+			#	a4 - offset
+			beqz a3, sum_up_done
+			li s6, 0
+			mv t0, a0
+			mv t1, a0
+			mv t2, a3
+			mv t3, a4
+			li t4, 1
+			li t5, 63
+			beq a1, t5, sum_up_mantissa_setup
+			sub s7, t5, a1
+			addi s7, s7, -1
+			sll a0, a0, s7
+  sum_up_mantissa_setup:
+			mv t0, a0
+			#find start of addition
+  sum_up_mantissa_look_for_start:
+			sll t6, t4, t5
+			and s1, t6, t2
+			bnez s1, sum_up_mantissa_begin
+			addi t5, t5, -1
+			j sum_up_mantissa_look_for_start
+  sum_up_mantissa_begin:
+			#t5 holds bit count
+			li s1, 62
+			li a6, 0x8000000000000000
+			li s2, 1
+			add t4, t4, t3	#t4 holds displacement
+  sum_up_mantissa_sum:
+			srl t3, a0, t4	#number to add
+			beqz t3, sum_up_mantissa_done
+			add t0, t0, t3
+			and a7, a6, t0
+			beqz a7, sum_up_mantissa_shift_count
+			srli t0, t0, 1  #return to 62 bits
+			addi s6, s6, 1	#increment count of power increase
+  sum_up_mantissa_shift_count:
+			addi t4, t4, 1
+			bgt t4, s1, sum_up_mantissa_done
+			addi t5, t5, -1
+			bltz t5, sum_up_mantissa_done
+			sll t6, s1, t5
+			and s3, t6, a0
+			beqz s3, sum_up_mantissa_shift_count
+			j sum_up_mantissa_sum
+  sum_up_mantissa_done:
+			add a2, a2, s6
+			sub a2, a2, s7
+			mv a0, t0
+  sum_up_done:
+			ret
+  sum_up_mantissa_power_inc:
+			addi a2, a2, 1
+			j sum_up_done
+
+ sumstring:
+			#input
+			#a0 has start of string
+			#a1 has length - 1
+			#output a0 - exponent
+			#a3 == -1: failure
+			sd s1, 72(s9)
+			sd s2, 80(s9)
+			sd s3, 88(s9)
+			sd s4, 96(s9)
+			sd s5, 104(s9)
+			sd s6, 112(s9)
+			li a3, 0
 			li s1, 0x0A	#10
 			li s2, 0x30	#0
 			li s3, 0x39	#9
@@ -607,7 +679,7 @@
 			mul s6, s6, s1
 			add s6, s6, s4
 			addi a1, a1, -1
-			beqz a1, sumstring_done
+			bltz a1, sumstring_done
 			addi a0, a0, 1
 			j sumstring_read
   sumstring_done:
@@ -622,5 +694,5 @@
 			ld s1, 72(s9)
 			ret
   sumstring_fail:
-	 		li a0, -1
+	 		li a3, -1
 			j sumstring_return
