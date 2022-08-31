@@ -334,8 +334,9 @@
 			#process mantissa
 			ld a0, 136(s9)	#number
 			call process_mantissa
+  x:
 			ld a2, 144(s9)		#a2 now has index
-			add a2, a2, a1		#adjust for power
+#			sub a2, a2, a1		#adjust for power
 			ld a3, 152(s9)		#a3 now has addition
 			ld a4, 160(s9)		#a4 has any additional offset
 			#sum up the mantissa
@@ -585,7 +586,6 @@
 			#	a4 - offset
 			beqz a3, sum_up_done
 			li s6, 0
-			mv t0, a0
 			mv t1, a0
 			mv t2, a3
 			mv t3, a4
@@ -599,7 +599,7 @@
 			mv t0, a0
 			#find start of addition
   sum_up_mantissa_look_for_start:
-			sll t6, t4, t5
+			sll t6, t4, t5	#look for the first bit in the 'addition'
 			and s1, t6, t2
 			bnez s1, sum_up_mantissa_begin
 			addi t5, t5, -1
@@ -623,8 +623,8 @@
 			bgt t4, s1, sum_up_mantissa_done
 			addi t5, t5, -1
 			bltz t5, sum_up_mantissa_done
-			sll t6, s1, t5
-			and s3, t6, a0
+			sll t6, s2, t5
+			and s3, t6, t2
 			beqz s3, sum_up_mantissa_shift_count
 			j sum_up_mantissa_sum
   sum_up_mantissa_done:
