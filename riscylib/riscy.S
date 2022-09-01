@@ -595,6 +595,7 @@
 			sub s7, t5, a1
 			addi s7, s7, -1
 			sll a0, a0, s7
+			sub a2, a2, s7
   sum_up_mantissa_setup:
 			mv t0, a0
 			#find start of addition
@@ -618,6 +619,7 @@
 			beqz a7, sum_up_mantissa_shift_count
 			srli t0, t0, 1  #return to 62 bits
 			addi s6, s6, 1	#increment count of power increase
+			addi t4, t4, 1 #adjust the 'addition'
   sum_up_mantissa_shift_count:
 			addi t4, t4, 1
 			bgt t4, s1, sum_up_mantissa_done
@@ -629,7 +631,6 @@
 			j sum_up_mantissa_sum
   sum_up_mantissa_done:
 			add a2, a2, s6
-			sub a2, a2, s7
 			mv a0, t0
   sum_up_done:
 			ret
