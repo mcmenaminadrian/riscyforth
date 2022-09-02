@@ -630,8 +630,23 @@
 			beqz s3, sum_up_mantissa_shift_count
 			j sum_up_mantissa_sum
   sum_up_mantissa_done:
+			li t1, 0xFFFFFFFFFFFFFC00
+			li t2, 0x200
+			and t3, t0, t2	#overflow bit?
+			and t4, t0, t1
+			srli t4, t4, 10
+			beqz t3, sum_up_mantissa_overflow_done
+			#add overflow bit
+			addi t4, t4, 1
+			li t1, 0x20000000000000
+			and t5, t4, t1
+			beqz t5, sum_up_mantissa_overflow_done
+			srli t4, t4, 1
+			addi s6, s6, 1
+  sum_up_mantissa_overflow_done:
+			mv a0, t4	#53 bit result
 			add a2, a2, s6
-			mv a0, t0
+			addi a2, a2, 62 #power
   sum_up_done:
 			ret
   sum_up_mantissa_power_inc:
