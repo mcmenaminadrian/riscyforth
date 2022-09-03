@@ -334,49 +334,41 @@
 			#process mantissa
 			ld a0, 136(s9)	#number
 			call process_mantissa
-  x:
 			ld a2, 144(s9)		#a2 now has index
-#			sub a2, a2, a1		#adjust for power
 			ld a3, 152(s9)		#a3 now has addition
 			ld a4, 160(s9)		#a4 has any additional offset
 			#sum up the mantissa
 			call sum_up_mantissa
-			#get size of add
-			bnez a3, process_float_calculate_addition
-			j process_float_recover 
-  process_float_calculate_addition:
-			#how many bits in the addition?
-			li t0, 1
-			li t1, 63
-  process_float_lookfor_max_addition:
-			sll t2, t0, t1
-			and t3, t2, a3
-			bnez t3, process_float_max_add_found
-			addi t1, t1, -1
-			j process_float_lookfor_max_addition
-  process_float_max_add_found:
-			#t1 holds length of addition
-			#a1 holds length of mantissa - 1
-			#a4 has additional offset
-			add t4, a1, 1
-			add t1, t1, a4
-			bge t4, t1, process_float_add_simple
-			sub t5, t1, t4
-			sll a0, a0, t5
-  process_float_add_simple:
-			add a0, a0, a3
-			#now check for overflow
-			
-  process_float_recover:	
+			#now have all we need
+			#a0 has mantissa
+			#a2 has power
+			li a1, 1	#default is failure
+			li t0, 1023	#test exponent in range
+			add a2, a2, t0
+			blez a2, float_out
+			slli t0, t0, 1
+			bgt a2, t0, float_out
+			ld t0, 128(s9)	#sign data
+			beqz t0, float_is_positive
+			li t0, -1	#negative
+			j float_insert_mantissa
+  float_is_positive:
+			li t0, 0
+  float_insert_mantissa:
+			li t1, 0x1FFFFFFFFFFFF800
+			and a0, a0, t1
+			srli a0, a0, 11
+			or t0, t0, a0
+			or a0, t0, a2	#have a float now
+			li a1, 0	#return success
+  process_float_recover:
+  float_out:
 			call float_stack_down
-			li a1, 1		#TODO: return 0 when code works
 			POP ra
 			ret
   process_float_exponent_fail:
-			POP ra
-			addi s9, s9, 32
 			li a1, 1
-			ret
+			j process_float_recover
 
 
   process_mantissa:
@@ -384,6 +376,7 @@
 	#OUTPUT a0 - processed number
 	#	a1 - power count
 			bnez a0, process_mantissa_continue
+			li a1, 0
 			ret					#just return 0
   process_mantissa_continue:
 			sd s0, 64(s9)
@@ -415,6 +408,8 @@
 	#		a1	to add to mantissa
 	#		a2	offset to addition
 			bnez a0, process_index_continue
+			li a1, 0
+			li a2, 0
 			ret
   process_index_continue:
 			#handle transformation of a0
@@ -630,11 +625,11 @@
 			beqz s3, sum_up_mantissa_shift_count
 			j sum_up_mantissa_sum
   sum_up_mantissa_done:
-			li t1, 0xFFFFFFFFFFFFFC00
-			li t2, 0x200
+			li t1, 0xFFFFFFFFFFFFF800
+			li t2, 0x400
 			and t3, t0, t2	#overflow bit?
 			and t4, t0, t1
-			srli t4, t4, 10
+			srli t4, t4, 11
 			beqz t3, sum_up_mantissa_overflow_done
 			#add overflow bit
 			addi t4, t4, 1
@@ -644,7 +639,7 @@
 			srli t4, t4, 1
 			addi s6, s6, 1
   sum_up_mantissa_overflow_done:
-			mv a0, t4	#53 bit result
+			mv a0, t4	#53 bit result (repress 1st bit on return)
 			add a2, a2, s6
 			addi a2, a2, 62 #power
   sum_up_done:
