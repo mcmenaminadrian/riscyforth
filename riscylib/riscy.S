@@ -244,63 +244,63 @@
 			POP ra
 			mv t1, t0
 			#first of all - check the sign
-			sd zero, 144(s9)	#zero as default exponent
-			lb t5, 0(t1)
-			beq t5, t6, process_float_negative
-			bne t5, a7, process_float_positive
-			addi t1, t1, 1
-			addi t3, t3, -1
+			sd zero, 144(s9)				#zero as default exponent
+			lb t5, 0(t1)					#read first char
+			addi t3, t3, -1					#decrement number left to read
+			beq t5, t6, process_float_negative		#check for - sign
+			sd zero, 128(s9)				#positive number - store 0
+			beq t5, a7, process_float_positive		#check for + sign
+			j process_float_check_mantissa			#jump ahead but no extra read
   process_float_positive:
-			addi t3, t3, -1		#prepare for 1st read
-			sd zero, 128(s9)	#positive number
-			j process_float_check_mantissa
+			addi t1, t1, 1					#increment index to input
+			j process_float_check_mantissa			#jump ahead
   process_float_negative:
-			li t6, 1
-			sd t6, 128(s9)		#negative number
-			addi t1, t1, 1
-			addi t3, t3, -1
+			li t6, 1					#store 1 as...
+			addi t1, t1, 1					#increment index to input
+			sd t6, 128(s9)					#negative number
   process_float_check_mantissa:
-			li t4, 0	#count of numbers to right of DP
-			sd s0, 64(s9)	#use return stack space
-			li s0, 0	#count of numbers to left of DP
-			li t6, 0	#number
-			li a4, 10	#for multiplying
-			li a7, 0	#found dot
+			li t4, 0					#count of numbers to right of DP
+			sd s0, 64(s9)					#use return stack space
+			li s0, 0					#count of numbers to left of DP
+			li t6, 0					#number
+			li a4, 10					#for multiplying
+			li a7, 0					#found dot
   process_float_calculate_mantissa:
-			lb t5, 0(t1)
-			beq t5, a3, process_float_check_mantissa_dot
-			beq t5, a2, process_float_check_mantissa_e
-			beq t5, a5, process_float_check_mantissa_done
-			beq t5, a6, process_float_check_mantissa_done
-			sub t5, t5, a0
-			mul t6, t6, a4
-			beqz a7, process_float_check_bigger
-			addi t4, t4, 1
-			j process_float_check_addin
+			lb t5, 0(t1)					#read char
+  process_float_claculate_mantissa_no_read:
+			beq t5, a3, process_float_check_mantissa_dot	#char is dot
+			beq t5, a2, process_float_check_mantissa_e	#char is E
+			beq t5, a5, process_float_check_mantissa_done	#char is space
+			beq t5, a6, process_float_check_mantissa_done	#char is CR
+			sub t5, t5, a0					#char is numeral - convert to number
+			mul t6, t6, a4					#increment saved number by 10
+			beqz a7, process_float_check_bigger		#not found . yet so test for x10
+			addi t4, t4, 1					#found . already so increment count to right of DP
+			j process_float_check_addin			#jump ahead to addition of number
   process_float_check_bigger:
-			bnez t6, process_float_process_bigger
+			bnez t6, process_float_process_bigger		#number > 0 so jump to increment left of DP count
 			#not yet broken zero
-			beqz t5, process_float_process_on
+			beqz t5, process_float_process_on		#number 0 maybe so jump to increment of reading char
   process_float_process_bigger:
 			#get here because we've got a mantissa >= 1
-			addi s0, s0, 1
+			addi s0, s0, 1					#increment left of DP count
   process_float_check_addin:
-			add t6, t6, t5
+			add t6, t6, t5					#add found numeral
   process_float_process_on:
-			addi t1, t1, 1
-			addi t3, t3, -1
-			j process_float_calculate_mantissa
+			addi t1, t1, 1					#increment index into number string
+			addi t3, t3, -1					#decrement numb of chars left
+			j process_float_calculate_mantissa		#loop back
   process_float_check_mantissa_dot:
-			li a7, 1
-			j process_float_process_on
+			li a7, 1					#found a dot
+			j process_float_process_on			#loop back
   process_float_check_mantissa_e:
 			#store mantissa and correction count
 			#and check exponent
-			sd t6, 136(s9)
-			sd t4, 152(s9)	#right of DP
-			sd s0, 160(s9)	#left of DP
-			ld s0, 64(s9)	#restore s0
-			j process_float_search_exponent
+			sd t6, 136(s9)					#store number
+			sd t4, 152(s9)					#right of DP
+			sd s0, 160(s9)					#left of DP
+			ld s0, 64(s9)					#restore s0
+			j process_float_search_exponent			#move on to checking exponent
   process_float_check_mantissa_done:
 			#store mantissa and correction count
 			sd t6, 136(s9)
@@ -328,11 +328,11 @@
   process_float_transfer_to_stack:
 			#process exponent
 			call process_index
-			sd a0, 144(s9)	#store base 2 index
-			sd a1, 152(s9)	#store adjustment
-			sd a2, 160(s9)	#offset for adjustment
+			sd a0, 144(s9)		#store base 2 index
+			sd a1, 152(s9)		#store adjustment
+			sd a2, 160(s9)		#offset for adjustment
 			#process mantissa
-			ld a0, 136(s9)	#number
+			ld a0, 136(s9)		#number
 			call process_mantissa
 			ld a2, 144(s9)		#a2 now has index
 			ld a3, 152(s9)		#a3 now has addition
@@ -355,10 +355,10 @@
   float_is_positive:
 			li t0, 0
   float_insert_mantissa:
-			li t1, 0x1FFFFFFFFFFFF800
+			li t1, 0xFFFFFFFFFFFFF	#52 bits
 			and a0, a0, t1
-			srli a0, a0, 11
 			or t0, t0, a0
+			slli a2, a2, 52
 			or a0, t0, a2	#have a float now
 			li a1, 0	#return success
   process_float_recover:
@@ -579,7 +579,6 @@
 			#	a1 - length in
 			#	a3 - addition
 			#	a4 - offset
-			beqz a3, sum_up_done
 			li s6, 0
 			mv t1, a0
 			mv t2, a3
@@ -593,6 +592,8 @@
 			sub a2, a2, s7
   sum_up_mantissa_setup:
 			mv t0, a0
+			bgt t3, t5, sum_up_mantissa_done	#too big a shift
+			beqz a3, sum_up_mantissa_done
 			#find start of addition
   sum_up_mantissa_look_for_start:
 			sll t6, t4, t5	#look for the first bit in the 'addition'
@@ -606,6 +607,7 @@
 			li a6, 0x8000000000000000
 			li s2, 1
 			add t4, t4, t3	#t4 holds displacement
+			bgt t4, s1, sum_up_mantissa_done
   sum_up_mantissa_sum:
 			srl t3, a0, t4	#number to add
 			beqz t3, sum_up_mantissa_done
@@ -614,32 +616,29 @@
 			beqz a7, sum_up_mantissa_shift_count
 			srli t0, t0, 1  #return to 62 bits
 			addi s6, s6, 1	#increment count of power increase
-			addi t4, t4, 1 #adjust the 'addition'
+			addi t4, t4, 1  #adjust the 'addition' offset
   sum_up_mantissa_shift_count:
-			addi t4, t4, 1
-			bgt t4, s1, sum_up_mantissa_done
-			addi t5, t5, -1
-			bltz t5, sum_up_mantissa_done
-			sll t6, s2, t5
-			and s3, t6, t2
-			beqz s3, sum_up_mantissa_shift_count
-			j sum_up_mantissa_sum
+			addi t4, t4, 1	#increment addition offset
+			bgt t4, s1, sum_up_mantissa_done	#no point in continuing if now too big
+			addi t5, t5, -1				#decrement index to bit in addition
+			bltz t5, sum_up_mantissa_done		#stop if we are at the end here
+			sll t6, s2, t5				#build index
+			and s3, t2, t6				#get indexed bit
+			beqz s3, sum_up_mantissa_shift_count	#zero - so just decrement
+			j sum_up_mantissa_sum			#go back to add
   sum_up_mantissa_done:
-			li t1, 0xFFFFFFFFFFFFF800
-			li t2, 0x400
-			and t3, t0, t2	#overflow bit?
-			and t4, t0, t1
-			srli t4, t4, 11
-			beqz t3, sum_up_mantissa_overflow_done
-			#add overflow bit
-			addi t4, t4, 1
-			li t1, 0x20000000000000
-			and t5, t4, t1
-			beqz t5, sum_up_mantissa_overflow_done
-			srli t4, t4, 1
-			addi s6, s6, 1
+			li t2, 0x400				#index for overflow
+			and t3, t0, t2				#get overflow bit
+			srli t0, t0, 10				#shift right
+			beqz t3, sum_up_mantissa_overflow_done	#no overflow so jump ahead
+			addi t0, t0, 1				#add overflow bit
+			li t1, 0x20000000000000			#index for increase in bit length
+			and t5, t0, t1				#get bit that indicates increase
+			beqz t5, sum_up_mantissa_overflow_done 	#no increase - jump ahead
+			srli t0, t0, 1				#correct length
+			addi s6, s6, 1				#increment power
   sum_up_mantissa_overflow_done:
-			mv a0, t4	#53 bit result (repress 1st bit on return)
+			mv a0, t0
 			add a2, a2, s6
 			addi a2, a2, 62 #power
   sum_up_done:
