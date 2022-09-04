@@ -413,54 +413,67 @@
 			ret
   process_index_continue:
 			#handle transformation of a0
-			sd s0, 64(s9)
+			sd s0, 64(s9)					#store registers
 			sd s1, 72(s9)
 			sd s2, 80(s9)
 			sd s3, 88(s9)
 			sd s4, 96(s9)
-			blt a0, zero, process_index_negative_continue
+			blt a0, zero, process_index_negative_continue	#negative power
 			#multiply number out - handle simple case of 1
 			li t1, 1
 			li s0, 10
-			bne a0, t1, process_index_standard
-			li s1, 3	#1010b - highest index is three
-			j process_index_calc_comp
+			bne a0, t1, process_index_standard		#not equal to 1
+			li s1, 3					#1010b - highest index is three for 10^1
+			j process_index_calc_comp			#jump ahead
   process_index_standard:
-			mv s2, a0
-			addi s2, s2, -1
-			li t0, 10	#invariant
+			mv s2, a0					#set s2 to 10 index
+			addi s2, s2, -1					#decrement index
+			li t0, 10					#invariant
   process_index_not1:
-			mulh s3, s0, t0
-			addi s2, s2, -1
-			beqz s3, process_index_bitcount
-			#handle overflow here
+			mulh s3, s0, t0					#get upper 128 bits of multiple
+			addi s2, s2, -1					#decrement index
+			beqz s3, process_index_bitcount			#upper 128 bits are 0
+			#TODO: handle overflow here
   process_index_bitcount:
-			mul s0, s0, t0
-			li t1, 0x80000000000000
-			li t2, 63
+			mul s0, s0, t0					#multiply by 10 - result in s0
+			li t1, 1					#turn single bit on
+			li t2, 63					#max bit shift
+			sll t1, t1, t2					#set t1 to 0x8000000000000000
   process_index_bitcount_check:
-			and t3, s0, t1
-			bnez t3, process_index_bitcount_found
-			srli t1, t1, 1
-			addi t2, t2, -1
-			bltz t2, process_index_error
-			j process_index_bitcount_check
+			and t3, s0, t1					#is bit set?
+			bnez t3, process_index_bitcount_found		#if bit set jump ahead
+			srli t1, t1, 1					#shift right
+			addi t2, t2, -1					#decrease count
+			bltz t2, process_index_error			#underflow error
+			j process_index_bitcount_check			#loop back
   process_index_bitcount_found:
-			mv s1, t2
-			bnez s2, process_index_not1
+			mv s1, t2					#found set bit - s1 holds count
+			bnez s2, process_index_not1			#loop back if more to do
   process_index_calc_comp:
 			#get here with s0 as number - but do not need to divide as
 			#s1 has bitcount - needed if > 63
 			#but have to return a0 and a1
 			mv a0, s1
 			li s2, 1
-			mv a1, s1
-			li a2, 63
-			ble a1, a2, process_index_bitcount_adjusted
-			li a1, 63
-  process_index_bitcount_adjusted:
-			sll s2, s2, a1
-			xor a1, s0, s2
+			sll s3, s2, s1					#set bit to match index
+			mv a1, s0
+			xor a1, a1, s3					#get rid of index bit
+			bnez a1, process_index_calc_comp_offset_calc
+			#no addition at all
+			li a2, 0
+			j process_index_error
+  process_index_calc_comp_offset_calc:
+			li s2, 1
+			li s3, 0
+			sll s2, s2, a0
+			srli s2, s2, 1
+  process_index_calc_comp_offset_check:
+			and s4, a1, s2
+			bnez s4, process_index_calc_comp_offset_done
+			addi s3, s3, 1
+			j process_index_calc_comp_offset_check
+  process_index_calc_comp_offset_done:
+			mv a2, s3
   process_index_error:			#TODO: fix label	
 			ld s0, 64(s9)
 			ld s1, 72(s9)
