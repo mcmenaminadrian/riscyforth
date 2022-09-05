@@ -434,6 +434,40 @@
 			addi s2, s2, -1					#decrement index
 			beqz s3, process_index_bitcount			#upper 128 bits are 0
 			#TODO: handle overflow here
+			#how far have we 'overshot'?
+			li t5, 1
+			li t6, 63
+  process_index_test_overflow:
+			slli a3, t5, t6					#mark index bit
+			and a4, s3, a3					#test index bit
+			bnez a4, process_index_found_overflow		#if bit is 1 jump head
+			addi t6, t6, -1					#decrement index
+			j process_index_test_overflow			#loop back
+  process_index_found_overflow:
+			#now have to calculate increase
+			li t5, 1
+			li a6, 63
+  process_index_count_base:
+			sll a4, t5, a6
+			and a5, s0, a4
+			bnez a5, process_index_count_overflow
+			addi a6, a6, -1
+			j process_index_count base
+  process_index_count_overflow:
+			#t6 has index
+			li t5, -1					#all bits set
+			li a3, 63
+			sub a6, a3, a6
+			add a0, t6, a6
+			sub a5, a3, t6					#63 - length of overflow
+			sll a3, a3, t6					#turn bits 0
+			mul s0, s0, t0					#get lower muliple
+			and s0, s0, a3					#zero out bits
+			srl s0, s0, t6					#shift to right
+			sll s3, s3, a5					#shift overflow to left
+			or s0, s0, s3					#or this in
+			srli s0, s0, 1					#restrict back to 62 bits
+			
   process_index_bitcount:
 			mul s0, s0, t0					#multiply by 10 - result in s0
 			li t1, 1					#turn single bit on
