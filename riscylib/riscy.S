@@ -418,7 +418,9 @@
 			sd s2, 80(s9)
 			sd s3, 88(s9)
 			sd s4, 96(s9)
+			sd s5, 104(s9)					#use s5 as base for bit count
 			blt a0, zero, process_index_negative_continue	#negative power
+			li s5, 0					#set to zero
 			#multiply number out - handle simple case of 1
 			li t1, 1
 			li s0, 10
@@ -438,35 +440,26 @@
 			li t5, 1
 			li t6, 63
   process_index_test_overflow:
-			slli a3, t5, t6					#mark index bit
+			sll a3, t5, t6					#mark index bit
 			and a4, s3, a3					#test index bit
 			bnez a4, process_index_found_overflow		#if bit is 1 jump head
 			addi t6, t6, -1					#decrement index
 			j process_index_test_overflow			#loop back
   process_index_found_overflow:
 			#now have to calculate increase
-			li t5, 1
-			li a6, 63
-  process_index_count_base:
-			sll a4, t5, a6
-			and a5, s0, a4
-			bnez a5, process_index_count_overflow
-			addi a6, a6, -1
-			j process_index_count base
-  process_index_count_overflow:
-			#t6 has index
-			li t5, -1					#all bits set
+			add s5, s5, t6					#add offset into upper 64 bits
+			addi s5, s5, 2					#based on resetting to 62nd bit
+			mul s0, s0, t0					#generate lower 64 bits
 			li a3, 63
-			sub a6, a3, a6
-			add a0, t6, a6
-			sub a5, a3, t6					#63 - length of overflow
-			sll a3, a3, t6					#turn bits 0
-			mul s0, s0, t0					#get lower muliple
-			and s0, s0, a3					#zero out bits
-			srl s0, s0, t6					#shift to right
-			sll s3, s3, a5					#shift overflow to left
-			or s0, s0, s3					#or this in
-			srli s0, s0, 1					#restrict back to 62 bits
+			sub a3, a3, t6					#calculate shift needed
+			sll s3, s3, a3					#shift left
+			addi t6, t6, 1
+			srl s0, s0, t6					#shift lower 64 bits right to drop lower bits
+			or s0, s3, s0					#get new number
+			srli s0, s0, 1					#reset to 62 bits
+			li s1, 62					#set count to 62
+			bnez s2, process_index_not1			#need to do more?
+			j process_index_calc_comp			#no, so jump ahead
 			
   process_index_bitcount:
 			mul s0, s0, t0					#multiply by 10 - result in s0
@@ -488,6 +481,7 @@
 			#s1 has bitcount - needed if > 63
 			#but have to return a0 and a1
 			mv a0, s1
+			add a0, a0, s5					#increment by any increase from shifting window
 			li s2, 1
 			sll s3, s2, s1					#set bit to match index
 			mv a1, s0
@@ -514,6 +508,7 @@
 			ld s2, 80(s9)
 			ld s3, 88(s9)
 			ld s4, 96(s9)
+			ld s5, 104(s9)
 			ret
   process_index_negative_continue:
 			#handle negative index
