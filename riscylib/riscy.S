@@ -192,46 +192,46 @@
 			li a7, 0x2B	#+
 			li t6, 0x2d	#-
 			mv t1, t0
-			mv t3, zero	#count length
-			mv t4, zero	#don't keep counting numbers
+			li t3, 1				#count length
+			li t4, 0				#don't keep counting numbers
 			#cannot start with E
 			lbu t5, 0(t1)
 			beq t5, a2, scan_float_done_out
 			j scan_float_notE
   scan_float_scan:
 			lbu t5, 0(t1)
+			addi t3, t3, 1				#increment count
 			bne t5, a2, scan_float_notE
 			bnez a4, scan_float_scan_E
-			addi a4, a4, 1	#number with E is sufficient for match eg 2E5
+			addi a4, a4, 1				#number with E is sufficient for match eg 2E5
   scan_float_scan_E:
-			addi a4, a4, 1
-			addi t3, t3, 1
-			j scan_float_next
+			addi a4, a4, 1				#record match with E
+			j scan_float_next			#move on
   scan_float_notE:
 			bne t5, a3, scan_float_notDot
-			addi a4, a4, 1
+			addi a4, a4, 1				#record match with dot
 			j scan_float_next
   scan_float_notDot:
-			beq t5, a5, scan_float_done
-			beq t5, a6, scan_float_done
-			beq t5, a7, scan_float_continue
-			beq t5, t6, scan_float_continue
-			blt t5, a0, scan_float_done_out
-			bgt t5, a1, scan_float_done_out
+			beq t5, a5, scan_float_done		#hit space - evaluate
+			beq t5, a6, scan_float_done		#hit CR - evaluate
+			beq t5, a7, scan_float_continue		#+ sign
+			beq t5, t6, scan_float_continue		#- sign
+			blt t5, a0, scan_float_done_out		#out or range of number
+			bgt t5, a1, scan_float_done_out		#out of range of number
   scan_float_continue:
-			addi t3, t3, 1
-			bnez t4, scan_float_next
-			addi a4, a4, 1
-			addi t4, t4, 1
+			bnez t4, scan_float_next		#if already seen a digit move on
+			addi a4, a4, 1				#match digit
+			addi t4, t4, 1				#ensure we don't keep matching digits
   scan_float_next:
-			addi t1, t1, 1
-			j scan_float_scan
+			addi t1, t1, 1				#move on to next part of string
+			j scan_float_scan			#loop
   scan_float_done:
-			li t4, 2	#min
-			li t5, 3	#max
+			addi t3, t3, -1				#decrement to reflect we've hit the end
+			li t4, 2				#min
+			li t5, 3				#max
 			blt a4, t4, scan_float_done_out
 			bgt a4, t5, scan_float_done_out
-			j process_float	#have a real one
+			j process_float				#have a real one
   scan_float_done_out:
 			li a1, 1
 			ret
@@ -242,7 +242,7 @@
 			PUSH ra
 			call float_stack_up
 			POP ra
-			mv t1, t0
+			mv t1, t0					#copy start of buffer address to t1
 			#first of all - check the sign
 			sd zero, 144(s9)				#zero as default exponent
 			lb t5, 0(t1)					#read first char
@@ -359,6 +359,7 @@
 			and a0, a0, t1
 			or t0, t0, a0
 			slli a2, a2, 52
+  x:
 			or a0, t0, a2	#have a float now
 			li a1, 0	#return success
   process_float_recover:
@@ -435,7 +436,6 @@
 			mulhu s3, s0, t0					#get upper 128 bits of multiple
 			addi s2, s2, -1					#decrement index
 			beqz s3, process_index_bitcount			#upper 128 bits are 0
-			#TODO: handle overflow here
 			#how far have we 'overshot'?
 			li t5, 1
 			li t6, 63
@@ -450,8 +450,7 @@
 			bnez s5, process_index_found_overflow_repeat	#not the first time?
 			add s5, s5, t6					#first time - add offset into 64 bits
 			li a3, 63					#calculate real update
-			sub a3, a3, s0
-			add s5, s5, a3					#add real update
+
 			j process_index_found_overflow_continue
   process_index_found_overflow_repeat:
 			add s5, s5, t6					#add offset into upper 64 bits
@@ -656,19 +655,19 @@
 			li s1, 62
 			li a6, 0x8000000000000000
 			li s2, 1
-			add t4, t4, t3	#t4 holds displacement
+			add t4, t4, t3				#t4 holds displacement
 			bgt t4, s1, sum_up_mantissa_done
   sum_up_mantissa_sum:
-			srl t3, a0, t4	#number to add
+			srl t3, a0, t4				#number to add
 			beqz t3, sum_up_mantissa_done
 			add t0, t0, t3
 			and a7, a6, t0
 			beqz a7, sum_up_mantissa_shift_count
-			srli t0, t0, 1  #return to 62 bits
-			addi s6, s6, 1	#increment count of power increase
-			addi t4, t4, 1  #adjust the 'addition' offset
+			srli t0, t0, 1  			#return to 62 bits
+			addi s6, s6, 1				#increment count of power increase
+			addi t4, t4, 1  			#adjust the 'addition' offset
   sum_up_mantissa_shift_count:
-			addi t4, t4, 1	#increment addition offset
+			addi t4, t4, 1				#increment addition offset
 			bgt t4, s1, sum_up_mantissa_done	#no point in continuing if now too big
 			addi t5, t5, -1				#decrement index to bit in addition
 			bltz t5, sum_up_mantissa_done		#stop if we are at the end here
@@ -677,7 +676,7 @@
 			beqz s3, sum_up_mantissa_shift_count	#zero - so just decrement
 			j sum_up_mantissa_sum			#go back to add
   sum_up_mantissa_done:
-			li t2, 0x400				#index for overflow
+			li t2, 0x200				#index for overflow
 			and t3, t0, t2				#get overflow bit
 			srli t0, t0, 10				#shift right
 			beqz t3, sum_up_mantissa_overflow_done	#no overflow so jump ahead
@@ -697,10 +696,10 @@
 			addi a2, a2, 1
 			j sum_up_done
 
- sumstring:
+  sumstring:
 			#input
 			#a0 has start of string
-			#a1 has length - 1
+			#a1 has length
 			#output a0 - exponent
 			#a3 == -1: failure
 			sd s1, 72(s9)
@@ -717,20 +716,21 @@
 			li s4, 0x2B	#+
 			li s5, 0x2D	#-
 			lbu s6, 0(a0)
-			beq s6, s5, sumstring_negative
-			bne s6, s4, sumstring_positive
-			addi a0, a0, 1
-			addi a1, a1, -1
-			j sumstring_positive
+			beq s6, s5, sumstring_negative		#chaeck if first char is a sign
+			beq s6, s4, sumstring_positive		#check for sign
+			li s6, 0
+			li s5, 1
+			j sumstring_read
   sumstring_negative:
 			li s6, 0
-			addi a0, a0, 1
-			addi a1, a1, -1
 			li s5, -1
-			j sumstring_read
+			j sumstring_signed
   sumstring_positive:
 			li s6, 0
 			li s5, 1
+  sumstring_signed:
+			addi a0, a0, 1
+			addi a1, a1, -1
   sumstring_read:
 			lbu s4, 0(a0)
 			blt s4, s2, sumstring_fail
@@ -739,7 +739,7 @@
 			mul s6, s6, s1
 			add s6, s6, s4
 			addi a1, a1, -1
-			bltz a1, sumstring_done
+			beqz a1, sumstring_done
 			addi a0, a0, 1
 			j sumstring_read
   sumstring_done:
