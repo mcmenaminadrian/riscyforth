@@ -309,13 +309,11 @@
 			ld s0, 64(s9)
 			j process_float_transfer_to_stack
   process_float_search_exponent:
-			li t6, 0	#count of exponent
+			li t6, 0					#count of exponent
 			PUSH ra
-			addi a0, t1, 1	#start of string
+			addi a0, t1, 1					#start of string
 			mv a1, t3
-			call sumstring	#returns with a0 holding exponent
-			li a1, -1
-			beq a3, a1, process_float_exponent_fail
+			call sumstring					#returns with a0 holding exponent
 			#now adjust to account for left or right
 			ld t0, 152(s9)
 			sub a0, a0, t0
@@ -433,7 +431,7 @@
 			addi s2, s2, -1					#decrement index
 			li t0, 10					#invariant
   process_index_not1:
-			mulhu s3, s0, t0					#get upper 128 bits of multiple
+			mulhu s3, s0, t0				#get upper 128 bits of multiple
 			addi s2, s2, -1					#decrement index
 			beqz s3, process_index_bitcount			#upper 128 bits are 0
 			#how far have we 'overshot'?
@@ -501,8 +499,8 @@
 			li s2, 1
 			li s3, 0
 			sll s2, s2, a0
-			srli s2, s2, 1
   process_index_calc_comp_offset_check:
+			srli s2, s2, 1
 			and s4, a1, s2
 			bnez s4, process_index_calc_comp_offset_done
 			addi s3, s3, 1
@@ -716,19 +714,18 @@
 			li s4, 0x2B	#+
 			li s5, 0x2D	#-
 			lbu s6, 0(a0)
-			beq s6, s5, sumstring_negative		#chaeck if first char is a sign
+			beq s6, s5, sumstring_negative		#check if first char is a sign
 			beq s6, s4, sumstring_positive		#check for sign
-			li s6, 0
-			li s5, 1
-			j sumstring_read
+			li s6, 0				#not a sign
+			li s5, 1				#so set up assuming +ve
+			j sumstring_read			#use current index
   sumstring_negative:
-			li s6, 0
-			li s5, -1
+			li s5, -1				#mark negative
 			j sumstring_signed
   sumstring_positive:
-			li s6, 0
-			li s5, 1
+			li s5, 1				#mark positive
   sumstring_signed:
+			li s6, 0
 			addi a0, a0, 1
 			addi a1, a1, -1
   sumstring_read:
@@ -744,7 +741,7 @@
 			j sumstring_read
   sumstring_done:
 			mv a0, s6
-			mul a0, a0, s5
+			mul a0, a0, s5				#correct for sign
   sumstring_return:
 			ld s6, 112(s9)
 			ld s5, 104(s9)
