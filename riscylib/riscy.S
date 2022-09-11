@@ -432,7 +432,7 @@
 			addi s2, s2, -1					#decrement index
 			li t0, 10					#invariant
   process_index_not1:
-			mulh s3, s0, t0					#get upper 128 bits of multiple
+			mulhu s3, s0, t0					#get upper 128 bits of multiple
 			addi s2, s2, -1					#decrement index
 			beqz s3, process_index_bitcount			#upper 128 bits are 0
 			#TODO: handle overflow here
