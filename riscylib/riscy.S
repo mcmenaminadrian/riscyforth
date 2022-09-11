@@ -326,6 +326,7 @@
   process_float_transfer_to_stack:
 			#process exponent
 			call process_index
+  y:
 			sd a0, 144(s9)		#store base 2 index
 			sd a1, 152(s9)		#store adjustment
 			sd a2, 160(s9)		#offset for adjustment
@@ -379,10 +380,6 @@
 			ret					#just return 0
   process_mantissa_continue:
 			sd s0, 64(s9)
-			sd s1, 72(s9)
-			sd s2, 80(s9)
-			sd s3, 88(s9)
-			sd s4, 96(s9)
 			mv s0, a0
 			li s1, 63
 			li s3, 1
@@ -395,10 +392,6 @@
   process_mantissa_done:
 			mv a1, s1
 			ld s0, 64(s9)
-			ld s1, 72(s9)
-			ld s2, 80(s9)
-			ld s3, 88(s9)
-			ld s4, 96(s9)
 			ret
 
   process_index:
@@ -448,7 +441,6 @@
 			bnez s5, process_index_found_overflow_repeat	#not the first time?
 			add s5, s5, t6					#first time - add offset into 64 bits
 			li a3, 63					#calculate real update
-
 			j process_index_found_overflow_continue
   process_index_found_overflow_repeat:
 			add s5, s5, t6					#add offset into upper 64 bits
@@ -486,7 +478,6 @@
 			#s1 has bitcount - needed if > 63
 			#but have to return a0 and a1
 			mv a0, s1
-			add a0, a0, s5					#increment by any increase from shifting window
 			li s2, 1
 			sll s3, s2, s1					#set bit to match index
 			mv a1, s0
@@ -507,6 +498,7 @@
 			j process_index_calc_comp_offset_check
   process_index_calc_comp_offset_done:
 			mv a2, s3
+			add a0, a0, s5					#increment by any increase from shifting window
   process_index_error:			#TODO: fix label	
 			ld s0, 64(s9)
 			ld s1, 72(s9)
@@ -632,35 +624,35 @@
 			mv t3, a4
 			li t4, 1
 			li t5, 63
-			beq a1, t5, sum_up_mantissa_setup
-			sub s7, t5, a1
-			addi s7, s7, -1
-			sll a0, a0, s7
-			sub a2, a2, s7
+			beq a1, t5, sum_up_mantissa_setup	#no shift needed
+			sub s7, t5, a1				#calculate shift
+			addi s7, s7, -1				#but leave top bit free
+			sll a0, a0, s7				#make shift
+			sub a2, a2, s7				#decrement exponent by shift
   sum_up_mantissa_setup:
 			mv t0, a0
-			bgt t3, t5, sum_up_mantissa_done	#too big a shift
-			beqz a3, sum_up_mantissa_done
+			bgt t3, t5, sum_up_mantissa_done	#offset too big to be of use
+			beqz a3, sum_up_mantissa_done		#addition is zero
 			#find start of addition
   sum_up_mantissa_look_for_start:
-			sll t6, t4, t5	#look for the first bit in the 'addition'
-			and s1, t6, t2
-			bnez s1, sum_up_mantissa_begin
-			addi t5, t5, -1
-			j sum_up_mantissa_look_for_start
+			sll t6, t4, t5				#look for the first bit in the 'addition'
+			and s1, t6, t2				#look for bit
+			bnez s1, sum_up_mantissa_begin		#found start
+			addi t5, t5, -1				#decrement shift
+			j sum_up_mantissa_look_for_start	#loop
   sum_up_mantissa_begin:
 			#t5 holds bit count
 			li s1, 62
-			li a6, 0x8000000000000000
+			li a6, 0x8000000000000000		#used to test for 63rd bit
 			li s2, 1
 			add t4, t4, t3				#t4 holds displacement
 			bgt t4, s1, sum_up_mantissa_done
   sum_up_mantissa_sum:
 			srl t3, a0, t4				#number to add
 			beqz t3, sum_up_mantissa_done
-			add t0, t0, t3
-			and a7, a6, t0
-			beqz a7, sum_up_mantissa_shift_count
+			add t0, t0, t3				#add number
+			and a7, a6, t0				#has 63rd bit been turned on?
+			beqz a7, sum_up_mantissa_shift_count	#no then jump ahead
 			srli t0, t0, 1  			#return to 62 bits
 			addi s6, s6, 1				#increment count of power increase
 			addi t4, t4, 1  			#adjust the 'addition' offset
