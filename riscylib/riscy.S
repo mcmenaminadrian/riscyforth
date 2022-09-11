@@ -447,8 +447,16 @@
 			j process_index_test_overflow			#loop back
   process_index_found_overflow:
 			#now have to calculate increase
+			bnez s5, process_index_found_overflow_repeat	#not the first time?
+			add s5, s5, t6					#first time - add offset into 64 bits
+			li a3, 63					#calculate real update
+			sub a3, a3, s0
+			add s5, s5, a3					#add real update
+			j process_index_found_overflow_continue
+  process_index_found_overflow_repeat:
 			add s5, s5, t6					#add offset into upper 64 bits
 			addi s5, s5, 2					#based on resetting to 62nd bit
+  process_index_found_overflow_continue:
 			mul s0, s0, t0					#generate lower 64 bits
 			li a3, 63
 			sub a3, a3, t6					#calculate shift needed
