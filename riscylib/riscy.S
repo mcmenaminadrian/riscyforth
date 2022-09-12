@@ -326,7 +326,6 @@
   process_float_transfer_to_stack:
 			#process exponent
 			call process_index
-  y:
 			sd a0, 144(s9)		#store base 2 index
 			sd a1, 152(s9)		#store adjustment
 			sd a2, 160(s9)		#offset for adjustment
@@ -440,7 +439,7 @@
 			#now have to calculate increase
 			bnez s5, process_index_found_overflow_repeat	#not the first time?
 			add s5, s5, t6					#first time - add offset into 64 bits
-			addi s5, s5, 2
+			addi s5, s5, 2					#make up for reduction back to 62
 			li a3, 63					#calculate real update
 			j process_index_found_overflow_continue
   process_index_found_overflow_repeat:
