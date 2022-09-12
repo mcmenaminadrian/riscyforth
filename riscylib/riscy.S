@@ -440,6 +440,7 @@
 			#now have to calculate increase
 			bnez s5, process_index_found_overflow_repeat	#not the first time?
 			add s5, s5, t6					#first time - add offset into 64 bits
+			addi s5, s5, 2
 			li a3, 63					#calculate real update
 			j process_index_found_overflow_continue
   process_index_found_overflow_repeat:
