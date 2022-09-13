@@ -266,8 +266,8 @@
 			li a4, 10					#for multiplying
 			li a7, 0					#found dot
   process_float_calculate_mantissa:
+			bltz t3, process_float_check_mantissa_done	#already at the end (no exponent)
 			lb t5, 0(t1)					#read char
-  process_float_claculate_mantissa_no_read:
 			beq t5, a3, process_float_check_mantissa_dot	#char is dot
 			beq t5, a2, process_float_check_mantissa_e	#char is E
 			beq t5, a5, process_float_check_mantissa_done	#char is space
@@ -306,7 +306,11 @@
 			sd t6, 136(s9)
 			sd t4, 152(s9)
 			sd s0, 160(s9)
+			mv a0, s0
+			sub a0, a0, t4
+			sd a0, 144(s9)
 			ld s0, 64(s9)
+			PUSH ra
 			j process_float_transfer_to_stack
   process_float_search_exponent:
 			li t6, 0					#count of exponent
