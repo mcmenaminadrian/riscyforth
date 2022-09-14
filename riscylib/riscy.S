@@ -253,10 +253,12 @@
 			j process_float_check_mantissa			#jump ahead but no extra read
   process_float_positive:
 			addi t1, t1, 1					#increment index to input
+			addi t3, t3, -1					#just forget the sign
 			j process_float_check_mantissa			#jump ahead
   process_float_negative:
 			li t6, 1					#store 1 as...
 			addi t1, t1, 1					#increment index to input
+			addi t3, t3, -1					#ignore the sign now
 			sd t6, 128(s9)					#negative number
   process_float_check_mantissa:
 			li t4, 0					#count of numbers to right of DP
@@ -352,7 +354,7 @@
 			bgt a2, t0, float_out
 			ld t0, 128(s9)	#sign data
 			beqz t0, float_is_positive
-			li t0, -1	#negative
+			li t0, 0x8000000000000000	#turn neg bit on
 			j float_insert_mantissa
   float_is_positive:
 			li t0, 0
