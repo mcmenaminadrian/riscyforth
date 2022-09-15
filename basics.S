@@ -290,7 +290,11 @@
 		call scan_floats
 		POP t0
 		bnez a1, scan_integers
-		tail scan_integers	#TODO: something useful
+		#have recovered an FP
+		addi sp, sp, -16
+		sd a0, 8(sp)
+		j search_exe				#and move on!	
+
   scan_integers:
 		#t0 points to start
 		#modified version of code used in >NUMBER here
@@ -343,7 +347,9 @@
 		add t6, t6, t2
 		mul t6, t6, a7			      	#multiply by 1 or -1
 		addi sp, sp, -16
-                sd t6, 8(sp)                      	#save number on stack
+                sd t6, 8(sp)
+                #save number on stack
+ search_exe:
                 la t0, WA_TOKENIZE_IMM                	#keep tokenizing
                 sd t0, 0(sp)
                 tail EXE

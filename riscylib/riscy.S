@@ -349,9 +349,9 @@
 			li a1, 1	#default is failure
 			li t0, 1023	#test exponent in range
 			add a2, a2, t0
-			blez a2, float_out
+			blez a2, float_out_zero
 			slli t0, t0, 1
-			bgt a2, t0, float_out
+			bgt a2, t0, float_out_pve_inf
 			ld t0, 128(s9)	#sign data
 			beqz t0, float_is_positive
 			li t0, 0x8000000000000000	#turn neg bit on
@@ -363,7 +363,6 @@
 			and a0, a0, t1
 			or t0, t0, a0
 			slli a2, a2, 52
-  x:
 			or a0, t0, a2	#have a float now
 			li a1, 0	#return success
   process_float_recover:
@@ -371,6 +370,19 @@
 			call float_stack_down
 			POP ra
 			ret
+  float_out_pve_inf:
+			li a0, 0x7FF0000000000000	#positive infinity
+  float_out_test_negative:
+			ld t0, 128(s9)
+			beqz t0, float_out_continue
+			li a1, 0x8000000000000000
+			or a0, a0, a1
+  float_out_continue:
+			li a1, 0
+			j float_out
+  float_out_zero:
+			li a0, 0x0			#zero
+			j float_out_test_negative
   process_float_exponent_fail:
 			li a1, 1
 			j process_float_recover

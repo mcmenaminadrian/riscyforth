@@ -22,9 +22,17 @@
 	CODEHEADER DFLOATS, DFALIGN, 0x01
 	#(n -- n)
 	TAILMOD t1
-	
 
-	CODEHEADER DFALIGNED, DFLOATS, 0x01
+	CODEHEADERZ FPLUS, F+, DFLOATS, 0x01
+	#(r r -- r)
+	fld f0, 0(sp)
+	fld f1, 8(sp)
+	addi sp, sp, 8
+	fadd.d f2, f0, f1
+	fsd f2, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER DFALIGNED, FPLUS, 0x01
 	#(addr -- df-addr)
 	ld t0, 0(sp)
 	li t1, 0x07
