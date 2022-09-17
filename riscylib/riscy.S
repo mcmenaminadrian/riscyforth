@@ -305,10 +305,13 @@
 			j process_float_search_exponent			#move on to checking exponent
   process_float_check_mantissa_done:
 			#store mantissa and correction count
-			sd t6, 136(s9)
-			sd t4, 152(s9)
-			sd s0, 160(s9)
+			sd t6, 136(s9)					#number
+			sd t4, 152(s9)					#right of DP
+			sd s0, 160(s9)					#left of DP
 			mv a0, s0
+			beqz a0, process_float_mantissa_done_ahead	#don't subtract 1 of alrwady 0
+			addi a0, a0, -1					#1 digit to left is power 0 etc
+  process_float_mantissa_done_ahead:
 			sub a0, a0, t4
 			sd a0, 144(s9)
 			ld s0, 64(s9)
@@ -321,10 +324,12 @@
 			mv a1, t3
 			call sumstring					#returns with a0 holding exponent
 			#now adjust to account for left or right
-			ld t0, 152(s9)
+			ld t0, 152(s9)					#right of DP
 			sub a0, a0, t0
-			ld t0, 160(s9)
-			addi t0, t0, -1
+			ld t0, 160(s9)					#left of DP
+			beqz t0, process_float_search_exponent_ahead	#don't subtract 1 if nothing to left
+			addi t0, t0, -1					#1 digit to left is power of 0 etc
+  process_float_search_exponent_ahead:
 			blez t0, process_float_save_exponent
 			add a0, a0, t0
   process_float_save_exponent:
