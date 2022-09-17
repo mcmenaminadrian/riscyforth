@@ -296,6 +296,7 @@
 			li a7, 1					#found a dot
 			j process_float_process_on			#loop back
   process_float_check_mantissa_e:
+			beqz t6, float_return_zero				#return 0 for zero
 			#store mantissa and correction count
 			#and check exponent
 			sd t6, 136(s9)					#store number
@@ -304,12 +305,13 @@
 			ld s0, 64(s9)					#restore s0
 			j process_float_search_exponent			#move on to checking exponent
   process_float_check_mantissa_done:
+			beqz t6, float_return_zero				#return 0 (all bits off)
 			#store mantissa and correction count
 			sd t6, 136(s9)					#number
 			sd t4, 152(s9)					#right of DP
 			sd s0, 160(s9)					#left of DP
 			mv a0, s0
-			beqz a0, process_float_mantissa_done_ahead	#don't subtract 1 of alrwady 0
+			beqz a0, process_float_mantissa_done_ahead	#don't subtract 1 of already 0
 			addi a0, a0, -1					#1 digit to left is power 0 etc
   process_float_mantissa_done_ahead:
 			sub a0, a0, t4
@@ -391,6 +393,13 @@
   process_float_exponent_fail:
 			li a1, 1
 			j process_float_recover
+  float_return_zero:					#return 0 (all bits off)
+			PUSH ra
+			call float_stack_down
+			POP ra
+			li a0, 0
+			li a1, 0
+			ret
 
 
   process_mantissa:
