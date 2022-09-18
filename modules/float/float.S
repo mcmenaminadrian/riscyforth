@@ -59,6 +59,31 @@
 	fsd f2, 0(sp)
 	TAILMOD t1
 
+	CODEHEADERZ FD, F., FTIMES, 0x01
+	#(r --)
+	ld t0, 0(sp)			#load from stack
+	addi sp, sp, 8			#adjust stack
+	beqz t0, fd_output_zero		#degenerate case of 0
+	li t1, -1			#test for all bits on
+	beq t0, t1, fd_output_neg_inf	#negative infinity
+	srli t1, 1			#turn off first bit
+	beq t0, t1, fd_output_inf	#positive infinity
+	li t1, 0			#use t1 to hold sign, default is positive
+	bgez t0, fd_get_exponent	#negative number?
+	li t1, 1			#set for negative number
+  fd_get_exponent:
+	li t2, 0x7FF0000000000000	#mask for exponent
+	and t3, t0, t2			#extract exponent
+	srli t3, t3, 52			#power down to 0
+	addi t3, t3, -1023		#normalise
+	li t2, 0xFFFFFFFFFFFFF		#bit mask for mantissa
+	and t4, t0, t2			#mantissa only
+	#now covert base 2 exponent to base 10
+
+
+	TAILMOD t1
+	
+
 	CODEHEADER ROOT2, FPLUS, 0x01
 	#(--r)
 	#Square root of two approximated to 1.4142135623730951
@@ -69,7 +94,7 @@
 
 	CODEHEADER GOLDENRATIO, ROOT2, 0x01
 	#(-- r)
-	#Golden ration approximated to 1.618033988749895
+	#Golden ratio approximated to 1.618033988749895
 	li t0, 0x3FF9E3779B97F4A8
 	addi sp, sp, -8
 	sd t0, 0(sp)
