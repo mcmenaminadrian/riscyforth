@@ -59,7 +59,39 @@
 	fsd f2, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER DFALIGNED, FPLUS, 0x01
+	CODEHEADER ROOT2, FPLUS, 0x01
+	#(--r)
+	#Square root of two approximated to 1.4142135623730951
+	li t0, 0x3FF6A09E667F3BCD
+	addi sp, sp, -8
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER GOLDENRATIO, ROOT2, 0x01
+	#(-- r)
+	#Golden ration approximated to 1.618033988749895
+	li t0, 0x3FF9E3779B97F4A8
+	addi sp, sp, -8
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER E, GOLDENRATIO, 0x01
+	#(-- r)
+	#e approximated to 2.718281828459045
+	li t0, 0x4005BF0A8B145769
+	addi sp, sp, -8
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER PI, E, 0x01
+	#(-- r)
+	#PI approximated to 3.141592653589793
+	li t0, 0x400921FB54442D18
+	addi sp, sp, -8
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER DFALIGNED, PI, 0x01
 	#(addr -- df-addr)
 	ld t0, 0(sp)
 	li t1, 0x07
