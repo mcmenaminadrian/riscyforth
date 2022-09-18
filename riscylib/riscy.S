@@ -276,18 +276,10 @@
 			beq t5, a6, process_float_check_mantissa_done	#char is CR
 			sub t5, t5, a0					#char is numeral - convert to number
 			mul t6, t6, a4					#increment saved number by 10
-			beqz a7, process_float_check_bigger		#not found . yet so test for x10
+			beqz a7, process_float_check_addin		#not found . yet so test for x10
 			addi t4, t4, 1					#found . already so increment count to right of DP
-			j process_float_check_addin			#jump ahead to addition of number
-  process_float_check_bigger:
-			bnez t6, process_float_process_bigger		#number > 0 so jump to increment left of DP count
-			#not yet broken zero
-			beqz t5, process_float_process_on		#number 0 maybe so jump to increment of reading char
-  process_float_process_bigger:
-			#get here because we've got a mantissa >= 1
-			addi s0, s0, 1					#increment left of DP count
   process_float_check_addin:
-			add t6, t6, t5					#add found numeral
+			add t6, t6, t5					#add found numeral - maybe zero but save nothing with jump
   process_float_process_on:
 			addi t1, t1, 1					#increment index into number string
 			addi t3, t3, -1					#decrement numb of chars left
@@ -305,14 +297,12 @@
 			ld s0, 64(s9)					#restore s0
 			j process_float_search_exponent			#move on to checking exponent
   process_float_check_mantissa_done:
-			beqz t6, float_return_zero				#return 0 (all bits off)
+			beqz t6, float_return_zero			#return 0 (all bits off)
 			#store mantissa and correction count
 			sd t6, 136(s9)					#number
 			sd t4, 152(s9)					#right of DP
 			sd s0, 160(s9)					#left of DP
 			mv a0, s0
-			beqz a0, process_float_mantissa_done_ahead	#don't subtract 1 of already 0
-			addi a0, a0, -1					#1 digit to left is power 0 etc
   process_float_mantissa_done_ahead:
 			sub a0, a0, t4
 			sd a0, 144(s9)
@@ -333,7 +323,6 @@
 			addi t0, t0, -1					#1 digit to left is power of 0 etc
   process_float_search_exponent_ahead:
 			blez t0, process_float_save_exponent
-			add a0, a0, t0
   process_float_save_exponent:
 			sd a0, 144(s9)	#store base 10 index
   process_float_transfer_to_stack:

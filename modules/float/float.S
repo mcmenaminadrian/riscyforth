@@ -23,7 +23,35 @@
 	#(n -- n)
 	TAILMOD t1
 
-	CODEHEADERZ FPLUS, F+, DFLOATS, 0x01
+	CODEHEADERZ FDIV, F/, DFLOATS, 0x01
+	#(r r -- r)
+	fld f0, 0(sp)
+	fld f1, 8(sp)
+	addi sp, sp, 8
+	fdiv.d f2, f1, f0
+	fsd f2, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ FMINUS, F-, FDIV, 0x01
+	#(r r -- r)
+	fld f0, 8(sp)
+	fld f1, 8(sp)
+	addi sp, sp, 8
+	fsub.d f2, f1, f0
+	fsd f2, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ FTIMES, F*, FMINUS, 0x01
+	#(r r -- r)
+tucker:
+	fld f0, 8(sp)
+	fld f1, 8(sp)
+	addi sp, sp, 8
+	fmul.d f2, f0, f1
+	fsd f2, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ FPLUS, F+, FTIMES, 0x01
 	#(r r -- r)
 	fld f0, 0(sp)
 	fld f1, 8(sp)
