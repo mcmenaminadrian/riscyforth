@@ -231,16 +231,23 @@
 	TAILMOD t1
 
 
+ convert_to_ten:
+	#convert to base 10 number
+
+
  divide_by_ten:
+	#divides input, returns digit and updated dividend
 	#input
-	# a0 - power
-	# a1 - mantissa
+	# a0 - length
+	# a1 - populated bits
 	# returns
-	# a1 - 0 on success, something else on failure
-	# a0 - pointer to buffer containing characters - must be FREEd by caller
-	addi sp, sp, -96
-	sd a0, 0(sp)				#save registers
-	sd a1, 8(sp)
+	# a0 - digit
+	# a1 - populated bits
+	# a2 - updated length
+	# a3 - is result valid
+	addi sp, sp, -96		#save registers
+	sd s1, 0(sp)
+	sd s2, 8(sp)
 	sd s3, 16(sp)
 	sd s4, 24(sp)
 	sd s5, 32(sp)
@@ -251,63 +258,13 @@
 	sd s10, 72(sp)
 	sd s11, 80(sp)
 	sd ra, 88(sp)
-	li a0, 1024				#allocate 1K for buffer
-	call malloc				#call
-	li a1, 1				#failure by default
-	beqz a0, clean_up_divide_start
-	mv s2, a0				#s2 stores buffer address
-	ld a0, 0(sp)				#store s0 and s1
-	ld a2, 8(sp)				#and swap in values
-	sd s0, 0(sp)
-	sd s1, 8(sp)
-	mv s1, a0				#s1 holds power
-	mv s2, a2				#s2 mantissa
-	li t1, 128				#this many stores needed
-	mv t2, a0				#use temp pointer into buffer
-  divide_by_ten_clean:
-	sd zero, 0(t2)				#store 0
-	addi t1, t1, -1
-	beqz t1, divide_by_ten_buffer_clean	#done cleaning
-	addi t2, t2, 8				#next 64 bits along
-	j divide_by_ten_clean			#loop back
-  divide_by_ten_clean:
-	#calculate how long the number is
-	#first adjust mantissa
-	srli s2, s2, 1
-	li t0, 0x8000000000000000
-	or s2, s2, t0				#turn on bit for 1
-	li s3, 1				#bit on
-	li s4, 0				#how far left
-  divide_by_ten_find_length:
-	sll s5, s3, s4				#shift left
-	and s6, s2, s5
-	bnez s6, divide_by_ten_got_length	#found length
-	addi s4, s4, 1				#check next bit along
-	j divide_by_ten_find_length
-  divide_by_ten_got_length:
-	li s3, 63
-	sub s3, s3, s4				#s3 holds maximum bit right
-	#now do the division
-	li a3, 10				#constant
-	li s4, 1				#bit marker
-	li s5, 63				#shift
-	li s6, 0				#dividend
-	li t0, 512
-	addi a2, a0, t0				#pointer to half way into buffer
-  divide_by_ten_shift:
-	sll s7, s4, s5				
-	and s8, s7, s2				#is bit 0 or 1
-	slli s6, s6, 1				#shift left
-	beqz s8, divide_by_ten_shift_divide	#0 so no adding 1
-	ori s6, s6, 1				#or in 1
-  divide_by_ten_shift_divide:
-	div s7, s6, a3
-	bnez s7, divide_by_ten_multiple		#got a result
-	addi s5, s5, -1
-	bgt s3, s5, divide_by_ten_zeros_only	#only zeros left
-	j divide_by_ten_shift
-  divide_by_ten_zeros_only:
-	beqz s6, divide_by_ten_all_zeros	#everything is zero
+	mv s1, a0			# store initial values - length in s1
+	mv s2, a1			# populated bits in s2
+	li s3, 10			# divisor in s3
+
+
+
+
 	
 	
 	
