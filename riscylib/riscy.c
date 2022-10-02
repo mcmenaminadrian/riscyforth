@@ -1,9 +1,8 @@
 /** RISCYLIB                                            **/
 /** Common code for Riscyforth and Riscyforth modules   **/
 /** Copyright (C) Adrian McMenamin, 2022                **/
-/** Licenced for reuse under the terms of v2 of GNU GPL **/
+/** Licensed for reuse under the terms of v2 of GNU GPL **/
 
-//#include <string.h>
 #include <stdlib.h>
 
 extern unsigned long INPUT_START;

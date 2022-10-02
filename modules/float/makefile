@@ -3,4 +3,4 @@ floatmod: float.o floatc.o
 float.o: float.S 
 	gcc -c -fpic float.S -o float.o
 floatc.o: float.c
-	gcc -c -fpic float.c -o floatc.o
+	gcc -c -g -fpic float.c -o floatc.o
