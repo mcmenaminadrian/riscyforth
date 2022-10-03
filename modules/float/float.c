@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
+
 /** Floating point code that's just complex to reasonably render in assembly **/
 
 
@@ -56,16 +58,18 @@ char* fpStringNumberDouble(char* buffer, uint64_t normPower, uint64_t mantissa, 
 {
 	/* Find the size of the mantissa */
 	uint64_t bitCheck = 1;
-	uint64_t lengthCheck = 0;
-	while (bitCheck & mantissa == 0 && lengthCheck++ < 52) {
-		bitCheck = bitCheck << 1;
+	int64_t lengthCheck = 0;
+	while (bitCheck & mantissa == 0 && lengthCheck++ > 0) {
+		bitCheck = bitCheck >>1;
 	}
+	/* normalise length counter */
+	lengthCheck = 52 - lengthCheck;
 	/* fix up mantissa */
 	uint64_t addOne = 1;
 	mantissa = mantissa | (addOne << 52);
 	/* index to scratch pad part of buffer */
 	uint64_t scratchPadIndex = 1023;
-	uint64_t leftNumber = (mantissa >> lengthCheck);
+	uint64_t leftNumber = mantissa;
 	uint64_t rightNumber = 0;
 	uint64_t adjustedPower = normPower;
 	if (normPower < (53 - lengthCheck)) {
@@ -77,12 +81,12 @@ char* fpStringNumberDouble(char* buffer, uint64_t normPower, uint64_t mantissa, 
 	}
 	/* process number */
 	uint64_t summation = 0;
-	uint64_t number_calculation = leftNumber;
+	uint64_t numberCalculation = leftNumber;
 	int64_t index = 52;		/* initial value */
 	uint64_t nextBit = 0;
 	uint64_t nextNumber = 0;
 	uint64_t shortenedBy = 0;
-	bool foundNumer = false;
+	bool foundNumber = false;
 	int64_t currentIndex = index;
 	uint64_t powerLeft = normPower;
 	while (index > 0)
@@ -94,7 +98,10 @@ char* fpStringNumberDouble(char* buffer, uint64_t normPower, uint64_t mantissa, 
 				nextNumber = nextNumber << 1;
 			}
 			if (currentIndex >= 0) {
-				nextBit = number_calculation & (bitCheck << currentIndex);
+				nextBit = numberCalculation & (bitCheck << currentIndex);
+				if (nextBit) {
+					nextBit = 1;
+				}
 			}
 			currentIndex--;
 			summation = summation | nextBit;
@@ -103,13 +110,16 @@ char* fpStringNumberDouble(char* buffer, uint64_t normPower, uint64_t mantissa, 
 					foundNumber = true;
 				}
 				summation = summation % radix;
-				if (totalShifts < 64)
+				if (totalShifts < 64) {
 					nextNumber = nextNumber | 1;
 				}
-			} else if (!foundNumber) {
-				shortenedBy++;
+			} else {
+				if (!foundNumber) {
+					shortenedBy++;
+				}
 			}
-		} while (--powerLeft)
+		} while (--powerLeft);
+
 		if (summation > 9) {
 			summation += 55;
 		} else {
@@ -120,8 +130,12 @@ char* fpStringNumberDouble(char* buffer, uint64_t normPower, uint64_t mantissa, 
 		powerLeft = normPower - shortenedBy;
 		index -= shortenedBy;
 		currentIndex = index;
-	}		
-		
+		summation = 0;
+		numberCalculation = nextNumber;
+		nextNumber = 0;
+	}
+
+	return buffer;
 }
 
 
@@ -132,13 +146,10 @@ char* fpStringNumberDouble(char* buffer, uint64_t normPower, uint64_t mantissa, 
 //usnigned long for conversion radix
 char* getFloatingPointStringDouble(uint64_t fpInput, uint64_t radix)
 {
-	/* set the answer to NULL by fault */
-	char* answerString = NULL;
 	const uint64_t powerMask = 0x7FF0000000000000;
 	const uint64_t mantissaMask = 0xFFFFFFFFFFFFF;
 	const uint64_t signMask = 0x8000000000000000;
-
-	answerString = (char*)malloc(1024);
+	char* answerString = (char*)malloc(1024);
 	if (NULL != answerString) {
 		const uint64_t power = (fpInput & powerMask) >> 52;
 		const uint64_t mantissa = fpInput & mantissaMask;
