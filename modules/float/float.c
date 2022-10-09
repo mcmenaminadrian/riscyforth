@@ -30,114 +30,112 @@ char* fpStringInfinityDouble(char* buffer, uint64_t sign)
 }
 
 /* Put the characters at the end of the buffer at its start */
-char* fpReverseBuffer(char* buffer)
+char* fpFinalProcess(char* buffer, uint64_t sign, uint64_t endIndex)
 {
 	/*Assume the buffer is 1024 characters long */
-	uint64_t indexEnd = 1023;
-	uint64_t indexStart = 0;
-	while (buffer[indexEnd] != '\n') {
-		buffer[indexStart++] = buffer[indexEnd--];
+	uint64_t startIndex = 0;
+	if (sign) {
+		buffer[startIndex++] = '-';
 	}
-	buffer[indexStart] = '\n';
+	do {
+		buffer[startIndex++] = buffer[endIndex++];
+	} while (endIndex < 1024);
+	buffer[startIndex] = '\0';
 	return buffer;
 }
 
-char* fpStringProcessFraction(char* buffer, uint64_t fraction, uint64_t bufferIndex, uint64_t radix)
+/* Process the integer part of the mantissa, returning the index into the buffer used for writing */
+uint64_t fpStringProcessInteger(char* buffer, uint64_t mantissa, int64_t power, uint64_t sign, uint64_t radix, uint64_t endIndex)
 {
-	return buffer;
-}
-
-
-char* fpStringFractionDouble(char* buffer, uint64_t normPower, uint64_t mantissa, uint64_t sign, uint64_t radix)
-{
-	return buffer;
-}
-
-/* Process a number > 1 */
-char* fpStringNumberDouble(char* buffer, uint64_t normPower, uint64_t mantissa, uint64_t sign, uint64_t radix)
-{
-	/* Find the size of the mantissa */
-	uint64_t bitCheck = 1;
-	int64_t lengthCheck = 0;
-	while (bitCheck & mantissa == 0 && lengthCheck++ > 0) {
-		bitCheck = bitCheck >>1;
-	}
-	/* normalise length counter */
-	lengthCheck = 52 - lengthCheck;
-	/* fix up mantissa */
-	uint64_t addOne = 1;
-	mantissa = mantissa | (addOne << 52);
-	/* index to scratch pad part of buffer */
-	uint64_t scratchPadIndex = 1023;
-	uint64_t leftNumber = mantissa;
-	uint64_t rightNumber = 0;
-	uint64_t adjustedPower = normPower;
-	if (normPower < (53 - lengthCheck)) {
-		rightNumber = leftNumber << ((64 - lengthCheck) - 
-			((53 - lengthCheck) - normPower));
-		rightNumber = rightNumber >> (63 - (53 - lengthCheck) - normPower);
-		leftNumber = leftNumber >> (lengthCheck - normPower);
-		adjustedPower = normPower - (53 - lengthCheck);
-	}
-	/* process number */
-	uint64_t summation = 0;
-	uint64_t numberCalculation = leftNumber;
-	int64_t index = 52;		/* initial value */
+	uint64_t bit = 1;
+	uint64_t summation = 0;		/* working dividend then remainder */
+	uint64_t numberCalculation = mantissa;
+	int64_t index = 63;		/* initial value */
 	uint64_t nextBit = 0;
 	uint64_t nextNumber = 0;
 	uint64_t shortenedBy = 0;
 	bool foundNumber = false;
-	int64_t currentIndex = index;
-	uint64_t powerLeft = normPower;
-	while (index > 0)
+	int64_t powerLeft = power;
+	uint64_t totalShifts = 0;
+	/* flush mantissa left */
+	uint64_t testBit = 0x8000000000000000;
+	
+	while (numberCalculation)
 	{
-		uint64_t totalShifts = 0;
+		while ((testBit & numberCalculation) == 0) {
+			numberCalculation = numberCalculation << 1;
+		}
 		do {
 			summation = summation << 1;
 			if (totalShifts++ < 64) {
 				nextNumber = nextNumber << 1;
-			}
-			if (currentIndex >= 0) {
-				nextBit = numberCalculation & (bitCheck << currentIndex);
-				if (nextBit) {
-					nextBit = 1;
+				nextBit = numberCalculation & (bit << index--);
+				if (0 != nextBit) {
+					summation = summation | 1;
 				}
 			}
-			currentIndex--;
-			summation = summation | nextBit;
-			if (summation / radix == 1) {			/* can only be 1 or 0 */
-				if (!foundNumber) {
+			if (summation / radix == 1) {
+				if (false == foundNumber) {
 					foundNumber = true;
 				}
+				nextNumber = nextNumber | 1;
 				summation = summation % radix;
-				if (totalShifts < 64) {
-					nextNumber = nextNumber | 1;
-				}
 			} else {
-				if (!foundNumber) {
+				if (false == foundNumber) {
 					shortenedBy++;
 				}
 			}
-		} while (--powerLeft);
-
+		} while (--powerLeft >= 0);
 		if (summation > 9) {
 			summation += 55;
 		} else {
 			summation += 48;
 		}
 		char addIn = (char)summation;
-		buffer[scratchPadIndex--] = addIn;
-		powerLeft = normPower - shortenedBy;
-		index -= shortenedBy;
-		currentIndex = index;
+		buffer[endIndex--] = addIn;
+		powerLeft = power - shortenedBy;
+		power = powerLeft;
+		index = 63;
 		summation = 0;
 		numberCalculation = nextNumber;
 		nextNumber = 0;
+		totalShifts = 0;
+		shortenedBy = 0;
+		foundNumber = false;
 	}
-
-	return buffer;
+	return endIndex;
 }
 
+uint64_t fpStringProcessFraction(char* buffer, uint64_t mantissa, int64_t power, uint64_t sign, uint64_t radix, uint64_t endIndex)
+{
+	return endIndex;
+}
+
+/* Partition the mantissa and call processing functions */
+char* fpStringProcessDouble(char* buffer, int64_t power, uint64_t mantissa, uint64_t sign, uint64_t radix)
+{
+	uint64_t fractionalMantissa = 0;
+	uint64_t integerMantissa = 0;
+	uint64_t bit = 1;
+	if (power >= 0 ) {
+		/* part that's right of . */
+		fractionalMantissa = mantissa << (power + 1);
+		/* and to the left */
+		integerMantissa = mantissa >> (63 - power);
+	} else {
+		fractionalMantissa = mantissa;
+	}
+	/* Track the write point at the end of the buffer */
+	uint64_t endIndex = 1023;
+	if (integerMantissa > 0) {
+		endIndex = fpStringProcessInteger(buffer, integerMantissa, power, sign, radix, endIndex);
+	}
+	if (fractionalMantissa > 0) {
+		endIndex = fpStringProcessFraction(buffer, fractionalMantissa, power, sign, radix, endIndex);
+	}
+	buffer[endIndex] = '\n';
+	return fpFinalProcess(buffer, sign, endIndex);
+}
 
 //Returns a pointer to a string allocated on the heap
 //Caller must free memory
@@ -147,12 +145,12 @@ char* fpStringNumberDouble(char* buffer, uint64_t normPower, uint64_t mantissa, 
 char* getFloatingPointStringDouble(uint64_t fpInput, uint64_t radix)
 {
 	const uint64_t powerMask = 0x7FF0000000000000;
-	const uint64_t mantissaMask = 0xFFFFFFFFFFFFF;
 	const uint64_t signMask = 0x8000000000000000;
 	char* answerString = (char*)malloc(1024);
 	if (NULL != answerString) {
 		const uint64_t power = (fpInput & powerMask) >> 52;
-		const uint64_t mantissa = fpInput & mantissaMask;
+		uint64_t mantissa = fpInput << 12;
+		mantissa = 0x8000000000000000 | (mantissa >> 1);
 		const uint64_t sign = (fpInput&signMask) >> 63;
 		/* Handle special cases */
 		if (power == 0x7FF) {
@@ -165,13 +163,9 @@ char* getFloatingPointStringDouble(uint64_t fpInput, uint64_t radix)
 			}
 		}
 		/* normalise power */
-		const uint64_t normPower = power - 1023;
+		const int64_t normPower = power - 1023;
 		/* And pass on to where the work is done */
-		if (normPower < 0) {
-			return fpStringFractionDouble(answerString, normPower, mantissa, sign, radix);
-		} else {
-			return fpStringNumberDouble(answerString, normPower, mantissa, sign, radix);
-		}
+		return fpStringProcessDouble(answerString, normPower, mantissa, sign, radix);
 	}
 	return answerString;
 }

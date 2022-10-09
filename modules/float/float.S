@@ -65,6 +65,9 @@
 	addi sp, sp, 8					#adjust stack
 	li a1, 10					#set radix to 10
 	call getFloatingPointStringDouble		#call C code
+	PUSH a0
+	call puts
+	POP a0
 	call free					#free malloc'ed memory
 	TAILMOD t1
 
