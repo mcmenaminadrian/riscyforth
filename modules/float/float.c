@@ -127,11 +127,16 @@ char* fpStringProcessDouble(char* buffer, int64_t power, uint64_t mantissa, uint
 	}
 	/* Track the write point at the end of the buffer */
 	uint64_t endIndex = 1023;
-	if (integerMantissa > 0) {
-		endIndex = fpStringProcessInteger(buffer, integerMantissa, power, sign, radix, endIndex);
-	}
 	if (fractionalMantissa > 0) {
 		endIndex = fpStringProcessFraction(buffer, fractionalMantissa, power, sign, radix, endIndex);
+	} else {
+		buffer[endIndex--] = '0';
+	}
+	buffer[endIndex--] = '.';
+	if (integerMantissa > 0) {
+		endIndex = fpStringProcessInteger(buffer, integerMantissa, power, sign, radix, endIndex);
+	} else {
+		buffer[endIndex--] = '0';
 	}
 	buffer[endIndex] = '\n';
 	return fpFinalProcess(buffer, sign, endIndex);
