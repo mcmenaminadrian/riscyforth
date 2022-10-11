@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <math.h>
 
 /** Floating point code that's just complex to reasonably render in assembly **/
 
@@ -106,8 +107,80 @@ uint64_t fpStringProcessInteger(char* buffer, uint64_t mantissa, int64_t power, 
 	return endIndex;
 }
 
+char fpStringGetDigit(double numberIn, uint64_t radix)
+{
+	int intFromDouble = (int) numberIn;
+	if (intFromDouble == 0) {
+		return 0;
+	}
+	int leftOver = intFromDouble % radix;
+	return (char)leftOver;
+}
+
+
 uint64_t fpStringProcessFraction(char* buffer, uint64_t mantissa, int64_t power, uint64_t sign, uint64_t radix, uint64_t endIndex)
 {
+	/* find smallest digit */
+	uint64_t bit = 1;
+	uint64_t displacement = 0;
+	while ((mantissa & (bit << displacement)) == 0) {
+		displacement++;
+	}
+	if (power >= 0) {
+		power = 1;
+	} else {
+		power = -1 * power;
+	}
+	double fraction = 0.0;
+	for (uint i = 63; i >= displacement; i--) {
+		if ((mantissa & (bit << i)) != 0) {
+			fraction += 1 / pow(2.0, power);
+		}
+		power++;
+	}
+	bool startedOutput = false;
+	uint64_t digitsLeft = 9;
+	uint64_t totalOutput = 0;
+	uint64_t powerUp = 1;
+	while (digitsLeft) {
+		double bigResult = fraction * pow(radix, powerUp++);
+		char digit = fpStringGetDigit(bigResult, radix);
+		if (!startedOutput && digit != 0) {
+			startedOutput = true;
+		}
+		if (digit > 9) {
+			digit += 55;
+		} else {
+			digit += 48;
+		}
+		buffer[endIndex--] = digit;
+		if (startedOutput) {
+			digitsLeft--;
+		}
+	}
+	/* Now reverse the digits */
+	uint64_t rightSide = 1023;
+	uint64_t leftSide = endIndex + 1;
+	while (leftSide < rightSide) {
+		char rChar = buffer[rightSide];
+		char lChar = buffer[leftSide];
+		buffer[leftSide++] = rChar;
+		buffer[rightSide--] = lChar;
+	}
+	/* check for shift left */
+	int shiftLeft = 0;
+	uint64_t shiftLeftIndex = 1023;
+	while (buffer[shiftLeftIndex--] == '0') {
+		shiftLeft++;
+	}
+	if (shiftLeft != 0) {
+		shiftLeftIndex = 1023;
+		uint64_t mvCharIndex = shiftLeftIndex - shiftLeft;
+		while (mvCharIndex > endIndex) {
+			buffer[shiftLeftIndex--] = buffer[mvCharIndex--];
+		}
+		endIndex += shiftLeft;
+	}
 	return endIndex;
 }
 

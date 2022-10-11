@@ -1,5 +1,5 @@
 floatmod: float.o floatc.o
-	ld --shared -o float.so float.o floatc.o -lc -ldl -lriscy
+	ld --shared -o float.so float.o floatc.o -lc -ldl -lriscy -lm
 float.o: float.S 
 	gcc -c -fpic float.S -o float.o
 floatc.o: float.c
