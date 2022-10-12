@@ -2,7 +2,7 @@
 .section .bss
     .comm NEXTMOD, 8
 
-.section data
+.section .data
 	stdoutopener:	.asciz "w"
 
 .section .text
@@ -68,12 +68,15 @@
 	li a1, 10					#set radix to 10
 	call getFloatingPointStringDouble		#call C code
 	PUSH a0
-	la a0, 1
-	ld a1, stdoutopener
+	li a0, 1
+	la a1, stdoutopener
 	call fdopen
 	mv a1, a0
 	ld a0, 0(sp)
+	PUSH a1
 	call fputs
+	POP a0
+	call fflush
 	POP a0
 	call free					#free malloc'ed memory
 	TAILMOD t1

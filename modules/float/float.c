@@ -12,7 +12,8 @@ char* fpStringNaNDouble(char* buffer)
 	buffer[0] = 'n';
 	buffer[1] = 'a';
 	buffer[2] = 'n';
-	buffer[3] = '\n';
+	buffer[3] = ' ';
+	buffer[4] = '\0';
 	return buffer;
 }
 
@@ -26,7 +27,8 @@ char* fpStringInfinityDouble(char* buffer, uint64_t sign)
 	buffer[index++] = 'i';
 	buffer[index++] = 'n';
 	buffer[index++] = 'f';
-	buffer[index] = '\n';
+	buffer[index++] = ' ';
+	buffer[index] = '\0';
 	return buffer;
 }
 
@@ -41,6 +43,7 @@ char* fpFinalProcess(char* buffer, uint64_t sign, uint64_t endIndex)
 	do {
 		buffer[startIndex++] = buffer[endIndex++];
 	} while (endIndex < 1024);
+	buffer[startIndex] = ' ';
 	buffer[startIndex] = '\0';
 	return buffer;
 }
