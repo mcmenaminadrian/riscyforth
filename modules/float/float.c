@@ -214,7 +214,7 @@ char* fpStringProcessDouble(char* buffer, int64_t power, uint64_t mantissa, uint
 	} else {
 		buffer[endIndex--] = '0';
 	}
-	buffer[endIndex] = '\n';
+	buffer[endIndex] = '\2';
 	return fpFinalProcess(buffer, sign, endIndex);
 }
 
