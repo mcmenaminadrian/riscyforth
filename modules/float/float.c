@@ -43,7 +43,7 @@ char* fpFinalProcess(char* buffer, uint64_t sign, uint64_t endIndex)
 	do {
 		buffer[startIndex++] = buffer[endIndex++];
 	} while (endIndex < 1024);
-	buffer[startIndex] = ' ';
+	buffer[startIndex++] = ' ';
 	buffer[startIndex] = '\0';
 	return buffer;
 }
