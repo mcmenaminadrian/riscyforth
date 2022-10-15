@@ -261,6 +261,8 @@
 			addi t3, t3, -1					#ignore the sign now
 			sd t6, 128(s9)					#negative number
   process_float_check_mantissa:
+			li s6, 0					#count of found numbers
+			li s7, 17					#max number of numbers we can count
 			li t4, 0					#count of numbers to right of DP
 			sd s0, 64(s9)					#use return stack space
 			li s0, 0					#count of numbers to left of DP
@@ -280,6 +282,9 @@
 			addi t4, t4, 1					#found . already so increment count to right of DP
   process_float_check_addin:
 			add t6, t6, t5					#add found numeral - maybe zero but save nothing with jump
+			beqz t6, process_float_process_on
+			addi s6, s6, 1
+			bgt s6, s7,  float_return_nan			#input too long to process - return NaN
   process_float_process_on:
 			addi t1, t1, 1					#increment index into number string
 			addi t3, t3, -1					#decrement numb of chars left
@@ -288,7 +293,7 @@
 			li a7, 1					#found a dot
 			j process_float_process_on			#loop back
   process_float_check_mantissa_e:
-			beqz t6, float_return_zero				#return 0 for zero
+			beqz t6, float_return_zero			#return 0 for zero
 			#store mantissa and correction count
 			#and check exponent
 			sd t6, 136(s9)					#store number
@@ -388,6 +393,13 @@
 			POP ra
 			li a0, 0
 			li a1, 0
+			ret
+  float_return_nan:
+			li a0, 0x7FFFFFFFFFFFFFFF	#NaN - input too long
+			li a1, 0
+			PUSH ra
+			call float_stack_down
+			POP ra
 			ret
 
 

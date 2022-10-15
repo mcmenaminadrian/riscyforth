@@ -112,11 +112,11 @@ uint64_t fpStringProcessInteger(char* buffer, uint64_t mantissa, int64_t power, 
 
 char fpStringGetDigit(double numberIn, uint64_t radix)
 {
-	int intFromDouble = (int) numberIn;
+	uint64_t intFromDouble = (uint64_t) numberIn;
 	if (intFromDouble == 0) {
 		return 0;
 	}
-	int leftOver = intFromDouble % radix;
+	uint64_t leftOver = intFromDouble % radix;
 	return (char)leftOver;
 }
 
@@ -137,12 +137,12 @@ uint64_t fpStringProcessFraction(char* buffer, uint64_t mantissa, int64_t power,
 	double fraction = 0.0;
 	for (uint i = 63; i >= displacement; i--) {
 		if ((mantissa & (bit << i)) != 0) {
-			fraction += 1 / pow(2.0, power);
+			fraction += 1.0 / pow(2.0, power);
 		}
 		power++;
 	}
 	bool startedOutput = false;
-	uint64_t digitsLeft = 9;
+	uint64_t digitsLeft = 15;
 	uint64_t totalOutput = 0;
 	uint64_t powerUp = 1;
 	while (digitsLeft) {
@@ -235,8 +235,8 @@ char* getFloatingPointStringDouble(uint64_t fpInput, uint64_t radix)
 		const uint64_t sign = (fpInput&signMask) >> 63;
 		/* Handle special cases */
 		if (power == 0x7FF) {
-			/* infinity */
-			if (mantissa == 0) {
+			if (mantissa == 0x8000000000000000) {
+				/* infinity */
 				return fpStringInfinityDouble(answerString, sign);
 			} else {
 				/* NaN */

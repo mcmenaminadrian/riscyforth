@@ -21,7 +21,35 @@
   dfalign_done:
 	TAILMOD t1
 
-	CODEHEADER DFLOATS, DFALIGN, 0x01
+	CODEHEADER FSIN, DFALIGN, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call sin
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FCOS, FSIN, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call cos
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FTAN, FCOS, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call tan
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FLOG, FTAN, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call log10
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER DFLOATS, FLOG, 0x01
 	#(n -- n)
 	TAILMOD t1
 
