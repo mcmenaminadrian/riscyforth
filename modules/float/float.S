@@ -49,7 +49,107 @@
 	fsd fa0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER DFLOATS, FLOG, 0x01
+	CODEHEADER FLN, FLOG, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call log
+	fsd fa0, 0(sp)
+	TAILMOD t1
+	
+	CODEHEADER FLOG2, FLN, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call log2
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FLOG1P, FLOG2, 0x01
+	#(n -- n) ln(1 + x)
+	fld fa0, 0(sp)
+	call log1p
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FABS, FLOG1P, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call fabs
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FACOS, FABS, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call acos
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FACOSH, FACOS, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call acosh
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FASIN, FACOSH, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call asin
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FASINH, FASIN, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call asinh
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FATAN, FASINH, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call atan
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FATAN2, FATAN, 0x01
+	#(y x -- n)
+	fld fa0, 8(sp)
+	fld fa1, 0(sp)
+	addi sp, sp, 8
+	call atan2
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FATANH, FATAN2, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call atanh
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FCBRT, FATANH, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call cbrt
+	fsd fa0, 0(sp)
+	TAILMOD t1
+	
+	CODEHEADER FEXP, FCBRT, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call exp
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FSQRT, FEXP, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call sqrt
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER DFLOATS, FSQRT, 0x01
 	#(n -- n)
 	TAILMOD t1
 
