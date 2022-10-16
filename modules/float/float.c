@@ -250,3 +250,38 @@ char* getFloatingPointStringDouble(uint64_t fpInput, uint64_t radix)
 	}
 	return answerString;
 }
+
+long* convertDoubleToLongLong(double input)
+{
+	long* answerArray = (long *)malloc(sizeof(long[2]));
+	if (answerArray)
+	{
+		long signRect = signbit(input)? -1 : 1;
+		double absInput = fabs(input);
+		double maxIntAsDouble = pow(2, 64) + 1.0;
+		double bigPart = absInput / maxIntAsDouble;
+		uint64_t bigAnswer = (uint64_t)bigPart;
+		double smallPart = absInput - (bigAnswer * maxIntAsDouble);
+		uint64_t smallAnswer = (uint64_t) smallPart;
+		if (signRect == -1) {
+			answerArray[1] = ~bigAnswer;
+			answerArray[0] = ~smallAnswer + 1;
+			if (answerArray[0] == 0) {
+				answerArray[1] = answerArray[1] + 1;
+			}
+		} else {
+			answerArray[1] = bigAnswer;
+			answerArray[0] = smallAnswer;
+		}
+	}
+	return answerArray;
+}
+
+double convert128BitsToDouble(int64_t hiPart, uint64_t loPart)
+{
+	double loDouble = (double)loPart;
+	double maxIntAsDouble = pow(2, 64) + 1.0;
+	double hiDouble = ((double)hiPart) * maxIntAsDouble;
+	return hiDouble + loDouble;
+}
+

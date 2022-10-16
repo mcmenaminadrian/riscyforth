@@ -73,8 +73,8 @@
 	CODEHEADER FABS, FLOG1P, 0x01
 	#(n -- n)
 	fld fa0, 0(sp)
-	call fabs
-	fsd fa0, 0(sp)
+	fabs.d fa1, fa0
+	fsd fa1, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER FACOS, FABS, 0x01
@@ -145,11 +145,58 @@
 	CODEHEADER FSQRT, FEXP, 0x01
 	#(n -- n)
 	fld fa0, 0(sp)
-	call sqrt
+	fsqrt.d fa1, fa0
+	fsd fa1, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FMAX, FSQRT, 0x01
+	#(y x -- n)
+	fld fa0, 8(sp)
+	fld fa1, 0(sp)
+	addi sp, sp, 8
+	fmax.d fa2, fa0, fa1
+	fsd fa2, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FMIN, FMAX, 0x01
+	#(y x -- n)
+	fld fa0, 8(sp)
+	fld fa1, 0(sp)
+	addi sp, sp, 8
+	fmin.d fa2, fa0, fa1
+	fsd fa2, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ FTOD, F>D, FMIN, 0x01
+	#(f -- n n)
+	fld fa0, 0(sp)
+	call convertDoubleToLongLong
+	beqz a0, ftod_done
+	addi sp, sp, -8
+	ld a1, 0(a0)
+	ld a2, 8(a0)
+	sd a1, 8(sp)
+	sd a2, 0(sp)
+	call free
+  ftod_done:
+	TAILMOD t1
+	
+	CODEHEADERZ DTOF, D>F, FTOD, 0x01
+	ld a0, 0(sp)
+	ld a1, 8(sp)
+	call convert128BitsToDouble
+	addi sp, sp, 8
 	fsd fa0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER DFLOATS, FSQRT, 0x01
+	CODEHEADERZ FTOS, F>S, DTOF, 0x01
+	#(f -- n)
+	fld fa0, 0(sp)
+	fcvt.l.d a0, fa0
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER DFLOATS, FTOS, 0x01
 	#(n -- n)
 	TAILMOD t1
 
