@@ -256,7 +256,19 @@
 	call free					#free malloc'ed memory
 	TAILMOD t1
 
-	CODEHEADER ROOT2, FD, 0x01
+	CODEHEADER FDUP, FD, 0x01
+	#(n -- n n)
+	fld f0, 0(sp)
+	addi sp, sp, -8
+	fsd f0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FDROP, FDUP, 0x01
+	#(n --)
+	addi sp, sp, 8
+	TAILMOD t1
+
+	CODEHEADER ROOT2, FDROP, 0x01
 	#(--r)
 	#Square root of two approximated to 1.4142135623730951
 	li t0, 0x3FF6A09E667F3BCD
