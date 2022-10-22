@@ -18,6 +18,7 @@
   .equ          INSTWIDTH3,    	0x0C
   .equ          INSTWIDTH4,    	0x10
   .equ          NAMEMAXLEN,    	0x18
+  .equ		SMALLERSPACE,	0x1000		#4KB
   .equ		BIGSPACE,      	0x100000	#1MB
   .equ		BIGGERSPACE,    0x200000	#2MB
   .equ		CONDITIONALBLK, 180		#size of if/else block

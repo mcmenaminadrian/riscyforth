@@ -28,10 +28,10 @@
 		la t0, LOADINGFILE
 		sd zero, 0(t0)			#ensure filehandle is NULL
 		la t0, STACKTOP
-		sd sp, 0(t0)			  #top of the stack
+		sd sp, 0(t0)			#top of the stack
 
 		la t0, INFILELOAD
-		sd zero, 0(t0)			  #we are not in file load mode
+		sd zero, 0(t0)			#we are not in file load mode
 		la t0, LOADLINESETUP
 		sd zero, 0(t0) 
 		li t0, 1
@@ -40,11 +40,11 @@
 		#now create standard dataspace
                 mv a0, zero
 		li a1, BIGGERSPACE
-		li a2, 0x07			  #read and execute
+		li a2, 0x07			#read and execute
 		li a3, 0x22
 		li a4, -1
 		li a5, 0
-		li a7, 222			  #mmap
+		li a7, 222			#mmap
 		ecall
 		la t0, dataspace
 		sd a0, 0(t0)

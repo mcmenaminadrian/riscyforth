@@ -42,7 +42,16 @@
 	fsd fa0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER FLOG, FTAN, 0x01
+	CODEHEADER FALOG, FTAN, 0x01
+	#(n -- n)
+	li a0, 10
+	fcvt.l.d a0, fa0
+	fld fa1, 0(sp)
+	call pow
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FLOG, FALOG, 0x01
 	#(n -- n)
 	fld fa0, 0(sp)
 	call log10
@@ -142,7 +151,14 @@
 	fsd fa0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER FSQRT, FEXP, 0x01
+	CODEHEADER FEXPM1, FEXP, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call expm1
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FSQRT, FEXPM1, 0x01
 	#(n -- n)
 	fld fa0, 0(sp)
 	fsqrt.d fa1, fa0
