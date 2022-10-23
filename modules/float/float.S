@@ -45,7 +45,7 @@
 	CODEHEADER FALOG, FTAN, 0x01
 	#(n -- n)
 	li a0, 10
-	fcvt.l.d a0, fa0
+	fcvt.d.l fa0, a0
 	fld fa1, 0(sp)
 	call pow
 	fsd fa0, 0(sp)
