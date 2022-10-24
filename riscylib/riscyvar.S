@@ -50,5 +50,6 @@
 .extern outerLoopTokenizeAddress
 .extern dataspaceptr
 .extern FP_AVAILABLE
+.extern literalNumberAddress
 
 #endif

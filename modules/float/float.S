@@ -42,7 +42,43 @@
 	fsd fa0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER FALOG, FTAN, 0x01
+	CODEHEADERZ FFETCH, F@, FTAN, 0x01
+	#(addr -- n)
+	ld a0, 0(sp)
+	fld fa0, 0(a0)
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FLITERAL, FFETCH, 0x01
+	#do nothing in interpretation
+	#extender code is what works here
+	#(--)
+	TAILMOD t1 
+
+  extender_fliteral:
+	#(n --)
+	call getCreateWritePoint
+	la t2, WA__FLITERAL
+	sd t2, 0(a0)
+	fld fa0, 0(sp)
+	fsd fa0, 8(a0)
+	addi sp, sp, 8
+	addi a0, a0, 16
+	call setCreateWritePoint
+	call getOuterLoopTokenize
+	mv s7, a0
+	fence.i
+	TAILMOD t1
+
+	CODEHEADER _FLITERAL, FLITERAL, 0x0
+	#(-- n)
+	fld fa0, 0(s7)
+	addi sp, sp, -8
+	fsd fa0, 0(sp)
+	addi s7, s7, 8
+	TAILMOD t1
+
+	CODEHEADER FALOG, _FLITERAL, 0x01
 	#(n -- n)
 	li a0, 10
 	fcvt.d.l fa0, a0
@@ -72,14 +108,14 @@
 	fsd fa0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER FLOG1P, FLOG2, 0x01
+	CODEHEADER FLNP1, FLOG2, 0x01
 	#(n -- n) ln(1 + x)
 	fld fa0, 0(sp)
 	call log1p
 	fsd fa0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER FABS, FLOG1P, 0x01
+	CODEHEADER FABS, FLNP1, 0x01
 	#(n -- n)
 	fld fa0, 0(sp)
 	fabs.d fa1, fa0
@@ -353,9 +389,9 @@
 	addi a0, a0, -56
 	call setDictionary	#return new tail of dictionary to caller
 	#setup extension writing
-#	la a0, WA_TWOLITERAL
-#	la a1, extender_2literal
-#	call  setExtenders
+	la a0, WA_FLITERAL
+	la a1, extender_fliteral
+	call  setExtenders
 	call setFPAvailable
 	POP ra
 	fence.i

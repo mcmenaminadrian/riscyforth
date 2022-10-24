@@ -25,6 +25,7 @@
    .comm outerLoopTokenizeAddress, ADDRWIDTH
    .comm dataspaceptr, ADDRWIDTH
    .comm FP_AVAILABLE, ADDRWIDTH
+   .comm literalNumberAddress, ADDRWIDTH
 
 .section .text
 
