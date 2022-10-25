@@ -288,12 +288,13 @@
 	fsd f2, 0(sp)
 	TAILMOD t1
 
-	CODEHEADERZ FD, F., FPLUS, 0x01
+	CODEHEADERZ FDOT, F., FPLUS, 0x01
 	#(r --)
 	ld a0, 0(sp)					#load number to process
 	addi sp, sp, 8					#adjust stack
 	li a1, 10					#set radix to 10
 	call getFloatingPointStringDouble		#call C code
+  float_output:
 	PUSH a0
 	li a0, 1
 	la a1, stdoutopener
@@ -308,7 +309,13 @@
 	call free					#free malloc'ed memory
 	TAILMOD t1
 
-	CODEHEADER FDUP, FD, 0x01
+	CODEHEADERZ FEDOT, FE., FDOT, 0x01
+	ld a0, 0(sp)
+	addi sp, sp, 8
+	call getFloatingPointEngineeringString
+	j float_output
+
+	CODEHEADER FDUP, FEDOT, 0x01
 	#(n -- n n)
 	fld f0, 0(sp)
 	addi sp, sp, -8
