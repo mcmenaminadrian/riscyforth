@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+#include <string.h>
 
 /** Floating point code that's just complex to reasonably render in assembly **/
 
@@ -285,3 +286,107 @@ double convert128BitsToDouble(int64_t hiPart, uint64_t loPart)
 	return hiDouble + loDouble;
 }
 
+char* engineerNumber(int counter, int sign, char* copyString, char* answerString)
+{
+	int ext = counter%3;
+	int newExp = counter - ext;
+	char newStrExp[3] = "   ";
+	int revIndex = 0;
+	while (newExp) {
+		char digit = newExp%10 + 48;
+		newExp = newExp / 10;
+		newStrExp[revIndex++] = digit;
+	}
+	int writePoint = 0;
+	int foundDot = -1;
+	int foundE = 0;
+	for (int i = 0; i < strnlen(copyString, 1024); i++) {
+		char x = copyString[i];
+		if (x == '.') {
+			foundDot = ext;
+		} else if (foundDot > 0) {
+			if (copyString[i + 1] == 'e') {
+				foundE = 1;
+				answerString[writePoint] = '0';
+			} else if (foundE == 1) {
+				answerString[writePoint] == '0';
+			} else {
+				answerString[writePoint] = copyString[i + 1];
+			}
+			if (--foundDot == 0) {
+				answerString[++writePoint] = '.';
+				if (foundE == 1) {
+					answerString[++writePoint] = '0';
+					break;
+				}
+			}
+		} else {
+			if (foundDot == -1) {
+				answerString[writePoint] = copyString[i];
+			} else {
+				answerString[writePoint] = copyString[i + 1];
+			}
+			writePoint++;
+		}
+	}
+	if (sign) {
+		answerString[writePoint++] = '-';
+	}
+	if (newStrExp[2] != ' ') {
+		answerString[writePoint++] = newStrExp[2];
+	}
+	if (newStrExp[1] != ' ') {
+		answerString[writePoint++] = newStrExp[1];
+	}
+	answerString[writePoint++] = newStrExp[0];
+	answerString[writePoint++] = ' ';
+	answerString[writePoint] = '\0';
+	return answerString;
+}		
+
+
+char* unEngineerNumber(char* copyString, char* answerString)
+{
+	int index = 0;
+	while (copyString[index] != '\0') {
+		answerString[index] = copyString[index];
+		index++;
+	}
+	answerString[index++] = ' ';
+	answerString[index] = '\0';
+	return answerString;
+}
+
+char* getFloatingPointEngineeringString(double input)
+{
+	int sign = 0;
+	char* answerString = (char *)malloc(1024);
+	char* copyString = (char *)malloc(1024);
+	if (answerString && copyString) {
+		gcvt(input, 3, copyString);
+		size_t strLen = strnlen(copyString, 1024);
+		if (strLen < 1024) { //have to have at least one char to avoid buffer overflow
+			void* ePointer = memchr(copyString, 'e', strLen);
+			if (ePointer) {
+				int index = ePointer - (void*)copyString;
+				int counter = 0;
+				if (copyString[index + 1] == '-') {
+					index++;
+					sign = 1;
+				}
+				while (copyString[index] != '\0' && copyString[index] != ' ') {
+					counter = (counter * 10) + copyString[index++] + 48;
+				}
+				if (counter%3 != 0) {
+					engineerNumber(counter, sign, copyString, answerString);
+				} else {
+					unEngineerNumber(copyString, answerString);
+				}
+			} else {
+				unEngineerNumber(copyString, answerString);
+			}
+		}
+	}
+	free(copyString);
+	return answerString;
+}  
