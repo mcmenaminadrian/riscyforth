@@ -310,7 +310,7 @@
 	TAILMOD t1
 
 	CODEHEADERZ FEDOT, FE., FDOT, 0x01
-	ld a0, 0(sp)
+	fld f0, 0(sp)
 	addi sp, sp, 8
 	call getFloatingPointEngineeringString
 	j float_output

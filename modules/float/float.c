@@ -219,6 +219,22 @@ char* fpStringProcessDouble(char* buffer, int64_t power, uint64_t mantissa, uint
 	return fpFinalProcess(buffer, sign, endIndex);
 }
 
+char* fpZeroCase(bool neg)
+{
+	/* special case of zero or negative zero */
+	char* answerString = (char*)malloc(8);
+	int index = 0;
+	if (neg) {
+		answerString[index++] = '-';
+	}
+	answerString[index++] = '0';
+	answerString[index++] = '.';
+	answerString[index++] = '0';
+	answerString[index++] = ' ';
+	answerString[index++] = '\0';
+	return answerString;
+}
+
 //Returns a pointer to a string allocated on the heap
 //Caller must free memory
 //Inputs: 
@@ -226,6 +242,9 @@ char* fpStringProcessDouble(char* buffer, int64_t power, uint64_t mantissa, uint
 //usnigned long for conversion radix
 char* getFloatingPointStringDouble(uint64_t fpInput, uint64_t radix)
 {
+	if (fpInput == 0 || fpInput == 0x8000000000000000) {
+		return fpZeroCase(fpInput == 0x8000000000000000);
+	}
 	const uint64_t powerMask = 0x7FF0000000000000;
 	const uint64_t signMask = 0x8000000000000000;
 	char* answerString = (char*)malloc(1024);
