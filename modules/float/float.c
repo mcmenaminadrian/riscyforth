@@ -392,6 +392,8 @@ char* getFloatingPointEngineeringString(double input)
 				if (copyString[index + 1] == '-') {
 					index++;
 					sign = 1;
+				} else if (copyString[index + 1] == '+') {
+					index++;
 				}
 				while (copyString[index] != '\0' && copyString[index] != ' ') {
 					counter = (counter * 10) + copyString[index++] + 48;
