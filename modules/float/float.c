@@ -307,10 +307,17 @@ double convert128BitsToDouble(int64_t hiPart, uint64_t loPart)
 
 char* engineerNumber(int counter, int sign, char* copyString, char* answerString)
 {
-	int ext = counter%3;
-	int newExp = counter - ext;
+	int newExp;
 	char newStrExp[3] = "   ";
-	int revIndex = 0;
+	int revIndex;
+	int ext = counter%3;
+	if (sign == 0) {
+		newExp = counter - ext;
+	} else {
+		newExp = counter + (3 - ext);
+		ext = 3 - ext;
+	}
+	revIndex = 0;
 	while (newExp) {
 		char digit = newExp%10 + 48;
 		newExp = newExp / 10;
@@ -324,32 +331,44 @@ char* engineerNumber(int counter, int sign, char* copyString, char* answerString
 		if (x == '.') {
 			foundDot = ext;
 		} else if (foundDot > 0) {
-			if (copyString[i + 1] == 'e') {
-				foundE = 1;
-				answerString[writePoint] = '0';
-			} else if (foundE == 1) {
-				answerString[writePoint] == '0';
+			if (copyString[i] == 'e') {
+				for (int j = foundDot; j > 0; j--) {
+					answerString[writePoint++] = '0';
+				}
+				answerString[writePoint++] = '.';
+				answerString[writePoint++] = '0';
+				answerString[writePoint++] = 'e';
+				break;
 			} else {
-				answerString[writePoint] = copyString[i + 1];
+				answerString[writePoint++] = copyString[i];
 			}
 			if (--foundDot == 0) {
-				answerString[++writePoint] = '.';
-				if (foundE == 1) {
-					answerString[++writePoint] = '0';
-					break;
-				}
+				answerString[writePoint++] = '.';
 			}
 		} else {
-			if (foundDot == -1) {
-				answerString[writePoint] = copyString[i];
+			if (copyString[i] == 'e') {
+				if (foundDot == -1) {
+					for (int j = ext; j > 0; j--) {
+						answerString[writePoint++] = '0';
+					}
+					answerString[writePoint++] = '.';
+					answerString[writePoint++] = '0';
+				} else {
+					if (answerString[writePoint - 1] == '.') {
+						answerString[writePoint++] = '0';
+					}
+				}
+				answerString[writePoint++] = 'e';
+				break;
 			} else {
-				answerString[writePoint] = copyString[i + 1];
+				answerString[writePoint++] = copyString[i];
 			}
-			writePoint++;
 		}
 	}
 	if (sign) {
 		answerString[writePoint++] = '-';
+	} else {
+		answerString[writePoint++] = '+';
 	}
 	if (newStrExp[2] != ' ') {
 		answerString[writePoint++] = newStrExp[2];
@@ -376,27 +395,28 @@ char* unEngineerNumber(char* copyString, char* answerString)
 	return answerString;
 }
 
-char* getFloatingPointEngineeringString(double input)
+char* getFloatingPointEngineeringString(double input, int precision)
 {
 	int sign = 0;
 	char* answerString = (char *)malloc(1024);
 	char* copyString = (char *)malloc(1024);
 	if (answerString && copyString) {
-		gcvt(input, 3, copyString);
+		gcvt(input, precision, copyString);
 		size_t strLen = strnlen(copyString, 1024);
 		if (strLen < 1024) { //have to have at least one char to avoid buffer overflow
 			void* ePointer = memchr(copyString, 'e', strLen);
 			if (ePointer) {
 				int index = ePointer - (void*)copyString;
+				index++;
 				int counter = 0;
-				if (copyString[index + 1] == '-') {
+				if (copyString[index] == '-') {
 					index++;
 					sign = 1;
-				} else if (copyString[index + 1] == '+') {
+				} else if (copyString[index] == '+') {
 					index++;
 				}
 				while (copyString[index] != '\0' && copyString[index] != ' ') {
-					counter = (counter * 10) + copyString[index++] + 48;
+					counter = (counter * 10) + copyString[index++] - 48;
 				}
 				if (counter%3 != 0) {
 					engineerNumber(counter, sign, copyString, answerString);
@@ -410,4 +430,5 @@ char* getFloatingPointEngineeringString(double input)
 	}
 	free(copyString);
 	return answerString;
-}  
+}
+  

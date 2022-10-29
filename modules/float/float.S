@@ -1,6 +1,7 @@
 .include "../../macros.S"
 .section .bss
     .comm NEXTMOD, 8
+    .comm FLPRECISION, 8
 
 .section .data
 	stdoutopener:	.asciz "w"
@@ -310,9 +311,10 @@
 	TAILMOD t1
 
 	CODEHEADERZ FEDOT, FE., FDOT, 0x01
-yy:
 	fld fa0, 0(sp)
 	addi sp, sp, 8
+	la t0, FLPRECSION
+	ld a0, 0(t0)
 	call getFloatingPointEngineeringString
 	j float_output
 
@@ -360,7 +362,14 @@ yy:
 	sd t0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER DFALIGNED, PI, 0x01
+	CODEHEADERZ SETFLPRECISION, SET-PRECISION, PI, 0x01
+	la a0, FLPRECISION
+	ld a1, 0(sp)
+	sd a1, 0(a0)
+	addi sp, sp, 8
+	TAILMOD t1
+
+	CODEHEADER DFALIGNED, SETFLPRECISION, 0x01
 	#(addr -- df-addr)
 	ld t0, 0(sp)
 	li t1, 0x07
@@ -396,6 +405,10 @@ yy:
 	la a0, DFALIGNED	#new end of dictionary
 	addi a0, a0, -56
 	call setDictionary	#return new tail of dictionary to caller
+	#set default precision to 5
+	la a0, FLPRECISION
+	li a1, 5
+	sd a1, 0(a0) 
 	#setup extension writing
 	la a0, WA_FLITERAL
 	la a1, extender_fliteral
