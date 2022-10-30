@@ -294,6 +294,8 @@
 	ld a0, 0(sp)					#load number to process
 	addi sp, sp, 8					#adjust stack
 	li a1, 10					#set radix to 10
+	la t0, FLPRECISION
+	ld a2, 0(t0)
 	call getFloatingPointStringDouble		#call C code
   float_output:
 	PUSH a0
@@ -313,7 +315,7 @@
 	CODEHEADERZ FEDOT, FE., FDOT, 0x01
 	fld fa0, 0(sp)
 	addi sp, sp, 8
-	la t0, FLPRECSION
+	la t0, FLPRECISION
 	ld a0, 0(t0)
 	call getFloatingPointEngineeringString
 	j float_output
@@ -362,7 +364,14 @@
 	sd t0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADERZ SETFLPRECISION, SET-PRECISION, PI, 0x01
+	CODEHEADER PRECISION, PI, 0x01
+	la a0, FLPRECISION
+	ld a1, 0(a0)
+	addi sp, sp, -8
+	sd a1, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ SETFLPRECISION, SET-PRECISION, PRECISION, 0x01
 	la a0, FLPRECISION
 	ld a1, 0(sp)
 	sd a1, 0(a0)

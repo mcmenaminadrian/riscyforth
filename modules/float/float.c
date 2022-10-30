@@ -122,7 +122,8 @@ char fpStringGetDigit(double numberIn, uint64_t radix)
 }
 
 
-uint64_t fpStringProcessFraction(char* buffer, uint64_t mantissa, int64_t power, uint64_t sign, uint64_t radix, uint64_t endIndex)
+uint64_t fpStringProcessFraction(char* buffer, uint64_t mantissa, int64_t power,
+	uint64_t sign, uint64_t radix, uint64_t endIndex, int precision)
 {
 	/* find smallest digit */
 	uint64_t bit = 1;
@@ -143,7 +144,7 @@ uint64_t fpStringProcessFraction(char* buffer, uint64_t mantissa, int64_t power,
 		power++;
 	}
 	bool startedOutput = false;
-	uint64_t digitsLeft = 15;
+	uint64_t digitsLeft = precision;
 	uint64_t totalOutput = 0;
 	uint64_t powerUp = 1;
 	while (digitsLeft) {
@@ -189,7 +190,8 @@ uint64_t fpStringProcessFraction(char* buffer, uint64_t mantissa, int64_t power,
 }
 
 /* Partition the mantissa and call processing functions */
-char* fpStringProcessDouble(char* buffer, int64_t power, uint64_t mantissa, uint64_t sign, uint64_t radix)
+char* fpStringProcessDouble(char* buffer, int64_t power, uint64_t mantissa,
+	uint64_t sign, uint64_t radix, int precision)
 {
 	uint64_t fractionalMantissa = 0;
 	uint64_t integerMantissa = 0;
@@ -205,7 +207,7 @@ char* fpStringProcessDouble(char* buffer, int64_t power, uint64_t mantissa, uint
 	/* Track the write point at the end of the buffer */
 	uint64_t endIndex = 1023;
 	if (fractionalMantissa > 0) {
-		endIndex = fpStringProcessFraction(buffer, fractionalMantissa, power, sign, radix, endIndex);
+		endIndex = fpStringProcessFraction(buffer, fractionalMantissa, power, sign, radix, endIndex, precision);
 	} else {
 		buffer[endIndex--] = '0';
 	}
@@ -240,7 +242,7 @@ char* fpZeroCase(bool neg)
 //Inputs: 
 //uint64_t for floating point input (IEEE754 double number)
 //usnigned long for conversion radix
-char* getFloatingPointStringDouble(uint64_t fpInput, uint64_t radix)
+char* getFloatingPointStringDouble(uint64_t fpInput, uint64_t radix, int precision)
 {
 	if (fpInput == 0 || fpInput == 0x8000000000000000) {
 		return fpZeroCase(fpInput == 0x8000000000000000);
@@ -266,7 +268,8 @@ char* getFloatingPointStringDouble(uint64_t fpInput, uint64_t radix)
 		/* normalise power */
 		const int64_t normPower = power - 1023;
 		/* And pass on to where the work is done */
-		return fpStringProcessDouble(answerString, normPower, mantissa, sign, radix);
+		return fpStringProcessDouble(answerString, normPower, mantissa,
+			sign, radix, precision);
 	}
 	return answerString;
 }
