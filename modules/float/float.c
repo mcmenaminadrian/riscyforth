@@ -111,7 +111,7 @@ uint64_t fpStringProcessInteger(char* buffer, uint64_t mantissa, int64_t power, 
 	return endIndex;
 }
 
-char fpStringGetDigit(double numberIn, uint64_t radix)
+char fpStringGetDigit(int numberIn, uint64_t radix)
 {
 	uint64_t intFromDouble = (uint64_t) numberIn;
 	if (intFromDouble == 0) {
@@ -148,8 +148,10 @@ uint64_t fpStringProcessFraction(char* buffer, uint64_t mantissa, int64_t power,
 	uint64_t totalOutput = 0;
 	uint64_t powerUp = 1;
 	while (digitsLeft) {
-		double bigResult = fraction * pow(radix, powerUp++);
-		char digit = fpStringGetDigit(bigResult, radix);
+		double pInt;
+		double bigResult = fraction * pow(radix, powerUp);
+		fraction = modf(bigResult, &pInt);
+		char digit = fpStringGetDigit(pInt, radix);
 		if (!startedOutput && digit != 0) {
 			startedOutput = true;
 		}
