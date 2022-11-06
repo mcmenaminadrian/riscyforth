@@ -22,7 +22,77 @@
   dfalign_done:
 	TAILMOD t1
 
-	CODEHEADER FSIN, DFALIGN, 0x01
+	CODEHEADERZ DFFIELDCOLON, DFFIELD:, DFALIGN, 0x01
+	#(n "<spaces>name" -- n)
+	#create new word with name that returns data address
+	li a5, 0x400			#badge for this type of function
+	PUSH a5
+	call getInputStart		#start of input
+	PUSH a0
+	call getInputEnd		#a0 has end
+	li t0, 0x61			#a
+	li t1, 0x7B			#z + 1
+	li t2, 0x20			#space or XOR to UC
+	POP a1				#restore start
+  dffield_look_for_start:
+	bgt a1, a0, dffield_done
+	lb t3, 0(a1)			#read in char
+	bne t3, t2, dffield_sanitize	#past the spaces
+	addi a1, a1, 1
+	j dffield_look_for_start	#or loop back
+  dffield_sanitize:
+	mv a2, a1			#store start
+  dffield_sanitize_test:
+	blt t3, t0, dffield_sanitize_next
+	blt t3, t1, dffield_sanitize_this
+  dffield_sanitize_next:
+	addi a1, a1, 1
+	bgt a1, a0, dffield_sanitize_done
+	lb t3, 0(a1)
+	beq t3, t2, dffield_sanitize_done
+	j dffield_santize_test
+  dffield_sanitize_this:
+	xor t4, t3, t2			#convert to UC
+	sb t4, 0(a1)
+	j dffield_sanitize_next
+  dffield_sanitize_done:
+	#now update the input
+	addi sp, sp, -24
+	sd a2, 0(sp)			#start
+	sd a1, 8(sp)			#end (+1)
+	sub a3, a1, a2
+	sd a3, 16(sp)			#length
+	mv a0, a1
+	call setInputStartIncrement
+	ld a0, 0(sp)
+	ld a1, 16(sp)
+	ld a5, 24(sp)
+	call lib_write_function_header 	#sets a0
+	la a1, NEXTMOD
+	addi sp, sp, 32			#reset stack
+	ld a2, 0(sp)			#jump we want
+	call set_up_field_jump
+	#check we are aligned
+	li t0, 0x07
+	li t2, 0x08
+	and t1, a0, t0
+	beqz t1, dffield_finish
+	sub t3, t2, t1
+	add a0, a0, t3
+  dffield_finish:
+	PUSH a0
+	call setCreateWritePoint
+	call getNewDictionary
+	call setDictionary
+	POP a0
+	call setNewDictionary
+	ld a0, 0(sp)
+	addi a0, a0, 8
+	sd a0, 0(sp)
+  dffield_done:
+	TAILMOD t1
+
+	CODEHEADER FSIN, DFFIELDCOLON, 0x01
 	#(n -- n)
 	fld fa0, 0(sp)
 	call sin
@@ -427,6 +497,43 @@
 	fence.i
 	ret
 
+  set_up_field_jump:
+	#get here with a2 holding jump
+	#a0 holding write address
+	#a1 holding return address
+	li t0, 0x297
+	sw t0, 0(a0)			#aui t0, 0 (mv t0, pc)
+	li t0, XXXXX			
+	sw t0, 4(a0)			#ld t1, XXXX (offset = 56)
+	li t0, XXXXX
+	sw t0, 8(a0)			#ld t2, 0(sp)
+	li t0, XXXXX
+	sw t0, 12(a0)			#add t3, t1, t2
+	li t0, XXXXXX
+	sw t0, 16(a0)			#li t4, 0x7
+	li t0, XXXXX
+	sw t0, 20(a0)			#li t5, 0x8
+	li t0, XXXXX
+	sw t0, 24(a0)			#and t6, t3, t4
+	li t0, XXXXX
+	sw t0, 28(a0)			#beqz t6, +12
+	li t0, XXXXX
+	sw t0, 32(a0)			#sub a0, t5, t6
+	li t0, XXXXX
+	sw t0, 36(a0)			#add t3, t3, a0
+	li t0, XXXXX
+	sw t0, 40(a0)			#sd t3, 0(sp)
+	li t0, XXXXXX
+	sw t0, 44(a0)			#ld t1, (offset == 64)
+	li t0, 0x30067
+	sw t0, 48(a0)			#jr t1
+	sw a2, 56(a0)			#store offset
+	sw a1, 64(a0)			#store return
+	addi a0, a0, 72
+	fence.i
+	ret
+	
+	
 .section .init_array
 .balign 8
 .8byte starter_float
