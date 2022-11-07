@@ -25,7 +25,7 @@
 	CODEHEADERZ DFFIELDCOLON, DFFIELD:, DFALIGN, 0x01
 	#(n "<spaces>name" -- n)
 	#create new word with name that returns data address
-	li a5, 0x400			#badge for this type of function
+	li a5, 0x401			#badge for this type of function
 	PUSH a5
 	call getInputStart		#start of input
 	PUSH a0
@@ -49,12 +49,12 @@
 	addi a1, a1, 1
 	bgt a1, a0, dffield_sanitize_done
 	lb t3, 0(a1)
-	beq t3, t2, dffield_sanitize_done
-	j dffield_santize_test
+	ble t3, t2, dffield_sanitize_done
+	j dffield_sanitize_test
   dffield_sanitize_this:
 	xor t4, t3, t2			#convert to UC
 	sb t4, 0(a1)
-	j dffield_sanitize_next
+	j dffield_sanitize_next 
   dffield_sanitize_done:
 	#now update the input
 	addi sp, sp, -24
@@ -461,6 +461,41 @@
   dfaligned_done:
 	TAILMOD t1
 
+  set_up_field_jump:
+	#get here with a2 holding jump
+	#a0 holding write address
+	#a1 holding return address
+	li t0, 0x297
+	sw t0, 0(a0)			#auipc t0, 0 (mv t0, pc)
+	li t0, 0x382b303			
+	sw t0, 4(a0)			#ld t1, 56(t0) 
+	li t0, 0x13383
+	sw t0, 8(a0)			#ld t2, 0(sp)
+	li t0, 0x730e33
+	sw t0, 12(a0)			#add t3, t1, t2
+	li t0, 0x700e93
+	sw t0, 16(a0)			#li t4, 0x7
+	li t0, 0x800f13
+	sw t0, 20(a0)			#li t5, 0x8
+	li t0, 0x1DE7fB3
+	sw t0, 24(a0)			#and t6, t3, t4
+	li t0, 0xF8663
+	sw t0, 28(a0)			#beqz t6, +12
+	li t0, 0x41FF0533
+	sw t0, 32(a0)			#sub a0, t5, t6
+	li t0, 0xAE0E33
+	sw t0, 36(a0)			#add t3, t3, a0
+	li t0, 0x1C13023
+	sw t0, 40(a0)			#sd t3, 0(sp)
+	li t0, 0x402B303
+	sw t0, 44(a0)			#ld t1, (offset == 64)
+	li t0, 0x30067
+	sw t0, 48(a0)			#jr t1
+	sw a2, 56(a0)			#store offset
+	sw a1, 64(a0)			#store return
+	addi a0, a0, 72
+	fence.i 
+	ret
 
  starter_float:
 	PUSH ra
@@ -497,41 +532,6 @@
 	fence.i
 	ret
 
-  set_up_field_jump:
-	#get here with a2 holding jump
-	#a0 holding write address
-	#a1 holding return address
-	li t0, 0x297
-	sw t0, 0(a0)			#aui t0, 0 (mv t0, pc)
-	li t0, XXXXX			
-	sw t0, 4(a0)			#ld t1, XXXX (offset = 56)
-	li t0, XXXXX
-	sw t0, 8(a0)			#ld t2, 0(sp)
-	li t0, XXXXX
-	sw t0, 12(a0)			#add t3, t1, t2
-	li t0, XXXXXX
-	sw t0, 16(a0)			#li t4, 0x7
-	li t0, XXXXX
-	sw t0, 20(a0)			#li t5, 0x8
-	li t0, XXXXX
-	sw t0, 24(a0)			#and t6, t3, t4
-	li t0, XXXXX
-	sw t0, 28(a0)			#beqz t6, +12
-	li t0, XXXXX
-	sw t0, 32(a0)			#sub a0, t5, t6
-	li t0, XXXXX
-	sw t0, 36(a0)			#add t3, t3, a0
-	li t0, XXXXX
-	sw t0, 40(a0)			#sd t3, 0(sp)
-	li t0, XXXXXX
-	sw t0, 44(a0)			#ld t1, (offset == 64)
-	li t0, 0x30067
-	sw t0, 48(a0)			#jr t1
-	sw a2, 56(a0)			#store offset
-	sw a1, 64(a0)			#store return
-	addi a0, a0, 72
-	fence.i
-	ret
 	
 	
 .section .init_array
