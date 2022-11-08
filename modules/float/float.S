@@ -69,6 +69,7 @@
 	ld a5, 24(sp)
 	call lib_write_function_header 	#sets a0
 	la a1, NEXTMOD
+	ld a1, 0(a1)
 	addi sp, sp, 32			#reset stack
 	ld a2, 0(sp)			#jump we want
 	call set_up_field_jump
@@ -99,7 +100,14 @@
 	fsd fa0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER FCOS, FSIN, 0x01
+	CODEHEADERZ DFFETCH, DF@, FSIN, 0x01
+	#(addr -- n)
+	ld t0, 0(sp)
+	fld ft0, 0(t0)
+	sld ft0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FCOS, DFFETCH, 0x01
 	#(n -- n)
 	fld fa0, 0(sp)
 	call cos

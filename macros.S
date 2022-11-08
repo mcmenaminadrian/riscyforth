@@ -33,7 +33,7 @@
 .endm
 
 .macro COLON Name
-      addi s9, s9, -STACKOFFSET
+      addi s9, s9, -8
       sd s7, 0(s9)
       la s8, COLON_\Name
       mv s7, s8
