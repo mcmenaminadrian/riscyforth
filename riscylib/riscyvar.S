@@ -51,5 +51,6 @@
 .extern dataspaceptr
 .extern FP_AVAILABLE
 .extern literalNumberAddress
+.extern STACKTOP
 
 #endif

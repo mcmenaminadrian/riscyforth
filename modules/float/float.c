@@ -400,6 +400,33 @@ char* unEngineerNumber(char* copyString, char* answerString)
 	return answerString;
 }
 
+void insertSpaceInFPString(char* copyString)
+{
+	int index = 0;
+	while (index < 1023) {
+		char x = copyString[index];
+		if (x == '\0') {
+			copyString[index] = ' ';
+			copyString[index + 1] = '\0';
+			break;
+		}
+		index++;
+	}
+	return;
+}
+
+char* getFloatingPointScientificString(double input, int precision)
+{
+	char* copyString = (char *) malloc(1024);
+	if (copyString) {
+		char* testReturn = gcvt(input, precision, copyString);
+		if (testReturn) {
+			insertSpaceInFPString(copyString);
+		}
+	}
+	return copyString;
+}
+
 char* getFloatingPointEngineeringString(double input, int precision)
 {
 	int sign = 0;

@@ -26,6 +26,7 @@
    .comm dataspaceptr, ADDRWIDTH
    .comm FP_AVAILABLE, ADDRWIDTH
    .comm literalNumberAddress, ADDRWIDTH
+   .comm STACKTOP, ADDRWIDTH
 
 .section .text
 

@@ -26,7 +26,6 @@
    .comm DECIDESTACKP, ADDRWIDTH
    .comm DECIDESTACKB, ADDRWIDTH
    .comm VARIABLEFLAG, ADDRWIDTH
-   .comm STACKTOP, ADDRWIDTH
    .comm datamanagement, ADDRWIDTH
    .comm recycleallot, ADDRWIDTH
    .comm recyclewatermark, ADDRWIDTH

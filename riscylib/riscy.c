@@ -17,6 +17,7 @@ extern unsigned long CREATEFLAG;
 extern unsigned long outerLoopTokenizeAddress;
 extern unsigned long dataspaceptr;
 extern unsigned long FP_AVAILABLE;
+extern unsigned long STACKTOP;
 
 static unsigned long EXTENDERS[512];
 static unsigned long EXTENDERSINDEX = 0;

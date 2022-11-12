@@ -758,9 +758,11 @@
 			addi a0, a0, 40
 			fence.i
 			ret
+
 			#COMPILE ONLY WORDS
 			CODEHEADER _COMPSEMI, INCLUDE, 0x0
 			tail search_create_test_postpone_semi
+
 			CODEHEADER _COMPUNTIL, _COMPSEMI, 0x0a
 			#(x --)
 			POP t0

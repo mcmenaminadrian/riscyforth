@@ -73,6 +73,7 @@
 	addi sp, sp, 32			#reset stack
 	ld a2, 0(sp)			#jump we want
 	call set_up_field_jump
+  float_write_alignment:
 	#check we are aligned
 	li t0, 0x07
 	li t2, 0x08
@@ -93,7 +94,94 @@
   dffield_done:
 	TAILMOD t1
 
-	CODEHEADER FSIN, DFFIELDCOLON, 0x01
+	CODEHEADERZ DFLOATPLUS, DFLOAT+, DFFIELDCOLON, 0x01
+	#(addr --- addr)
+	ld t0, 0(sp)
+	li t1, 8
+	add t2, t0, t1
+	sd t2, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ DFSTORE, DF!, DFLOATPLUS, 0x01
+	#(n addr --)
+	ld t0, 0(sp)
+	fld ft0, 8(sp)
+	addi sp, sp, 16
+	fsd ft0, 0(t0)
+	TAILMOD t1
+
+	CODEHEADER FCONSTANT, DFSTORE, 0x01
+	#(n "<spaces>name" -->
+	li a5, 0x202			#0x202 for a float constant
+	PUSH a5
+	call getInputStart		#a0 has start on return
+	PUSH a0
+	call getInputEnd		#a0 has end
+	li t0, 0x61			#a
+	li t1, 0x7B			#z + 1
+	li t2, 0x20			#space or XOR to UC
+	POP a1				#restore start
+  fconstant_look_for_start:
+	bgt a1, a0, dffield_done	#bail out
+	lb t3, 0(a1)			#read in char
+	bne t3, t2, fconstant_sanitize	#past the spaces
+	addi a1, a1, 1
+	j fconstant_look_for_start	#or loop back
+  fconstant_sanitize:
+	mv a2, a1			#store start
+  fconstant_sanitize_test:
+	blt t3, t0, fconstant_sanitize_next
+	blt t3, t1, fconstant_sanitize_this
+  fconstant_sanitize_next:
+	addi a1, a1, 1
+	bgt a1, a0, fconstant_sanitize_done
+	lb t3, 0(a1)
+	ble t3, t2, fconstant_sanitize_done
+	j fconstant_sanitize_test
+  fconstant_sanitize_this:
+	xor t4, t3, t2			#convert to UC
+	sb t4, 0(a1)
+	j fconstant_sanitize_next 
+  fconstant_sanitize_done:
+	#now update the input
+	addi sp, sp, -24
+	sd a2, 0(sp)			#start
+	sd a1, 8(sp)			#end (+1)
+	sub a3, a1, a2
+	sd a3, 16(sp)			#length
+	mv a0, a1
+	call setInputStartIncrement
+	ld a0, 0(sp)
+	ld a1, 16(sp)
+	ld a5, 24(sp)
+	call lib_write_function_header 	#sets a0
+	la a1, NEXTMOD
+	ld a1, 0(a1)
+	fld fa0, 32(sp) 
+	addi sp, sp, 40			#reset stack
+	call float_constant_code
+	j float_write_alignment		#reuse dffield code
+
+	CODEHEADER FDEPTH, FCONSTANT, 0x01
+	#(-- n)
+	#no float stack (for now?) so just the same as DEPTH (for now?)
+	la t0, STACKTOP
+	ld t1, 0(t0)
+	sub t2, t1, sp
+	srai t3, t2, 3
+	PUSH t3
+	TAILMOD t1
+
+	CODEHEADERZ FSDOT, FS., FDEPTH, 0x01
+	#(n -- )
+	fld fa0, 0(sp)
+	addi sp, sp, 8
+	la t0, FLPRECISION
+	ld a0, 0(t0)
+	call getFloatingPointScientificString
+	j float_output
+
+	CODEHEADER FSIN, FSDOT, 0x01
 	#(n -- n)
 	fld fa0, 0(sp)
 	call sin
@@ -104,7 +192,7 @@
 	#(addr -- n)
 	ld t0, 0(sp)
 	fld ft0, 0(t0)
-	sld ft0, 0(sp)
+	fsd ft0, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER FCOS, DFFETCH, 0x01
@@ -503,6 +591,29 @@
 	sw a1, 64(a0)			#store return
 	addi a0, a0, 72
 	fence.i 
+	ret
+
+  float_constant_code:
+	#get here with fa0 holding float
+	#a0 holding write address
+	#a1 holding return address
+	li t0, 0x297
+	sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
+	li t0, 0x182B303
+	sw t0, 4(a0)						#ld t1, 24(t0)
+	li t0, 0xFF810113
+	sw t0, 8(a0)						#addi sp, sp, -8
+	li t0, 0x613023
+	sw t0, 12(a0)						#sd t1, 0(sp)
+	#now jump to next
+	li t0, 0x202B303
+	sw t0, 16(a0)						#ld t1, 32(t0)
+	li t0, 0x30067
+	sw t0, 20(a0)						#jr t1
+	fsd fa0, 24(a0)
+	sd a1, 32(a0)
+	addi a0, a0, 40
+	fence.i
 	ret
 
  starter_float:
