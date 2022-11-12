@@ -181,7 +181,11 @@
 	call getFloatingPointScientificString
 	j float_output
 
-	CODEHEADER FSIN, FSDOT, 0x01
+	CODEHEADERZ FFIELDCOLON, FFIELD:, FSDOT, 0x0
+	#just call code for double
+	tail DFFIELDCOLON
+
+	CODEHEADER FSIN, FFIELDCOLON, 0x01
 	#(n -- n)
 	fld fa0, 0(sp)
 	call sin
@@ -289,7 +293,46 @@
 	fsd fa1, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER FACOS, FABS, 0x01
+	CODEHEADER FCOSH, FABS, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call cosh
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FSINH, FCOSH, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call sinh
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FTANH, FSINH, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call tanh
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FNEGATE, FTANH, 0x01
+	#(n -- n)
+	fld ft0, 0(sp)
+	fmv.x.d a0, ft0
+	li t0, 0x8000000000000000		#get sign bit
+	xor a3, a0, t0
+	fmv.d.x ft1, a3
+	fsd ft1, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FSWAP, FNEGATE, 0x01
+	#(r1 r2 -- r2 r1)
+	fld ft0, 0(sp)
+	fld ft1, 8(sp)
+	fsd ft0, 8(sp)
+	fsd ft1, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FACOS, FSWAP, 0x01
 	#(n -- n)
 	fld fa0, 0(sp)
 	call acos
@@ -419,7 +462,22 @@
 	#(n -- n)
 	TAILMOD t1
 
-	CODEHEADERZ FDIV, F/, DFLOATS, 0x01
+	CODEHEADER FLOATS, DFLOATS, 0x01
+	tail DFLOATS
+
+	CODEHEADER SFLOATS, FLOATS, 0x0
+	tail DFLOATS
+
+	CODEHEADERZ FSTARSTAR, F**, SFLOATS, 0x01
+	#(n n -- n)
+	fld fa0, 8(sp)
+	fld fa1, 0(sp)
+	call pow
+	addi sp, sp, 8
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ FDIV, F/, FSTARSTAR, 0x01
 	#(r r -- r)
 	fld f0, 0(sp)
 	fld f1, 8(sp)
@@ -428,7 +486,24 @@
 	fsd f2, 0(sp)
 	TAILMOD t1
 
-	CODEHEADERZ FMINUS, F-, FDIV, 0x01
+	CODEHEADER FROT, FDIV, 0x1
+	#(r1 r2 r3 -- r2 r3 r1)
+	fld ft0, 16(sp)
+	fld ft1, 8(sp)
+	fld ft2, 0(sp)
+	fsd ft0, 0(sp)
+	fsd ft2, 8(sp)
+	fsd ft1, 16(sp)
+	TAILMOD t1
+
+	CODEHEADER FOVER, FROT, 0x01
+	#(r1 r2 -- r1 r2 r1)
+	fld ft0, 8(sp)
+	addi sp, sp, -8
+	fsd ft0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ FMINUS, F-, FOVER, 0x01
 	#(r r -- r)
 	fld f0, 0(sp)
 	fld f1, 8(sp)
@@ -486,14 +561,47 @@
 	call getFloatingPointEngineeringString
 	j float_output
 
-	CODEHEADER FDUP, FEDOT, 0x01
+	CODEHEADER FLOOR, FEDOT, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call floor
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FTRUNC, FLOOR, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call trunc
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FROUND, FTRUNC, 0x01
+	#(n -- n)
+	fld fa0, 0(sp)
+	call round
+	fsd fa0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FDUP, FROUND, 0x01
 	#(n -- n n)
 	fld f0, 0(sp)
 	addi sp, sp, -8
 	fsd f0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER FDROP, FDUP, 0x01
+	CODEHEADER FSINCOS, FDUP, 0x01
+	#(n -- n n)
+	fld fa0, 0(sp)
+	call sin
+	fld ft0, 0(sp)
+	fsd fa0, 0(sp)
+	fmv.d fa0, ft0
+	call cos
+	addi sp, sp, -8
+	fsd fa0, 0(sp)
+	TAILMOD t1
+	
+	CODEHEADER FDROP, FSINCOS, 0x01
 	#(n --)
 	addi sp, sp, 8
 	TAILMOD t1
