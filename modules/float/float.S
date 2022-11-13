@@ -267,7 +267,16 @@
   fproximate_done:
 	TAILMOD t1
 
-	CODEHEADERZ FZERO, 0.0, FPROXIMATE, 0x0
+	CODEHEADER REPRESENT, FPROXIMATE, 0x0
+	#(r addr u -- n flag flag)
+	TAILMOD t1
+
+	
+	
+
+	CODEHEADERZ FZERO, 0.0, REPRESENT, 0x0
+	#("0.0" -- n)
+	#helper to ensure we get correct IEEE754 0
 	addi sp, sp, -8
 	sd zero, 0(sp)
 	TAILMOD t1

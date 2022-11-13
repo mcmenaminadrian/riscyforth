@@ -463,4 +463,3 @@ char* getFloatingPointEngineeringString(double input, int precision)
 	free(copyString);
 	return answerString;
 }
-  
