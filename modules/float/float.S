@@ -114,6 +114,7 @@
 	#(n "<spaces>name" -->
 	li a5, 0x202			#0x202 for a float constant
 	PUSH a5
+  fconstant_common_code:
 	call getInputStart		#a0 has start on return
 	PUSH a0
 	call getInputEnd		#a0 has end
@@ -172,7 +173,13 @@
 	PUSH t3
 	TAILMOD t1
 
-	CODEHEADERZ FSDOT, FS., FDEPTH, 0x01
+	CODEHEADER FVALUE, FDEPTH, 0x01
+	#(n "<spaces>name" --)
+	li a5, 0x04				#same as integer VALUE
+	PUSH a5
+	j fconstant_common_code
+
+	CODEHEADERZ FSDOT, FS., FVALUE, 0x01
 	#(n -- )
 	fld fa0, 0(sp)
 	addi sp, sp, 8
@@ -220,7 +227,52 @@
 	fsd fa0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER FLITERAL, FFETCH, 0x01
+	CODEHEADERZ FPROXIMATE, F~, FFETCH, 0x01
+	#(r r r -- flag)
+	fld fa3, 0(sp)			#value determines type of test
+	fld fa2, 8(sp)
+	fld fa1, 16(sp)
+	addi sp, sp, 16
+	fmv.x.d t0, fa3
+	beqz t0, fproximate_strict_equality	#check for 0
+	li t1, 0x8000000000000000
+	fsub.d ft0, fa1, fa2
+	fabs.d ft1, ft0				#get absolute difference for later use
+	xor t2, t0, t1
+	beqz t2, fproxumate_strict_equality	#check for -0
+	or t2, t0, t1				#checking if negative
+	beq t2, t0, fproximate_close
+	#now checking 'relatively close'
+	fabs.d ft3, fa3
+	fabs.d ft4, fa1
+	fabs.d ft5, fa2
+	fadd.d ft6, ft4, ft5			#sum of absolutes
+	fmul.d ft7, ft6, ft3			#producr of absolutes
+	flt.d a0, ft1, ft7
+	bnez a0, fproximate_true
+	j fproximate_false
+  fproximate_close:
+	flt.d a0, ft1, fa3
+	bnez a0, fproximate_true
+	j fproximate_false
+  fproximate_strict_equality:
+	feq.d a0, fa2, fa1
+	bnez a0, fproximate_true
+  fproximate_false:
+	sd zero, 0(sp)
+	j fproximate_done
+  fproximate_true:
+	li t0, -1
+	sd t0, 0(sp)
+  fproximate_done:
+	TAILMOD t1
+
+	CODEHEADERZ FZERO, 0.0, FPROXIMATE, 0x0
+	addi sp, sp, -8
+	sd zero, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FLITERAL, FZERO, 0x01
 	#do nothing in interpretation
 	#extender code is what works here
 	#(--)
@@ -317,10 +369,7 @@
 	CODEHEADER FNEGATE, FTANH, 0x01
 	#(n -- n)
 	fld ft0, 0(sp)
-	fmv.x.d a0, ft0
-	li t0, 0x8000000000000000		#get sign bit
-	xor a3, a0, t0
-	fmv.d.x ft1, a3
+	fneg.d ft1, ft0
 	fsd ft1, 0(sp)
 	TAILMOD t1
 
