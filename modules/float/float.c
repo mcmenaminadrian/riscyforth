@@ -464,9 +464,116 @@ char* getFloatingPointEngineeringString(double input, int precision)
 	return answerString;
 }
 
-void* complexFPRepresent(char*, uint64_t*, bool, uint64_t, void*, uint64_t)
+// write out 0.0
+int setFPRepresentZero(uint64_t address)
 {
-	return NULL;
+	// just 0
+	char* writeOut = (char *)address;
+	writeOut[0] = '0';
+	writeOut[1] = '.';
+	writeOut[2] = '0';
+	writeOut[3] = '\0';
+	return -1;
+}
+
+/* leading zero case */
+int processFPRepresentLeadZero(char* fpResult, int offsetDot, uint64_t address, int* index)
+{
+	int indexIn = *index;
+	int returnAdjust = 0;
+	char* writeOut = (char *) address;
+	/* cases - 0, 0.0, 0.nn */
+	if (offsetDot == -1) {
+		returnAdjust = setFPRepresentZero(address);
+	} else {
+		//0.0 or 0.xxxxx etc
+		returnAdjust = offsetDot - indexIn;
+		indexIn = offsetDot + 1;
+		int indexOut = 0;
+		bool gotNonZero = false;
+		while (fpResult[indexIn] != '\0') {
+			char x = fpResult[indexIn];
+			if (!gotNonZero && x == '0') {
+				returnAdjust++;
+				indexIn++;
+			} else if (!gotNonZero) {
+				gotNonZero = true;
+				writeOut[indexOut++] = x;
+				writeOut[indexOut++] = '.';
+			} else {
+				writeOut[indexOut++] = x;
+			}
+		}
+		if (!gotNonZero) {
+			returnAdjust = setFPRepresentZero(address);
+		}
+	}
+	return returnAdjust;
+}
+
+/* Leading non-zero case */
+int processFPRepresentLeadNZ(char* fpResult, int offsetDot, uint64_t address, int* index)
+{
+	int indexIn = *index;
+	int indexOut = 0;
+	int returnAdjust = 0;
+	char *writeOut = (char *) address;
+	writeOut[indexOut++] = fpResult[indexIn++];
+	writeOut[indexOut++] = '.';
+	if (offsetDot == -1) {
+		while (fpResult[indexIn] != '\0') {
+			writeOut[indexOut++] = fpResult[indexIn++];
+			returnAdjust++;
+		}
+	} else {
+		while (indexIn < offsetDot) {
+			writeOut[indexOut++] = fpResult[indexIn++];
+			returnAdjust++;
+		}
+		indexIn++;
+		while (fpResult[indexIn] != '\0') {
+			writeOut[indexOut++] = fpResult[indexIn++];
+		}
+	}
+	return returnAdjust;
+}
+
+
+/* In this case need to process string somewhat */
+void* complexFPRepresent(char* fpResult, uint64_t* returnPtr, bool isNeg, int offsetDot,
+	int offsetE, uint64_t address)
+{
+	int indexIn = 0;
+	char *writeOut = (char *) address;
+	if (fpResult[indexIn] == '-' || fpResult[indexIn] == '+') {
+		indexIn++;
+	}
+	int adjustDot = 0;
+	bool leadZero = (fpResult[indexIn] == '0');
+	if (leadZero) {
+		adjustDot = processFPRepresentLeadZero(fpResult, offsetDot, address, &indexIn);
+		if (adjustDot < 0) {
+			returnPtr[1] = 0;
+		} else {
+			adjustDot = -1 * adjustDot;
+		}
+	} else {
+		adjustDot = processFPRepresentLeadNZ(fpResult, offsetDot, address, &indexIn);
+	}
+	//calculate E
+	int retE = 0;
+	if (offsetE != -1) {
+		offsetE++;
+		while (fpResult[offsetE] != '\0') {
+			retE *= 10;
+			retE += (fpResult[offsetE] - 48);
+			offsetE++;
+		}
+		retE += adjustDot;
+		returnPtr[1] = retE;
+	}
+	returnPtr[0] = isNeg;
+	return returnPtr;
 }
 
 /* Just parse the string - no further processing needed */
@@ -500,6 +607,7 @@ void* simpleFPRepresent(char* fpResult, uint64_t* returnPtr, bool isNeg, void* e
 	power *= sign;
 	returnPtr[0] = (uint64_t)isNeg;		//sign
 	returnPtr[1] = (uint64_t)power;		//exponent
+	free(fpResult);
 	return returnPtr;
 }
 
@@ -507,18 +615,14 @@ void* processFPRepresent(void* returnStruct, double input, uint64_t address, uin
 {
 	char* fpResult = NULL;
 	uint64_t *returnPtr = (uint64_t *)returnStruct;
-	char* fpBuffer = (char*)malloc(1024);
-	if (fpBuffer) {
-		fpResult = (char*)malloc(1024);
-	}
-	if (fpBuffer && fpResult) {
+	fpResult = (char*)malloc(1024);
+	if (fpResult && gcvt(input, precision, fpResult)) {
 		bool isNeg = (input < 0.0);
-		gcvt(input, precision, fpResult);
 		size_t strLen = strnlen(fpResult, 1024);
 		void* dotPointer = memchr(fpResult, '.', strLen);
 		void* ePointer = memchr(fpResult, 'e', strLen);
-		uint64_t offsetDot;
-		uint64_t offsetE;
+		int offsetDot = -1;
+		int offsetE = -1;
 		if (dotPointer) {
 			offsetDot = dotPointer - (void*)fpResult;
 		}
@@ -528,12 +632,9 @@ void* processFPRepresent(void* returnStruct, double input, uint64_t address, uin
 		if ((!isNeg && offsetDot == 1) || (isNeg && offsetDot == 2)) {
 			returnStruct =  simpleFPRepresent(fpResult, returnPtr, isNeg, ePointer, address);
 		} else {
-			returnStruct = complexFPRepresent(fpResult, returnPtr, isNeg, offsetDot, ePointer, address);
+			returnStruct = complexFPRepresent(fpResult, returnPtr, isNeg, offsetDot, offsetE, address);
 		}
 	} else {
-		if (fpBuffer) {
-			free(fpBuffer);
-		}
 		if (fpResult) {
 			free(fpResult);
 		}

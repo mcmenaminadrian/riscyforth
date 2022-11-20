@@ -273,12 +273,22 @@
 	ld a0, 8(sp)
 	ld a1, 0(sp)
 	call getFloatingPointRepresent
+	beqz a0, represent_fail
 	ld t0, 0(a0)
+	beqz t0, represent_continue
+	li t0, -1		#TRUTH = -1
+  represent_continue:
 	ld t1, 8(a0)
 	sd t1, 16(sp)
 	sd t0, 8(sp)
 	li t0, -1
 	sd t0, 0(sp)
+	call free		#free returned structure
+	TAILMOD t1
+  represent_fail:
+	sd zero, 0(sp)		#failure
+	sd zero, 8(sp)
+	sd zero, 16(sp)
 	TAILMOD t1
 
 	CODEHEADERZ FZERO, 0.0, REPRESENT, 0x0
