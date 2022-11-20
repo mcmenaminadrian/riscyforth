@@ -269,10 +269,17 @@
 
 	CODEHEADER REPRESENT, FPROXIMATE, 0x0
 	#(r addr u -- n flag flag)
+	fld fa0, 16(sp)
+	ld a0, 8(sp)
+	ld a1, 0(sp)
+	call getFloatingPointRepresent
+	ld t0, 0(a0)
+	ld t1, 8(a0)
+	sd t1, 16(sp)
+	sd t0, 8(sp)
+	li t0, -1
+	sd t0, 0(sp)
 	TAILMOD t1
-
-	
-	
 
 	CODEHEADERZ FZERO, 0.0, REPRESENT, 0x0
 	#("0.0" -- n)

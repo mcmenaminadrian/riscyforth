@@ -463,3 +463,103 @@ char* getFloatingPointEngineeringString(double input, int precision)
 	free(copyString);
 	return answerString;
 }
+
+void* complexFPRepresent(char*, uint64_t*, bool, uint64_t, void*, uint64_t)
+{
+	return NULL;
+}
+
+/* Just parse the string - no further processing needed */
+void* simpleFPRepresent(char* fpResult, uint64_t* returnPtr, bool isNeg, void* ePointer, uint64_t address)
+{
+	/* string looks like [-]n.nnnn..e[-]nnn */
+	int indexIn = 0;
+	char *writeOut = (char *)address;
+	if (fpResult[indexIn] == '-' || fpResult[indexIn] == '+') {
+		indexIn++;
+	}
+	while (fpResult + indexIn < (char *)ePointer) {
+		*writeOut = fpResult[indexIn];
+		writeOut++;
+		indexIn++;
+	}
+	int power = 0;
+	int sign = 1;
+	indexIn++; 	// move beyond e
+	if (fpResult[indexIn] == '-') {
+		sign = -1;
+		indexIn++;
+	} else if (fpResult[indexIn] == '+') {
+		indexIn++;
+	}
+	while (fpResult[indexIn] != '\0') {
+		power *= 10;
+		power += (fpResult[indexIn] - 48);
+		indexIn++;
+	}
+	power *= sign;
+	returnPtr[0] = (uint64_t)isNeg;		//sign
+	returnPtr[1] = (uint64_t)power;		//exponent
+	return returnPtr;
+}
+
+void* processFPRepresent(void* returnStruct, double input, uint64_t address, uint64_t precision)
+{
+	char* fpResult = NULL;
+	uint64_t *returnPtr = (uint64_t *)returnStruct;
+	char* fpBuffer = (char*)malloc(1024);
+	if (fpBuffer) {
+		fpResult = (char*)malloc(1024);
+	}
+	if (fpBuffer && fpResult) {
+		bool isNeg = (input < 0.0);
+		gcvt(input, precision, fpResult);
+		size_t strLen = strnlen(fpResult, 1024);
+		void* dotPointer = memchr(fpResult, '.', strLen);
+		void* ePointer = memchr(fpResult, 'e', strLen);
+		uint64_t offsetDot;
+		uint64_t offsetE;
+		if (dotPointer) {
+			offsetDot = dotPointer - (void*)fpResult;
+		}
+		if (ePointer) {
+			offsetE = ePointer - (void*)fpResult;
+		}
+		if ((!isNeg && offsetDot == 1) || (isNeg && offsetDot == 2)) {
+			returnStruct =  simpleFPRepresent(fpResult, returnPtr, isNeg, ePointer, address);
+		} else {
+			returnStruct = complexFPRepresent(fpResult, returnPtr, isNeg, offsetDot, ePointer, address);
+		}
+	} else {
+		if (fpBuffer) {
+			free(fpBuffer);
+		}
+		if (fpResult) {
+			free(fpResult);
+		}
+		free(returnStruct);
+		returnStruct = NULL;
+	}
+	return returnStruct;
+}
+
+void* getFPRepresentAllocRS(double input, uint64_t address, uint64_t precision)
+{
+	void* returnStruct = NULL;
+	returnStruct = malloc(sizeof(uint64_t) * 2);
+	if (returnStruct) {
+		returnStruct = processFPRepresent(returnStruct, input, address, precision);
+	}
+	return returnStruct;
+}
+
+/* return a pointer to a structure that holds the sign and the exponent */
+void* getFloatingPointRepresent(double input, uint64_t address, uint64_t precision)
+{
+	void* returnStruct = NULL;
+	/* don't write to null address */
+	if (address) {
+		returnStruct = getFPRepresentAllocRS(input, address, precision);
+	} 
+	return returnStruct;
+}
