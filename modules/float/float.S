@@ -267,7 +267,7 @@
   fproximate_done:
 	TAILMOD t1
 
-	CODEHEADER REPRESENT, FPROXIMATE, 0x0
+	CODEHEADER REPRESENT, FPROXIMATE, 0x01
 	#(r addr u -- n flag flag)
 	fld fa0, 16(sp)
 	ld a0, 8(sp)

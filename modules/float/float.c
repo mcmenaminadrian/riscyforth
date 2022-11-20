@@ -500,8 +500,10 @@ int processFPRepresentLeadZero(char* fpResult, int offsetDot, uint64_t address, 
 				gotNonZero = true;
 				writeOut[indexOut++] = x;
 				writeOut[indexOut++] = '.';
+				indexIn++;
 			} else {
 				writeOut[indexOut++] = x;
+				indexIn++;
 			}
 		}
 		if (!gotNonZero) {
@@ -553,7 +555,7 @@ void* complexFPRepresent(char* fpResult, uint64_t* returnPtr, bool isNeg, int of
 	if (leadZero) {
 		adjustDot = processFPRepresentLeadZero(fpResult, offsetDot, address, &indexIn);
 		if (adjustDot < 0) {
-			returnPtr[1] = 0;
+			adjustDot = 0;
 		} else {
 			adjustDot = -1 * adjustDot;
 		}
@@ -569,9 +571,9 @@ void* complexFPRepresent(char* fpResult, uint64_t* returnPtr, bool isNeg, int of
 			retE += (fpResult[offsetE] - 48);
 			offsetE++;
 		}
-		retE += adjustDot;
-		returnPtr[1] = retE;
 	}
+	retE += adjustDot;
+	returnPtr[1] = retE;
 	returnPtr[0] = isNeg;
 	return returnPtr;
 }
@@ -629,7 +631,7 @@ void* processFPRepresent(void* returnStruct, double input, uint64_t address, uin
 		if (ePointer) {
 			offsetE = ePointer - (void*)fpResult;
 		}
-		if ((!isNeg && offsetDot == 1) || (isNeg && offsetDot == 2)) {
+		if (((!isNeg && offsetDot == 1) || (isNeg && offsetDot == 2)) && offsetE != -1) {
 			returnStruct =  simpleFPRepresent(fpResult, returnPtr, isNeg, ePointer, address);
 		} else {
 			returnStruct = complexFPRepresent(fpResult, returnPtr, isNeg, offsetDot, offsetE, address);
