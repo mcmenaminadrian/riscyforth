@@ -486,7 +486,32 @@
 	addi s7, s7, 8
 	TAILMOD t1
 
-	CODEHEADER FALOG, _FLITERAL, 0x01
+	#write out F0= 'by hand'
+	#CODEHEADERZ FZEROEQUAL, F0=, _FLITERAL, 0x01
+	#(r -- flag)
+  TIL_FZEROEQUAL:
+	.8byte 0x01		#flags
+  WA_FZEROEQUAL:
+	.8byte FZEROEQUAL
+  ptr__FLITERAL:
+	.8byte TIL__FLITERAL
+  length_ASCII_FZEROEQUAL:
+	.8byte 0x03
+  beg_FZEROEQUAL:
+	.ascii "F0="
+  end_FZEROEQUAL:
+	.fill 21, 1, 0xFF
+  FZEROEQUAL:
+	fld ft0, 0(sp)
+	fmv.d.x ft1, zero
+	feq.d a0, ft0, ft1
+	beqz a0, fzeroequals_continue
+	li a0, -1
+  fzeroequals_continue:
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER FALOG, FZEROEQUAL, 0x01
 	#(n -- n)
 	li a0, 10
 	fcvt.d.l fa0, a0
@@ -645,7 +670,26 @@
 	fsd fa1, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER FMAX, FSQRT, 0x01
+	CODEHEADERZ FZEROLESSTHAN, F0<, FSQRT, 0x01
+	#(r -- flag)
+	fld ft0, 0(sp)
+	fmv.d.x ft1, zero
+  fzerolessthan_common:
+	flt.d a0, ft0, ft1
+	beqz a0, fzerolessthan_continue
+	li a0, -1
+  fzerolessthan_continue:
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ FLESSTHAN, F<, FZEROLESSTHAN, 0x01
+	#(r0 r1 -- flag)
+	fld ft1, 0(sp)
+	fld ft0, 8(sp)
+	addi sp, sp, 8
+	j fzerolessthan_common
+
+	CODEHEADER FMAX, FLESSTHAN, 0x01
 	#(y x -- n)
 	fld fa0, 8(sp)
 	fld fa1, 0(sp)
