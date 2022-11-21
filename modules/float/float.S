@@ -173,7 +173,73 @@
 	PUSH t3
 	TAILMOD t1
 
-	CODEHEADER FVALUE, FDEPTH, 0x01
+	CODEHEADER FVARIABLE, FDEPTH, 0x01
+	#("<spaces>name" --)
+	#create new word with name that returns data address
+	li a5, 0x408			#badge for this type of function
+	PUSH a5
+	call getInputStart		#start of input
+	PUSH a0
+	call getInputEnd		#a0 has end
+	li t0, 0x61			#a
+	li t1, 0x7B			#z + 1
+	li t2, 0x20			#space or XOR to UC
+	POP a1				#restore start
+  fvariable_look_for_start:
+	bgt a1, a0, fvariable_done
+	lb t3, 0(a1)			#read in char
+	bne t3, t2, fvariable_sanitize	#past the spaces
+	addi a1, a1, 1
+	j fvariable_look_for_start	#or loop back
+  fvariable_sanitize:
+	mv a2, a1			#store start
+  fvariable_sanitize_test:
+	blt t3, t0, fvariable_sanitize_next
+	blt t3, t1, fvariable_sanitize_this
+  fvariable_sanitize_next:
+	addi a1, a1, 1
+	bgt a1, a0, fvariable_sanitize_done
+	lb t3, 0(a1)
+	ble t3, t2, fvariable_sanitize_done
+	j fvariable_sanitize_test
+  fvariable_sanitize_this:
+	xor t4, t3, t2			#convert to UC
+	sb t4, 0(a1)
+	j fvariable_sanitize_next
+  fvariable_sanitize_done:
+	addi sp, sp, -24
+	sd a2, 0(sp)			#start
+	sd a1, 8(sp)			#end + 1
+	sub a3, a1, a2
+	sd a3, 16(sp)			#length
+	mv a0, a1
+	call setInputStartIncrement	#update input point
+	ld a0, 0(sp)
+	ld a1, 16(sp)
+	ld a5, 24(sp)
+	call lib_write_function_header 	#sets a0
+	call float_data_address_code
+	li t0, 0x07			#check write alignment
+	li t2, 0x08
+	and t1, a1, t0
+	and t1, a0, t0
+	beqz t1, fvariable_out
+	sub t3, t2, t1
+	add a0, a0, t3
+  fvariable_out:
+	sd a0, 0(sp)			#just write over stack as we don't need old values
+	call setCreateWritePoint
+	call getNewDictionary
+	call setDictionary
+	ld a0, 0(sp)
+	call setNewDictionary
+	addi sp, sp, 32
+	TAILMOD t1
+  fvariable_done:
+	addi sp, sp, 8
+	TAILMOD t1			#failure
+
+	CODEHEADER FVALUE, FVARIABLE, 0x01
 	#(n "<spaces>name" --)
 	li a5, 0x04				#same as integer VALUE
 	PUSH a5
@@ -799,6 +865,44 @@
 	fence.i
 	ret
 
+  float_data_address_code:
+	addi sp, sp, -16
+	sd a0, 0(sp)
+	sd ra, 8(sp)
+	call getDataspacePtr
+	li t0, 0x07						#checking we are aligned
+	and t2, a0, t0
+	beqz t2, float_data_address_code_allocate
+	li t1, 0x08
+	sub t4, t1, t2
+	add a0, a0, t4
+  float_data_address_code_allocate:
+	addi a0, a0, 8
+	call setDataspacePtr
+	addi a2, a0, -8
+	POP a0
+	la a1, NEXTMOD
+	ld a1, 0(a1)
+	li t0, 0x297
+	sw t0, 0(a0)						#aui t0, 0 (mv t0, pc)
+	li t0, 0x182B303
+	sw t0, 4(a0)						#ld t1, 24(t0)
+	li t0, 0xFF810113
+	sw t0, 8(a0)						#addi sp, sp, -8
+	li t0, 0x613023
+	sw t0, 12(a0)						#sd t1, 0(sp)
+	#now jump to next
+	li t0, 0x202B303
+	sw t0, 16(a0)						#ld t1, 32(t0)
+	li t0, 0x30067
+	sw t0, 20(a0)						#jr t1
+	sd a2, 24(a0)
+	sd a1, 32(a0)
+	addi a0, a0, 40
+	fence.i
+	POP ra
+	ret
+	
  starter_float:
 	PUSH ra
 	call getNextAddress	#get the address for tail return

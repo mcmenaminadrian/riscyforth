@@ -120,7 +120,7 @@
 
 **FVALUE**
 
-**FVARIABLE**	TODO
+**FVARIABLE**
 
 **F0=**		TODO
 
