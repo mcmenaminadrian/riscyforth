@@ -150,11 +150,11 @@
 
 **SFALIGNED**
 
-**SFFIELD:**	TODO
+**SFFIELD:**
 
-**SF@**		TODO
+**SF@**	
 
-**SFLOAT+**	TODO
+**SFLOAT+**
 
 **SFLOATS**
 
