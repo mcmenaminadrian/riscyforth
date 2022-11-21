@@ -245,7 +245,14 @@
 	PUSH a5
 	j fconstant_common_code
 
-	CODEHEADERZ FSDOT, FS., FVALUE, 0x01
+	CODEHEADERZ STOF, S>F, FVALUE, 0x01
+	#(n -- r)
+	ld t0, 0(sp)
+	fcvt.d.l ft0, t0
+	fsd ft0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADERZ FSDOT, FS., STOF, 0x01
 	#(n -- )
 	fld fa0, 0(sp)
 	addi sp, sp, 8
