@@ -20,9 +20,9 @@
 
 **FACOSH**
 
-**FALIGN**	TODO
+**FALIGN**
 
-**FALIGNED**	TODO
+**FALIGNED**
 
 **FALOG**
 

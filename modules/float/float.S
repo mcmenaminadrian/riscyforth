@@ -22,7 +22,13 @@
   dfalign_done:
 	TAILMOD t1
 
-	CODEHEADERZ DFFIELDCOLON, DFFIELD:, DFALIGN, 0x01
+	CODEHEADER FALIGN, DFALIGN, 0x0
+	tail DFALIGN
+
+	CODEHEADER FALIGNED, FALIGN, 0x0
+	tail DFALIGNED
+
+	CODEHEADERZ DFFIELDCOLON, DFFIELD:, FALIGNED, 0x01
 	#(n "<spaces>name" -- n)
 	#create new word with name that returns data address
 	li a5, 0x401			#badge for this type of function
