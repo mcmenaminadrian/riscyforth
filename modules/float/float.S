@@ -252,7 +252,63 @@
 	fsd ft0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADERZ FSDOT, FS., STOF, 0x01
+	CODEHEADERZ TOFLOAT, >FLOAT, STOF, 0x01
+	#(addr u -- r true  | false)
+	li a0, 48
+	call malloc
+	beqz a0, tofloat_failed
+	#process string
+	li t0, -1				#string of blanks (TRUE)
+	li t1, 0x20				#space
+	li t2, 0x2C				#comma
+	li t3, 0x65				#e (lc)
+	mv a1, a0
+	ld a2, 0(sp)				#count
+	ld a3, 8(sp)				#address
+  tofloat_gatherinput:
+	beqz a2, tofloat_testoutput
+	lb a4, 0(a3)				#read byte
+	beq a4, t1, tofloat_nextread
+	li t0, 0
+	beq a4, t2, tofloat_nextread
+	bne a4, t3, tofloat_continue
+	xor a4, a4, t1				#convert e to E
+  tofloat_continue:
+	sb a4, 0(a1)
+	sb t1, 1(a1)				#always lead with a space
+  	addi a1, a1, 1
+  tofloat_nextread:
+	addi a2, a2, -1
+	addi a3, a3, 1
+	j tofloat_gatherinput
+  tofloat_testoutput:
+	beqz t0, tofloat_realinput
+	li t4, 0x30
+	sb t4, 0(a0)
+	li t3, 0x2E
+	sb t3, 1(a0)
+	sb t4, 2(a0)				#write out 0.0
+	sb t1, 3(a0)
+  tofloat_realinput:
+	sd a0, 0(sp)				#write a0 over stack stuff
+	call scan_floats
+	bnez a1, tofloat_noparse
+	ld t0, 0(sp)				#for freeing
+	sd a0, 8(sp)
+	li t1, -1				#store TRUE
+	sd t1, 0(sp)				#store result
+	mv a0, t0
+	call free
+	TAILMOD t1
+  tofloat_noparse:
+	ld a0, 0(sp)				#for freeing
+	call free
+  tofloat_failed:
+	addi sp, sp, 8
+	sd zero, 0(sp)				#FALSE 
+	TAILMOD t1
+
+	CODEHEADERZ FSDOT, FS., TOFLOAT, 0x01
 	#(n -- )
 	fld fa0, 0(sp)
 	addi sp, sp, 8
