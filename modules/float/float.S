@@ -22,13 +22,19 @@
   dfalign_done:
 	TAILMOD t1
 
-	CODEHEADER FALIGN, DFALIGN, 0x0
+	CODEHEADER FALIGN, DFALIGN, 0x01
 	tail DFALIGN
 
-	CODEHEADER FALIGNED, FALIGN, 0x0
+	CODEHEADER FALIGNED, FALIGN, 0x01
 	tail DFALIGNED
 
-	CODEHEADERZ DFFIELDCOLON, DFFIELD:, FALIGNED, 0x01
+	CODEHEADER SFALIGN, FALIGNED, 0x0
+	tail DFALIGN
+
+	CODEHEADER SFALIGNED, SFALIGN, 0x0
+	tail DFALIGNED
+
+	CODEHEADERZ DFFIELDCOLON, DFFIELD:, SFALIGNED, 0x01
 	#(n "<spaces>name" -- n)
 	#create new word with name that returns data address
 	li a5, 0x401			#badge for this type of function
@@ -108,7 +114,10 @@
 	sd t2, 0(sp)
 	TAILMOD t1
 
-	CODEHEADERZ DFSTORE, DF!, DFLOATPLUS, 0x01
+	CODEHEADERZ FLOATPLUS, FLOAT+, DFLOATPLUS, 0x01
+	tail DFLOATPLUS
+
+	CODEHEADERZ DFSTORE, DF!, FLOATPLUS, 0x01
 	#(n addr --)
 	ld t0, 0(sp)
 	fld ft0, 8(sp)
@@ -116,7 +125,13 @@
 	fsd ft0, 0(t0)
 	TAILMOD t1
 
-	CODEHEADER FCONSTANT, DFSTORE, 0x01
+	CODEHEADERZ FSTORE, F!, DFSTORE, 0x01
+	tail DFSTORE
+
+	CODEHEADERZ SFSTORE, SF!, FSTORE. 0x0
+	tail DFSTORE
+
+	CODEHEADER FCONSTANT, SFSTORE, 0x01
 	#(n "<spaces>name" -->
 	li a5, 0x202			#0x202 for a float constant
 	PUSH a5
@@ -323,7 +338,7 @@
 	call getFloatingPointScientificString
 	j float_output
 
-	CODEHEADERZ FFIELDCOLON, FFIELD:, FSDOT, 0x0
+	CODEHEADERZ FFIELDCOLON, FFIELD:, FSDOT, 0x01
 	#just call code for double
 	tail DFFIELDCOLON
 

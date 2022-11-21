@@ -68,7 +68,7 @@
 
 **FLNP1**
 
-**FLOAT+**	TODO
+**FLOAT+**
 
 **FLOATS**
 
@@ -106,7 +106,7 @@
 
 **FS.**
 
-**F!**		TODO
+**F!**
 
 **FTAN**
 
@@ -146,9 +146,9 @@
 
 **ROOT2**	(Constant)
 
-**SFALIGN**	TODO
+**SFALIGN**
 
-**SFALIGNED**	TODO
+**SFALIGNED**
 
 **SFFIELD:**	TODO
 
@@ -158,7 +158,7 @@
 
 **SFLOATS**
 
-**SF!**		TODO
+**SF!**	
 
 **S>F**	
 
