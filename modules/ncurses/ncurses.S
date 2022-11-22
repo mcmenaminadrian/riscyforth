@@ -11,18 +11,29 @@
   .balign 8
 
 	CODEEND INITSCR, 0x01
+	#(--)
 	call initscr
 	TAILMOD t1
 
-	CODEHEADER GETCH, INITSCR, 0x01
+	CODEHEADER PRINTW, INITSCR, 0x01
+	#(addr --)
+	ld a0, 0(sp)
+	addi sp, sp, 8
+	call printw
+	TAILMOD t1
+
+	CODEHEADER GETCH, PRINTW, 0x01
+	#(--)
 	call getch
 	TAILMOD t1
 
 	CODEHEADER REFRESH, GETCH, 0x01
+	#(--)
 	call refresh
 	TAILMOD t1
 
 	CODEHEADER ENDWIN, REFRESH, 0x01
+	#(--)
 	call endwin
 	TAILMOD t1
 
