@@ -1,6 +1,12 @@
+Words implemented in the Riscyforth float module.
+
+NB: All floats are 64bit, with IEEE754 compliance targeted. SF-- type commands are implemented as handling 64 bits
+and are not listed when WORDS is invoked as they are only implemented as fail safes.
+
+
 **DFALIGN**
 
-**DFALIGNED**
+**DFALIGNED** 
 
 **DFFIELD:**
 
