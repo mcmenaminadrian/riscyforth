@@ -71,7 +71,303 @@
 	call keypad
 	TAILMOD t1
 
-	CODEHEADER ATTRON, KEYPAD, 0x01
+	CODEHEADER NORMALON, KEYPAD, 0x01
+	#(--)
+	mv a0, zero
+	call attron
+	TAILMOD t1
+
+	CODEHEADER NORMALOFF, NORMALON, 0x01
+	#(--)
+	#does nothing
+	TAILMOD t1
+
+	CODEHEADER STANDOUTON, NORMALOFF, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 16
+	call attron
+	TAILMOD t1
+
+	CODEHEADER STANDOUTOFF, STANDOUTON, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 16
+	call attroff
+	TAILMOD t1
+
+	CODEHEADER UNDERLINEON, STANDOUTOFF, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 17
+	call attron
+	TAILMOD t1
+
+	CODEHEADER UNDERLINEOFF, UNDERLINEON, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 17
+	call attroff
+	TAILMOD t1
+
+	CODEHEADER REVERSEON, UNDERLINEOFF, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 18
+	call attron
+	TAILMOD t1
+
+	CODEHEADER REVERSEOFF, REVERSEON, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 18
+	call attron
+	TAILMOD t1
+
+	CODEHEADER BLINKON, REVERSEOFF, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 19
+	call attron
+	TAILMOD t1
+
+	CODEHEADER BLINKOFF, BLINKON, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 19
+	call attron
+	TAILMOD t1
+
+	CODEHEADER DIMON, BLINKOFF, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 20
+	call attron
+	TAILMOD t1
+
+	CODEHEADER DIMOFF, DIMON, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 20
+	call attron
+	TAILMOD t1
+
+	CODEHEADER BOLDON, DIMOFF, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 21
+	call attron
+	TAILMOD t1
+
+	CODEHEADER BOLDOFF, BOLDON, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 21
+	call attron
+	TAILMOD t1
+
+	CODEHEADER PROTECTON, BOLDOFF, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 24
+	call attron
+	TAILMOD t1
+
+	CODEHEADER PROTECTOFF, PROTECTON, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 24
+	call attron
+	TAILMOD t1
+
+	CODEHEADER INVISON, PROTECTOFF, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 25
+	call attron
+	TAILMOD t1
+
+	CODEHEADER INVISOFF, INVISON, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 25
+	call attron
+	TAILMOD t1
+
+	CODEHEADER ALTCHARSETON, INVISOFF, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 22
+	call attron
+	TAILMOD t1
+
+	CODEHEADER ALTCHARSETOFF, ALTCHARSETON, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 22
+	call attron
+	TAILMOD t1
+
+	CODEHEADER CHARTEXTON, ALTCHARSETOFF, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 8
+	addi a0, a0, -1
+	call attron
+	TAILMOD t1
+
+	CODEHEADER CHARTEXTOFF, CHARTEXTON, 0x01
+	#(--)
+	li a0, 1
+	slli a0, a0, 8
+	addi a0, a0, -1
+	call attron
+	TAILMOD t1
+
+	CODEHEADER A_NORMAL, CHARTEXTOFF, 0x01
+	#(-- n)
+	addi sp, sp, -8
+	sd zero, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_CHARTEXT, A_NORMAL, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 7
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_COLOR, A_CHARTEXT, 0x01
+	#(--n)
+	addi sp, sp, -1
+	li t0, 1
+	slli t0, t0, 8
+	addi t0, t0, -1
+	slli t0, t0, 8
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_STANDOUT, A_COLOR, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 16
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_UNDERLINE, A_STANDOUT, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 17
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_REVERSE, A_UNDERLINE, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 18
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_BLINK, A_REVERSE, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 19
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_DIM, A_BLINK, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 20
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_BOLD, A_DIM, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 21
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_ALTCHARSET, A_BOLD, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 22
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_INVIS, A_ALTCHARSET, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 23
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_PROTECT, A_INVIS, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 24
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_HORIZONTAL, A_PROTECT, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 25
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_LEFT, A_HORIZONTAL, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 26
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_LOW, A_LEFT, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 27
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_RIGHT, A_LOW, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 28
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_TOP, A_RIGHT, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 29
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER A_VERTICAL, A_TOP, 0x01
+	#(--n)
+	addi sp, sp, -8
+	li t0, 1
+	slli t0, t0, 30
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER ATTRON, A_VERTICAL, 0x01
 	#(n --)
 	POP a0
 	call attron
