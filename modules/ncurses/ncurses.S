@@ -18,7 +18,195 @@
 	sd a0, 0(t0)
 	TAILMOD t1
 
-	CODEHEADER PRINTW, INITSCR, 0x01
+	CODEHEADER CLEAR, INITSCR, 0x01
+	#( -- )
+	call clear
+	TAILMOD t1
+
+	CODEHEADER NEWWIN, CLEAR, 0x01
+	#(height, width, starty, startx -- win)
+	ld a0, 24(sp)
+	ld a1, 16(sp)
+	ld a2, 8(sp)
+	ld a3, 0(sp)
+	call newwin
+	addi sp, sp, 24
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER WREFRESH, NEWWIN, 0x01
+	#(n --)
+	ld a0, 0(sp)
+	addi sp, sp, 8
+	call wrefresh
+	TAILMOD t1
+
+	CODEHEADER DELWIN, WREFRESH, 0x01
+	#(n --)
+	ld a0, 0(sp)
+	addi sp, sp, 8
+	call delwin
+	TAILMOD t1
+
+	CODEHEADER CURS_SET, DELWIN, 0x01
+	#(n --_
+	ld a0, 0(sp)
+	addi sp, sp, 8
+	call curs_set
+	TAILMOD t1
+
+	CODEHEADER CURS_INVIS, CURS_SET, 0x01
+	#(--)
+	li a0, 0
+	call curs_set
+	TAILMOD t1
+
+	CODEHEADER CURS_NORMAL, CURS_INVIS, 0x01
+	#(--)
+	li a0, 1
+	call curs_set
+	TAILMOD t1
+
+	CODEHEADER CURS_VVIS, CURS_NORMAL, 0x01
+	li a0, 2
+	call curs_set
+	TAILMOD t1 
+
+	CODEHEADER DEF_PROG_MODE, CURS_VVIS, 0x01
+	#(--)
+	call def_prog_mode
+	TAILMOD t1
+
+	CODEHEADER RESET_PROG_MODE, DEF_PROG_MODE, 0x01
+	#(--)
+	call reset_prog_mode
+	TAILMOD t1
+
+	CODEHEADER COLOR_BLACK, RESET_PROG_MODE, 0x01
+	#(-- n)
+	li a0, 0
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER COLOR_RED, COLOR_BLACK, 0x01
+	#(-- n)
+	li a0, 1
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER COLOR_GREEN, COLOR_RED, 0x01
+	#(-- n)
+	li a0, 2
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER COLOR_YELLOW, COLOR_GREEN, 0x01
+	#(-- n)
+	li a0, 3
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER COLOR_BLUE, COLOR_YELLOW, 0x01
+	#(-- n)
+	li a0, 4
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER COLOR_MAGENTA, COLOR_BLUE, 0x01
+	#(-- n)
+	li a0, 5
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER COLOR_CYAN, COLOR_MAGENTA, 0x01
+	#(-- n)
+	li a0, 6
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER COLOR_WHITE, COLOR_CYAN, 0x01
+	#(-- n)
+	li a0, 7
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER START_COLOR, COLOR_WHITE, 0x01
+	#(--)
+	call start_color
+	TAILMOD t1
+
+	CODEHEADER INIT_PAIR, START_COLOR, 0x01
+	#(num, colf, colb -- n)
+	ld a0, 16(sp)
+	ld a1, 8(sp)
+	ld a2, 0(sp)
+	li t0, 1
+	addi t1, a0, 8
+	sll t2, t0, t1
+	addi sp, sp, 16
+	sd t2, 0(sp)
+	call init_pair
+	TAILMOD t1
+
+	CODEHEADER COLOR_PAIR, INIT_PAIR, 0x01
+	#(n -- n)
+	ld t0, 0(sp)
+	li t1, 8
+	sll t2, t0, t1
+	sd t2, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER INIT_COLOR, COLOR_PAIR, 0x01
+	#(n n n n ---)
+	ld a0, 24(sp)
+	ld a1, 16(sp)
+	ld a2, 8(sp)
+	ld a3, 0(sp)
+	call init_color
+	TAILMOD t1
+
+	CODEHEADER MOVEW, INIT_COLOR, 0x01
+	#(row col --)
+	ld a0, 8(sp)
+	ld a1, 0(sp)
+	addi sp, sp, 16
+	call move
+	TAILMOD t1
+
+	CODEHEADER ADDCH, MOVEW, 0x01
+	#(c --)
+	ld a0, 0(sp)
+	addi sp, sp, 8
+	call addch
+	TAILMOD t1
+
+	CODEHEADER MVADDCH, ADDCH, 0x01
+	#(row col c --)
+	ld a0, 16(sp)
+	ld a1, 8(sp)
+	ld a2, 0(sp)
+	addi sp, sp, 24
+	call mvaddch
+	TAILMOD t1
+
+	CODEHEADER MVPRINTW, MVADDCH, 0x01
+	#(row col addr --)
+	ld a0, 16(sp)
+	ld a1, 8(sp)
+	ld a2, 0(sp)
+	addi sp, sp, 24
+	call mvprintw
+	TAILMOD t1
+
+	CODEHEADER PRINTW, MVPRINTW, 0x01
 	#(addr --)
 	ld a0, 0(sp)
 	addi sp, sp, 8
