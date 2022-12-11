@@ -891,39 +891,41 @@
 		#now get length
 		mv t0, a5
 		addi t0, t0, 3			      	#pass the opening "
-		mv a0, t0
+		mv a0, t0				#set up pointer to inside string
 		li a1, 0
 		li a2, 0x201				#max length
 		li t2, 0x22				#"
   embed_encsq_check_next:
-		lbu a3, 0(a0)
-		beq a3, t2, embed_encsq_gotlength
-		addi a0, a0, 1
-		addi a1, a1, 1
-		blt a1, a2, embed_encsq_check_next
-		la t0, String_err
+		lbu a3, 0(a0)				#read char
+		beq a3, t2, embed_encsq_gotlength	#if closing " jump
+		addi a0, a0, 1				#increment pointer
+		addi a1, a1, 1				#increment count
+		blt a1, a2, embed_encsq_check_next	#loop back if in range
+		la t0, String_err			#otherwise -- error message
 		li t1, 18
 		WRITESTRINGR t0, t1
 		WRITECR
 		tail NEXT				#failed
   embed_encsq_gotlength:
 		#write out the length
-		sd a1, 8(t1)
+		sd a1, 8(t1)				#embed length
 		addi t1, t1, 16				#prepare to embed the string
 		#t0 points to the start of the string in buffer
 		#a1 holds its length
 		#t1 the write point
 		mv a2, a1				#countdown
-		mv a3, t0
+		mv a3, t0				#readpoint
   embed_encsq_embed:
-		beqz a2, embed_encsq_checkalignment
-		lbu a4, 0(a3)
-		sb a4, 0(t1)
-		addi a2, a2, -1
-		addi a3, a3, 1
-		addi t1, t1, 1
-		j embed_encsq_embed
+		beqz a2, embed_encsq_checkalignment	#jump if counted to zero
+		lbu a4, 0(a3)				#load char
+		sb a4, 0(t1)				#write char
+		addi a2, a2, -1				#decement countdown
+		addi a3, a3, 1				#increment readpoint
+		addi t1, t1, 1				#increment writepoint
+		j embed_encsq_embed			#loop
   embed_encsq_checkalignment:
+		#effectively null terminate our string if needed
+		sb zero, 0(t1)
 		#need to ensure alignment of output maintained
 		#a1 holds length
 		li a0, 0x07
