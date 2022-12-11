@@ -924,8 +924,6 @@
 		addi t1, t1, 1				#increment writepoint
 		j embed_encsq_embed			#loop
   embed_encsq_checkalignment:
-		#effectively null terminate our string if needed
-		sb zero, 0(t1)
 		#need to ensure alignment of output maintained
 		#a1 holds length
 		li a0, 0x07
