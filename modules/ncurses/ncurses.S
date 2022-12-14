@@ -197,19 +197,48 @@
 	call mvaddch
 	TAILMOD t1
 
+	# MVPRINTW and PRINTW handle Forth counted strings now
 	CODEHEADER MVPRINTW, MVADDCH, 0x01
-	#(row col addr --)
-	ld a0, 16(sp)
-	ld a1, 8(sp)
-	ld a2, 0(sp)
-	addi sp, sp, 24
+	#(row col addr n --)
+	ld a0, 24(sp)
+	ld a1, 16(sp)
+	ld t1, 8(sp)
+	ld t0, 0(sp)
+	addi sp, sp, 32
+	#now copy to buffer and null terminate
+	la t2, SCRATCH_PAD
+	mv a2, t2
+  printnw_loop:
+	beqz t0, printnw_call
+	lb t3, 0(t1)
+	sb t3, 0(t2)
+	addi t1, t1, 1
+	addi t2, t2, 1
+	addi t0, t0, -1
+	j printnw_loop
+  printnw_call:
+	sb zero, 0(t2) 
 	call mvprintw
 	TAILMOD t1
 
 	CODEHEADER PRINTW, MVPRINTW, 0x01
-	#(addr --)
-	ld a0, 0(sp)
-	addi sp, sp, 8
+	#(addr n --)
+	ld t0, 0(sp)
+	ld t1, 8(sp)
+	addi sp, sp, 16
+	#now copy to buffer and null terminate
+	la t2, SCRATCH_PAD
+	mv a0, t2
+  printw_loop:
+	beqz t0, printw_call
+	lb t3, 0(t1)
+	sb t3, 0(t2)
+	addi t1, t1, 1
+	addi t2, t2, 1
+	addi t0, t0, -1
+	j printw_loop
+  printw_call:
+	sb zero, 0(t2) 
 	call printw
 	TAILMOD t1
 

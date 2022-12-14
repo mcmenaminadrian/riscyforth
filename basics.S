@@ -480,11 +480,11 @@
 		addi t4, t4, 1
 		li t1, 0x22		#"
   sq_check_next:
-		lb t0, 0(t4)
-		beq t0, t1, sq_prep_memory_area
-		addi t3, t3, 1
-		addi t4, t4, 1
-		blt t4, t5, sq_check_next
+		lb t0, 0(t4)				#read char
+		beq t0, t1, sq_prep_memory_area		#jump if end quote
+		addi t3, t3, 1				#increment count
+		addi t4, t4, 1				#increment read point
+		blt t4, t5, sq_check_next		#loop back if still in range
 		la t0, String_err
 		li t1, 18		#length of error message
 		WRITESTRINGR t0, t1
