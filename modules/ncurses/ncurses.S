@@ -143,7 +143,14 @@
 	call start_color
 	TAILMOD t1
 
-	CODEHEADER INIT_PAIR, START_COLOR, 0x01
+	CODEHEADER KEY_F, START_COLOR, 0x01
+	#(n -- n)
+	ld t0, 0(sp)
+	addi t0, t0, 264
+	sd t0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER INIT_PAIR, KEY_F, 0x01
 	#(num, colf, colb -- n)
 	ld a0, 16(sp)
 	ld a1, 8(sp)
@@ -243,8 +250,10 @@
 	TAILMOD t1
 
 	CODEHEADER GETCH, PRINTW, 0x01
-	#(--)
+	#(-- c)
 	call getch
+	addi sp, sp, -8
+	sd a0, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER REFRESH, GETCH, 0x01
@@ -267,12 +276,24 @@
 	call noecho
 	TAILMOD t1
 
-	CODEHEADER RAW, NOECHO, 0x01
+	CODEHEADER CBREAK, NOECHO, 0x01
+	#(--)
+	call cbreak
+	TAILMOD t1
+
+	CODEHEADER RAW, CBREAK, 0x01
 	#(--)
 	call raw
 	TAILMOD t1
 
-	CODEHEADER KEYPADSTD, RAW, 0x01
+	CODEHEADER HALFDELAY, RAW, 0x01
+	#(n -- n)
+	ld a0, 0(sp)
+	call halfdelay
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER KEYPADSTD, HALFDELAY, 0x01
 	#(--)
 	la t0, STDSCR
 	ld a0, 0(t0)
