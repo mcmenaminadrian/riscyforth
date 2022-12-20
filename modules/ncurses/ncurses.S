@@ -359,7 +359,7 @@
 	#(--)
 	li a0, 1
 	slli a0, a0, 18
-	call attron
+	call attroff
 	TAILMOD t1
 
 	CODEHEADER BLINKON, REVERSEOFF, 0x01
@@ -373,7 +373,7 @@
 	#(--)
 	li a0, 1
 	slli a0, a0, 19
-	call attron
+	call attroff
 	TAILMOD t1
 
 	CODEHEADER DIMON, BLINKOFF, 0x01
@@ -387,7 +387,7 @@
 	#(--)
 	li a0, 1
 	slli a0, a0, 20
-	call attron
+	call attroff
 	TAILMOD t1
 
 	CODEHEADER BOLDON, DIMOFF, 0x01
@@ -401,7 +401,7 @@
 	#(--)
 	li a0, 1
 	slli a0, a0, 21
-	call attron
+	call attroff
 	TAILMOD t1
 
 	CODEHEADER PROTECTON, BOLDOFF, 0x01
@@ -415,7 +415,7 @@
 	#(--)
 	li a0, 1
 	slli a0, a0, 24
-	call attron
+	call attroff
 	TAILMOD t1
 
 	CODEHEADER INVISON, PROTECTOFF, 0x01
@@ -429,7 +429,7 @@
 	#(--)
 	li a0, 1
 	slli a0, a0, 25
-	call attron
+	call attroff
 	TAILMOD t1
 
 	CODEHEADER ALTCHARSETON, INVISOFF, 0x01
@@ -443,7 +443,7 @@
 	#(--)
 	li a0, 1
 	slli a0, a0, 22
-	call attron
+	call attroff
 	TAILMOD t1
 
 	CODEHEADER CHARTEXTON, ALTCHARSETOFF, 0x01
@@ -459,7 +459,7 @@
 	li a0, 1
 	slli a0, a0, 8
 	addi a0, a0, -1
-	call attron
+	call attroff
 	TAILMOD t1
 
 	CODEHEADER A_NORMAL, CHARTEXTOFF, 0x01
