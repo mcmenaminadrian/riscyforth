@@ -180,7 +180,7 @@
 	call init_color
 	TAILMOD t1
 
-	CODEHEADER MOVEW, INIT_COLOR, 0x01
+	CODEHEADER MOVE, INIT_COLOR, 0x01
 	#(row col --)
 	ld a0, 8(sp)
 	ld a1, 0(sp)
@@ -188,7 +188,16 @@
 	call move
 	TAILMOD t1
 
-	CODEHEADER ADDCH, MOVEW, 0x01
+	CODEHEADER MVWADDCH, MOVE, 0x01
+	#(n n n c --)
+	ld a0, 24(sp)
+	ld a1, 16(sp)
+	ld a2, 8(sp)
+	ld a3, 0(sp)
+	call mvwaddch
+	TAILMOD t1
+
+	CODEHEADER ADDCH, MVWADDCH, 0x01
 	#(c --)
 	ld a0, 0(sp)
 	addi sp, sp, 8
@@ -229,10 +238,83 @@
 	TAILMOD t1
 
 	CODEHEADER PRINTW, MVPRINTW, 0x01
-	#(addr n --)
+	#([var n] addr n --)
+	#complex printw, printwstronly deals with simplest case
+	#first load counted string and parse for %
+	ld t0, 0(sp)			#length
+	ld t1, 8(sp)			#string ptr
+	li t2, 0			#count of %
+	li t3, 0x25			#%
+  printw_cnt_test:
+	beqz t0, printw_cnt_done
+	lb t4, 0(t1)
+	bne t3, t4, printw_cnt_adv	#not a %
+	addi t2, t2, 1
+  printw_cnt_adv:
+	addi t0, t0, -1
+	addi t1, t1, 1
+	j printw_cnt_test		#loop back
+  printw_cnt_done:
+	bnez t2, printw_handle_complex
+	tail PRINTWSTRONLY		#no inserts
+  printw_handle_complex:
+	mv a1, t2			#preserve count
+	#firstly null terminate the string
 	ld t0, 0(sp)
 	ld t1, 8(sp)
-	addi sp, sp, 16
+	call null_terminate_string	#a0 now points to string
+	mv t0, a1			#use this to countdown
+	mv t1, t0			#use this to calcuylate stack adjustment
+	ld a1, 16(sp)
+	addi t0, t0, -1
+	beqz t0, printw_setcall
+	ld a2, 24(sp)
+	addi t0, t0, -1
+	beqz t0, printw_setcall
+	ld a3, 32(sp)	
+	addi t0, t0, -1
+	beqz t0, printw_setcall
+	ld a4, 40(sp)
+	addi t0, t0, -1
+	beqz t0, printw_setcall
+	ld a5, 48(sp)
+	addi t0, t0, -1
+	beqz t0, printw_setcall
+	ld a6, 56(sp)
+	addi t0, t0, -1
+	beqz t0, printw_setcall
+	ld a7, 64(sp)
+	addi t0, t0, -1
+	beqz t0, printw_setcall
+	#now loop and stick this stuff on an adjusted stack
+	#maximum number of parameters is going to be 64!
+	mv t2, sp	#keep track of old stack pointer
+	addi sp, sp, -448	#new stack pointer
+	addi t2, t2, 72	#where next 
+	mv t3, sp	#use this to track storage point
+  printw_stack_loop:
+	ld t4, 0(t2)
+	sd t4, 0(t3)
+	addi t0, t0, -1
+	beqz t0, printw_docall
+	addi t2, t2, 8
+	addi t3, t3, 8
+	j printw_stack_loop
+  printw_setcall:
+	#calculate stack extension required
+	li t1, -512
+	slli t0, t0, 3	#multiply by 8
+	add t2, t1, t0
+	add sp, sp, t2
+  printw_docall:
+	call printw
+	addi sp, sp, 512	#fix up stack
+	TAILMOD t1
+
+  null_terminate_string:
+	#t0 has length
+	#t1 has address
+	#returns SCRATCH_PAD address in a0
 	#now copy to buffer and null terminate
 	la t2, SCRATCH_PAD
 	mv a0, t2
@@ -245,11 +327,19 @@
 	addi t0, t0, -1
 	j printw_loop
   printw_call:
-	sb zero, 0(t2) 
+	sb zero, 0(t2)
+	ret
+
+	CODEHEADER PRINTWSTRONLY, PRINTW, 0x0
+	#(addr n --)
+	ld t0, 0(sp)
+	ld t1, 8(sp)
+	addi sp, sp, 16
+	call null_terminate_string
 	call printw
 	TAILMOD t1
 
-	CODEHEADER GETCH, PRINTW, 0x01
+	CODEHEADER GETCH, PRINTWSTRONLY, 0x01
 	#(-- c)
 	call getch
 	addi sp, sp, -8
