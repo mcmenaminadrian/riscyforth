@@ -3,7 +3,7 @@ loadmodule ./modules/float/float.so
 variable chx 
 : main
 initscr clear raw keypadstd noecho
-S\" Well then\z" DROP  pi 8 7 6 5 4 3 2 1 S\" %i %i %i %i %i %i HELLO %i %%%i%% %f %s \n" printw
+S\" Well then\z" DROP  pi 8 7 6 5 4 3 2 1 19 5 S\" %i %i %i %i %i %i HELLO %i %%%i%% %f %s \n" mvprintw
 \ S\" Type any character to see it in bold\n" printw
 getch dup chx !
 1 KEY_F =

@@ -213,36 +213,10 @@
 	call mvaddch
 	TAILMOD t1
 
-	# MVPRINTW and PRINTW handle Forth counted strings now
-	CODEHEADER MVPRINTW, MVADDCH, 0x01
-	#(row col addr n --)
-	ld a0, 24(sp)
-	ld a1, 16(sp)
-	ld t1, 8(sp)
-	ld t0, 0(sp)
-	addi sp, sp, 32
-	#now copy to buffer and null terminate
-	la t2, SCRATCH_PAD
-	mv a2, t2
-  printnw_loop:
-	beqz t0, printnw_call
-	lb t3, 0(t1)
-	sb t3, 0(t2)
-	addi t1, t1, 1
-	addi t2, t2, 1
-	addi t0, t0, -1
-	j printnw_loop
-  printnw_call:
-	sb zero, 0(t2) 
-	call mvprintw
-	TAILMOD t1
-
-	CODEHEADER PRINTW, MVPRINTW, 0x01
-	#([var n] addr n --)
-	#complex printw, printwstronly deals with simplest case
-	#first load counted string and parse for %
-	ld t0, 0(sp)			#length
-	ld t1, 8(sp)			#string ptr
+  printw_cnt_percent:
+	#enter here with t0 as length
+	#and t1 as pointer
+	#returns t2 as count
 	li t2, 0			#count of %
 	li t3, 0x25			#%
 	li t5, 0			#was previous char %?
@@ -263,16 +237,89 @@
 	addi t1, t1, 1
 	j printw_cnt_test		#loop back
   printw_cnt_done:
+	ret
+
+	# MVPRINTW and PRINTW handle Forth counted strings now
+	CODEHEADER MVPRINTW, MVADDCH, 0x01
+	#([var n] row col addr n --)
+	#process string first
+	ld t0, 0(sp)
+	ld t1, 8(sp)
+	call printw_cnt_percent
+	mv a1, t2			#store cnt for now
+	#get null terminated string
+	ld t0, 0(sp)
+	ld t1, 8(sp)
+	call null_terminate_string
+	#set up the definite params
+	mv a2, a0
+	mv t0, a1
+	ld a0, 24(sp)
+	ld a1, 16(sp)
+	bnez t0, mvprintw_complex
+	#simplest case
+	call mvprintw
+	addi sp, sp, 32
+	ret
+  mvprintw_complex:
+	mv t1, t0			#for later stack adjustment
+	ld a3, 32(sp)	
+	addi t0, t0, -1
+	beqz t0, mvprintw_setcall
+	ld a4, 40(sp)
+	addi t0, t0, -1
+	beqz t0, mvprintw_setcall
+	ld a5, 48(sp)
+	addi t0, t0, -1
+	beqz t0, mvprintw_setcall
+	ld a6, 56(sp)
+	addi t0, t0, -1
+	beqz t0, mvprintw_setcall
+	ld a7, 64(sp)
+	addi t0, t0, -1
+	beqz t0, mvprintw_setcall
+	#now loop and stick this stuff on an adjusted stack
+	#maximum number of parameters is going to be 64!
+	mv t2, sp	#keep track of old stack pointer
+	addi sp, sp, -448	#new stack pointer
+	addi t2, t2, 72	#where next 
+	mv t3, sp	#use this to track storage point
+  mvprintw_stack_loop:
+	ld t4, 0(t2)
+	sd t4, 0(t3)
+	addi t0, t0, -1
+	beqz t0, mvprintw_docall
+	addi t2, t2, 8
+	addi t3, t3, 8
+	j mvprintw_stack_loop
+  mvprintw_setcall:
+	#calculate stack extension required
+	li t3, -512
+	slli t1, t1, 3	#multiply by 8
+	add t2, t1, t3
+	add sp, sp, t2
+  mvprintw_docall:
+	call mvprintw
+	addi sp, sp, 512	#fix up stack
+	TAILMOD t1
+
+	CODEHEADER PRINTW, MVPRINTW, 0x01
+	#([var n] addr n --)
+	#complex printw, printwstronly deals with simplest case
+	#first load counted string and parse for %
+	ld t0, 0(sp)			#length
+	ld t1, 8(sp)			#string ptr
+	call printw_cnt_percent
 	bnez t2, printw_handle_complex
 	tail PRINTWSTRONLY		#no inserts
   printw_handle_complex:
 	mv a1, t2			#preserve count
-	#firstly null terminate the string
+	#next null terminate the string
 	ld t0, 0(sp)
 	ld t1, 8(sp)
 	call null_terminate_string	#a0 now points to string
 	mv t0, a1			#use this to countdown
-	mv t1, t0			#use this to calcuylate stack adjustment
+	mv t1, t0			#use this to calculate stack adjustment
 	ld a1, 16(sp)
 	addi t0, t0, -1
 	beqz t0, printw_setcall
