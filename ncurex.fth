@@ -2,7 +2,7 @@ loadmodule ./modules/ncurses/ncurses.so
 variable chx 
 : main
 initscr clear raw keypadstd noecho
-10 9 8 7 6 5 4 3 2 1 S\" %i %i %i %i %i %i HELLO %i %i %i %i" printw
+S\" Well then\z" DROP  9 8 7 6 5 4 3 2 1 S\" %i %i %i %i %i %i HELLO %i %i %i %s" printw
 \ S\" Type any character to see it in bold\n" printw
 getch dup chx !
 1 KEY_F =

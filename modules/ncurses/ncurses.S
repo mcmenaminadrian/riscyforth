@@ -302,9 +302,9 @@
 	j printw_stack_loop
   printw_setcall:
 	#calculate stack extension required
-	li t1, -512
-	slli t0, t0, 3	#multiply by 8
-	add t2, t1, t0
+	li t3, -512
+	slli t1, t1, 3	#multiply by 8
+	add t2, t1, t3
 	add sp, sp, t2
   printw_docall:
 	call printw
