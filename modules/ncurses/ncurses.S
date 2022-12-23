@@ -245,11 +245,19 @@
 	ld t1, 8(sp)			#string ptr
 	li t2, 0			#count of %
 	li t3, 0x25			#%
+	li t5, 0			#was previous char %?
   printw_cnt_test:
 	beqz t0, printw_cnt_done
 	lb t4, 0(t1)
-	bne t3, t4, printw_cnt_adv	#not a %
+	bne t3, t4, printw_cnt_adv_zero	#not a %
+	bnez t5, printw_cnt_adv_zero_match
 	addi t2, t2, 1
+	li t5, 1			#enable %%
+	j printw_cnt_adv
+  printw_cnt_adv_zero_match:
+	addi t2, t2, -1
+  printw_cnt_adv_zero:
+	li t5, 0
   printw_cnt_adv:
 	addi t0, t0, -1
 	addi t1, t1, 1
