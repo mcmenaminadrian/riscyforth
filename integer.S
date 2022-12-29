@@ -81,11 +81,7 @@
                 CODEHEADER MOD, UNDERPLUS, 0x01
 		ld t0, 0(sp)
 		ld t1, 8(sp)
-		beqz t0, mod_zero
-		div t2, t1, t0
-		mul t3, t2, t0
-		sub t0, t1, t3
-  mod_zero:
+		rem t0, t1, t0
 		sd t0, 8(sp)
 		addi sp, sp, 8
                 tail NEXT

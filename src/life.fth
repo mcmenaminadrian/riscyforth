@@ -15,7 +15,7 @@ endx endy * scale !
 : memsetup
     scale @  allocate drop grida !
     scale @  allocate drop gridb !
-    scale @ 0 do i grida + 0 swap C! i gridb + 0 swap C! loop
+    scale @ 0 do 0 i grida + C! 0 i gridb + C! loop
 ;
 
 : memclean
@@ -34,24 +34,28 @@ variable behindy
     endy starty do
         i 1+ endy mod aheady !
         i 1- endy mod behindy !
+        behindy @ 0 < if behindy @ endy + behindy ! then
         endx startx do
             0 countup !
             i 1+ endx mod aheadx !
             i 1- endx mod behindx !
+            behindx @ 0 < if behindx @ endx + behindx ! then
+\            behindx @ . i . aheadx @ . behindy @ . j . aheady @ . cr
             \ all the aheadx
             aheadx @ behindy @ * gridb + C@ 1 = IF countup @ 1+ countup ! then
             aheadx @ j * gridb + C@ 1 = IF countup @ 1+ countup ! then
-            aheadx @ aheady @ gridb + C@ 1 = IF countup @ 1+ countup ! then
+            aheadx @ aheady @ * gridb + C@ 1 = IF countup @ 1+ countup ! then
             \ equal x
             i behindy @ * gridb + C@ 1 = if countup @ 1+ countup ! then
             i aheady @ * gridb + C@ 1 = if countup @ 1+ countup ! then
             \ behindx
             behindx @ behindy @ * gridb + C@ 1 = IF countup @ 1+ countup ! then
             behindx @ j * gridb + C@ 1 = IF countup @ 1+ countup ! then
-            behindx @ aheady @ gridb + C@ 1 = IF countup @ 1+ countup ! then
+            behindx @ aheady @ * gridb + C@ 1 = IF countup @ 1+ countup ! then
             \ now update display grid
             countup @ 3 > IF 0 i j * grida + C! else countup @ 3 = if 1 i j * grida + C! else countup @ 2 < IF 0 i j * grida + C! then
         loop
+ \ getch
     loop
 ;
 
@@ -92,5 +96,3 @@ variable behindy
     memclean
     endwin
 ;   
-
-
