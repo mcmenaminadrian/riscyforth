@@ -2,8 +2,8 @@ loadmodule ./modules/ncurses/ncurses.so
 
 0 constant startx
 0 constant starty
-100 constant endx
-40 constant endy
+120 constant endx
+50 constant endy
 
 variable grida
 variable gridb
@@ -13,14 +13,14 @@ variable scale
 endx endy * scale !
 
 : memsetup
-    scale @  allocate drop grida !
-    scale @  allocate drop gridb !
+    scale @ allocate 0<> IF ." ALLOCATE failed" exit then grida !
+    scale @ allocate 0<> IF ." ALLOCATE failed" exit then  gridb !
     scale @ 0 do 0 i grida @ + C! 0 i gridb @ + C! loop
 ;
 
 : memclean
-    grida free
-    gridb free
+    grida @ free
+    gridb @ free
 ;
 
 variable aheadx
@@ -31,6 +31,8 @@ variable currentpos
 
 
 : updategrid
+    \ swap the numbers about
+    @ swap @ 
     grida ! gridb !
     endy starty do
         i 1+ endy mod aheady !
@@ -51,8 +53,8 @@ variable currentpos
             behindx @ j endx * + gridb @ + C@ 1 = IF countup @ 1+ countup ! then
             behindx @ aheady @ endx * + gridb @ + C@ 1 = IF countup @ 1+ countup ! then
             \ now update display grid
-            i j endx * + currentpos !
-            currentpos @ gridb @ + C@ currentpos @ grida @ + C!
+            i j endx * + dup currentpos !
+            gridb @ + C@ currentpos @ grida @ + C!
             countup @ 3 > if 0 currentpos @ grida @ + C! then
             countup @ 3 = if 1 currentpos @ grida @ + C! then
             countup @ 2 < if 0 currentpos @ grida @ + C! then
