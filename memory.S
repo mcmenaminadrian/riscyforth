@@ -604,7 +604,7 @@
 		
 		CODEHEADER ALLOCATE, TOIN, 0x01
 		#get memory from the allocator
-		ld t0, 0(sp)
+		ld a0, 0(sp)
 		call get_memory_allocation
 		addi sp, sp, -8
 		sd a0, 8(sp)
