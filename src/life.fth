@@ -1,3 +1,11 @@
+\ Conway's Game of Life in Forth (Riscyforth)
+\ Copyright (c) Adrian McMenamin, 2022
+\ Loosely inspired by the NCURSES How-To version
+\ You may distribute this code or a modified version subject
+\ to the terms of the GNU GPL, either version 2 or any later
+\ version at your discretion
+\ See https://github.com/mcmenaminadrian/riscyforth for latest code
+
 loadmodule ./modules/ncurses/ncurses.so
 
 0 constant startx
