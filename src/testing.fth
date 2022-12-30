@@ -521,15 +521,17 @@ VARIABLE allocaddress
 1 ALLOCATE 0 = IF allocaddress ! ELSE RED ." ALLOCATE FAILED " RESET CR EXIT THEN
 FREE 0 = FALSE AND IF RED ." ALLOCATE passed but FREE failed " RESET CR EXIT THEN
 99999 1 DO
+\ should always allocate to same address
 1 ALLOCATE 0 = allocaddress @ = AND FALSE AND IF RED ." ALLOCATE FAIL on pass " I . RESET CR EXIT THEN
-allocaddress @ FREE 0 = FALSE AND IF RED ." FREE FAIL on pass " RESET I . CR EXIT THEN
+allocaddress @ FREE 0<> IF RED ." FREE FAIL on pass " RESET I . CR EXIT THEN
 LOOP BLUE ." ALLOCATE and FREE passed basic allocate and free test " RESET CR 
 \ Test large allocation - 10000 times
 ." Now testing large allocations " 5 SPACES
-1000 ALLOCATE 0 = FALSE AND IF RED ." Large ALLOCATE FAILED " RESET CR EXIT THEN
+1000 ALLOCATE 0<> IF RED ." Large ALLOCATE FAILED " RESET CR EXIT THEN
 allocaddress ! allocaddress @ free 0 = FALSE AND IF RED ." Large FREE failed " RESET CR EXIT THEN
+BLUE ." Initial larger allocation and free succeeded" RESET CR
 9999 1 DO
-1 ALLOCATE 0 = allocaddress @ = AND FALSE AND IF RED ." Large ALLOCATE FAIL on pass " RESET I . CR EXIT THEN
+1000 ALLOCATE 0 = allocaddress @ = AND FALSE AND IF RED ." Large ALLOCATE FAIL on pass " RESET I . CR EXIT THEN
 allocaddress @ FREE 0 = FALSE AND IF RED ." Large FREE FAIL on pass " RESET I . CR EXIT THEN
 LOOP BLUE ." Large ALLOCATE and FREE passed." RESET CR ;
 
