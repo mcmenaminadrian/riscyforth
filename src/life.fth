@@ -10,7 +10,7 @@ loadmodule ./modules/ncurses/ncurses.so
 
 0 constant startx
 0 constant starty
-120 constant endx
+160 constant endx
 50 constant endy
 
 variable grida
@@ -75,7 +75,7 @@ variable currentpos
     endy starty  do
          endx startx do
             i j endx * + grida @ + C@
-            1 = If j i 55 mvaddch else j i 32 mvaddch then
+            1 = If j i 79 mvaddch else j i 32 mvaddch then
         loop
     loop
     refresh
@@ -97,7 +97,35 @@ variable currentpos
   1 39 18 endx * + grida @ + C!
   1 41 17 endx * + grida @ + C!
   1 41 18 endx * + grida @ + C!
+  1 139 16 endx * + grida @ + C!
+  1 140 16 endx * + grida @ + C!
+  1 141 16 endx * + grida @ + C!
+  1 139 17 endx * + grida @ + C!
+  1 139 18 endx * + grida @ + C!
+  1 141 17 endx * + grida @ + C!
+  1 141 18 endx * + grida @ + C!
   1 0 0 endx * + grida @ + C!
+  1 1 0 endx * + grida @ + C!
+  1 2 0 endx * + grida @ + C!
+  1 3 0 endx * + grida @ + C!
+  1 4 0 endx * + grida @ + C!
+  1 5 0 endx * + grida @ + C!
+  1 6 0 endx * + grida @ + C!
+  1 7 0 endx * + grida @ + C!
+  1 8 0 endx * + grida @ + C!
+  1 9 0 endx * + grida @ + C!
+  1 10 0 endx * + grida @ + C!
+  1 0 1 endx * + grida @ + C!
+  1 1 1 endx * + grida @ + C!
+  1 2 1 endx * + grida @ + C!
+  1 3 1 endx * + grida @ + C!
+  1 4 1 endx * + grida @ + C!
+  1 5 1 endx * + grida @ + C!
+  1 6 1 endx * + grida @ + C!
+  1 7 1 endx * + grida @ + C!
+  1 8 1 endx * + grida @ + C!
+  1 9 1 endx * + grida @ + C!
+  1 10 1 endx * + grida @ + C!
   scale @ 0 do i grida @ + C@ i gridb @ + C! loop 
 ;
             
@@ -105,13 +133,20 @@ variable currentpos
 : life
     memsetup
     initscr
+    start_color
+    1 COLOR_RED COLOR_BLACK init_pair
+    1 color_pair attron
+    boldon
     clear
     raw
     keypadstd
     noecho
     initgrid
-    displaygrid
-    begin getch 1 key_f = while grida gridb swap updategrid displaygrid repeat
+    displaygrid getch nodelayonstd
+    begin getch 1 key_f <>  while grida gridb swap updategrid displaygrid repeat
+    nodelayoffstd
+    boldoff
+    1 color_pair attroff
     memclean
     endwin
 ;   

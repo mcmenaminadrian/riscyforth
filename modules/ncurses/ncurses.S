@@ -23,7 +23,23 @@
 	call clear
 	TAILMOD t1
 
-	CODEHEADER NEWWIN, CLEAR, 0x01
+	CODEHEADER NODELAYONSTD, CLEAR, 0x01
+	#(-- n)
+	mv a0, zero
+	call timeout
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER NODELAYOFFSTD, NODELAYONSTD, 0x01
+	#(-- n)
+	li a0, -1
+	call timeout
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER NEWWIN, NODELAYOFFSTD, 0x01
 	#(height, width, starty, startx -- win)
 	ld a0, 24(sp)
 	ld a1, 16(sp)
