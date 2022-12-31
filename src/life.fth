@@ -81,51 +81,26 @@ variable currentpos
     refresh
 ;
 
+variable rowpos 0 rowpos !
+variable colpos 0 colpos !
+
 : initgrid
-  1 19 15 endx * + grida @ + C!
-  1 20 15 endx * + grida @ + C!
-  1 21 15 endx * + grida @ + C!
-  1 19 16 endx * + grida @ + C!
-  1 19 17 endx * + grida @ + C!
-  1 21 16 endx * + grida @ + C!
-  1 21 17 endx * + grida @ + C!
-  1 19 18 endx * + grida @ + C!
-  1 39 16 endx * + grida @ + C!
-  1 40 16 endx * + grida @ + C!
-  1 41 16 endx * + grida @ + C!
-  1 39 17 endx * + grida @ + C!
-  1 39 18 endx * + grida @ + C!
-  1 41 17 endx * + grida @ + C!
-  1 41 18 endx * + grida @ + C!
-  1 139 16 endx * + grida @ + C!
-  1 140 16 endx * + grida @ + C!
-  1 141 16 endx * + grida @ + C!
-  1 139 17 endx * + grida @ + C!
-  1 139 18 endx * + grida @ + C!
-  1 141 17 endx * + grida @ + C!
-  1 141 18 endx * + grida @ + C!
-  1 0 0 endx * + grida @ + C!
-  1 1 0 endx * + grida @ + C!
-  1 2 0 endx * + grida @ + C!
-  1 3 0 endx * + grida @ + C!
-  1 4 0 endx * + grida @ + C!
-  1 5 0 endx * + grida @ + C!
-  1 6 0 endx * + grida @ + C!
-  1 7 0 endx * + grida @ + C!
-  1 8 0 endx * + grida @ + C!
-  1 9 0 endx * + grida @ + C!
-  1 10 0 endx * + grida @ + C!
-  1 0 1 endx * + grida @ + C!
-  1 1 1 endx * + grida @ + C!
-  1 2 1 endx * + grida @ + C!
-  1 3 1 endx * + grida @ + C!
-  1 4 1 endx * + grida @ + C!
-  1 5 1 endx * + grida @ + C!
-  1 6 1 endx * + grida @ + C!
-  1 7 1 endx * + grida @ + C!
-  1 8 1 endx * + grida @ + C!
-  1 9 1 endx * + grida @ + C!
-  1 10 1 endx * + grida @ + C!
+  displaygrid
+  rowpos @ colpos @ movestd
+  begin getch dup 1 key_f <> \ F1 to end this
+      while
+         dup 259 = if rowpos @ 1- dup 0< if drop endy 1- then rowpos ! drop  else \ up arrow
+             dup 260 = if colpos @ 1- dup 0< if drop endx 1- then colpos ! drop else \ left arrow
+                 dup 261 = if colpos @ 1+ dup endx > if drop 0 then colpos ! drop else \ right arrow
+                     258 = if rowpos @ 1+ dup endy > if drop 0 then rowpos ! else \ down arrow
+                         rowpos @ endx * colpos @ + grida @ + C@ 0<> if 0 rowpos @ endx * colpos @ + grida @ + C! else 1 rowpos @ endx * colpos @ + grida @ + C! \ everything else toggles state
+                         then displaygrid
+                     then
+                 then
+             then
+         then
+      rowpos @ colpos @ movestd
+      repeat
   scale @ 0 do i grida @ + C@ i gridb @ + C! loop 
 ;
             
@@ -134,14 +109,18 @@ variable currentpos
     memsetup
     initscr
     start_color
+    2 COLOR_CYAN COLOR_BLACK init_pair
     1 COLOR_RED COLOR_BLACK init_pair
-    1 color_pair attron
+    2 color_pair attron
     boldon
     clear
     raw
     keypadstd
     noecho
     initgrid
+    2 color_pair attroff
+    clear
+    1 color_pair attron
     displaygrid getch nodelayonstd
     begin getch 1 key_f <>  while grida gridb swap updategrid displaygrid repeat
     nodelayoffstd

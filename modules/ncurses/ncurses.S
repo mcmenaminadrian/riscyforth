@@ -196,7 +196,7 @@
 	call init_color
 	TAILMOD t1
 
-	CODEHEADER MOVE, INIT_COLOR, 0x01
+	CODEHEADER MOVESTD, INIT_COLOR, 0x01
 	#(row col --)
 	ld a0, 8(sp)
 	ld a1, 0(sp)
@@ -204,7 +204,7 @@
 	call move
 	TAILMOD t1
 
-	CODEHEADER MVWADDCH, MOVE, 0x01
+	CODEHEADER MVWADDCH, MOVESTD, 0x01
 	#(n n n c --)
 	ld a0, 24(sp)
 	ld a1, 16(sp)
