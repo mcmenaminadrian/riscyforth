@@ -1,7 +1,7 @@
 #####################################################################################
 #           RISCYFORTH                                                              #
 #           TIL for RISC-V                                                          #
-#           Copyright (c) Adrian McMenamin <adrianmcmenamin@gmail.com> 2020, 2021   #
+#           Copyright (c) Adrian McMenamin <adrianmcmenamin@gmail.com> 2020 - 2023  #
 #           Licensed for resuse under version 2 of the GPL                          #
 #                                                                                   #
 #           As per the terms of the GPL no warranty is offered for this code        #
