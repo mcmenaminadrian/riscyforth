@@ -398,7 +398,7 @@
 	fsub.d ft0, fa1, fa2
 	fabs.d ft1, ft0				#get absolute difference for later use
 	xor t2, t0, t1
-	beqz t2, fproxumate_strict_equality	#check for -0
+	beqz t2, fproximate_strict_equality	#check for -0
 	or t2, t0, t1				#checking if negative
 	beq t2, t0, fproximate_close
 	#now checking 'relatively close'
