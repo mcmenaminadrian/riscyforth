@@ -4,24 +4,50 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <stdint.h>
+#include <string.h>
 
 /* Frame buffer code we're not going to try putting in assembly */
+int fb_fd = -1;
+uint64_t fbsize = 0;
 
-void _getscreeninfo(unsigned char* screen_info_mem)
+void _getscreeninfo(struct fb_var_screeninfo* screen_info_mem)
 {
-	int fbfd;
-
 	/* Open video memory first */
-	if ((fbfd = open("/dev/fb0", O_RDWR)) < 0) {
-		printf("Could not access video memory.\n");
+	fb_fd = open("/dev/fb0", O_RDWR);
+	if (fb_fd < 0) {
+		printf("Failed to open, errno is %d\n", errno);
 		exit(1);
 	}
 
 	/* Now populate structure */
-	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &screen_info_mem)) {
+	if (ioctl(fb_fd, FBIOGET_VSCREENINFO, screen_info_mem)) {
 		printf("VSCREENINFO ioctl call failed.\n");
 		exit(2);
 	}
 	return;
 }
-		
+
+uint64_t* _memmapfb(struct fb_var_screeninfo* screen_info_mem, uint64_t* address)
+{
+	/* Calculate size of framebuffer */
+	fbsize = screen_info_mem->xres * screen_info_mem->yres *
+		(screen_info_mem->bits_per_pixel / 8);
+
+	/* now memmap */
+	address = mmap(0, fbsize, PROT_READ|PROT_WRITE, MAP_SHARED,
+		fb_fd, 0);
+	if ((uint64_t)address == 0xFFFFFFFFFFFFFFFF) {
+		printf("Frame buffer memory mapping failed.\n");
+		exit(3);
+	}
+	return address;
+}
+
+void _clearfb(uint64_t* address)
+{
+	printf("SIZE: 0x%X\n", fbsize);
+	memset(address, 0x34, fbsize);
+}
+
