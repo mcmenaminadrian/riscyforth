@@ -47,7 +47,6 @@ uint64_t* _memmapfb(struct fb_var_screeninfo* screen_info_mem, uint64_t* address
 
 void _clearfb(uint64_t* address)
 {
-	printf("SIZE: 0x%X\n", fbsize);
-	memset(address, 0x34, fbsize);
+	memset(address, 0x0, fbsize);
 }
 
