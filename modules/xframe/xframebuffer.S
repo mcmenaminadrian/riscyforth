@@ -53,7 +53,34 @@
 	sd a0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER XDEFAULTGC, XOPENDISPLAY, 0x01
+	CODEHEADER XBLACKPIXEL, XOPENDISPLAY, 0x01
+	#(n -- n)
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	call XBlackPixel
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER XWHITEPIXEL, XBLACKPIXEL, 0x01
+	#(n -- n)
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	call XWhitePixel
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER XDEFAULTSCREEN, XWHITEPIXEL, 0x01
+	#(-- n)
+	la t0, x11_display
+	ld a0, 0(t0)
+	call XDefaultScreen
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER XDEFAULTGC, XDEFAULTSCREEN, 0x01
 	#(n -- n)
 	ld a1, 0(sp)
 	la t0, x11_display
