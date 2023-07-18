@@ -80,7 +80,108 @@
 	sd a0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER XDEFAULTGC, XDEFAULTSCREEN, 0x01
+	CODEHEADER XCREATESIMPLEWINDOW, XDEFAULTSCREEN, 0x01
+	# (n n n n n n n n -- n)
+	# display, parent, x, y, width, height, border_width, border, background
+	la t0, x11_display
+	ld a0, 0(t0)	# display
+	ld a1, 0(sp)	# parent
+	ld a2, 8(sp)	# x
+	ld a3, 16(sp)	# y
+	ld a4, 24(sp)	# width
+	ld a5, 32(sp)	# height
+	ld a6, 40(sp)	# border_width
+	ld a7, 48(sp)	# border
+	addi sp, sp, 56	# stack now points to background
+	call XCreateSimpleWindow
+	sd a0, 0(sp)	# return window
+	TAILMOD t1
+
+	CODEHEADER XSETWMPROPERTIES, XCREATESIMPLEWINDOW, 0x01
+	#( n n n n n n n n --- )
+	# display, window, window_name, icon_name, argv, argc, normal_hint, wm_hints, class_hints
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)	# window
+	ld a2, 8(sp)	# window_name (XTextProperty*)
+	ld a3, 16(sp)	# icon name (XTestProperty*)
+	ld a4, 24(sp)	# argv (char**)
+	ld a5, 32(sp)	# argc
+	ld a6, 40(sp)	# normal hints (normal_hints*)
+	ld a7, 48(sp)	# wm_hints (specifies WMHints*)
+	addi sp, sp, 56	# stack now points to class_hints (XClassHint*)
+	call XSetWMProperties
+	addi sp, sp, 8
+	TAILMOD t1
+
+	CODEHEADER XSELECTINPUT, XSETWMPROPERTIES, 0x01
+	#(n n --)
+	# display, window, event_mask
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)	# window
+	ld a2, 8(sp)	# event_mask
+	call XSelectInput
+	addi sp, sp, 16
+	TAILMOD t1
+
+	CODEHEADER XCREATEGC, XSELECTINPUT, 0x01
+	#(n n n - n)
+	# display, drawable, valuemask, values
+	# returns graphics context
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)	# drawable
+	ld a2, 8(sp)	# valuemask
+	ld a3, 16(sp)	# values
+	call XCreateGC
+	addi sp, sp, 16
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER XSETBACKGROUND, XCREATEGC, 0x01
+	#(n n --)
+	# display, gc, background
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	ld a2, 8(sp)
+	call XSetBackground
+	addi sp, sp, 12
+	TAILMOD t1 
+
+	CODEHEADER XSETFOREGROUND, XSETBACKGROUND, 0x01
+	#(n n --)
+	# display, gc, foreground
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	ld a2, 8(sp)
+	call XSetForeground
+	addi sp, sp, 12
+	TAILMOD t1 
+
+	CODEHEADER XCLEARWINDOW, XSETFOREGROUND, 0x01
+	#(n --)
+	# display, window
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	call XClearWindow
+	addi sp, sp, 8
+	TAILMOD t1
+	
+	CODEHEADER XMAPRAISED, XCLEARWINDOW 0x01
+	#(n --)
+	# display, window
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	call XMapRaised
+	addi sp, sp, 8
+	TAILMOD t1
+
+	CODEHEADER XDEFAULTGC, XMAPRAISED, 0x01
 	#(n -- n)
 	ld a1, 0(sp)
 	la t0, x11_display
