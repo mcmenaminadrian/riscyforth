@@ -181,7 +181,16 @@
 	addi sp, sp, 8
 	TAILMOD t1
 
-	CODEHEADER XDEFAULTGC, XMAPRAISED, 0x01
+	CODEHEADER XDEFAULTROOTWINDOW, XMAPRAISED, 0x01
+	#(-- n)
+	la t0, x11_display
+	ld a0, 0(t0)
+	call XDefaultRootWindow
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER XDEFAULTGC, XDEFAULTROOTWINDOW, 0x01
 	#(n -- n)
 	ld a1, 0(sp)
 	la t0, x11_display
