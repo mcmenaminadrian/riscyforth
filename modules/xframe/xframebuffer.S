@@ -190,7 +190,42 @@
 	sd a0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER XDEFAULTGC, XDEFAULTROOTWINDOW, 0x01
+	CODEHEADER XMAPWINDOW, XDEFAULTROOTWINDOW, 0x01
+	# (n  ---)
+	# display, window
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	call XMapWindow
+	addi sp, sp, 8
+	TAILMOD t1
+
+	CODEHEADER XSETWMPROTOCOLS, XMAPWINDOW, 0x01
+	# ( n, n, n, --- n)
+	# display, window, protocols_return, count_return
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	ld a2, 8(sp)
+	ld a3, 16(sp)
+	call XGetWMProtocols
+	addi sp, sp, 16
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER XINTERNATOM, XSETWMPROTOCOLS, 0x01
+	# (n n - n)
+	# display, atom_name, only_if_exists
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	ld a2, 8(sp)
+	call XInternAtom
+	addi sp, sp, 8
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER XDEFAULTGC, XINTERNATOM, 0x01
 	#(n -- n)
 	ld a1, 0(sp)
 	la t0, x11_display

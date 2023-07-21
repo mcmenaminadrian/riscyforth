@@ -7,13 +7,14 @@ variable gc
 variable bpixel
 variable wpixel
 variable rootw
+variable wmdelete
 
 : winname S" My Window" drop ;
 : iconname S" HI" drop ;
 
 
 : showx11
-." Starting..."
+." Starting..." CR
 XOPENDISPLAY 0= abort" Cannot connect to X11"
 XDEFAULTSCREEN screen !
 screen @ XBLACKPIXEL bpixel !
@@ -24,11 +25,11 @@ XDEFAULTROOTWINDOW rootw !
 rootw @ 0 0 200 300 5 wpixel @ bpixel @ XCREATESIMPLEWINDOW win !
 win @ 0= if abort" Failed to create X11-window" then ." X11-window created." CR
 ." Point C" CR
-win @ winname iconname 0 0 0 0 0 XSETWMPROPERTIES
+s" WM_DELETE_WINDOW" 1 XINTERNATOM wmdelete !
 ." Point D" CR
-win @ 0 XSELECTINPUT
+win @ wmdelete @ 1 XSETWMPROTOCOLS drop
 ." Point E" CR
-win @ 0 0 XCREATEGC gc !
+win @ XMAPWINDOW
 ." Point F" CR
 gc @ wpixel @ XSETBACKGROUND
 ." Point G" CR
