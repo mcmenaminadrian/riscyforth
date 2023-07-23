@@ -114,7 +114,48 @@
 	addi sp, sp, 8
 	TAILMOD t1
 
-	CODEHEADER XSELECTINPUT, XSETWMPROPERTIES, 0x01
+	CODEHEADER XFILLRECTANGLE, XSETWMPROPERTIES, 0x01
+	# (n n n n n ---)
+	# display, drawable, gc, x, y, width, height
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	ld a2, 8(sp)
+	ld a3, 16(sp)
+	ld a4, 24(sp)
+	ld a5, 32(sp)
+	ld a6, 40(sp)
+	call XFillRectangle
+	addi sp, sp, 48
+	TAILMOD t1
+
+	CODEHEADER XDRAWSTRING, XFILLRECTANGLE, 0x01
+	# (n, n, n, n, n ---)
+	# display, drawable, gc, x, y, string, length
+	# note reversal of order of string from Forth
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	ld a2, 8(sp)
+	ld a3, 16(sp)
+	ld a4, 24(sp)
+	ld a6, 32(sp)
+	ld a5, 40(sp)
+	call XDrawString
+	addi sp, sp, 48
+	TAILMOD t1
+
+	CODEHEADER XNEXTEVENT, XDRAWSTRING, 0x01
+	# (n --)
+	# display, XEvent*
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	call XNextEvent
+	addi sp, sp, 8
+	TAILMOD t1
+
+	CODEHEADER XSELECTINPUT, XNEXTEVENT, 0x01
 	#(n n --)
 	# display, window, event_mask
 	la t0, x11_display
@@ -147,7 +188,7 @@
 	ld a1, 0(sp)
 	ld a2, 8(sp)
 	call XSetBackground
-	addi sp, sp, 12
+	addi sp, sp, 16
 	TAILMOD t1 
 
 	CODEHEADER XSETFOREGROUND, XSETBACKGROUND, 0x01
@@ -158,7 +199,7 @@
 	ld a1, 0(sp)
 	ld a2, 8(sp)
 	call XSetForeground
-	addi sp, sp, 12
+	addi sp, sp, 16
 	TAILMOD t1 
 
 	CODEHEADER XCLEARWINDOW, XSETFOREGROUND, 0x01
@@ -190,7 +231,17 @@
 	sd a0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER XMAPWINDOW, XDEFAULTROOTWINDOW, 0x01
+	CODEHEADER XROOTWINDOW, XDEFAULTROOTWINDOW, 0x01
+	# (n -- n)
+	# display, screen
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
+	call XRootWindow
+	sd a0, 0(sp)
+	TAILMOD t1
+
+	CODEHEADER XMAPWINDOW, XROOTWINDOW, 0x01
 	# (n  ---)
 	# display, window
 	la t0, x11_display
@@ -225,11 +276,25 @@
 	sd a0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER XDEFAULTGC, XINTERNATOM, 0x01
-	#(n -- n)
-	ld a1, 0(sp)
+	CODEHEADER XFLUSH, XINTERNATOM, 0x01
+	# ( -- )
 	la t0, x11_display
 	ld a0, 0(t0)
+	call XFlush
+	TAILMOD t1
+
+	CODEHEADER XCLOSEDISPLAY, XFLUSH, 0x01
+	# ( --- )
+	la t0, x11_display
+	ld a0, 0(t0)
+	call XCloseDisplay
+	TAILMOD t1
+
+	CODEHEADER XDEFAULTGC, XCLOSEDISPLAY, 0x01
+	#(n -- n)
+	la t0, x11_display
+	ld a0, 0(t0)
+	ld a1, 0(sp)
 	call XDefaultGC
 	sd a0, 0(sp)
 	TAILMOD t1
