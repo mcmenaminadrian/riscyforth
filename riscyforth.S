@@ -38,6 +38,7 @@
    .comm CYCLESTART, ADDRWIDTH
    .comm CYCLECOUNT, ADDRWIDTH
    .comm CYCLEPINGS, ADDRWIDTH
+   .comm SUPPRESS, ADDRWIDTH
 
    .data
    welcome_msg:   	.asciz "RISCYFORTH - Copyright Adrian McMenamin 2020 - 2023"

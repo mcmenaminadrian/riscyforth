@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <unistd.h>
 
+extern unsigned long SUPPRESS;
+
 /*
  * Code to handle initialisation with running files
  */
@@ -37,7 +39,7 @@ void initriscyforth(int argc, char *arg0)
 			break;
 		case 's':
 			//suppress messages
-			printf("Suppress initial messages\n");
+			SUPPRESS = 1;
 			break;
 		case 'h':
 		case 'u':

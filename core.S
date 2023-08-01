@@ -14,6 +14,9 @@
 		la t0, pull_in_another
 		la t1, PULLINANOTHER
 		sd t0, 0(t1)			#for library code
+		la a5, SUPPRESS			# test for suppression
+		ld a6, 0(a5)
+		bnez a6, printdone
                 PRINT riscy_forth0
                 PRINT riscy_forth1
                 PRINT riscy_forth3
@@ -27,6 +30,7 @@
                 WRITECHAR 0x0A
                 WRITECR
                 WRITECHAR 0x0A
+  printdone:
 		la t0, LOADINGFILE
 		sd zero, 0(t0)			#ensure filehandle is NULL
 		la t0, STACKTOP
@@ -121,3 +125,4 @@
                	la s7, outer_loop_tokenize
                	POP s8
                	j RUN
+
