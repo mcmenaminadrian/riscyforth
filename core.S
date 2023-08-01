@@ -16,11 +16,10 @@
 		sd t0, 0(t1)			#for library code
                 PRINT riscy_forth0
                 PRINT riscy_forth1
-                PRINT riscy_forth2
                 PRINT riscy_forth3
                 PRINT riscy_forth4
+                PRINT riscy_forth4a
                 PRINT riscy_forth5
-                PRINT riscy_forth0
                 PRINT riscy_forth0
                 WRITECR
                 WRITECHAR 0x0A
@@ -118,7 +117,7 @@
                 addi s8, s8, ADDRWIDTH              #increment WA
                 jalr zero, t0, 0                    #run the code    
 
-  EXE:                                          #execute the next command on the stack
+  EXE:                                              #execute the next command on the stack
                	la s7, outer_loop_tokenize
                	POP s8
                	j RUN

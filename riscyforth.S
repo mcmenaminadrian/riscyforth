@@ -2,13 +2,12 @@
 #           RISCYFORTH                                                              #
 #           TIL for RISC-V                                                          #
 #           Copyright (c) Adrian McMenamin <adrianmcmenamin@gmail.com> 2020 - 2023  #
-#           Licensed for resuse under version 2 of the GPL                          #
+#           Licensed for resuse under version 2 of the GPL or any later version     #
 #                                                                                   #
 #           As per the terms of the GPL no warranty is offered for this code        #
 #####################################################################################
 
 .include "./riscylib/riscyvar.S"
-
 
    .bss
    .comm SOURCEID, ADDRWIDTH
@@ -44,9 +43,9 @@
    welcome_msg:   	.asciz "RISCYFORTH - Copyright Adrian McMenamin 2020 - 2023"
    riscy_forth0:  	.asciz "*******************************************************************************"
    riscy_forth1:  	.asciz "RISCYFORTH is a FORTH for RISC-V devices."
-   riscy_forth2:  	.asciz "To see supported words type 'WORDS'."
    riscy_forth3:	.asciz "==============================================================================="
-   riscy_forth4:  	.asciz "RISCYFORTH is licenced under version 2 of the GNU General Public Licence."
+   riscy_forth4:  	.asciz "RISCYFORTH is licenced under version 2 of the GNU General Public Licence or"
+   riscy_forth4a:	.asciz "any later version at your discretion."
    riscy_forth5:  	.asciz "See https://github.com/mcmenaminadrian/riscyforth.git"
    riscy_forthQ:  	.asciz "Exiting RISCYFORTH."
    Ok_msg:        	.asciz "OK"
@@ -96,6 +95,10 @@
   .globl main
   _start:
   main:
+		# handle initial options
+		ld a0, 0(sp)					# argc
+		ld a1, 8(sp)					# points to first argv element
+		call initriscyforth
                 la s10, STACK + BIGSPACE - STACKOFFSET
                 la s9, CALLSTACK + BIGSPACE - STACKOFFSET
                 la a0, riscy_forth0
