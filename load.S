@@ -138,6 +138,7 @@
 	addi s10, s10, 1
 	sd s10, 0(s0)
 	bgeu zero, a0, load_failed_nopath
+  init_join_include:
 	la s4, LOADINGFILE	#file stream
 	sd a0, 0(s4)
 	li a0, 512		#get 512 bytes from malloc
@@ -180,8 +181,12 @@
 	call fgets
 	beqz a0, load_free_malloc #nothing returned
 	PUSH a0
-	#output the read in line
+	# test for verbose output
+	la t5, VERBOSE
+	ld t6, 0(t5)
+	beqz t6, line_out_done
 	call puts
+  line_out_done:
 	#now process the line
 	#start by looking for tokens
 	la t0, INPUT_START

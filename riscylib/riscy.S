@@ -27,7 +27,9 @@
    .comm FP_AVAILABLE, ADDRWIDTH
    .comm literalNumberAddress, ADDRWIDTH
    .comm STACKTOP, ADDRWIDTH
-   .comm SUPPRESS, ADDRWIDTH
+   .comm VERBOSE, ADDRWIDTH
+   .comm INITFILE, ADDRWIDTH
+   .comm INITFILEPATH, BUFFERLEN
 
 .section .text
 

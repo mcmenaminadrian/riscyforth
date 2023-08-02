@@ -13,10 +13,14 @@
 		sd a1, 0(a0)
 		la t0, pull_in_another
 		la t1, PULLINANOTHER
-		sd t0, 0(t1)			#for library code
-		la a5, SUPPRESS			# test for suppression
+		sd t0, 0(t1)			# for library code
+		la a5, VERBOSE			# test for verbose output
 		ld a6, 0(a5)
-		bnez a6, printdone
+		beqz a6, printmsgonly
+                la a0, riscy_forth0
+                call puts
+                la a0, welcome_msg
+                call puts
                 PRINT riscy_forth0
                 PRINT riscy_forth1
                 PRINT riscy_forth3
@@ -30,6 +34,10 @@
                 WRITECHAR 0x0A
                 WRITECR
                 WRITECHAR 0x0A
+		j printdone
+  printmsgonly:
+                la a0, welcome_msg
+                call puts
   printdone:
 		la t0, LOADINGFILE
 		sd zero, 0(t0)			#ensure filehandle is NULL
@@ -109,7 +117,12 @@
 		#pass NEXT for modules
 		la a0, NEXT
 		call setNextAddress
-  
+		# any initial execution?
+		la t0, INITFILE
+		ld t1, 0(t0)
+		beqz t1, set_outer_loop 
+		j process_init_file 
+  set_outer_loop:
                 la s7, outer_loop                   #set instruction register to start of outer loop
 
   NEXT:
@@ -126,3 +139,22 @@
                	POP s8
                	j RUN
 
+
+  process_init_file:
+		# code to process init file and then hand over control to INCLUDE code
+		addi sp, sp, -72
+		sd s0, 0(sp)
+		sd s1, 8(sp)
+		sd s2, 16(sp)
+		sd s3, 24(sp)
+		sd s4, 32(sp)
+		sd s5, 40(sp)
+		sd s6, 48(sp)
+		sd s10, 56(sp)
+		sd s11, 64(sp)
+		#now point the registers to the right place
+		la a0, INITFILEPATH
+		la a1, stdinopen
+		call fopen
+		tail init_join_include	
+		

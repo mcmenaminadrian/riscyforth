@@ -52,5 +52,8 @@
 .extern FP_AVAILABLE
 .extern literalNumberAddress
 .extern STACKTOP
+.extern VERBOSE
+.extern INITFILE
+.extern INITFILEPATH
 
 #endif
