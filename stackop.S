@@ -88,7 +88,35 @@
 		addi sp, sp, 16
 		tail NEXT
 
-		CODEHEADER SQUARE, DROP2, 0x01
+		CODEHEADERZ SPGET, SP@, DROP2, 0x01
+		# ( --- addr)
+		mv a0, sp		#stack pointer before we do this operation
+		addi sp, sp, -8
+		sd a0, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ SPSET, SP!, SPGET, 0x01
+		# stack pointer reset!
+		#(addr --- ?)
+		ld a0, 0(sp)
+		mv sp, a0
+		tail NEXT
+
+		CODEHEADERZ RPGET, RP@, SPSET, 0x01
+		#( -- addr)
+		addi sp, sp, -8
+		sd s9, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ RPSET, RP!, RPGET, 0x01
+		# resets R stack
+		# (addr ---)
+		ld a0, 0(sp)
+		addi sp, sp, 8
+		mv s9, a0
+		tail NEXT
+
+		CODEHEADER SQUARE, RPSET, 0x01
 		ld t0, 0(sp)
 		mul t1, t0, t0
 		sd t1, 0(sp)
