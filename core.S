@@ -141,6 +141,9 @@
 
 
   process_init_file:
+		# set all this to zero
+		la t0, INPUT_DISPLACE
+		sd zero, 0(t0)
 		# code to process init file and then hand over control to INCLUDE code
 		addi sp, sp, -72
 		sd s0, 0(sp)

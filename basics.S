@@ -57,8 +57,16 @@
                 la a0, OKSTATUS
 		ld a0, 0(a0)
                 bne a0, zero, ok_not_ok
+		la t0, INFILELOAD		# suppress in file load if not verbose
+		ld t1, 0(t0)
+		beqz t1, say_ok
+		la t2, VERBOSE
+		ld t3, 0(t2)
+		beqz t3, ok_go_home
+  say_ok:
                 la a0, Ok_msg
                 call puts
+  ok_go_home:
                 tail NEXT
   ok_not_ok:
                 addi t0, zero, 1

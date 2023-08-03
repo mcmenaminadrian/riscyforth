@@ -12,8 +12,6 @@ extern unsigned long INITFILEPATH;
  * Code to handle initialisation with running files
  */
 
-const int MAX_OPT = 16;
-
 void initriscyforth(int argc, char *arg0)
 {
 	int opt;
