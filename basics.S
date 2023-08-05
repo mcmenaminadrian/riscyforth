@@ -104,11 +104,15 @@
 		la a4, INFILELOAD
 		ld a4, 0(a4)
 		bnez a4, tokenize_buffer_set		#don't mess about with file loads
-		la a5, INPUT_DISPLACE
-		ld a5, 0(a5)
+		la a3, INPUT_DISPLACE
+		ld a5, 0(a3)
 		la a6, INPUT_BUFFER
 		sub a7, a0, a6
 		beq a7, a5, tokenize_buffer_set
+		blt a7, a5, tokenize_buffer_forward
+		sd a7, 0(a3)
+		j tokenize_buffer_set
+  tokenize_buffer_forward:
 		add a0, a6, a5
   tokenize_buffer_set:
                 addi t0, a0, 1                        #account for minimal input
