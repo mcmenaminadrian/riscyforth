@@ -1,7 +1,7 @@
 #####################################################################################
 #           RISCYFORTH                                                              #
 #           TIL for RISC-V                                                          #
-#           Copyright (c) Adrian McMenamin <adrianmcmenamin@gmail.com> 2020, 2021   #
+#           Copyright (c) Adrian McMenamin <adrianmcmenamin@gmail.com> 2020 - 2023  #
 #           Licensed for resuse under version 2 of the GPL                          #
 #                                                                                   #
 #           As per the terms of the GPL no warranty is offered for this code        #
@@ -42,7 +42,7 @@
    .comm CYCLEPINGS, ADDRWIDTH
 
    .data
-   welcome_msg:   	.asciz "RISCYFORTH - Copyright Adrian McMenamin 2020 - 2022"
+   welcome_msg:   	.asciz "RISCYFORTH - Copyright Adrian McMenamin 2020 - 2023"
    riscy_forth0:  	.asciz "*******************************************************************************"
    riscy_forth1:  	.asciz "RISCYFORTH is a FORTH for RISC-V devices."
    riscy_forth2:  	.asciz "To see supported words type 'WORDS'."
