@@ -36,7 +36,6 @@
    .comm INEVAL, ADDRWIDTH
    .comm RESUME_AFTER_EVAL, ADDRWIDTH
    .comm termios, 64
-   #for debugging
    .comm CYCLESTART, ADDRWIDTH
    .comm CYCLECOUNT, ADDRWIDTH
    .comm CYCLEPINGS, ADDRWIDTH
