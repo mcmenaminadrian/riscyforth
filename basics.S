@@ -99,21 +99,20 @@
   tokenize_not_does_:
                 la a1, INPUT_END
 		ld a1, 0(a1)
-                la a0, INPUT_START
-		ld a0, 0(a0)
+                la a2, INPUT_START
+		ld a0, 0(a2)				# needed for file load code
 		la a4, INFILELOAD
 		ld a4, 0(a4)
 		bnez a4, tokenize_buffer_set		#don't mess about with file loads
 		la a3, INPUT_DISPLACE
-		ld a5, 0(a3)
+		ld a3, 0(a3)
+		la t3, SOURCEID
+		ld t4, 0(t3)
+		li t0, -1				# evaluating a string?
+		beq t0, t4, tokenize_buffer_set		# if so, ignore input buffer
 		la a6, INPUT_BUFFER
-		sub a7, a0, a6
-		beq a7, a5, tokenize_buffer_set
-		blt a7, a5, tokenize_buffer_forward
-		sd a7, 0(a3)
-		j tokenize_buffer_set
-  tokenize_buffer_forward:
-		add a0, a6, a5
+		add a0, a3, a6
+		sd a0, 0(a2)
   tokenize_buffer_set:
                 addi t0, a0, 1                        #account for minimal input
                 bltu t0, a1, tokenize_have_data       #buffer has data
@@ -124,14 +123,35 @@
 		la t0, LOADLINESETUP
 		sd zero, 0(t0)
   tokenize_really_all_over:
-		la t0, INEVAL				#handle EVALUATE case
+		la t0, INEVAL				# handle EVALUATE case
 		ld t1, 0(t0)
 		beq t1, zero, tokenize_leave
+		# are we really at the end of EVALUATE?
+		la t0, INPUT_DISPLACE
+		ld t1, 0(t0)
+		la t2, INPUT_BUFFER_STRING
+		ld t3, 0(t2)
+		la t4, INPUT_END
+		ld t5, 0(t4)
+		add t6, t3, t1
+		bge t6, t5, tokenize_turn_off_eval
+		sd t6, 0(t2)
+		sd t6, INPUT_START, t3
+		j tokenize_normal			# stay in EVALUATE for now
+  tokenize_turn_off_eval:
 		sd zero, INEVAL, t1
 		la t0, RESUME_AFTER_EVAL
 		ld s7, 0(t0)
 		la t0, SOURCEID
-		sd zero, 0(t0)				#SOURCE-ID
+		sd zero, 0(t0)				# SOURCE-ID
+		la a0, INPUT_START			# reset input points
+		la a1, INPUT_START_RESTART
+		la a2, INPUT_DISPLACE
+		la a3, INPUT_DISPLACE_RESTART
+		ld a1, 0(a1)
+		sd a1, 0(a0)
+		ld a3, 0(a3)
+		sd a3, 0(a2)
   tokenize_leave:
                 tail NEXT
   tokenize_have_data:
@@ -167,10 +187,24 @@
                 j tokenize_advance_search
   tokenize_end_token:
                 sd t1, INPUT_START, t5                #update the end point for subsequent searches
+		la a5, SOURCEID
+		ld a5, 0(a5)
+		li a6, -1
+		beq a5, a6, tokenize_end_token_update_string
 		la a5, INPUT_BUFFER
 		la a6, INPUT_DISPLACE
 		sub a7, t1, a5
 		sd a7, 0(a6)
+		j tokenize_end_token_pre_sane
+  tokenize_end_token_update_string:
+		la a5, INPUT_BUFFER_STRING
+		ld a5, 0(a5)
+		la a6, INPUT_DISPLACE
+		la t1, INPUT_START
+		ld t1, 0(t1)
+		sub a7, t1, a5
+		sd a7, 0(a6)
+  tokenize_end_token_pre_sane:
                 addi t1, t1, -1                       # space or NL not part of token
                 mv t2, t0
 		sub a0, t1, t0			      #a0 has length of token - 1

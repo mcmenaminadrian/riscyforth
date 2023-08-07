@@ -30,6 +30,7 @@
 
 
 .extern INPUT_BUFFER
+.extern INPUT_BUFFER_STRING
 .extern EXPANDED_BUFFER
 .extern dictionary
 .extern newdictionary

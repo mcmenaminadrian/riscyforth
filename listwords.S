@@ -103,9 +103,20 @@
 		ld t1, 8(sp)
 		addi sp, sp, 16
 		#set the INPUT and OUTPUT and pass control
+		la a0, INPUT_START				# get restart point
+		ld a1, 0(a0)
+		add a2, a1, t0					# advance
+		sd a2, INPUT_START_RESTART, t3			# save for future reuse
+		la a3, INPUT_DISPLACE
+		ld a4, 0(a3)
+		addi a4, a4, 2
+		add a4, a4, t0
+		sd a4, INPUT_DISPLACE_RESTART, t3		# save for reuse
+		sd t1, INPUT_BUFFER_STRING, t3
 		sd t1, INPUT_START, t3
 		add t0, t0, t1
 		sd t0, INPUT_END, t3
+		sd zero, INPUT_DISPLACE, t3
 		la s7, outer_loop_tokenize
 		tail NEXT
 

@@ -4,6 +4,7 @@
 
 .section .bss
    .comm INPUT_BUFFER, BUFFERLEN
+   .comm INPUT_BUFFER_STRING, ADDRWIDTH
    .comm EXPANDED_BUFFER, BUFFERLEN
    .comm createwritepoint, ADDRWIDTH
    .comm newdictionary, ADDRWIDTH
