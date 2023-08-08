@@ -4,6 +4,7 @@
 
 .section .bss
    .comm INPUT_BUFFER, BUFFERLEN
+   .comm INPUT_BUFFER_STRING, ADDRWIDTH
    .comm EXPANDED_BUFFER, BUFFERLEN
    .comm createwritepoint, ADDRWIDTH
    .comm newdictionary, ADDRWIDTH
@@ -27,6 +28,9 @@
    .comm FP_AVAILABLE, ADDRWIDTH
    .comm literalNumberAddress, ADDRWIDTH
    .comm STACKTOP, ADDRWIDTH
+   .comm VERBOSE, ADDRWIDTH
+   .comm INITFILE, ADDRWIDTH
+   .comm INITFILEPATH, BUFFERLEN
 
 .section .text
 

@@ -30,6 +30,7 @@
 
 
 .extern INPUT_BUFFER
+.extern INPUT_BUFFER_STRING
 .extern EXPANDED_BUFFER
 .extern dictionary
 .extern newdictionary
@@ -52,5 +53,8 @@
 .extern FP_AVAILABLE
 .extern literalNumberAddress
 .extern STACKTOP
+.extern VERBOSE
+.extern INITFILE
+.extern INITFILEPATH
 
 #endif

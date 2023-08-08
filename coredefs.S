@@ -843,8 +843,9 @@
 		
 		CODEHEADER EXECUTE, SOURCE, 0x01
 		#(xt --)
-		#Code will crash system if used badly!
-		POP s8
+		# take address (xt) off stack and get it to execute
+		ld s8, 0(sp)
+		addi sp, sp, 8
 		tail RUN
 
 		CODEHEADER _TICK, EXECUTE, 0x0

@@ -663,24 +663,30 @@
   embed_to:
   embed_tick:
   embed_marker:
-		#embed string - but don't process it in any way
+		# embed string - but don't process it in any way
 		la t0, createwritepoint
 		ld t1, 0(t0)
-		sd t3, 0(t1)				#write out word address
+		sd t3, 0(t1)				# write out word address
   embed_tick_postpone:
 		PUSH t1					# save for later
-		#find length
+		# find length
 		call tick_start_looking
-		#t0 has start of token
-		#t1 has end of token
+		# t0 has start of token
+		# t1 has end of token
+		# update buffer pointers
+		la t3, INPUT_START
+		ld t4, 0(t3)
+		la t5, INPUT_DISPLACE
+		sub t6, t0, t4
+		sd t6, 0(t5)
 		addi t1, t1, -1
 		mv t2, t0
 		mv t3, t1
 		sub a0, t3, t2
 		addi a0, a0, 1
 		POP t1
-		sd a0, 8(t1)				#write out length
-		addi t1, t1, 16				#prepare to embed
+		sd a0, 8(t1)				# write out length
+		addi t1, t1, 16				# prepare to embed
 		mv a2, a0
 		mv a3, t0
 		mv a5, t1

@@ -128,4 +128,6 @@ variable colpos 0 colpos !
     1 color_pair attroff
     memclean
     endwin
-;   
+;
+
+life   
