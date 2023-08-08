@@ -108,9 +108,14 @@
 		ld a3, 0(a3)
 		la t3, SOURCEID
 		ld t4, 0(t3)
-		li t0, -1				# evaluating a string?
-		beq t0, t4, tokenize_buffer_set		# if so, ignore input buffer
+		li t0, -1						# evaluating a string?
+		bne t0, t4, tokenize_displace_input_buffer		# if so, process input buffer
+		la a6, INPUT_BUFFER_STRING
+		ld a6, 0(a6)
+		j tokenize_process_displace
+  tokenize_displace_input_buffer:
 		la a6, INPUT_BUFFER
+  tokenize_process_displace:
 		add a0, a3, a6
 		sd a0, 0(a2)
   tokenize_buffer_set:
