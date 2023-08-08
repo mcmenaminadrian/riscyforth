@@ -73,11 +73,19 @@
 		#(-- char) at runtime
 		#places first char of name on stack
 		ld a0, INPUT_START
+		PUSH a0
 		ld a1, INPUT_END
 		call utility_find_string
 		beqz a0, bracketchar_error
 		#a0 has start, a1 has end + 1, a2 has length
 		sd a1, INPUT_START, t5
+		la t0, INPUT_DISPLACE
+		ld t1, 0(t0)
+		add t2, t1, a2
+		POP t3
+		sub t4, a0, t3
+		add t5, t2, t4
+		sd t5, 0(t0)
   bracketchar_completion:
 		lb t0, 0(a0)
 		addi sp, sp, -8

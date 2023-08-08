@@ -677,8 +677,10 @@
 		la t3, INPUT_START
 		ld t4, 0(t3)
 		la t5, INPUT_DISPLACE
+		ld a5, 0(t5)
 		sub t6, t0, t4
-		sd t6, 0(t5)
+		add a6, t6, a5
+		sd a6, 0(t5)
 		addi t1, t1, -1
 		mv t2, t0
 		mv t3, t1
