@@ -66,7 +66,6 @@
 		add s7, s7, t2
   _bracketchar_adjustment_over:
 		j bracketchar_completion
-		tail NEXT
 
 		CODEHEADERZ BRACKETCHAR, [CHAR], _BRACKETCHAR, 0x01
 		#("spaces<name>" --) at interpretation
