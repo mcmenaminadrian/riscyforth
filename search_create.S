@@ -677,7 +677,10 @@
 		la t3, INPUT_START
 		ld t4, 0(t3)
 		la t5, INPUT_DISPLACE
-		sub t6, t0, t4
+		ld a5, 0(t5)
+		# TODO: does this work for eval and should it?
+		la a0, INPUT_BUFFER			# update from start of input
+		sub t6, t4, a0
 		sd t6, 0(t5)
 		addi t1, t1, -1
 		mv t2, t0
