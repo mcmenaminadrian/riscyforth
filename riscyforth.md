@@ -2,7 +2,7 @@
 % Adrian McMenamin
 % August 2023
 
-RICSCYFORTH(1)    PROGRAMS    RISCYFORTH(1)
+RICSCYFORTH(1)                  RISCYFORTH MANUAL                RISCYFORTH(1)
 
 # NAME
 
