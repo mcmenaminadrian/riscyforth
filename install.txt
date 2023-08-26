@@ -1,0 +1,1 @@
+sudo make install to make riscylib library and install the riscylib man file 
