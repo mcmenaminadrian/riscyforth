@@ -1,6 +1,8 @@
 % RISCYFORTH
 % Adrian McMenamin
-% January 2022
+% August 2023
+
+RICSCYFORTH(1)    PROGRAMS    RISCYFORTH(1)
 
 # NAME
 
@@ -8,15 +10,19 @@ riscyforth - Forth for RISC-V SBCs
 
 # SYNOPSIS
 
-**riscyforth**
+riscyforth
+riscyforth  [-h | -u]
+riscyforth  -v
+riscyforth  -i  filepath
+
 
 # DESCRIPTION
 
-**riscyforth** is a 64-bit Forth for RISC-V single board computers. It is
+**riscyforth** is a 64-bit Forth for RISC-V single board computers. It is mostly
 written in RISC-V assembly and is free software with modification and
 distribution (including of this man file) covered by version 2 of the GNU
 General Public Licence (which should be found in every distribution of
-**riscyforth**).
+**riscyforth**), or any later version, at your discretion.
 
 The most up-to-date version of **riscyforth** can be found at
 https://github.com/mcmenaminadrian/riscyforth
@@ -30,16 +36,32 @@ all Forths **riscyforth** may be extended through *colon words* written in
 Forth itself.
 
 **riscyforth** aims to support the Forth 2012 standard but not all words here
-are part of the standard and not all the standard is (currently) supported.
+are part of the standard and not quite all of the standard is (currently) supported.
 
 It should be noted that **riscyforth** is a 64 bit Forth - i.e., cells are 8
 bytes wide by default.
 
 **riscyforth** is copyright (c) Adrian McMenamin, 2020 - 2022.
 
+# OPTIONS
+
+        -h, -u
+            Show usage message
+
+        -v
+            Show verbose output (default is verbose output is suppressed).
+
+        -i filepath
+            Include Forth file found at filepath
+
+# EXAMPLES
+
+        riscyforth -i ./src/exceptions.fth
+            Load the Forth exceptions code on startup from the src directory.
+
 # FORTH WORDS
 
-An alphabetical list of Forth words implemented on **riscyforth** follows. A
+An alphabetical list of core Forth words implemented on **riscyforth** follows. A
 word in the Forth 2012 Core which is not yet implemented (and may never be) is
 also noted for the convenience of those porting code.
 
