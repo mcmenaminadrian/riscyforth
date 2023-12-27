@@ -1,6 +1,7 @@
-# Copyright Adrian McMenamin, 2021 - 2022
+# Copyright Adrian McMenamin, 2021 - 2023
 # Resuse licensed under version 2 of the GNU GPL
-# Words from the Forth standard core not defined somewhere else
+# Mostly words from the Forth standard core not defined somewhere else
+# Also terminal io
 
 		
 		CODEHEADER _ABORTCOMM, ALLOCATE, 0x0
@@ -685,7 +686,7 @@
 		j DISPLAY
 
 		CODEHEADER BRIGHT, BBLACK, 0x01
-		#bright
+		#bright foreground
 		#\e[1m
 		addi sp, sp, -40
 		li t0, 0x1B
@@ -716,7 +717,139 @@
 		sd t0, 32(sp)
 		j DISPLAY
 
-		CODEHEADER ABORTCOMM, RESET, 0x01
+		CODEHEADER BLINK, RESET, 0x01
+		# (slow) blinking text
+		# \e[5m
+		addi sp, sp, -40
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x35
+		sd t0, 16(sp)
+		li t0, 0x6D
+		sd t0, 24(sp)
+		li t0, 0x90
+		sd t0, 32(sp)
+		j DISPLAY
+
+		CODEHEADER UNDERLINE, BLINK, 0x01
+		# underlined text
+		# \e[4m
+		addi sp, sp, -40
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x34
+		sd t0, 16(sp)
+		li t0, 0x6D
+		sd t0, 24(sp)
+		li t0, 0x90
+		sd t0, 32(sp)
+		j DISPLAY
+
+		CODEHEADER CROSSEDOUT, UNDERLINE, 0x01
+		# crossedout text (may not work)
+		# \e[9m
+		addi sp, sp, -40
+		li t0, 0x1B
+		sd t0, 0(sp)
+		li t0, 0x5B
+		sd t0, 8(sp)
+		li t0, 0x39
+		sd t0, 16(sp)
+		li t0, 0x6D
+		sd t0, 24(sp)
+		li t0, 0x90
+		sd t0, 32(sp)
+		j DISPLAY
+
+		CODEHEADER TERMIOSSTRING, CROSSEDOUT, 0x01
+		# general termios output
+		# format...
+		# read in the last two numbers on the stack
+		# "cccc" ---
+		# takes the string and tops and tails it as termios
+		mv a1, sp	# used to restore
+		mv a2, zero	# count up jump in input
+		mv a3, zero     # length of string
+		addi sp, sp, -16 # for \e[
+		la t0, INPUT_START  # look for start of string
+		la t6, SCRATCH_PAD
+		ld t0, 0(t0)
+		li t2, 0x20	# space
+		li t3, 0x0A	# nl
+		li t4, 0x22	# "
+		li t5, 0x27	# '
+  termios_look_for_start:
+		addi a2, a2, 1
+		lb t1, 0(t0)
+		beq t1, t4, termios_start
+		beq t1, t5, termios_start
+		beq t1, t3, termios_fail
+		addi t0, t0, 1
+		j termios_look_for_start
+  termios_fail:
+		mv a1, sp
+		la t0, INPUT_START
+		ld t1, 0(t0)
+		add t2, t1, a2
+		sd t2, 0(t0)
+		la a0, Error_msg
+		call puts
+		tail NEXT
+  termios_loop:
+  termios_start:
+		addi t0, t0, 1
+		addi a2, a2, 1
+		lb t1, 0(t0)
+		beq t1, t4, termios_done
+		beq t1, t5, termios_done
+		beq t1, t3, termios_fail
+		beq t1, t2, termios_fail
+		addi sp, sp, -8
+		sb t1, 0(t6)	# write to scratch pad
+		addi t6, t6, 1
+		addi a3, a3, 1  # count up characters
+		j termios_loop
+  termios_done:
+		# add in the end stuff
+		addi sp, sp, -16
+		la t0, SCRATCH_PAD
+		mv t1, zero
+		mv t2, sp
+		li t3, 0x1B
+		sd t3, 0(t2)
+		li t3, 0x5B
+		sd t3, 8(t2)
+		addi t2, t2, 16
+  termios_copy_scratch_pad:
+		lb t3, 0(t0)
+		sd t3, 0(t2)
+		addi a3, a3, -1		# have we written everything yet?
+		beqz a3, termios_final_write
+		addi t0, t0, 1		# advance through scratch pad
+		addi t2, t2, 8		# advance through stack
+		j termios_copy_scratch_pad
+  termios_final_write:
+		li t3, 0x6D		# m
+		sd t3, 8(t2)
+		li t3, 0x90
+		sd t3, 16(t2)
+		la t0, INPUT_START	# update input point
+		ld t1, 0(t0)
+		add t2, t1, a2
+		addi a2, a2, 1
+		sd t2, 0(t0)
+		la a3, INPUT_DISPLACE
+		ld a4, 0(a3)
+		add a4, a4, a2
+		sd a4, 0(a3)
+		j DISPLAY
+  
+
+		CODEHEADER ABORTCOMM, TERMIOSSTRING, 0x01
 		#does nothing in interpretration mode
 		tail NEXT
 
