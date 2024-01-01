@@ -190,6 +190,8 @@ in intrepreted code.
 
 **CRESET** (mask addr --) Turn bits off at *addr* using 8-bit *mask*
 
+**CROSSEDOUT** ( --- ) Cross out text
+
 **CSET** (mask addr --) Set bits at *addr* using 8-bit *mask*
 
 **CTOGGLE** (mask addr --) Toggle bits at *addr* using 8-bit *mask*
@@ -468,6 +470,8 @@ the string defined in the inverted commas
 
 **!** (x addr --) Store *x* at *addr*
 
+**TERMIOSSTRING** (ccc"string" --- ?) Interperet string as the body of a termnal escape sequence
+
 **THEN** Final clause in all *IF...* structures, execution continues after
 *THEN* once *IF* and *ELSE* clauses exhausted
 
@@ -544,6 +548,8 @@ remainder *u2* - all arithmetic is unsigned
 arithmetic is unsigned
 
 **+UNDER** (x2 x1 x0 -- x1 x3) *x3* is the sum of *x2* and *x0*
+
+**UNDERLINE** ( --- ) Underline output text
 
 **UNLOOP** Discard the loop parameters for the current loop (before *EXIT*)
 
