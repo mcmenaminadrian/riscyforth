@@ -41,7 +41,7 @@ are part of the standard and not quite all of the standard is (currently) suppor
 It should be noted that **riscyforth** is a 64 bit Forth - i.e., cells are 8
 bytes wide by default.
 
-**riscyforth** is copyright (c) Adrian McMenamin, 2020 - 2022.
+**riscyforth** is copyright (c) Adrian McMenamin, 2020 - 2024.
 
 # OPTIONS
 
@@ -118,7 +118,7 @@ to *a1*
 
 **BRIGHT** Set terminal output to bright
 
-**BUFFER:** (-- a) Creates a buffer that returns address *a* e.g.,
+**BUFFER:** (x -- a) Creates a buffer of length x that returns address *a* e.g.,
 *80 BUFFER: TESTBUF* creates the buffer *TESTBUF* of length 80 bytes
 
 **BWHITE** Set terminal background to white
@@ -610,7 +610,7 @@ Parse characters ccc delimited by char (512 max length)
 **#>** (xd -- addr u) Make a pictured numeric string of length *u* 
 available at *addr*
 
-**<#** Initialise the pcitured numeric string process
+**<#** Initialise the pictured numeric string process
 
 **#** (ud1 -- ud2) Extract one (lowest) digit (by radix) from *ud1*
 leaving *ud2* and add to pictured numeric string

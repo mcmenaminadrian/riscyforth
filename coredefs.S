@@ -765,7 +765,47 @@
 		sd t0, 32(sp)
 		j DISPLAY
 
-		CODEHEADER TERMIOSSTRING, CROSSEDOUT, 0x01
+		CODEHEADER _TERMIOSSTRING, CROSSEDOUT, 0x0
+		# compiled version of TERMIOSSTRING
+		ld t0, 0(s7)	# length to offset
+		addi t0, t0, -2	# discount inverted commas (0x22)
+		la t1, SCRATCH_PAD
+		li t2, 0x1B
+		sb t2, 0(t1)
+		li t2, 0x5B
+		sb t2, 1(t1)
+		addi t1, t1, 2
+		#now write out string
+		mv t3, s7
+		addi t3, t3, ADDRWIDTH + 1	# skip "
+		mv t4, t0
+  termios__loop:
+		beqz t4, termios__end
+		lb t5, 0(t3)
+		sb t5, 0(t1)
+		addi t3, t3, 1
+		addi t1, t1, 1
+		addi t4, t4, -1
+		j termios__loop
+  termios__end:
+		#write out the end
+		li t2, 0x6D			# m
+		sb t2, 0(t1)
+		mv s7, t3
+		addi s7, s7, 1			# beyond "
+		li a0, 0x07
+		and a2, s7, a0
+		beqz a2, termios__out
+		li a1, 0x08
+		sub a3, a1, a2
+		add s7, s7, a3
+  termios__out:
+		addi t0, t0, 3			# account for extra chars again
+		la t1, SCRATCH_PAD
+		WRITESTRINGR t1, t0
+		tail NEXT
+
+		CODEHEADER TERMIOSSTRING, _TERMIOSSTRING, 0x01
 		# general termios output
 		# format...
 		# read in the last two numbers on the stack

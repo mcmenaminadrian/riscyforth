@@ -54,7 +54,7 @@ words here are part of the standard and not quite all of the standard is
 It should be noted that \f[B]riscyforth\f[R] is a 64 bit Forth - i.e.,
 cells are 8 bytes wide by default.
 .PP
-\f[B]riscyforth\f[R] is copyright (c) Adrian McMenamin, 2020 - 2022.
+\f[B]riscyforth\f[R] is copyright (c) Adrian McMenamin, 2020 - 2024.
 .SH OPTIONS
 .IP
 .nf
@@ -146,9 +146,9 @@ stack
 .PP
 \f[B]BRIGHT\f[R] Set terminal output to bright
 .PP
-\f[B]BUFFER:\f[R] (\[en] a) Creates a buffer that returns address
-\f[I]a\f[R] e.g., \f[I]80 BUFFER: TESTBUF\f[R] creates the buffer
-\f[I]TESTBUF\f[R] of length 80 bytes
+\f[B]BUFFER:\f[R] (x \[en] a) Creates a buffer of length x that returns
+address \f[I]a\f[R] e.g., \f[I]80 BUFFER: TESTBUF\f[R] creates the
+buffer \f[I]TESTBUF\f[R] of length 80 bytes
 .PP
 \f[B]BWHITE\f[R] Set terminal background to white
 .PP
@@ -233,6 +233,8 @@ Does nothing in intrepreted code.
 .PP
 \f[B]CRESET\f[R] (mask addr \[en]) Turn bits off at \f[I]addr\f[R] using
 8-bit \f[I]mask\f[R]
+.PP
+\f[B]CROSSEDOUT\f[R] ( \[em] ) Cross out text
 .PP
 \f[B]CSET\f[R] (mask addr \[en]) Set bits at \f[I]addr\f[R] using 8-bit
 \f[I]mask\f[R]
@@ -584,6 +586,9 @@ and \f[I]u\f[R] the length of, the string defined in the inverted commas
 .PP
 \f[B]!\f[R] (x addr \[en]) Store \f[I]x\f[R] at \f[I]addr\f[R]
 .PP
+\f[B]TERMIOSSTRING\f[R] (ccc\[rq]string\[rq] \[em] ?)
+Interperet string as the body of a termnal escape sequence
+.PP
 \f[B]THEN\f[R] Final clause in all \f[I]IF\&...\f[R] structures,
 execution continues after \f[I]THEN\f[R] once \f[I]IF\f[R] and
 \f[I]ELSE\f[R] clauses exhausted
@@ -673,6 +678,8 @@ store result in \f[I]ud\f[R] - all arithmetic is unsigned
 \f[B]+UNDER\f[R] (x2 x1 x0 \[en] x1 x3) \f[I]x3\f[R] is the sum of
 \f[I]x2\f[R] and \f[I]x0\f[R]
 .PP
+\f[B]UNDERLINE\f[R] ( \[em] ) Underline output text
+.PP
 \f[B]UNLOOP\f[R] Discard the loop parameters for the current loop
 (before \f[I]EXIT\f[R])
 .PP
@@ -740,7 +747,7 @@ processed
 \f[B]#>\f[R] (xd \[en] addr u) Make a pictured numeric string of length
 \f[I]u\f[R] available at \f[I]addr\f[R]
 .PP
-\f[B]<#\f[R] Initialise the pcitured numeric string process
+\f[B]<#\f[R] Initialise the pictured numeric string process
 .PP
 \f[B]#\f[R] (ud1 \[en] ud2) Extract one (lowest) digit (by radix) from
 \f[I]ud1\f[R] leaving \f[I]ud2\f[R] and add to pictured numeric string
