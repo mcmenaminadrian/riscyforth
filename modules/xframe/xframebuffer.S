@@ -82,7 +82,7 @@
 
 	CODEHEADER XCREATESIMPLEWINDOW, XDEFAULTSCREEN, 0x01
 	# (n n n n n n n n -- n)
-	# display, parent, x, y, width, height, border_width, border, background
+	# (display) parent, x, y, width, height, border_width, border, background
 	la t0, x11_display
 	ld a0, 0(t0)	# display
 	ld a1, 0(sp)	# parent
@@ -251,7 +251,7 @@
 	addi sp, sp, 8
 	TAILMOD t1
 
-	CODEHEADER XSETWMPROTOCOLS, XMAPWINDOW, 0x01
+	CODEHEADER XGETWMPROTOCOLS, XMAPWINDOW, 0x01
 	# ( n, n, n, --- n)
 	# display, window, protocols_return, count_return
 	la t0, x11_display
