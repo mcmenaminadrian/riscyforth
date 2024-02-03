@@ -38,7 +38,7 @@ This module provides a Forth interface to the X11 libraries. Commands are descri
 
 ## XCREATESIMPLEWINDOW
 
-    (n n n n n n n n -- n)
+    (n n n n n n n n n -- n)
 
     Calls `XCreateSimpleWindow`. Takes display value from `x11_display`.
 
@@ -52,6 +52,7 @@ This module provides a Forth interface to the X11 libraries. Commands are descri
     - Border_width
     - Border
     - Background
+    - Foreground
 
     Returns window ID of its created window.
 
