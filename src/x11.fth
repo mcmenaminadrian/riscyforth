@@ -8,6 +8,7 @@ variable bpixel
 variable wpixel
 variable rootw
 variable wmdelete
+variable countup
 
 : winname S" HELLO WORLD" ;
 : iconname S" HI" drop ;
@@ -27,16 +28,18 @@ XDEFAULTSCREEN screen !
 screen @ XROOTWINDOW rootw !
 screen @ XBLACKPIXEL bpixel !
 screen @ XWHITEPIXEL wpixel !
-WPIXEL @ [ hex FF0000 decimal ]  1 400 100 90 120 rootw @ XCREATESIMPLEWINDOW win !
+WPIXEL @ [ hex FF0000 decimal ]  1 400 400 90 120 rootw @ XCREATESIMPLEWINDOW win !
 hex 28043 decimal win @ XSELECTINPUT
 win @ XMAPWINDOW
 screen @ XDEFAULTGC gc !
+0 countup !
 BEGIN
 TRUE
 WHILE
 wmdelete @  XNEXTEVENT
 100 100 200 200 gc @ win @ XFILLRECTANGLE
-S" Hello World!" 50 10 gc @  win @ XDRAWSTRING
+countup s>d <# #s #> . 50 10 gc @  win @ XDRAWSTRING
+countup @ 1+ countup !
 REPEAT
 wmdelete @ FREE
 XCLOSEDISPLAY

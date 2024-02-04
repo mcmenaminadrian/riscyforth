@@ -217,7 +217,16 @@
 		sd t0, 0(s9)
 		tail NEXT
 
-		CODEHEADERZ RFROM, R>, TOR, 0x01 #R>
+		CODEHEADERZ RFROM2, 2R>, TOR, 0x01
+		ld t0, 0(s9)
+		ld t1, STACKOFFSET(s9)
+		addi s9, s9, (STACKOFFSET * 2)
+		addi sp, sp, -(STACKOFFSET * 2)
+		sd t1, STACKOFFSET(sp)
+		sd t0, 0(sp)
+		tail NEXT
+
+		CODEHEADERZ RFROM, R>, RFROM2, 0x01 #R>
 		ld t0, 0(s9)
 		PUSH t0
 		addi s9, s9, STACKOFFSET

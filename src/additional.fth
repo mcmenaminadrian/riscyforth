@@ -18,6 +18,7 @@
     false swap !
 ;
 
+
 \ string commands - as in GForth
 
 : str=           \ str-equals
