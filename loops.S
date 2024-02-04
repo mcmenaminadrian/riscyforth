@@ -24,6 +24,7 @@
 		addi s10, s10, 24		#unloop first
 		la t0, WA__LOOP
 		la t1, WA__PLUSLOOP
+		la t5, WA__MINUSLOOP
 		la t3, WA__DO
 		la t6, WA__QDO
 		mv t4, zero
@@ -37,6 +38,7 @@
   leave_test:
 		beq t2, t0, leave_maybe_leave
 		beq t2, t1, leave_maybe_leave
+		beq t2, t5, leave_maybe_leave
   leave_move_on:
 		addi s7, s7, 8
 		j leave_load_secondary
