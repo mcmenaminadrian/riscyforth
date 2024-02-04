@@ -556,6 +556,13 @@
 		sub t2, t2, t0
 		add t1, t1, t2
   sq_write_out:
+		# update >IN count first
+		la a0, INPUT_DISPLACE
+		ld a1, 0(a0)
+		add a1, a1, t3
+		addi a1, a1, 2		# account for space and "
+		sd a1, 0(a0)
+		# now resume writing out string
 		sd t3, 0(t1)
 		addi t1, t1, 8
 		addi sp, sp, -16
