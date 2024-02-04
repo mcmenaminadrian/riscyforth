@@ -18,18 +18,19 @@
     false swap !
 ;
 
-\ add a character to a string
-:  c$+!
-    ( saddr char -- )
-    >R                          \ save the character
-    DUP @ 1+ 
-    , HERE >R                   \ get the old length, add 1, store on R stack, set new address to R stack
-    @ >R                        \ put old length on R stack
-    @                           \ get read address
-    0 R> DO DUP C@ C, 1+ -1 +LOOP      \ copy characters
-    DROP
-    R>
-    R> C,                       \ save the character
-    !                           \ save the updated address
+
+\ string commands - as in GForth
+
+: str=           \ str-equals
+  ( c-addr1 u1 c-addr2 u2 -- f)
+  \ test length first
+  2>R 2>R 1
+  2R> 2R>
+  >R swap R@ 
+  = FALSE = IF 2DROP DROP 0
+  ELSE
+  \ now test character equality
+     R@ 0 DO 2DUP C@ SWAP C@ = FALSE = IF 2DROP DROP 0 1 2 LEAVE THEN 1+ SWAP 1+ LOOP
+  THEN
+      R> DROP 2DROP
 ;
-    
