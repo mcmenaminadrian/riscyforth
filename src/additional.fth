@@ -18,6 +18,10 @@
     false swap !
 ;
 
+: 3DROP
+  ( n n n -- )
+  2DROP DROP
+;
 
 \ string commands - as in GForth
 
@@ -27,12 +31,12 @@
   2>R 2>R -1
   2R> 2R>
   >R swap R@ 
-  = FALSE = IF 2DROP DROP 0
+  <> IF 3DROP 0 1 2
   ELSE
   \ now test character equality
-     R@ 0 DO 2DUP C@ SWAP C@ = FALSE = IF 2DROP DROP 0 1 2 LEAVE THEN 1+ SWAP 1+ LOOP
+     R@ 0 DO 2DUP C@ SWAP C@ <> IF 3DROP 0 1 2 LEAVE THEN 1+ SWAP 1+ LOOP
   THEN
-      R> DROP 2DROP
+      R> 3DROP
 ;
 
 : count-trailing      \ count trailing spaces
@@ -40,7 +44,14 @@
   0 >R
   DUP >R
   + 1-
-  0 R> DO DUP C@ 32 = FALSE = IF LEAVE ELSE R> 1+ >R 1- -1 -LOOP THEN
+  0 R> DO DUP C@ 32 <> IF LEAVE ELSE R> 1+ >R 1- -1 -LOOP THEN
   DROP R>
 ;
+
+: -trailing           \ remove trailing spaces
+  ( c_addr u1 -- c_addr u2 )
+
+  2dup count-trailing
+  -
+;  
 
