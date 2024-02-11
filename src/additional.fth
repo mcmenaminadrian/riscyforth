@@ -145,12 +145,26 @@
   THEN 2RDROP
 ;
 
+: string-prefix?
+  ( ca1 u1 ca2 u2 -- f)
+  >R SWAP >R                          \ ca1 ca2     R: u2 u1
+  2R@ > IF 2DROP 2RDROP 0
+  ELSE                                \ ca1 ca2 R: u2 u1
+    RDROP R> DUP                      \ ca1 ca2 u2 u2  
+    -ROT
+    str==
+  THEN
+;
+
 : foxy S" the quick brown fox jumped over the lazy dog" ;
 : quick S" quick" ;
 : lazy S" lazy" ;
 : laser S" lazer" ;
 
 : test-search
+lazy S" laz" string-prefix? .s
+quick foxy string-prefix? .s
+foxy quick string-prefix? .s
 ." Searching..." foxy type CR
 ." FOR " laser type ." ..." foxy laser search IF type ELSE ." failed" THEN CR
 ." FOR " quick type ." ..." foxy quick search IF type ELSE ." failed" THEN CR
@@ -159,5 +173,5 @@
 ;
 test-search
 
-bye
+
 
