@@ -25,7 +25,6 @@
 
 \ string commands - as in GForth
 
-
 : count-trailing      \ count trailing spaces
   ( c-addr u -- u )
   0 >R
@@ -34,6 +33,7 @@
   0 R> DO DUP C@ 32 <> IF LEAVE ELSE R> 1+ >R 1- -1 -LOOP THEN
   DROP R>
 ;
+
 
 : -trailing           \ remove trailing spaces
   ( c_addr u1 -- c_addr u2 )
@@ -46,6 +46,7 @@
   ( addr1 addr2 -- c1 c2)
   C@ SWAP C@ SWAP
 ;
+
 
 : str==           \ str-equals - strict equality
   ( c-addr1 u1 c-addr2 u2 -- f )
@@ -61,10 +62,12 @@
       RDROP 2DROP
 ;
 
+
 : str=           \ lexical comparison
   ( c-addr1 u1 c-addr2 u2 -- f )
   2>R -TRAILING 2R> -TRAILING str==
 ;
+
 
 : compare             \ lexical comparison -1 <, 0 =, 1 >
   ( caddr2 u2 caddr1 u1 -- n )
@@ -91,21 +94,24 @@
   2RDROP
 ;
 
+
 : str<             \ lexical comparison
   ( caddr2 u2 caddr1 u1 -- f)
   compare -1 =
 ;
+
 
 : str>            \ lexical comparison
   ( caddr2 u2 caddr1 u1 -- f)
   compare 1 =
 ;
 
+
 : find-char \ find a character in a string
     ( a u c -- u f )
     >R .s 0 DO          \ a R: c
-    DUP C@ R@ = .s        \ a f R: c
-    IF DROP I -1 LEAVE \ l -1 R: c
+    DUP C@ R@ =         \ a f R: c
+    IF DROP I -1 LEAVE  \ l -1 R: c
     ELSE
       1+ LOOP
     THEN
@@ -114,26 +120,44 @@
       0 0
     THEN RDROP
 ;
- 
-: test S" 0123456789";
 
-test 53 find-char .s
+
+: search
+  ( ca1 u1 ca2 u2 -- ca3 u3 f) 
+  2>R DUP                              \ CA U u1 R: ca2 u2
+  0 DO                                 \ CA U R: ca2 u2
+    DUP                                \ CA U U R: ca2 u2
+    I -                                \ CA U u R: ca2 u2
+    R@                                 \ CA U u u2 R: ca2 u2
+    < IF 0 LEAVE
+    ELSE                               \ CA U R: ca2 u2
+      SWAP DUP                         \ U CA CA R: ca2 u2
+      I +                              \ U CA ca R: ca2 u2
+      >R SWAP R>                       \ CA U ca R: ca2 u2
+      R@ 2R@                           \ CA U ca u2 ca2 u2 R: ca2 u2
+      str=                             \ CA U f R: ca2 u2
+      IF                               \ CA U R: ca2 u2
+        I - SWAP I + SWAP -1 LEAVE
+      THEN                             \ CA U R: ca2 u2 
+    THEN                               \ CA U R: ca2 u2
+  LOOP
+  DUP -1 <> IF 0
+  THEN 2RDROP
+;
+
+: foxy S" the quick brown fox jumped over the lazy dog" ;
+: quick S" quick" ;
+: lazy S" lazy" ;
+: laser S" lazer" ;
+
+: test-search
+." Searching..." foxy type CR
+." FOR " laser type ." ..." foxy laser search IF type ELSE ." failed" THEN CR
+." FOR " quick type ." ..." foxy quick search IF type ELSE ." failed" THEN CR
+." FOR " lazy type ." ..." foxy lazy search IF type ELSE ." failed" THEN CR
+." AND look for " laser type ." IN " lazy type ."  ..." lazy laser search IF type ELSE ." also failed." CR
+;
+test-search
+
 bye
 
-\ : search              \ look for a substring
-\  ( caddr1 u1 caddr2 u2  -- caddr3 u3 flag)
-\  2>R 2DUP 2R> 2DUP 2>R     \ a1 u1 a1 u1 a2 u2 R: a2 u2
-\  NIP                       \ a1 u1 a1 u1 u2 R: a2 u2
-\  <
-\  IF
-\    DROP 0
-\  ELSE
-\    DROP 2DUP 2R@ str=
-\    IF
-\      -1
-\    ELSE                   \ a1 u1  R: a2 u2
-\      2DUP                 \ a1 u1 a1 u1 R: a2 u2
-\      R@ DUP               \ a1 u1 a1 u1 u2 R: a2 u2
-\      R@ C@                \ a1 u1 a1 u1 u2 c2 R: a2 u2
-\      >R                   \ a1 u1 a1 u1 u2 R: a2 u2 c2 
-           
