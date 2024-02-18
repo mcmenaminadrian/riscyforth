@@ -156,6 +156,20 @@
   THEN
 ;
 
+: cmove
+  ( c-from c-to u -- )
+  0 DO 2DUP 1 MOVE SWAP 1+ SWAP 1+ LOOP
+;
+
+
+: cmove>
+  ( c-from c-to u -- )
+  >R
+  R@ 1- + SWAP R@ 1- + SWAP
+  R> 0 DO 2DUP 1 MOVE SWAP 1- SWAP 1- LOOP
+;
+ 
+
 : foxy S" the quick brown fox jumped over the lazy dog" ;
 : quick S" quick" ;
 : lazy S" lazy" ;
@@ -171,6 +185,21 @@ foxy quick string-prefix? .s
 ." FOR " lazy type ." ..." foxy lazy search IF type ELSE ." failed" THEN CR
 ." AND look for " laser type ." IN " lazy type ."  ..." lazy laser search IF type ELSE ." also failed." CR
 ;
+
+: result-string-failure
+S" TOTAL FAILURE" ;
+: result-string-success
+S" MAGIC SUCCESS" ;
+: result-string-wot
+S" UTTER CONFUSE" ;
+
+
+." This way everything is a " result-string-success type cr
+." And this way it is a " result-string-failure drop result-string-success cmove result-string-success type cr
+." And now we are " result-string-wot drop result-string-success cmove> result-string-success type cr
+
+
+
 test-search
 
 
