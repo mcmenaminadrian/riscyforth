@@ -175,6 +175,7 @@
   32 fill
 ;
 
+
 : /string
   ( c-addr1 u1 n -- caddr2 u2 )
   >R
@@ -186,37 +187,9 @@
   THEN
 ;
 
-: foxy S" the quick brown fox jumped over the lazy dog" ;
-: quick S" quick" ;
-: lazy S" lazy" ;
-: laser S" lazer" ;
 
-: test-search
-lazy S" laz" string-prefix? .s
-quick foxy string-prefix? .s
-foxy quick string-prefix? .s
-." Searching..." foxy type CR
-." FOR " laser type ." ..." foxy laser search IF type ELSE ." failed" THEN CR
-." FOR " quick type ." ..." foxy quick search IF type ELSE ." failed" THEN CR
-." FOR " lazy type ." ..." foxy lazy search IF type ELSE ." failed" THEN CR
-." AND look for " laser type ." IN " lazy type ."  ..." lazy laser search IF type ELSE ." also failed." CR
+: bounds
+  ( addr u -- addr+u addr)
+  2>R 2R@ + 2R> DROP
 ;
-
-: result-string-failure
-S" TOTAL FAILURE" ;
-: result-string-success
-S" MAGIC SUCCESS" ;
-: result-string-wot
-S" UTTER CONFUSE" ;
-
-
-." This way everything is a " result-string-success type cr
-." And this way it is a " result-string-failure drop result-string-success cmove result-string-success type cr
-." And now we are " result-string-wot drop result-string-success cmove> result-string-success type cr
-
-
-
-test-search
-
-
 
