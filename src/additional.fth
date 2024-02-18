@@ -170,6 +170,22 @@
 ;
  
 
+: blank
+  ( caddr u -- )
+  32 fill
+;
+
+: /string
+  ( c-addr1 u1 n -- caddr2 u2 )
+  >R
+  DUP R@ <  IF 2DUP BLANK DROP 0 RDROP
+  ELSE
+    2DUP SWAP R@ + SWAP R@ -
+    2SWAP DROP SWAP 2>R 2R@ MOVE
+    2R> RDROP
+  THEN
+;
+
 : foxy S" the quick brown fox jumped over the lazy dog" ;
 : quick S" quick" ;
 : lazy S" lazy" ;
