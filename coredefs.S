@@ -985,21 +985,45 @@
 		tail NEXT
 		
 		CODEHEADER MOVE, WHILE, 0x01
-		ld t0, 0(sp)
-		ld t1, 8(sp)
-		ld t2, 16(sp)
-		addi sp, sp, 24
-		bnez t0, move_do
+		# (c-from c-to u-count -- )
+                ld a0, 0(sp)
+		bnez a0, move_do
   move_done:
 		tail NEXT
   move_do:
-		lbu t3, 0(t2)
-		sb t3, 0(t1)
+		# create a heap object to store the copied data
+		call malloc
+                bnez a0, move_copy
+                addi sp, sp, 24
+		j move_done
+  move_copy:
+		ld t0, 0(sp)
+		ld t1, 16(sp)
+		mv a1, a0
+  move_loop:
+		lb t2, 0(t1)
+		sb t2, 0(a1)
 		addi t0, t0, -1
-		beqz t0, move_done
-		addi t2, t2, 1
+		beqz t0, move_transpose
+		addi a1, a1, 1
 		addi t1, t1, 1
-		j move_do
+		j move_loop
+  move_transpose:
+		mv a1, a0
+		ld t0, 0(sp)
+		ld t1, 8(sp)
+  move_transpose_loop:
+		lb t2, 0(a1)
+		sb t2, 0(t1)
+		addi t0, t0, -1
+		beqz t0, move_cleanup
+		addi a1, a1, 1
+		addi t1, t1, 1
+		j move_transpose_loop
+  move_cleanup:
+		addi sp, sp, 24
+		call free
+		j move_done
 
 		CODEHEADER SOURCE, MOVE, 0x01
 		la t0, INPUT_BUFFER
