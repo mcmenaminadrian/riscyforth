@@ -158,7 +158,8 @@
 
 : cmove
   ( c-from c-to u -- )
-  0 DO 2DUP 1 MOVE SWAP 1+ SWAP 1+ LOOP
+   0 DO 2DUP SWAP C@  SWAP C! SWAP 1+ SWAP 1+ LOOP
+   2DROP
 ;
 
 
@@ -166,7 +167,8 @@
   ( c-from c-to u -- )
   >R
   R@ 1- + SWAP R@ 1- + SWAP
-  R> 0 DO 2DUP 1 MOVE SWAP 1- SWAP 1- LOOP
+  R> 0 DO 2DUP SWAP C@ SWAP C! SWAP 1- SWAP 1- LOOP
+  2DROP
 ;
  
 
