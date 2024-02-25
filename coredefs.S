@@ -1074,6 +1074,12 @@
 		#Parse the input
 		#Sanitize it first
 		call tick_start_looking
+ 		la a0, INPUT_DISPLACE
+		ld a1, 0(a0)
+		sub a2, t1, t0
+		add a1, a1, a2
+		addi a1, a1, 1
+		sd a1, 0(a0)
 		j tick_process_found_token
 		
 		#code that follows is subroutine to accommodate compiled code too
