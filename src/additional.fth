@@ -195,3 +195,7 @@
   2>R 2R@ + 2R> DROP
 ;
 
+: at-xy
+  ( x y -- )
+  \ TERMIOS "\e[y;x f" or TERMIOSSTRING "y;xf"
+;

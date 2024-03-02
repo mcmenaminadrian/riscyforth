@@ -655,11 +655,13 @@ RESET ." And back to normal..." CR ;
 
 : VERIFYTERMIOS
 ." Verifying TERMIO string handling" CR
-TERMIOSSTRING "0;30;45" ." Black on Violet"
-TERMIOSSTRING "0;35;40" CR ." Violet on Black"
-UNDERLINE TERMIOSSTRING "34;45" CR ." Also verifying UNDERLINE in Cyan on Violet"
-TERMIOSSTRING "3;30;43" CR ." Still underlined italic Black on Yellow"
-RESET CR ." Verificiation complete." CR ;
+TERMIOSSTRING "0;30;45m" ." Black on Violet"
+TERMIOSSTRING "0;35;40m" CR ." Violet on Black"
+TERMIOSSTRING "4;34;45m" CR ." Also verifying UNDERLINE in Cyan on Violet" 
+RESET UNDERLINE
+TERMIOSSTRING "3;30;43m" CR ." Still underlined italic Black on Yellow"
+RESET CR ." Verification complete." CR ;
+urs
 
 : TESTMS
 ." Verifying MS word - waiting around 1 second..." 5 SPACES
