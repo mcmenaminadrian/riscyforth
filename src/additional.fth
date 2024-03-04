@@ -195,7 +195,63 @@
   2>R 2R@ + 2R> DROP
 ;
 
-: at-xy
+
+: AT-XY
   ( x y -- )
-  \ TERMIOS "\e[y;x f" or TERMIOSSTRING "y;xf"
-;
+  \ Generate and evaluate TERMIOSSTRING "y;xH"
+    DECIMAL 32 ALLOCATE 0=                    \ allocate space for string command
+    IF                                        \ proceed if allocation succeeded
+     >R                                          \ copy the allocated address to return stack R: (addr)
+     C" TERMIOSSTRING "                           \ get a counted string for the first part of the command
+     DUP @ R@ !                                   \ write initial count to memory location
+     DUP
+     @ 0 DO                                       \ limit index
+       DUP I +                                    \ update address by index and duplicate
+       8 + C@                                     \ get character
+       R@ 8 + I +                                 \ address to copy to
+       C!                                         \ copy
+     LOOP
+     DROP
+     R@ @                                         \ current length of final string
+     1+                                           \ increase by 1
+     R@  !                                         \ update length
+     34                                           \ "
+     R@ @ + 8 + R@ !                                 \ write out
+     SWAP                                         \ y - first
+     ." here: " .s CR
+     BEGIN
+     DUP
+     0<>
+     WHILE
+       10 /MOD .s
+       SWAP 48 +                      \ convert to character
+       R@ @ 1+ R@ !                               \ update length
+       R@ @ + 8 + R@ !                               \ write out character
+     REPEAT
+     DROP
+     ." Done second part: " .s CR
+     R@ @ 1+ R@ !
+     59
+     R@ @ + 8 + R@ !                                 \ write out ;
+     BEGIN
+     DUP
+     0<>
+     WHILE
+       10 /MOD
+       SWAP 48  +
+       R@ @ 1+ R@ !
+       R@ @ + 8 + R@ !
+     REPEAT
+     DROP .s
+     R@ @ 1+ R@ !
+     72
+     R@ @ + 8 R@ !                                   \ write out H
+     R@ @ 1+ R@ !
+     34
+     R@ @ + 8 R@ !                                   \ closing "
+     R@ EVALUATE
+     R> FREE
+  ELSE
+    ABORT" Memory allocation failure in AT-XY"
+  THEN ;
+

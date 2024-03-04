@@ -789,8 +789,6 @@
 		j termios__loop
   termios__end:
 		#write out the end
-		#li t2, 0x6D			# m
-		#sb t2, 0(t1)
 		mv s7, t3
 		addi s7, s7, 1			# beyond "
 		li a0, 0x07
@@ -800,7 +798,6 @@
 		sub a3, a1, a2
 		add s7, s7, a3
   termios__out:
-		#addi t0, t0, 3			# account for extra chars again
 		addi t0, t0, 2
 		la t1, SCRATCH_PAD
 		WRITESTRINGR t1, t0
@@ -874,8 +871,6 @@
 		addi t2, t2, 8		# advance through stack
 		j termios_copy_scratch_pad
   termios_final_write:
-#		li t3, 0x6D		# m
-#		sd t3, 8(t2)
 		li t3, 0x90
 		sd t3, 8(t2)
 		la t0, INPUT_START	# update input point
