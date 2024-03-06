@@ -406,7 +406,8 @@ TESTBEGINAGAIN BAXX @ 7500000 = IF BLUE ." BEGIN ... AGAIN passed " ELSE RED ." 
 
 
 : FACTORAL
-DUP 2 < IF DROP 1 EXIT THEN DUP BEGIN DUP 2 > WHILE 1- SWAP OVER * SWAP REPEAT DROP ;
+DUP 2 < IF DROP 1 EXIT THEN DUP BEGIN DUP 2 > WHILE 1- SWAP OVER * SWAP 
+REPEAT DROP ;
 
 : HARDREPEATTEST 
  BEGIN DUP 2 > WHILE DUP 5 < WHILE DUP 1+ REPEAT 123 ELSE 345 THEN ;
@@ -655,11 +656,12 @@ RESET ." And back to normal..." CR ;
 
 : VERIFYTERMIOS
 ." Verifying TERMIO string handling" CR
-TERMIOSSTRING "0;30;45" ." Black on Violet"
-TERMIOSSTRING "0;35;40" CR ." Violet on Black"
-UNDERLINE TERMIOSSTRING "34;45" CR ." Also verifying UNDERLINE in Cyan on Violet"
-TERMIOSSTRING "3;30;43" CR ." Still underlined italic Black on Yellow"
-RESET CR ." Verificiation complete." CR ;
+TERMIOSSTRING "0;30;45m" ." Black on Violet"
+TERMIOSSTRING "0;35;40m" CR ." Violet on Black"
+TERMIOSSTRING "4;34;45m" CR ." Also verifying UNDERLINE in Cyan on Violet" 
+RESET
+UNDERLINE TERMIOSSTRING "3;30;43m" CR ." Still underlined italic Black on Yellow"
+RESET CR ." Verification complete." CR ;
 
 : TESTMS
 ." Verifying MS word - waiting around 1 second..." 5 SPACES

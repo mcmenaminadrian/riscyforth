@@ -714,8 +714,10 @@
 		li a0, 0x07
 		li a2, 0x08
 		and a3, a1, a0
+		beqz a3, tick_embed_advance_write 
 		sub a3, a2, a3
 		add a1, a1, a3
+  tick_embed_advance_write:
 		add t1, t1, a1
 		la a0, createwritepoint
 		sd t1, 0(a0)				#advance writepoint

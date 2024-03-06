@@ -195,3 +195,89 @@
   2>R 2R@ + 2R> DROP
 ;
 
+: >STRING
+  ( n -- c-addr )
+  0 >R                                             \ length 0 on stack
+  PAD SWAP
+  BEGIN
+  DUP
+  0<>
+  WHILE
+    10 /MOD
+    SWAP 48 +
+    ROT DUP >R
+    C!
+    R> CHAR+ SWAP
+    R> 1+ >R
+  REPEAT
+  2DROP
+  R@ CELL+ ALLOCATE 0=
+  IF
+    DUP
+    R@ SWAP !
+    DUP
+    CELL+
+    R@ 0 DO DUP R@ 1- I - PAD + C@
+    SWAP C! CHAR+ LOOP
+    DROP RDROP
+ ELSE ABORT" Allocation failed."
+ THEN ;
+
+
+: AT-XY
+  ( x y -- )
+  \ Generate and evaluate TERMIOSSTRING "y;xH"
+    DECIMAL 32 ALLOCATE 0=                    \ allocate space for string command
+    IF                                        \ proceed if allocation succeeded
+     >R                                       \ copy the allocated address to return stack R: (addr)
+     C" TERMIOSSTRING "                       \ get a counted string for the first part of the command
+     DUP @ R@ !                               \ write initial count to memory location
+     DUP
+     @ 0 DO                                   \ limit index
+       DUP I +                                \ update address by index and duplicate
+       CELL+ C@                               \ get character
+       R@ CELL+ I +                           \ address to copy to
+       C!                                     \ copy
+     LOOP
+     DROP
+     R@ @                                     \ current length of final string
+     CHAR+                                    \ increase by 1
+     R@  !                                    \ update length
+     34                                       \ "
+     R@ @ 1- CELL+ R@ + C!                    \ write out
+     SWAP >STRING DUP >R
+     @ 0 DO 
+       R@ CELL+ I + C@                        \ character to write out
+       2R> SWAP DUP @ 1+ 1 PICK ! SWAP 2>R    \ update length
+       2R@ DROP @ 1- CELL+ 2R@ DROP + C!      \ write out
+     LOOP
+     R> FREE DROP
+     R@ @
+     CHAR+
+     R@ !
+     59                                       \ ;
+     R@ @ 1- CELL+ R@ + C!
+     >STRING DUP >R
+     @ 0 DO 
+       R@ CELL+ I + C@                        \ character to write out
+       2R> SWAP DUP @ 1+ 1 PICK ! SWAP 2>R    \ update length
+       2R@ DROP @ 1- CELL+ 2R@ DROP + C!      \ write out
+     LOOP
+     DROP
+     R> FREE DROP
+     R@ 8 + R@ @ type R@ @ 
+     CHAR+
+     R@ !
+     72                                       \ H
+     R@ @ 1- CELL+ R@ + C!
+     R@ @
+     CHAR+
+     R@ !
+     34                                       \ "
+     R@ @ 1- CELL+ R@ + C!
+     R@ 8 + R@ @ EVALUATE
+     R> FREE DROP
+  ELSE
+    ABORT" Memory allocation failure in AT-XY"
+  THEN ;
+
