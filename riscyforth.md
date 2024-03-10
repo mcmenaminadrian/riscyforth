@@ -323,6 +323,8 @@ start of pictured numeric output
 
 **KEY** (-- char) Receive one character from the (ASCII) chaarcter set.
 
+**KEYRAW** (-- char) Read a character in raw mode.
+
 **LEAVE** R:(n --) Immediately leave a loop discarding control parameters
 
 **LITERAL** (-- x) Place *x* on the stack e.g. *[ x ] LITERAL*
@@ -404,6 +406,10 @@ colon definition.
 **?** (addr --) Output value stored at address *addr*
 
 **QUIT** Leave the executing program
+
+**RAWON** ( -- ) Enter terminal raw mode.
+
+**RAWOFF** ( -- ) Leave terminal raw mode.
 
 **RDROP** R:(x --)
 
