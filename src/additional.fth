@@ -245,7 +245,7 @@
      R@  !                                    \ update length
      34                                       \ "
      R@ @ 1- CELL+ R@ + C!                    \ write out
-     SWAP >STRING DUP >R
+     >STRING DUP >R
      @ 0 DO 
        R@ CELL+ I + C@                        \ character to write out
        2R> SWAP DUP @ 1+ 1 PICK ! SWAP 2>R    \ update length
@@ -265,7 +265,7 @@
      LOOP
      DROP
      R> FREE DROP
-     R@ 8 + R@ @ type R@ @ 
+     R@ 8 + R@ @
      CHAR+
      R@ !
      72                                       \ H
