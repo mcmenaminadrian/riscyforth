@@ -6,6 +6,7 @@
 #see include/uapi/asm-generic/termbits.h in Linux kernel distro
 .equ 	TCSANOW, 0
 .equ	TCSADRAIN, 1
+.equ	TCSAFLUSH, 2
 
 #offsets to the c_cc[] array
 .equ	VTIME_OFFSET, 22
@@ -19,9 +20,12 @@
 .equ	OPOST, 0x01
 .equ	CS8, 0x00000030
 .equ	ECHO, 0x00008
+.equ	ECHOE, 0x00010
 .equ	ICANON, 0x00002
 .equ	IEXTEN, 0x08000
 .equ	ISIG, 0x00001
+.equ	CSIZE, 0x00000030
+.equ	PARENB, 0x00000100
 
 
 #INITIALIZE termios structure
@@ -82,6 +86,21 @@
 		POP ra
 		ret
 
+#IXON ON
+  ixon_termios_on:
+		PUSH ra
+		li a0, 0
+		li a1, TCSADRAIN
+		la a2, termios
+		lwu a3, 0(a2)
+		li a4, IXON
+		or a4, a4, ICRNL
+		or a5, a4, a3
+		sw a5, 0(a2)
+		call tcsetattr
+		POP ra
+		ret
+
 #ECHOE ON
   echoe_termios_on:
 		PUSH ra
@@ -97,6 +116,36 @@
 		POP ra
 		ret
 
+#ISIG ON
+  isig_termios_on:
+		PUSH ra
+		li a0, 0
+		li a1, TCSADRAIN
+		la a2, termios
+		#set ISIG
+		lwu a3, 12(a2)
+		li a4, ISIG
+		or a5, a4, a3
+		sw a5, 12(a2)
+		call tcsetattr
+		POP ra
+		ret
+
+#OPOST ON
+  opost_termios_on:
+		PUSH ra
+		li a0, 0
+		li a1, TCSADRAIN
+		la a2, termios
+		lwu a3, 4(a2)
+		li a4, OPOST
+		or a5, a4, a3
+		sw a5, 4(a2)
+		call tcsetattr
+		POP ra
+		ret
+		
+
   reset_termios:
 		PUSH ra
 		call copy_termios_structure		
@@ -106,6 +155,17 @@
 		POP ra
 		ret
 
+  reset_raw_termios:
+		PUSH ra
+		call copy_termios_structure		
+		call icanon_termios_on
+		call echo_termios_on
+		call echoe_termios_on
+		call isig_termios_on
+		call ixon_termios_on
+		call opost_termios_on
+		POP ra
+		ret
 #ICANON OFF
   icanon_termios_off:
 		PUSH ra
@@ -138,6 +198,22 @@
 		POP ra
 		ret
 
+#IXON OFF
+  ixon_termios_off:
+		PUSH ra
+		li a0, 0
+		li a1, TCSADRAIN
+		la a2, termios
+		lwu a3, 0(a2)
+		li a4, IXON
+		or a4, a4, ICRNL
+		not a4, a4
+		and a5, a4, a3
+		sw a3, 0(a2)
+		call tcsetattr
+		POP ra
+		ret
+
 #ECHOE OFF
   echoe_termios_off:
 		PUSH ra
@@ -154,6 +230,38 @@
 		POP ra
 		ret
 
+#ISIG_OFF
+  isig_termios_off:
+		PUSH ra
+		li a0, 0
+		li a1, TCSADRAIN
+		la a2, termios
+		#set ISIG off
+		lwu a3, 12(a2)
+		li a4, ISIG
+		not a4, a4
+		and a5, a4, a3
+		sw a5, 12(a2)
+		call tcsetattr
+		POP ra
+		ret
+
+#OPOST OFF
+  opost_termios_off:
+		push ra
+		li a0, 0
+		li a1, TCSADRAIN
+		la a2, termios
+		lwu a3, 4(a2)
+		li a4, OPOST
+		not a4, a4
+		and a5, a4, a3
+		sw a5, 4(a2)
+		call tcsetattr
+		POP ra
+		ret
+
+
 #NO POLLING
   nopolling_termios:
 		PUSH ra
@@ -166,61 +274,16 @@
 		call tcsetattr
 		POP ra
 		ret
-
-
-# true raw mode - single char no echo
-  rawmode_termios:
+   
+# return single character, no echo
+  singlechar_termios:
 		PUSH ra
-		call load_termios
-		# set t0 to ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON)
-		li t0, BRKINT
-		li t5, ICRNL
-		or t0, t0, t5
-		li t5, INPCK
-		or t0, t0, t5
-		li t5, ISTRIP
-		or t0, t0, t5
-		li t5, IXON
-		or t0, t0, t5
-		not t0, t0
-		# set t1 to ~(OPOST)
-		li t1, OPOST
-		not t1, t1
-		# set t2 to CS8
-		li t2, CS8
-		# set t3 to ~(ECHO | ICANON | IEXTEN | ISIG)
-		li t3, ECHO
-		li t5, ICANON
-		or t3, t3, t5
-		li t5, IEXTEN
-		or t3, t3, t5
-		li t5, ISIG
-		or t3, t3, t5
-		not t3, t3
-		# now edit local termios structure
-		la t4, termios
-		lwu t5, 0(t4)
-		and t5, t5, t0
-		sw t5, 0(t4)
-		lwu t5, 4(t4)
-		and t5, t5, t1
-		sw t5, 4(t4)
-		lwu t5, 8(t4)
-		or t5, t5, t2
-		sw t5, 8(t4)
-		lwu t5, 12(t4)
-		and t5, t5, t3
-		sw t5, 12(t4)
-		li a0, 0
-		li a1, TCSANOW
-		la a2, termios
-		call tcsetattr
-		POP ra
-		ret
-
-  rawmode_termios_key:
+		call echoe_termios_off
+		call echo_termios_off
+		call nopolling_termios
+		call icanon_termios_off
+		call get_termios
 		#ensure we are NOT in O_NONBLOCK
-		PUSH ra
 		li a0, 0
 		li a1, 3			#F_GETFL
 		call fcntl
@@ -232,7 +295,6 @@
 		not t0, t0
 		and a2, a2, t0
 		call fcntl
-
 		#now get character - returned in a0
 		li a0, 0
 		la a1, SCRATCH_PAD
@@ -246,15 +308,75 @@
 		POP a0
 		POP ra
 		ret
-   
-# return single character, no echo
-  singlechar_termios:
+
+  set_lflag_raw:
+		li t0, ECHO
+		li t1, ICANON
+		or t0, t0, t1
+		li t1, IEXTEN
+		or t0, t0, t1
+		li t1, ISIG
+		or t0, t0, t1
+		not t0, t0
+		lwu a3, 12(a2)
+		and a3, a3, t0
+		sw a3, 12(a2)
+		ret
+
+  set_iflag_raw:
+		li t0, BRKINT
+		li t1, ICRNL
+		or t0, t0, t1
+		li t1, INPCK
+		or t0, t0, t1
+		li t1, ISTRIP
+		or t0, t0, t1
+		li t1, IXON
+		or t0, t0, t1
+		not t0, t0
+		lwu a3, 0(a2)
+		and a3, a3, t0
+	 	sw a3, 0(a2)
+		ret
+
+  set_oflag_raw:
+		li t0, OPOST
+		not t0, t0
+		lwu a3, 4(a2)
+		and a3, a3, t0
+		sw a3, 4(a2)
+		ret
+
+  set_cflag_raw:
+		li t0, CSIZE
+		li t1, PARENB
+		or t0, t0, t1
+		not t0, t0
+		lwu a3, 8(a2)
+		and a3, a3, t0
+		sw a3, 8(a2)
+		ret
+
+  set_cflag_raw2:
+		li t0, CS8
+		sw a3, 8(a2)
+		or a3, a3, t0
+		sw a3, 8(a2)
+		ret
+
+
+  singlechar_raw_termios:
 		PUSH ra
-		call echoe_termios_off
-		call echo_termios_off
-		call nopolling_termios
-		call icanon_termios_off
 		call get_termios
+		la a2, termios
+		call set_lflag_raw
+		call set_iflag_raw
+		call set_oflag_raw
+		call set_cflag_raw
+		call set_cflag_raw2
+		li a0, 0
+		li a1, TCSAFLUSH
+		call tcsetattr
 		#ensure we are NOT in O_NONBLOCK
 		li a0, 0
 		li a1, 3			#F_GETFL
