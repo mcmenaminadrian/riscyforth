@@ -316,6 +316,8 @@ start of pictured numeric output
 
 **INVERT** (x1 -- x2) Invert all bits of *x1* and store on the stack as *x2*
 
+**IOCTL** (fd req mem -- int) Make ioctl system call, normall 0 returned on success
+
 **IS** (xt --) Set *name* to execute *xt* e.g.,
 *' . IS TESTDEFER* will ensure *TESTDEFER* executes *.*
 

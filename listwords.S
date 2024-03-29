@@ -411,7 +411,17 @@
   dots_done:
 		tail NEXT
 
-		CODEHEADER DISPLAY, DOTS, 0x01
+		CODEHEADER IOCTL, DOTS, 0x01
+		#(fd, request, mem -- i)
+		ld a2, 16(sp)
+		ld a1, 8(sp)
+		ld a0, 0(sp)
+		add sp, sp, 16
+		call ioctl
+		sd a0, 0(sp)
+		tail NEXT
+
+		CODEHEADER DISPLAY, IOCTL, 0x01
 		la t0, SCRATCH_PAD
 		mv t1, zero
 		mv t3, sp
