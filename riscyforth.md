@@ -411,6 +411,8 @@ colon definition.
 
 **RAWOFF** ( -- ) Leave terminal raw mode.
 
+**READFD** (fd buf cnt -- cnt') read cnt bytes from file descriptor to buffer
+
 **RDROP** R:(x --)
 
 **RECURSE** Re-execute the current word
