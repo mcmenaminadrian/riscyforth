@@ -412,12 +412,19 @@
 		tail NEXT
 
 		CODEHEADER IOCTL, DOTS, 0x01
-		#(fd, request, mem -- i)
-		ld a2, 16(sp)
+		#(fd, request, mem -- errno ret)
+		ld a0, 16(sp)
 		ld a1, 8(sp)
-		ld a0, 0(sp)
-		add sp, sp, 16
+		ld a2, 0(sp)
+		add sp, sp, 8
 		call ioctl
+                li t0, -1
+		beq t0, a0, ioctl_real_err_no
+		sd zero, 8(sp)
+		j ioctl_set_ret
+  ioctl_real_err_no:
+		sd a7, 8(sp)
+  ioctl_set_ret:
 		sd a0, 0(sp)
 		tail NEXT
 
