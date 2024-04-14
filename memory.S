@@ -578,8 +578,8 @@
 		ld a0, 0(sp)
 		ld a1, 8(sp)
 		call resize_memory_allocation
-		sd a1, 8(sp)
-		sd a0, 0(sp)
+		sd a1, 0(sp)
+		sd a0, 8(sp)
 		tail NEXT
 
 		CODEHEADER UNUSED, RESIZE, 0x01

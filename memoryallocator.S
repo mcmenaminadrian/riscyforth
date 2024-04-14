@@ -191,8 +191,8 @@
   resize_memory_allocation_test_chain:
 		mv t6, t0		#t6 holds the top
 		ld t1, 0(t0)
+		beq t1, a0, resize_memory_not_needed	#don't care about same size
 		beqz t1, resize_memory_allocation_failed
-		beq t1, a0, resize_memory_allocation_advance	#don't care about same size
 		mv t3, t1		#store size
 		ld t1, 8(t0)
   resize_memory_allocation_walk_chain:
@@ -201,6 +201,9 @@
 		beq t2, a1, resize_memory_allocation_found_block
 		ld t1, 8(t1)
 		j resize_memory_allocation_walk_chain
+  resize_memory_not_needed:
+		mv a0, a1
+		j allot_over
   resize_memory_allocation_advance:
 		ld t0, 16(t0)
 		beqz t0, resize_memory_allocation_failed		#end of the line
@@ -402,8 +405,27 @@
 		#t3 is the chain we are looking for
 		mv t2, t1
 		#clean the used chain first
-		ld t4, 8(t1)
-		sd t4, 8(t6)
+		ld t4, 8(t1)					#get the next pointer in the chain
+		#are we at the end of this chain
+		bnez t4, free_overwrite_alloc_chain
+		#might the chain now be empty?
+		ld t4, 8(t6)
+		ld t4, 0(t4)
+		bne t4, a0, free_overwrite_alloc_chain		#not cleaning up a single entry chain
+		#but we are cleaning up a single entry chain here
+		sd zero, 8(t6)
+		j free_check_big_alloc
+  free_overwrite_alloc_chain:
+		#not zero so relay chain
+		ld a5, 16(t1)
+		ld a6, 24(t1)
+		sd a5, 0(t1)
+		sd a6, 8(t1)
+		beqz a6, free_fix_alloc_chain_head
+		addi t1, t1, 16					#move on to next in chain
+		j free_overwrite_alloc_chain
+  free_fix_alloc_chain_head:
+  free_check_big_alloc:
 		#check whether we have big allocation
 		li t5, PAGESIZE
 		bgt t3, t5, free_big_allocation
