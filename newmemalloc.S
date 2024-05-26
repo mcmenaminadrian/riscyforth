@@ -126,10 +126,11 @@ find_start_chain_search:
 	ld t0, 0(s2)				# are any blocks allocated to this chain?
 find_loop_through_chain:
 	beqz t0, find_move_to_next_chain	# no allocated blocks for this chain
-	mv s3, t0				# s3 now points to pair
+	mv s3, s2				# s3 now points to pair
 	ld t1, 0(s3)
 	beq t1, a0, find_matched_chain		# have a match
-	ld t0, 8(s3)				# next pointer
+	ld s2, 8(s3)				# next tuple
+	ld t0, 0(s2)				# read value
 	mv s4, s3				# store previous tuple so we can update chain if needed
 	j find_loop_through_chain
 find_move_to_next_chain:
@@ -143,8 +144,8 @@ find_no_match:
 	ret
 find_matched_chain:				# returns a0 - 1, a1 - start of chain, a2 - pointer to tuple, a3, pointer to previous
 	li a0, 1				# found
-	mv a1, s9				# start of chain record
-	mv a2, s3				# address, next tuple
+	ld a1, 0(s9)				# start of chain record
+	mv a2, s3				# address, sought tuple
 	mv a3, s4				# address, previous tuple
 	STACK_DOWN
 	ret
@@ -220,6 +221,7 @@ memory_count_blocks_loop:
 	srli a0, a0, 1
 	bnez a0, memory_count_blocks_loop
 	li a0, 1
+	mv a3, a0				# save if needed
 	sll a0, a0, t0				# convert to size in power of 2
 	ret
 
@@ -253,7 +255,7 @@ resize_non_zero:
 	ret
 resize_check_size:
 	# is it same size
-	ld a0, 8(a1)				# load size of found (old) block
+	ld a0, 0(a1)				# load size of found (old) block
 	call memory_get_block_size		# get size of old block
 	mv s4, a0				# store size of old block
 	ld a0, 0(sp)				# load size we are seeking
@@ -275,7 +277,7 @@ resize_allocate_new_size:
 	beqz a0, resize_unwind_on_failure	# alloc failed so return	
 	# not same size - copy over old data
 	ld t0, 8(sp)				# address of old block
-	mv t1, a1				# address of new block
+	mv t1, a0				# address of new block
 resize_copy_byte:
 	lb t2, 0(t0)				# byte from old block
 	sb t2, 0(t1)				# copy over
