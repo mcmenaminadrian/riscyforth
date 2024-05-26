@@ -122,8 +122,8 @@ execute_find_block_memory_allocator:
 find_start_chain_search:
 	mv s4, zero				# no previous tuple
 	ld s1, 0(s9)				# s1 points to start of next chain
-	ld s2, 16(s9)				# we only search the used chain - here held in s2
-	ld t0, 0(s2)
+	ld s2, 16(s1)				# we only search the used chain - here held in s2
+	ld t0, 0(s2)				# are any blocks allocated to this chain?
 find_loop_through_chain:
 	beqz t0, find_move_to_next_chain	# no allocated blocks for this chain
 	mv s3, t0				# s3 now points to pair
@@ -135,6 +135,7 @@ find_loop_through_chain:
 find_move_to_next_chain:
 	beqz s1, find_no_match			# reached the end and there is no match
 	mv s9, s1				# move on to the next chain
+	addi s9, s9, 8
 	j find_start_chain_search		# jump to the start of the search through the chain
 find_no_match:
 	mv a0, zero
@@ -168,13 +169,12 @@ allocator_check_size:
 allocator_found_memory_size:
 	ld t0, 24(s9)				# get pointer to first tuple in free chain
 	beqz t0, allocator_big_allocator	# run out of memory so take it from heap
-	ld s1, 16(s9)				# s1 holds pointer to previous starting tuple of used chain
-	ld s2, 8(t0)				# s2 holds pointer to next in free chain
-	sd s1, 8(t0)				# insert our found block ahead of previous starting tuple
-	sd s2, 24(s9)				# update header pointer to free chain
-	sd t0, 16(s9)				# update header pointer to used chain
-	ld a0, 16(s9)				# get the start of the used chain
-	ld a0, 0(a0)				# address to return
+	ld s1, 8(t0)
+	sd s1, 24(s9)				# update free chain
+	ld s2, 16(s9)
+	sd t0, 16(s9)				# update used chain
+	sd s2, 8(t0)				# update used chain next pointer
+	ld a0, 0(t0)				# address to return
 	STACK_DOWN
 	ret
 allocator_big_allocator:

@@ -127,7 +127,7 @@
     .balign 8
     .include "constant.S"
     .balign 8
-    .include "memoryallocator.S"
+    .include "newmemalloc.S"
     .balign 8
     .include "memory.S"
     .balign 8
