@@ -205,6 +205,7 @@ free_update_free_chain:
 	sd a2, 24(a1)				# replace with freed tuple
 	sd s1, 8(a2)				# update the pointer for the freed block
 	STACK_DOWN
+	li a0, 0				# success
 	ret
 free_try_raw_free:
 	ld a0, 0(sp)
