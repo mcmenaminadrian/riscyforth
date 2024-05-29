@@ -256,15 +256,14 @@ resize_non_zero:
 	ret
 resize_check_size:
 	# is it same size
-	ld a0, 0(a1)				# load size of found (old) block
-	call memory_get_block_size		# get size of old block
-	mv s4, a0				# store size of old block
+	ld s4, 0(a1)				# load size of found (old) block
 	ld a0, 0(sp)				# load size we are seeking
 	call memory_get_block_size
 	bne a0, s4, resize_allocate_new_size	# sizes do not match
 resize_unwind_on_failure:
 	# sizes do match so clean up and go home
 	ld a0, 8(sp)
+	addi sp, sp, 16
 	STACK_DOWN
 	addi sp, sp, -16
 	sd a0, 8(sp)
@@ -275,15 +274,15 @@ resize_allocate_new_size:
 	# not same size - allocate new block
 	mv s5, a0				# store new size
 	call allocate_memory_allocator		# get a new memory block
-	beqz a0, resize_unwind_on_failure	# alloc failed so return	
+	bnez a0, resize_unwind_on_failure	# alloc failed so return	
 	# not same size - copy over old data
 	ld t0, 8(sp)				# address of old block
 	mv t1, a0				# address of new block
 resize_copy_byte:
 	lb t2, 0(t0)				# byte from old block
 	sb t2, 0(t1)				# copy over
-	addi s5, s5, -1
-	beqz s5, resize_free_old_block
+	addi s4, s4, -1
+	beqz s4, resize_free_old_block
 	addi t0, t0, 1
 	addi t1, t1, 1
 	j resize_copy_byte

@@ -575,7 +575,7 @@
 		tail NEXT
 
 		CODEHEADER RESIZE, FREE, 0x01
-		# ( u u --)
+		# ( u u -- a ior)
 		call resize_memory_allocator		# pass values over on stack
 		tail NEXT
 
