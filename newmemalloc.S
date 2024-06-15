@@ -258,7 +258,6 @@ resize_check_size:
 	# is it same size
 	ld s4, 0(a1)				# load size of found (old) block
 	ld a0, 0(sp)				# load size we are seeking
-	call memory_get_block_size
 	bne a0, s4, resize_allocate_new_size	# sizes do not match
 resize_unwind_on_failure:
 	# sizes do match so clean up and go home
@@ -267,8 +266,7 @@ resize_unwind_on_failure:
 	STACK_DOWN
 	addi sp, sp, -16
 	sd a0, 8(sp)
-	li a1, -1
-	sd a1, 0(sp)
+	sd zero, 0(sp)
 	ret
 resize_allocate_new_size:
 	# not same size - allocate new block
