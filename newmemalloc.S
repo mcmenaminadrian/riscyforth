@@ -118,11 +118,13 @@ find_block_memory_allocator:			# call with a0 holding address
 	ret
 execute_find_block_memory_allocator:
 	STACK_UP
-	la s9, datamanagement			# s9 points to start of memory chains
+	la s9, datamanagement			# s9 points to address holding memory management
+	ld s9, 0(s9)				# s9 now points to memory management
+	addi s9, s9, 8				# we don't care about the size for now
 find_start_chain_search:
 	mv s4, zero				# no previous tuple
 	ld s1, 0(s9)				# s1 points to start of next chain
-	ld s2, 16(s1)				# we only search the used chain - here held in s2
+	ld s2, 8(s9)				# we only search the used chain - here held in s2
 	ld t0, 0(s2)				# are any blocks allocated to this chain?
 find_loop_through_chain:
 	beqz t0, find_move_to_next_chain	# no allocated blocks for this chain
@@ -144,7 +146,8 @@ find_no_match:
 	ret
 find_matched_chain:				# returns a0 - 1, a1 - start of chain, a2 - pointer to tuple, a3, pointer to previous
 	li a0, 1				# found
-	ld a1, 0(s9)				# start of chain record
+	mv a1, s9
+	addi a1, a1, 8				# start of chain
 	mv a2, s3				# address, sought tuple
 	mv a3, s4				# address, previous tuple
 	STACK_DOWN
@@ -176,11 +179,13 @@ allocator_found_memory_size:
 	sd t0, 16(s9)				# update used chain
 	sd s2, 8(t0)				# update used chain next pointer
 	ld a0, 0(t0)				# address to return
+	mv a1, zero
 	STACK_DOWN
 	ret
 allocator_big_allocator:
 	call malloc
 	STACK_DOWN
+	mv a1, zero
 	ret
 
 free_memory_allocator:				# call with a0 holding the address to be freed
@@ -199,10 +204,10 @@ execute_memory_free:
 	sd s9, 8(a3)				# update previous tuple
 	j free_update_free_chain
 free_at_chain_head:
-	sd s9, 16(a1)				# update head of chain
+	sd s9, 0(a1)				# update head of chain
 free_update_free_chain:
-	ld s1, 24(a1)				# get head of free chain
-	sd a2, 24(a1)				# replace with freed tuple
+	ld s1, 8(a1)				# get head of free chain
+	sd a2, 8(a1)				# replace with freed tuple
 	sd s1, 8(a2)				# update the pointer for the freed block
 	STACK_DOWN
 	li a0, 0				# success
@@ -258,7 +263,7 @@ resize_check_size:
 	# is it same size
 	ld s4, 0(a1)				# load size of found (old) block
 	ld a0, 0(sp)				# load size we are seeking
-	bne a0, s4, resize_allocate_new_size	# sizes do not match
+	bgt a0, s4, resize_allocate_new_size	# sizes do not match - allocation required
 resize_unwind_on_failure:
 	# sizes do match so clean up and go home
 	ld a0, 8(sp)
@@ -272,7 +277,7 @@ resize_allocate_new_size:
 	# not same size - allocate new block
 	mv s5, a0				# store new size
 	call allocate_memory_allocator		# get a new memory block
-	bnez a0, resize_unwind_on_failure	# alloc failed so return	
+	bnez a1, resize_unwind_on_failure	# alloc failed so return
 	# not same size - copy over old data
 	ld t0, 8(sp)				# address of old block
 	mv t1, a0				# address of new block
@@ -295,15 +300,4 @@ resize_free_old_block:
 	sd a0, 8(sp)
 	sd zero, 0(sp)
 	ret
-	
-	
-	
-
-		
-	
-	
-	
-
-	
-	
 	
