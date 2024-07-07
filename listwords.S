@@ -497,8 +497,15 @@
 		sd a1, INPUT_START, t5			#update read in point
 		call utility_sanitize_string		
 		#now check this is not a keyword or a number
+		PUSH a2					# store length
 		call utility_check_dictionary_match
 		bnez a3, variable_gone_bad
+		POP t2					# get length back
+		addi t2, t2, 1
+		la t3, INPUT_DISPLACE
+		ld t4, 0(t3)
+		add t4, t4, t2
+		sd t4, 0(t3)
 		#write out a word with the variable name that will return the address
 		#get the address we'll return
 		mv a1, a2
@@ -539,6 +546,7 @@
 
 		
   variable_gone_bad:
+		addi sp, sp, 8				# clear stack
 		la t0, NotOk_msg
                 addi t1, zero, 24                     #error message is 24 chars long 
                 WRITESTRINGR t0, t1
