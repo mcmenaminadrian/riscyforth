@@ -31,7 +31,22 @@
 	call reset_termios
 	tail NEXT
 
-	CODEHEADER LOADMODULE, KEY, 0x01
+
+	CODEHEADER KEYRAW, KEY, 0x01
+	# ( -- char)
+	# raw mode KEY
+	call copy_termios_structure
+	call reset_raw_termios
+	call singlechar_raw_termios
+	addi sp, sp, -8
+	sd a0, 0(sp)
+	la t0, SCRATCH_PAD
+	sd zero, 0(t0)
+	call reset_raw_termios
+	tail NEXT
+
+
+	CODEHEADER LOADMODULE, KEYRAW, 0x01
 	#("<module>" -- flag)
 	#load a module, setting the flag to TRUE or FALSE
 	la t0, INPUT_START

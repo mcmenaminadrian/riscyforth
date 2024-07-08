@@ -429,11 +429,10 @@
 			POP ra
 			j utility_expand_done
   utility_expand_two_beginC:
-			sb t1, 0(a2)
-			addi sp, sp, 8
+			addi sp, sp, 8			# drop t1 from stack
 			lbu t1, 1(a0)
 			li t2, 0x2C
-			bne t1, t2, tick_length_two_cq
+			bne t1, t2, utility_expand_two_cq
 			PUSH ra
 			call fix_up_ccomma		#,
 			POP ra
@@ -445,13 +444,9 @@
 			call fix_up_cq
 			POP ra
 			j utility_expand_done
-  utility_expand_two_c_done:
-			j utility_expand_two_finished
-
 
   utility_expand_two_beginS:
-			sb t1, 0(a2)
-			addi sp, sp, 8
+			addi sp, sp, 8			# drop t1 from stack
 			lbu t1, 1(a0)
 			li t2, 0x22			#"
 			bne t1, t2, utility_expand_two_bail

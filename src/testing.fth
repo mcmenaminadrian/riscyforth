@@ -284,7 +284,7 @@ BLUE 20 10 2dup MAX 20 = if ." MAX passed and " else RED ." MAX FAILED and " the
 : TESTS>D
 ." Testing S>D " 5 spaces
 [ decimal ] 
-0 S>D 0 = SWAP 0 = AND 1 S>D 0 = SWAP 1 = AND AND 2 S>D 0 = SWAP 2 = AND AND -1 S>D -1 = SWAP -1 = AND AND -2 S>D -1 = SWAP -2 = AND AND TRUE AND
+0 S>D 0= SWAP 0= AND 1 S>D 0= SWAP 1 = AND AND 2 S>D 0= SWAP 2 = AND AND -1 S>D -1 = SWAP -1 = AND AND -2 S>D -1 = SWAP -2 = AND AND TRUE AND
 IF BLUE ." S>D passed" ELSE RED ." S>D FAILED" THEN RESET CR ;
 
 : TESTSHIFTS
@@ -511,7 +511,7 @@ CREATE STRANGETOWN
 
 : TESTPADFILLERASE
 ." Testing PAD, FILL and ERASE " 5 SPACES
-PAD 10 35 FILL PAD 3 + 1 ERASE PAD 2 + C@ 35 = PAD 3 + C@ 0 = AND PAD 4 + C@ 35 = AND 
+PAD 10 35 FILL PAD 3 + 1 ERASE PAD 2 + C@ 35 = PAD 3 + C@ 0= AND PAD 4 + C@ 35 = AND 
 IF BLUE ." PAD, FILL and ERASE passed" ELSE RED ." PAD, FILL and ERASE FAILED" THEN RESET CR ;
 
 \ Memory allocator
@@ -519,21 +519,21 @@ VARIABLE allocaddress
 : TESTALLOCATOR
 ." Testing ALLOCATE and FREE " 5 SPACES
 \ Test 100000 allocations, frees
-1 ALLOCATE 0 = IF allocaddress ! ELSE RED ." ALLOCATE FAILED " RESET CR EXIT THEN
-FREE 0 = FALSE AND IF RED ." ALLOCATE passed but FREE failed " RESET CR EXIT THEN
+1 ALLOCATE 0= IF allocaddress ! ELSE RED ." ALLOCATE FAILED " RESET CR EXIT THEN
+allocaddress @ FREE 0= FALSE AND IF RED ." ALLOCATE passed but FREE failed " RESET CR EXIT THEN
 99999 1 DO
 \ should always allocate to same address
-1 ALLOCATE 0 = allocaddress @ = AND FALSE AND IF RED ." ALLOCATE FAIL on pass " I . RESET CR EXIT THEN
+1 ALLOCATE 0= allocaddress @  = AND FALSE AND IF RED ." ALLOCATE FAIL on pass " I . RESET CR EXIT THEN
 allocaddress @ FREE 0<> IF RED ." FREE FAIL on pass " RESET I . CR EXIT THEN
 LOOP BLUE ." ALLOCATE and FREE passed basic allocate and free test " RESET CR 
 \ Test large allocation - 10000 times
 ." Now testing large allocations " 5 SPACES
 1000 ALLOCATE 0<> IF RED ." Large ALLOCATE FAILED " RESET CR EXIT THEN
-allocaddress ! allocaddress @ free 0 = FALSE AND IF RED ." Large FREE failed " RESET CR EXIT THEN
+allocaddress ! allocaddress @ free 0= FALSE AND IF RED ." Large FREE failed " RESET CR EXIT THEN
 BLUE ." Initial larger allocation and free succeeded" RESET CR
 9999 1 DO
-1000 ALLOCATE 0 = allocaddress @ = AND FALSE AND IF RED ." Large ALLOCATE FAIL on pass " RESET I . CR EXIT THEN
-allocaddress @ FREE 0 = FALSE AND IF RED ." Large FREE FAIL on pass " RESET I . CR EXIT THEN
+1000 ALLOCATE 0= allocaddress @ = AND FALSE AND IF RED ." Large ALLOCATE FAIL on pass " RESET I . CR EXIT THEN
+allocaddress @ FREE 0= FALSE AND IF RED ." Large FREE FAIL on pass " RESET I . CR EXIT THEN
 LOOP BLUE ." Large ALLOCATE and FREE passed." RESET CR ;
 
 \ 2! test
@@ -551,7 +551,7 @@ VARIABLE allocx
 ." Testing RESIZE " 5 SPACES
 1 ALLOCATE DROP allocx !
 [ HEX BADCAFEF00D ] literal DECIMAL allocx @ !
-allocx @ 40 RESIZE 0 = FALSE AND IF RED ." RESIZE FAIL - no resize " RESET CR EXIT THEN
+allocx @ 40 RESIZE 0= FALSE AND IF RED ." RESIZE FAIL - no resize " RESET CR EXIT THEN
 @ [ HEX BADCAFEF00D ] literal DECIMAL = IF BLUE ." RESIZE passed " RESET ELSE RED ." RESIZE FAIL: no copy" RESET CR EXIT THEN
 CR ;
 
@@ -589,7 +589,7 @@ BLUE 10 CELLS 80 = IF ." CELLS passed " ELSE RED ." CELLS FAILED " THEN RESET CR
 
 : TESTALIGN
 ." Testing ALIGN " 5 SPACES
-HERE 7 AND 0 = IF 1 ALLOT THEN ALIGN HERE 7 AND 0 = IF BLUE ." ALIGN passed " ELSE RED ." ALIGN FAILED " RESET EXIT THEN RESET
+HERE 7 AND 0= IF 1 ALLOT THEN ALIGN HERE 7 AND 0= IF BLUE ." ALIGN passed " ELSE RED ." ALIGN FAILED " RESET EXIT THEN RESET
 CR ." Now testing ALIGNED... " 5 SPACES 1 ALLOT HERE ALIGNED HERE - 7 = 
 IF BLUE ." ALIGNED passed " ELSE RED ." ALIGNED FAILED " THEN RESET CR ;
 

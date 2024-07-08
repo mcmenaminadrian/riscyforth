@@ -570,16 +570,13 @@
 		CODEHEADER FREE, HERE, 0x01
 		#return a block to the free pool
 		ld a0, 0(sp)
-		call free_memory_allocation
+		call free_memory_allocator
 		sd a0, 0(sp)
 		tail NEXT
 
 		CODEHEADER RESIZE, FREE, 0x01
-		ld a0, 0(sp)
-		ld a1, 8(sp)
-		call resize_memory_allocation
-		sd a1, 8(sp)
-		sd a0, 0(sp)
+		# ( u u -- a ior)
+		call resize_memory_allocator		# pass values over on stack
 		tail NEXT
 
 		CODEHEADER UNUSED, RESIZE, 0x01
@@ -605,9 +602,14 @@
 		CODEHEADER ALLOCATE, TOIN, 0x01
 		#get memory from the allocator
 		ld a0, 0(sp)
-		call get_memory_allocation
+		call allocate_memory_allocator
 		addi sp, sp, -8
 		sd a0, 8(sp)
+		beqz a0, allocate_bad_alloc
+		sd zero, 0(sp)
+		tail NEXT
+  allocate_bad_alloc:
+		li a1, -1
 		sd a1, 0(sp)
 		tail NEXT
 	

@@ -883,9 +883,18 @@
 		add a4, a4, a2
 		sd a4, 0(a3)
 		j DISPLAY
-  
 
-		CODEHEADER ABORTCOMM, TERMIOSSTRING, 0x01
+		CODEHEADER READFD, TERMIOSSTRING, 0x01
+		#( fd addr cnt -- cnt )
+		ld a2, 0(sp)
+		ld a1, 8(sp)
+		ld a0, 16(sp)
+		addi sp, sp, 16
+		call read
+		sd a0, 0(sp)
+		tail NEXT
+
+		CODEHEADER ABORTCOMM, READFD, 0x01
 		#does nothing in interpretration mode
 		tail NEXT
 

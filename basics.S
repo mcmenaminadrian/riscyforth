@@ -931,6 +931,7 @@
 		j fix_up_length_two_finished
 
   length_two_beginS:
+		addi sp, sp, 8
 		lb t1, 1(a0)
 		li t2, 0x22			#"
 		bne t1, t2, length_two_c_done
