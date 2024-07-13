@@ -935,7 +935,6 @@
 		lb t1, 1(a0)
 		li t2, 0x22			#"
 		bne t1, t2, length_two_c_done
-		addi sp, sp, 8
 		call fix_up_squote
 		j fix_up_done
 
