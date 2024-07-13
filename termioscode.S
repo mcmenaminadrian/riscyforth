@@ -392,6 +392,7 @@
 		#now get character - returned in a0
 		li a0, 0
 		la a1, SCRATCH_PAD
+		li a2, 3			#handle escapes
 		call read
 		lb t0, 0(a1)
 		li a0, 0

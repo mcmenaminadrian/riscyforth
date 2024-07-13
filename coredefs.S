@@ -99,6 +99,15 @@
 		tail NEXT
 
 		CODEHEADER ENDOF, CASE, 0x01
+		# get to endcase
+		ld t1, 0(s7)
+		la t0, WA_ENDCASE
+  check_endcase:
+		beq t1, t0, set_endcase
+		addi s7, s7, 8
+		ld t1, 0(s7)
+		j check_endcase
+  set_endcase:
 		tail NEXT
 
 		CODEHEADER _OF, ENDOF, 0x00
