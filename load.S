@@ -91,7 +91,55 @@
 	PUSH t6		#flag on to stack
 	tail NEXT
 
-	CODEHEADER INCLUDE, LOADMODULE, 0x01
+	# words from the File-Access word set
+	CODEHEADERZ OPENFILE, OPEN-FILE, LOADMODULE, 0x01
+	# (c-addr u fam -- fileid ior)
+        # create a null terminated string for the path
+	ld a0, 8(sp)
+	beqz a0, open_path_failed
+	call malloc
+	beqz a0, open_path_failed
+	# copy the path
+	mv t5, a0
+	li t0, 0
+        ld t2, 8(sp)
+	ld t3, 16(sp)
+	beqz t3, open_path_failed_free
+  open_path_copy_path:
+	lb t4, 0(t3)
+	sb t4, 0(t5)
+	addi t0, t0, 1
+	beq t0, t2, open_path_copy_path_done
+	addi t3, t3, 1
+	addi t5, t5, 1
+	j open_path_copy_path
+  open_path_copy_path_done:
+	# null terminate
+	sb zero, 1(t5)
+	# fam is assumed to be null terminated
+	ld a1, 0(sp)
+	beqz a1, open_path_failed_free
+	sd a0, 16(sp)		# for later freeing
+	call fopen
+	beqz a0, open_path_failed_free_recover
+	ld t0, 16(sp)
+	sd zero, 8(sp)
+	sd a0, 16(sp)
+	mv a0, t0
+	call free
+	addi sp, sp, 8
+	tail NEXT
+  open_path_failed_free_recover:
+	ld a0, 16(sp)
+  open_path_failed_free:
+	call free
+  open_path_failed:
+	addi sp, sp, 8
+	li t0, -1
+	sd t0, 0(sp)
+	tail NEXT
+
+	CODEHEADER INCLUDE, OPENFILE, 0x01
 	#Load a file line by line, executing each line as we go
 	addi sp, sp, -72
 	sd s0, 0(sp)
