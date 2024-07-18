@@ -92,7 +92,63 @@
 	tail NEXT
 
 	# words from the File-Access word set
-	CODEHEADERZ OPENFILE, OPEN-FILE, LOADMODULE, 0x01
+	CODEHEADERZ READLINEFILE, READ-LINE, LOADMODULE, 0x01
+	# (c-addr u fileid -- u flag ior)
+	# rely on malloc inside call to allocate and then copy
+	la a0, SCRATCH_PAD
+	sd zero, 0(a0)			# force malloc
+	addi a1, a0, 8			# hold size of returned buffer
+	ld a2, 0(sp)			# FILE *
+	call getline
+	ld t5, 16(sp)			# input buffer
+	sd a0, 16(sp)			# size read
+	li t0, -1
+	beq a0, t0, readlinefile_failed
+	# but was the line too long?
+	ld t0, 8(sp)
+	bgt a0, t0, readlinefile_toolong
+	# copy from src to destination
+	la t1, SCRATCH_PAD
+	mv t2, a0			# length
+	sd t2, 16(sp)
+	ld t3, 0(t1)			# source
+	mv a0, t3			# needed for free later
+  readlinefile_copy:
+	lb t4, 0(t3)
+	sb t4, 0(t5)
+	addi t2, t2, -1
+	beqz t2, readlinefile_copydone
+	addi t3, t3, 1
+	addi t5, t5, 1
+	j readlinefile_copy
+  readlinefile_copydone:
+	call free			# free buffer
+	li t0, -1
+	sd t0, 8(sp)
+	sd zero, 0(sp)
+	tail NEXT
+  readlinefile_toolong:
+	li t0, 1
+	sd t0, 8(sp)
+	j readlinefile_freefail
+  readlinefile_failed:
+	sd zero, 8(sp)
+  readlinefile_freefail:
+	li t0, -1
+	sd t0, 0(sp)
+	la t0, SCRATCH_PAD
+	ld a0, 0(t0)
+	call free			# free on failure automatically
+	tail NEXT
+
+	CODEHEADERZ FILECLOSEFILE, CLOSE-FILE, READLINEFILE, 0x01
+	# (fileid -- ior)
+	ld a0, 0(sp)
+	call fclose
+	sd a0, 0(sp)
+	tail NEXT
+
+	CODEHEADERZ FILEOPENFILE, OPEN-FILE, FILECLOSEFILE, 0x01
 	# (c-addr u fam -- fileid ior)
         # create a null terminated string for the path
 	ld a0, 8(sp)
@@ -139,7 +195,7 @@
 	sd t0, 0(sp)
 	tail NEXT
 
-	CODEHEADER INCLUDE, OPENFILE, 0x01
+	CODEHEADER INCLUDE, FILEOPENFILE, 0x01
 	#Load a file line by line, executing each line as we go
 	addi sp, sp, -72
 	sd s0, 0(sp)
