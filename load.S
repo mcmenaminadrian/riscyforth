@@ -123,6 +123,13 @@
 	j readlinefile_copy
   readlinefile_copydone:
 	call free			# free buffer
+	li t6, 0x0a
+	bne t6, t4, readlinefile_normalexit
+	# newline at end, so reduce count by one
+	ld t2, 16(sp)
+	addi t2, t2, -1
+	sd t2, 16(sp)
+  readlinefile_normalexit:
 	li t0, -1
 	sd t0, 8(sp)
 	sd zero, 0(sp)
