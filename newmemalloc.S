@@ -124,6 +124,7 @@ execute_find_block_memory_allocator:
 find_start_chain_search:
 	mv s4, zero				# no previous tuple
 	ld s1, 0(s9)				# s1 points to start of next chain
+	beqz s1, find_no_match			# reached the end and there is no match
 	ld s2, 8(s9)				# we only search the used chain - here held in s2
 	ld t0, 0(s2)				# are any blocks allocated to this chain?
 find_loop_through_chain:
@@ -136,7 +137,6 @@ find_loop_through_chain:
 	mv s4, s3				# store previous tuple so we can update chain if needed
 	j find_loop_through_chain
 find_move_to_next_chain:
-	beqz s1, find_no_match			# reached the end and there is no match
 	mv s9, s1				# move on to the next chain
 	addi s9, s9, 8
 	j find_start_chain_search		# jump to the start of the search through the chain
@@ -217,6 +217,7 @@ free_try_raw_free:
 	addi sp, sp, 8
 	call free
 	STACK_DOWN
+	li a0, 0
 	ret
 	
 memory_get_block_size:				# a0 has size on input
