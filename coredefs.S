@@ -242,6 +242,12 @@
 		addi a1, a0, 512
 		call utility_find_string
 		addi sp, sp, -16
+		li t0, 512
+		bne a2, t0, parsename_found
+		# found nothing
+		sd zero, 0(sp)
+		tail NEXT
+  parsename_found:
 		sd a0, 8(sp)
 		sd a2, 0(sp)
 		la t0, INPUT_START

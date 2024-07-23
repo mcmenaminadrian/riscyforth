@@ -35,14 +35,14 @@
 	CODEHEADER KEYRAW, KEY, 0x01
 	# ( -- char *scratchpad)
 	# raw mode KEY
-  # will also return pointer to SCRATCHPAD for longer sequences
+	# will also return pointer to SCRATCHPAD for longer sequences
 	call copy_termios_structure
 	call reset_raw_termios
 	call singlechar_raw_termios
 	addi sp, sp, -16
 	sd a0, 0(sp)
 	la t0, SCRATCH_PAD
-  sd t0, 8(sp)
+ 	sd t0, 8(sp)
 	call reset_raw_termios
 	tail NEXT
 
@@ -91,7 +91,118 @@
 	PUSH t6		#flag on to stack
 	tail NEXT
 
-	CODEHEADER INCLUDE, LOADMODULE, 0x01
+	# words from the File-Access word set
+	CODEHEADERZ READLINEFILE, READ-LINE, LOADMODULE, 0x01
+	# (c-addr u fileid -- u flag ior)
+	# rely on malloc inside call to allocate and then copy
+	la a0, SCRATCH_PAD
+	sd zero, 0(a0)			# force malloc
+	addi a1, a0, 8			# hold size of returned buffer
+	ld a2, 0(sp)			# FILE *
+	call getline
+	ld t5, 16(sp)			# input buffer
+	sd a0, 16(sp)			# size read
+	li t0, -1
+	beq a0, t0, readlinefile_failed
+	# but was the line too long?
+	ld t0, 8(sp)
+	bgt a0, t0, readlinefile_toolong
+	# copy from src to destination
+	la t1, SCRATCH_PAD
+	mv t2, a0			# length
+	sd t2, 16(sp)
+	ld t3, 0(t1)			# source
+	mv a0, t3			# needed for free later
+  readlinefile_copy:
+	lb t4, 0(t3)
+	sb t4, 0(t5)
+	addi t2, t2, -1
+	beqz t2, readlinefile_copydone
+	addi t3, t3, 1
+	addi t5, t5, 1
+	j readlinefile_copy
+  readlinefile_copydone:
+	call free			# free buffer
+	li t6, 0x0a
+	bne t6, t4, readlinefile_normalexit
+	# newline at end, so reduce count by one
+	ld t2, 16(sp)
+	addi t2, t2, -1
+	sd t2, 16(sp)
+  readlinefile_normalexit:
+	li t0, -1
+	sd t0, 8(sp)
+	sd zero, 0(sp)
+	tail NEXT
+  readlinefile_toolong:
+	li t0, 1
+	sd t0, 8(sp)
+	j readlinefile_freefail
+  readlinefile_failed:
+	sd zero, 8(sp)
+  readlinefile_freefail:
+	li t0, -1
+	sd t0, 0(sp)
+	la t0, SCRATCH_PAD
+	ld a0, 0(t0)
+	call free			# free on failure automatically
+	tail NEXT
+
+	CODEHEADERZ FILECLOSEFILE, CLOSE-FILE, READLINEFILE, 0x01
+	# (fileid -- ior)
+	ld a0, 0(sp)
+	call fclose
+	sd a0, 0(sp)
+	tail NEXT
+
+	CODEHEADERZ FILEOPENFILE, OPEN-FILE, FILECLOSEFILE, 0x01
+	# (c-addr u fam -- fileid ior)
+        # create a null terminated string for the path
+	ld a0, 8(sp)
+	beqz a0, open_path_failed
+	call malloc
+	beqz a0, open_path_failed
+	# copy the path
+	mv t5, a0
+	li t0, 0
+        ld t2, 8(sp)
+	ld t3, 16(sp)
+	beqz t3, open_path_failed_free
+  open_path_copy_path:
+	lb t4, 0(t3)
+	sb t4, 0(t5)
+	addi t0, t0, 1
+	beq t0, t2, open_path_copy_path_done
+	addi t3, t3, 1
+	addi t5, t5, 1
+	j open_path_copy_path
+  open_path_copy_path_done:
+	# null terminate
+	sb zero, 1(t5)
+	# fam is assumed to be null terminated
+	ld a1, 0(sp)
+	beqz a1, open_path_failed_free
+	sd a0, 16(sp)		# for later freeing
+	call fopen
+	beqz a0, open_path_failed_free_recover
+	ld t0, 16(sp)
+	sd zero, 8(sp)
+	sd a0, 16(sp)
+	mv a0, t0
+	call free
+	addi sp, sp, 8
+	tail NEXT
+  open_path_failed_free_recover:
+	ld a0, 16(sp)
+  open_path_failed_free:
+	call free
+  open_path_failed:
+	addi sp, sp, 8
+	li t0, -1
+	sd t0, 0(sp)
+	tail NEXT
+
+	CODEHEADER INCLUDE, FILEOPENFILE, 0x01
 	#Load a file line by line, executing each line as we go
 	addi sp, sp, -72
 	sd s0, 0(sp)

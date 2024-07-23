@@ -18,6 +18,7 @@
     false swap !
 ;
 
+\ drop 3 from stack
 : 3DROP
   ( n n n -- )
   2DROP DROP
@@ -41,7 +42,7 @@
   -
 ;
 
-
+\ read characters at two addresses
 : 2C@
   ( addr1 addr2 -- c1 c2)
   C@ SWAP C@ SWAP
@@ -122,6 +123,7 @@
 ;
 
 
+\ search str1 for str2 = f indicates success of search, u3 is remaining length of str1 at found point
 : search
   ( ca1 u1 ca2 u2 -- ca3 u3 f) 
   2>R DUP                              \ CA U u1 R: ca2 u2
@@ -145,6 +147,7 @@
   THEN 2RDROP
 ;
 
+\ is str2 a prefix of str1?
 : string-prefix?
   ( ca1 u1 ca2 u2 -- f)
   >R SWAP >R                          \ ca1 ca2     R: u2 u1
@@ -156,13 +159,14 @@
   THEN
 ;
 
+\ copy u from c-from to c-to going from low to high addresses
 : cmove
   ( c-from c-to u -- )
    0 DO 2DUP SWAP C@  SWAP C! SWAP 1+ SWAP 1+ LOOP
    2DROP
 ;
 
-
+\ copy u from c-from to c-to going from higher to lower addresses
 : cmove>
   ( c-from c-to u -- )
   >R
@@ -171,13 +175,14 @@
   2DROP
 ;
  
-
+\ fill caddr with u spaces
 : blank
   ( caddr u -- )
   32 fill
 ;
 
 
+\ remove n characters from start of string
 : /string
   ( c-addr1 u1 n -- caddr2 u2 )
   >R
@@ -189,12 +194,13 @@
   THEN
 ;
 
-
+\ create an address 2-tuple
 : bounds
   ( addr u -- addr+u addr)
   2>R 2R@ + 2R> DROP
 ;
 
+\ convert an integer to a counted string
 : >STRING
   ( n -- c-addr )
   0 >R                                             \ length 0 on stack
@@ -279,5 +285,29 @@
      R> FREE DROP
   ELSE
     ABORT" Memory allocation failure in AT-XY"
-  THEN ;
+  THEN 
+  ;
 
+\ Test memory word result
+: _MEM_TEST_ERR_
+  ( u -- )
+  0<> IF ABORT" Heap memory failure" THEN ;
+
+\ Concatenate two strings and save on heap
+: S+
+  ( addr1 u1 addr2 u2 -- addr3 u3 )
+  2>R
+  DUP
+  R@ +                                         \ stack now: addr1 u1 u3                 R-stack: addr2 u2
+  >R R@ ALLOCATE _MEM_TEST_ERR_                \ stack: addr1 u1 addr3                  R-stack: addr2 u2 u3
+  >R R@ SWAP >R R@                             \ stack: addr1 addr3 u1                  R-stack: addr2 u2 u3 addr3 u1
+  MOVE                                         \ stack:                                 R-stack: addr2 u2 u3 addr3 u1
+  2R@ +                                        \ stack: t-addr                          R-stack: addr2 u2 u3 addr3 u1
+  RDROP                                        \ stack: t-addr                          R-stack: addr2 u2 u3 addr3
+  2R>                                          \ stack: t-addr u3 addr3                 R-stack: addr2 u2
+  2 PICK                                       \ stack: t-addr u3 addr3 t-addr          R-stack: addr2 u2
+  2R>                                          \ stack: t-addr u3 addr3 t-addr addr2 u2
+  ROT SWAP                                     \ stack: t-addr u3 addr3 addr2 t-addr u2
+  MOVE                                         \ stack: t-addr u3 addr3
+  2>R DROP 2R> SWAP                            \ stack: addr3 u3
+;
