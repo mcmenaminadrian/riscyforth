@@ -226,7 +226,9 @@
     R@ 0 DO DUP R@ 1- I - PAD + C@
     SWAP C! CHAR+ LOOP
     DROP RDROP
- ELSE ABORT" Allocation failed."
+ ELSE
+. ." Allocation failed." CR
+  ABORT
  THEN ;
 
 
@@ -284,14 +286,15 @@
      R@ 8 + R@ @ EVALUATE
      R> FREE DROP
   ELSE
-    ABORT" Memory allocation failure in AT-XY"
+    ." Memory allocation failure in AT-XY" CR
+    ABORT
   THEN 
   ;
 
 \ Test memory word result
 : _MEM_TEST_ERR_
   ( u -- )
-  0<> IF ABORT" Heap memory failure" THEN ;
+  0<> ABORT" Heap memory failure" ;
 
 \ Concatenate two strings and save on heap
 : S+
@@ -310,4 +313,15 @@
   ROT SWAP                                     \ stack: t-addr u3 addr3 addr2 t-addr u2
   MOVE                                         \ stack: t-addr u3 addr3
   2>R DROP 2R> SWAP                            \ stack: addr3 u3
+;
+
+\ file words
+: R/O
+  ( -- fam )
+  S\" r\z" DROP
+;
+
+: R/W
+  ( -- fam )
+  S\" rw\0" DROP
 ;

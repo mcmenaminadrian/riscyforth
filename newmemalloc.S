@@ -172,8 +172,10 @@ allocator_check_size:
 	j allocator_check_size
 allocator_found_memory_size:
 	ld t0, 24(s9)				# get pointer to first tuple in free chain
-	beqz t0, allocator_big_allocator	# run out of memory so take it from heap
-	ld s1, 8(t0)
+	beqz t0, allocator_big_allocator	# run out of memory so take it from the heap
+allocator_not_end_of_chain:
+	ld t1, 0(t0)
+	ld s1, 8(t0)				# pointer to next in chain
 	sd s1, 24(s9)				# update free chain
 	ld s2, 16(s9)
 	sd t0, 16(s9)				# update used chain
@@ -242,7 +244,9 @@ resize_memory_allocator:
 	sd ra, 0(sp)
 	call free_memory_allocator		# resizing to zero so just a free
 	ld ra, 0(sp)
-	addi sp, sp, 8
+	addi sp, sp, -8
+	sd zero, 8(sp)				# return 0 0 as freed
+	sd a0, 0(sp)				
 	ret
 resize_non_zero:
 	STACK_UP
@@ -252,6 +256,12 @@ resize_non_zero:
 	call find_block_memory_allocator	# look for block
 	# have we found a block
 	bnez a0, resize_check_size
+	# we haven't - so we need to allocate from the heap
+	ld a0, 0(sp)
+	mv s4, a0
+	call malloc
+	bnez a0, resize_copy_data
+resize_failed:
 	ld a0, 8(sp)				# get back original address
 	addi sp, sp, 16
 	STACK_DOWN
@@ -262,7 +272,7 @@ resize_non_zero:
 	ret
 resize_check_size:
 	# is it same size
-	ld s4, 0(a1)				# load size of found (old) block
+	ld s4, -16(a1)				# load size of found (old) block
 	ld a0, 0(sp)				# load size we are seeking
 	bgt a0, s4, resize_allocate_new_size	# sizes do not match - allocation required
 resize_unwind_on_failure:
@@ -280,8 +290,10 @@ resize_allocate_new_size:
 	call allocate_memory_allocator		# get a new memory block
 	bnez a1, resize_unwind_on_failure	# alloc failed so return
 	# not same size - copy over old data
+resize_copy_data:
 	ld t0, 8(sp)				# address of old block
 	mv t1, a0				# address of new block
+	sd a0, 0(sp)				# store new address
 resize_copy_byte:
 	lb t2, 0(t0)				# byte from old block
 	sb t2, 0(t1)				# copy over
@@ -294,7 +306,8 @@ resize_free_old_block:
 	# not same size - free old block
 	ld a0, 8(sp)
 	call free_memory_allocator
-	beqz a0, resize_unwind_on_failure
+	bnez a0, resize_unwind_on_failure
+	ld a0, 0(sp)
 	addi sp, sp, 16
 	STACK_DOWN
 	addi sp, sp, -16
