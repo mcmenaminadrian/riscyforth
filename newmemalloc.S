@@ -1,6 +1,7 @@
 # SIZE | Ptr to next Size | Ptr to used blocks | Ptr to free blocks |
 
-.equ MEM_PAGE_COUNT,  2				# how many pages per allocation
+.equ MEM_PAGE_COUNT,  64				# how many pages per allocation
+.equ PAGE_SIZE, 0x1000
 
 .macro STACK_UP
 	addi sp, sp, -104
@@ -63,8 +64,9 @@ initialize_memoryspace:
 	li a3, 0x22
 	li a4, -1
 	li a5, 0
-	call mmap
-	beqz a0, memory_fail
+	call mmap				# map in memory
+	li a4, -1
+	beq a4, a0, memory_fail			# a0 points to allocated memory
 	# setup the list
 	la t0, datamanagement
 	sd a0, 0(t0)				# datamanagement points to allocated memory
@@ -78,10 +80,10 @@ zero_out_allocation:				# ensure everything starts as null pointers
 allocate_memory_blocks:
 	la s9, datamanagement			# now write out tables and allocate memory
 	ld s9, 0(s9)				# s9 pointer to start of chain info block
-	li s1, PAGESIZE				# s1 holds page size
+	li s1, PAGE_SIZE				# s1 holds page size
 	li s4, MEM_PAGE_COUNT
 	mul s4, s1, s4				# s4 holds size to be allocated
-	li s2, 8				# start with 8 byte - s2 holds current write size
+	li s2, 16				# start with 16 bytes - s2 holds current write size
 allocate_big_loop:
 	bgt s2, s1, allocate_memory_blocks_done
 	call allocate_memory_pages		# returns with a0 pointing to allocated memory
