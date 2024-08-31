@@ -1,6 +1,7 @@
 # SIZE | Ptr to next Size | Ptr to used blocks | Ptr to free blocks |
 
-.equ MEM_PAGE_COUNT,  2				# how many pages per allocation
+.equ MEM_PAGE_COUNT,  64				# how many pages per allocation
+.equ PAGE_SIZE, 0x1000
 
 .macro STACK_UP
 	addi sp, sp, -104
@@ -63,8 +64,9 @@ initialize_memoryspace:
 	li a3, 0x22
 	li a4, -1
 	li a5, 0
-	call mmap
-	beqz a0, memory_fail
+	call mmap				# map in memory
+	li a4, -1
+	beq a4, a0, memory_fail			# a0 points to allocated memory
 	# setup the list
 	la t0, datamanagement
 	sd a0, 0(t0)				# datamanagement points to allocated memory
@@ -78,10 +80,10 @@ zero_out_allocation:				# ensure everything starts as null pointers
 allocate_memory_blocks:
 	la s9, datamanagement			# now write out tables and allocate memory
 	ld s9, 0(s9)				# s9 pointer to start of chain info block
-	li s1, PAGESIZE				# s1 holds page size
+	li s1, PAGE_SIZE				# s1 holds page size
 	li s4, MEM_PAGE_COUNT
 	mul s4, s1, s4				# s4 holds size to be allocated
-	li s2, 8				# start with 8 byte - s2 holds current write size
+	li s2, 16				# start with 16 bytes - s2 holds current write size
 allocate_big_loop:
 	bgt s2, s1, allocate_memory_blocks_done
 	call allocate_memory_pages		# returns with a0 pointing to allocated memory
@@ -124,6 +126,7 @@ execute_find_block_memory_allocator:
 find_start_chain_search:
 	mv s4, zero				# no previous tuple
 	ld s1, 0(s9)				# s1 points to start of next chain
+	beqz s1, find_no_match			# reached the end and there is no match
 	ld s2, 8(s9)				# we only search the used chain - here held in s2
 	ld t0, 0(s2)				# are any blocks allocated to this chain?
 find_loop_through_chain:
@@ -136,7 +139,6 @@ find_loop_through_chain:
 	mv s4, s3				# store previous tuple so we can update chain if needed
 	j find_loop_through_chain
 find_move_to_next_chain:
-	beqz s1, find_no_match			# reached the end and there is no match
 	mv s9, s1				# move on to the next chain
 	addi s9, s9, 8
 	j find_start_chain_search		# jump to the start of the search through the chain
@@ -172,8 +174,10 @@ allocator_check_size:
 	j allocator_check_size
 allocator_found_memory_size:
 	ld t0, 24(s9)				# get pointer to first tuple in free chain
-	beqz t0, allocator_big_allocator	# run out of memory so take it from heap
-	ld s1, 8(t0)
+	beqz t0, allocator_big_allocator	# run out of memory so take it from the heap
+allocator_not_end_of_chain:
+	ld t1, 0(t0)
+	ld s1, 8(t0)				# pointer to next in chain
 	sd s1, 24(s9)				# update free chain
 	ld s2, 16(s9)
 	sd t0, 16(s9)				# update used chain
@@ -217,6 +221,7 @@ free_try_raw_free:
 	addi sp, sp, 8
 	call free
 	STACK_DOWN
+	li a0, 0
 	ret
 	
 memory_get_block_size:				# a0 has size on input
@@ -241,7 +246,9 @@ resize_memory_allocator:
 	sd ra, 0(sp)
 	call free_memory_allocator		# resizing to zero so just a free
 	ld ra, 0(sp)
-	addi sp, sp, 8
+	addi sp, sp, -8
+	sd zero, 8(sp)				# return 0 0 as freed
+	sd a0, 0(sp)				
 	ret
 resize_non_zero:
 	STACK_UP
@@ -251,6 +258,12 @@ resize_non_zero:
 	call find_block_memory_allocator	# look for block
 	# have we found a block
 	bnez a0, resize_check_size
+	# we haven't - so we need to allocate from the heap
+	ld a0, 0(sp)
+	mv s4, a0
+	call malloc
+	bnez a0, resize_copy_data
+resize_failed:
 	ld a0, 8(sp)				# get back original address
 	addi sp, sp, 16
 	STACK_DOWN
@@ -261,7 +274,7 @@ resize_non_zero:
 	ret
 resize_check_size:
 	# is it same size
-	ld s4, 0(a1)				# load size of found (old) block
+	ld s4, -16(a1)				# load size of found (old) block
 	ld a0, 0(sp)				# load size we are seeking
 	bgt a0, s4, resize_allocate_new_size	# sizes do not match - allocation required
 resize_unwind_on_failure:
@@ -279,8 +292,10 @@ resize_allocate_new_size:
 	call allocate_memory_allocator		# get a new memory block
 	bnez a1, resize_unwind_on_failure	# alloc failed so return
 	# not same size - copy over old data
+resize_copy_data:
 	ld t0, 8(sp)				# address of old block
 	mv t1, a0				# address of new block
+	sd a0, 0(sp)				# store new address
 resize_copy_byte:
 	lb t2, 0(t0)				# byte from old block
 	sb t2, 0(t1)				# copy over
@@ -293,7 +308,8 @@ resize_free_old_block:
 	# not same size - free old block
 	ld a0, 8(sp)
 	call free_memory_allocator
-	beqz a0, resize_unwind_on_failure
+	bnez a0, resize_unwind_on_failure
+	ld a0, 0(sp)
 	addi sp, sp, 16
 	STACK_DOWN
 	addi sp, sp, -16

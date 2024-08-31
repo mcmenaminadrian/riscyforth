@@ -23,7 +23,7 @@
   .equ		BIGGERSPACE,    0x200000	#2MB
   .equ		CONDITIONALBLK, 180		#size of if/else block
   .equ		CONDITIONALSTK, 0x28		#size of conditional stack entry
-  .equ		DATASPACEMAN, 	0x14000		#to manage memory allocation lists
+  .equ		DATASPACEMAN, 	0x800000	#to manage memory allocation lists
   .equ		PAGESIZE,	0x1000
 
 # extern variables for a BSS section 
