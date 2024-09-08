@@ -194,7 +194,7 @@ allocator_big_allocator:
 
 free_memory_allocator:				# call with a0 holding the address to be freed
 	bgt a0, zero, execute_memory_free
-	li a0, -1				# won't free a null pointer
+	li a0, 0				# won't free a null pointer
 	ret
 execute_memory_free:
 	STACK_UP
