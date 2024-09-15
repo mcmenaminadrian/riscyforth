@@ -1008,6 +1008,7 @@
 		# (c-from c-to u-count -- )
                 ld a0, 0(sp)
 		bnez a0, move_do
+		addi sp, sp, 24
   move_done:
 		tail NEXT
   move_do:
