@@ -325,3 +325,19 @@
   ( -- fam )
   S\" rw\0" DROP
 ;
+
+: ZALLOCATE    \ zeroed allocation
+  ( u -- a-addr ior)
+  >R
+  R@ ALLOCATE                              \ stack: addr ior
+  DUP 0=                                   \ stack: addr ior bool
+  IF
+    R@ 0 DO
+      0                                    \ stack: addr ior 0
+      2 PICK I +                           \ stack: addr ior 0 addr+I
+      C!                                   \ stack: addr ior
+    LOOP
+  THEN
+  RDROP
+;
+
