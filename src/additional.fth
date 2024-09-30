@@ -200,7 +200,7 @@
   2>R 2R@ + 2R> DROP
 ;
 
-\ convert an integer to a counted string
+\ convert an integer to a counted string (on heap!)
 : >STRING
   ( n -- c-addr )
   0 >R                                             \ length 0 on stack
