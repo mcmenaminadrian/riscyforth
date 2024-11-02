@@ -202,7 +202,35 @@
 	sd t0, 0(sp)
 	tail NEXT
 
-	CODEHEADER INCLUDE, FILEOPENFILE, 0x01
+	CODEHEADERZ FILEWRITEFILE WRITE-FILE, FILEOPENFILE, 0x01
+	# ( c-addr u fileid -- ior)
+	ld t0, 0(sp)
+	ld t1, 8(sp)
+	ld t2, 16(sp)
+filewritefile_put:
+	beqz t1, filewritefile_done
+	lb a0, 0(t2)
+	mv a1, t2
+	call fputc
+	li t3, -1
+	beq a0, t3, filewritefile_fail
+	ld t1, 8(sp)
+	addi t1, t1, -1
+	ld t2, 16(sp)
+	addi t2, t2, 1
+	ld t0, 0(sp)
+	j filewritefile_put
+filewritefile_done:
+	addi sp, sp, 16
+	sd zero, 0(sp)
+	tail NEXT
+filewritefile_fail:
+	addi sp, sp, 16
+	sd a0, 0(sp)
+	tail NEXT
+
+
+	CODEHEADER INCLUDE, FILEWRITEFILE, 0x01
 	#Load a file line by line, executing each line as we go
 	addi sp, sp, -72
 	sd s0, 0(sp)
