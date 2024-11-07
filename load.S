@@ -155,61 +155,23 @@
 	sd a0, 0(sp)
 	tail NEXT
 
-	CODEHEADERZ FILECREATEFILE, CREATE-FILE, FILECLOSEFILE, 0x01
-	# ( caddr u fam -- fileid ior)
-	# create a string on the heap for the file name
-	ld a0, 8(sp)
-	beqz a0, filecreatefile_stringfail
-	addi a0, a0, 1
-	call malloc
-	beqz a0, filecreatefile_stringfail
-	# copy the path
-	mv t5, a0
-	li t0, 0
-        ld t2, 8(sp)
-	ld t3, 16(sp)
-	beqz t3, filecreatefile_failed_free
-  filecreatefile_copy_path:
-	lb t4, 0(t3)
-	sb t4, 0(t5)
-	addi t0, t0, 1
-	beq t0, t2, filecreatefile_copy_path_done
-	addi t3, t3, 1
-	addi t5, t5, 1
-	j filecreatefile_copy_path
-  filecreatefile_copy_path_done:
-	# null terminate
-	sb zero, 1(t5)
-	# fam is assumed to be null terminated
-	ld a1, 0(sp)
-	beqz a1, filecreatefile_failed_free
-	sd a0, 16(sp)		# for later freeing
-	call fopen
-	beqz a0, filecreatefile_failed_free_recover
-	ld t0, 16(sp)
-	sd zero, 8(sp)
-	sd a0, 16(sp)
-	mv a0, t0
-	call free
-	addi sp, sp, 8
-	# ensure file is of zero length
-	ld a0, 8(sp)
-	li a1, 0
-	call ftruncate
+        CODEHEADERZ FILEWRITEFILE, WRITE-FILE, FILECLOSEFILE, 0x01 
+	# ( c-addr u fileid -- ior)
+	ld a0, 16(sp)
+	ld a2, 8(sp)
+	li a1, 1
+	ld a3, 0(sp)
+	addi sp, sp, 16
+	call fwrite
+	beqz a0, filewritefile_fail       
 	sd a0, 0(sp)
 	tail NEXT
-  filecreatefile_failed_free_recover:
-	ld a0, 16(sp)
-  filecreatefile_failed_free:
-	call free
-  filecreatefile_stringfail:
-	addi sp, sp, 8
-	li t0, -1
-	sd t0, 0(sp)
+  filewritefile_fail:
+	li t1, -1
+	sd t1, 0(sp)
 	tail NEXT
 
-
-	CODEHEADERZ FILEOPENFILE, OPEN-FILE, FILECREATEFILE, 0x01
+	CODEHEADERZ FILEOPENFILE, OPEN-FILE, FILEWRITEFILE, 0x01
 	# (c-addr u fam -- fileid ior)
         # create a null terminated string for the path
 	ld a0, 8(sp)
@@ -257,35 +219,35 @@
 	sd t0, 0(sp)
 	tail NEXT
 
-	CODEHEADERZ FILEWRITEFILE WRITE-FILE, FILEOPENFILE, 0x01
-	# ( c-addr u fileid -- ior)
-	ld t0, 0(sp)
-	ld t1, 8(sp)
-	ld t2, 16(sp)
-  filewritefile_put:
-	beqz t1, filewritefile_done
-	lb a0, 0(t2)
-	mv a1, t2
-	call fputc
-	li t3, -1
-	beq a0, t3, filewritefile_fail
-	ld t1, 8(sp)
-	addi t1, t1, -1
-	ld t2, 16(sp)
-	addi t2, t2, 1
-	ld t0, 0(sp)
-	j filewritefile_put
-  filewritefile_done:
-	addi sp, sp, 16
-	sd zero, 0(sp)
-	tail NEXT
-  filewritefile_fail:
-	addi sp, sp, 16
-	sd a0, 0(sp)
-	tail NEXT
+#	CODEHEADERZ FILEWRITEFILE WRITE-FILE, FILEOPENFILE, 0x01
+#	# ( c-addr u fileid -- ior)
+#	ld t0, 0(sp)
+#	ld t1, 8(sp)
+#	ld t2, 16(sp)
+#  filewritefile_put:
+#	beqz t1, filewritefile_done
+#	lb a0, 0(t2)
+#	mv a1, t2
+#	call fputc
+#	li t3, -1
+#	beq a0, t3, filewritefile_fail
+#	ld t1, 8(sp)
+#	addi t1, t1, -1
+#	ld t2, 16(sp)
+#	addi t2, t2, 1
+#	ld t0, 0(sp)
+#	j filewritefile_put
+ # filewritefile_done:
+#	addi sp, sp, 16
+#	sd zero, 0(sp)
+#	tail NEXT
+ # filewritefile_fail:
+#	addi sp, sp, 16
+#	sd a0, 0(sp)
+#	tail NEXT
 
 
-	CODEHEADER INCLUDE, FILEWRITEFILE, 0x01
+	CODEHEADER INCLUDE, FILEOPENFILE, 0x01
 	#Load a file line by line, executing each line as we go
 	addi sp, sp, -72
 	sd s0, 0(sp)

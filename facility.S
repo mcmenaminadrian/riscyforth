@@ -108,7 +108,7 @@
 		sd t1, 0(sp)
 		tail DOT
 
-		CODEHEADER DEBUGIN, Q, 0x0
+		CODEHEADER DEBUGIN, Q, 0x1
 		#(--)
 		#debug word
 		la t0, CYCLESTART
@@ -116,7 +116,7 @@
 		sd t1, 0(t0)
 		tail NEXT
 		
-		CODEHEADER DEBUGOUT, DEBUGIN, 0x0
+		CODEHEADER DEBUGOUT, DEBUGIN, 0x1
 		#(--)
 		#debug word
 		rdcycle t0
@@ -140,7 +140,7 @@
 		sd t2, 0(t6)
 		tail NEXT
 
-		CODEHEADER DEBUGRESULTS, DEBUGOUT, 0x0
+		CODEHEADER DEBUGRESULTS, DEBUGOUT, 0x1
 		#(-- n n n)
 		la t0, CYCLECOUNT
 		la t1, CYCLEPINGS
@@ -161,7 +161,7 @@
 		CODEHEADER MS, DEBUGRESULTS, 0x01
 		#(u --)
 		ld t0, 0(sp)
-		addi sp, sp, -8
+		addi sp, sp, 8
 		li t1, 1000
 		mul a0, t1, t0
 		call usleep

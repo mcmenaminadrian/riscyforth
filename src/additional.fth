@@ -350,6 +350,11 @@
   S\" rw\0" DROP
 ;
 
+: W/O
+  ( -- fam )
+  S\" w\z" DROP
+;
+
 : ZALLOCATE    \ zeroed allocation
   ( u -- a-addr ior)
   >R
@@ -365,3 +370,12 @@
   RDROP
 ;
 
+: CREATE-FILE
+  ( caddr u fam -- fileid ior)
+  C@ [ HEX 5F ] LITERAL AND [CHAR] R =
+  IF
+    S\" w+\z" DROP OPEN-FILE
+  ELSE
+    W/O OPEN-FILE
+  THEN
+;
