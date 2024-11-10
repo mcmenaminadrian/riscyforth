@@ -200,14 +200,25 @@
   2>R 2R@ + 2R> DROP
 ;
 
-\ convert an integer to a counted string
-: >STRING
-  ( n -- c-addr )
+: STRINGZERO
+  ( -- c-addr )
+  [ decimal 9 ] literal ALLOCATE
+  0<>
+    ABORT" Allocation failure"
+  DUP DUP
+  1 SWAP !
+  CELL+
+  CHAR 0
+  SWAP !
+;
+
+: STRINGNZ
+  ( n -- c-addr)
   0 >R                                             \ length 0 on stack
   PAD SWAP
   BEGIN
-  DUP
-  0<>
+    DUP
+    0<>
   WHILE
     10 /MOD
     SWAP 48 +
@@ -226,11 +237,24 @@
     R@ 0 DO DUP R@ 1- I - PAD + C@
     SWAP C! CHAR+ LOOP
     DROP RDROP
- ELSE
-. ." Allocation failed." CR
-  ABORT
- THEN ;
+  ELSE
+    ." Allocation failed." CR
+    ABORT
+  THEN
+;
 
+
+\ convert an integer to a counted string (on heap!)
+: >STRING
+  ( n -- c-addr )
+  ?DUP
+  0=
+  IF
+    STRINGZERO                                          \ handle degenerate case
+  ELSE
+    STRINGNZ
+  THEN
+;
 
 : AT-XY
   ( x y -- )
@@ -324,4 +348,34 @@
 : R/W
   ( -- fam )
   S\" rw\0" DROP
+;
+
+: W/O
+  ( -- fam )
+  S\" w\z" DROP
+;
+
+: ZALLOCATE    \ zeroed allocation
+  ( u -- a-addr ior)
+  >R
+  R@ ALLOCATE                              \ stack: addr ior
+  DUP 0=                                   \ stack: addr ior bool
+  IF
+    R@ 0 DO
+      0                                    \ stack: addr ior 0
+      2 PICK I +                           \ stack: addr ior 0 addr+I
+      C!                                   \ stack: addr ior
+    LOOP
+  THEN
+  RDROP
+;
+
+: CREATE-FILE
+  ( caddr u fam -- fileid ior)
+  C@ [ HEX 5F ] LITERAL AND [CHAR] R =
+  IF
+    S\" w+\z" DROP OPEN-FILE
+  ELSE
+    W/O OPEN-FILE
+  THEN
 ;

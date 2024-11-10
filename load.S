@@ -155,11 +155,28 @@
 	sd a0, 0(sp)
 	tail NEXT
 
-	CODEHEADERZ FILEOPENFILE, OPEN-FILE, FILECLOSEFILE, 0x01
+        CODEHEADERZ FILEWRITEFILE, WRITE-FILE, FILECLOSEFILE, 0x01 
+	# ( c-addr u fileid -- ior)
+	ld a0, 16(sp)
+	ld a2, 8(sp)
+	li a1, 1
+	ld a3, 0(sp)
+	addi sp, sp, 16
+	call fwrite
+	beqz a0, filewritefile_fail       
+	sd a0, 0(sp)
+	tail NEXT
+  filewritefile_fail:
+	li t1, -1
+	sd t1, 0(sp)
+	tail NEXT
+
+	CODEHEADERZ FILEOPENFILE, OPEN-FILE, FILEWRITEFILE, 0x01
 	# (c-addr u fam -- fileid ior)
         # create a null terminated string for the path
 	ld a0, 8(sp)
 	beqz a0, open_path_failed
+	addi a0, a0, 1
 	call malloc
 	beqz a0, open_path_failed
 	# copy the path
@@ -201,6 +218,7 @@
 	li t0, -1
 	sd t0, 0(sp)
 	tail NEXT
+
 
 	CODEHEADER INCLUDE, FILEOPENFILE, 0x01
 	#Load a file line by line, executing each line as we go
