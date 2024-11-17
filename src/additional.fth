@@ -280,7 +280,7 @@
      >STRING DUP >R
      @ 0 DO 
        R@ CELL+ I + C@                        \ character to write out
-       2R> SWAP DUP @ 1+ 1 PICK ! SWAP 2>R    \ update length
+       2R> SWAP DUP @ 1+ OVER ! SWAP 2>R      \ update length
        2R@ DROP @ 1- CELL+ 2R@ DROP + C!      \ write out
      LOOP
      R> FREE DROP
@@ -292,7 +292,7 @@
      >STRING DUP >R
      @ 0 DO 
        R@ CELL+ I + C@                        \ character to write out
-       2R> SWAP DUP @ 1+ 1 PICK ! SWAP 2>R    \ update length
+       2R> SWAP DUP @ 1+ OVER ! SWAP 2>R      \ update length
        2R@ DROP @ 1- CELL+ 2R@ DROP + C!      \ write out
      LOOP
      DROP
