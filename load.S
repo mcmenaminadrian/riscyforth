@@ -33,16 +33,13 @@
 
 
 	CODEHEADER KEYRAW, KEY, 0x01
-	# ( -- char *scratchpad)
+	# ( -- char)
 	# raw mode KEY
-	# will also return pointer to SCRATCHPAD for longer sequences
 	call copy_termios_structure
 	call reset_raw_termios
 	call singlechar_raw_termios
-	addi sp, sp, -16
+	addi sp, sp, -8
 	sd a0, 0(sp)
-	la t0, SCRATCH_PAD
- 	sd t0, 8(sp)
 	call reset_raw_termios
 	tail NEXT
 
