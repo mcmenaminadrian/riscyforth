@@ -33,16 +33,13 @@
 
 
 	CODEHEADER KEYRAW, KEY, 0x01
-	# ( -- char *scratchpad)
+	# ( -- char)
 	# raw mode KEY
-	# will also return pointer to SCRATCHPAD for longer sequences
 	call copy_termios_structure
 	call reset_raw_termios
 	call singlechar_raw_termios
-	addi sp, sp, -16
+	addi sp, sp, -8
 	sd a0, 0(sp)
-	la t0, SCRATCH_PAD
- 	sd t0, 8(sp)
 	call reset_raw_termios
 	tail NEXT
 
@@ -375,7 +372,11 @@
 	sd zero, 0(a0)
 	sd zero, 0(a1)
 	sd zero, 0(a2)
-	ret				
+    la a0, ININIT
+    bnez a0, load_loop_includes
+	ret
+  load_loop_includes:
+    tail process_next_init
 
 
   load_malloc_failed:

@@ -18,7 +18,8 @@ void initriscyforth(int argc, char *arg0)
 	int counter = 0;
 	opterr = 0;
 	// malloc space for an array of pointers
-	uint64_t* argPtrs = malloc(sizeof(uint64_t) * argc);;
+	uint64_t* argPtrs = malloc(sizeof(uint64_t) * argc);
+	INITFILE = 0u;
 
 	for (int i = 0; i < argc; i++)
 	{
@@ -34,8 +35,9 @@ void initriscyforth(int argc, char *arg0)
 		switch(opt)
 		{
 		case 'i':
-			INITFILE = 1;
-			strcpy((char *)&INITFILEPATH, optarg);
+			// allow for up to 4 paths
+			strcpy((char *)((char*)&INITFILEPATH + (INITFILE * 256u)), optarg);
+			INITFILE++;
 			break;
 		case 'v':
 			VERBOSE = 1;
@@ -48,9 +50,9 @@ void initriscyforth(int argc, char *arg0)
 			printf("riscyforth [options]\n");
 			printf("-h -u: print this usage message and exit.\n");
 			printf("-v: verbose output.\n");
-			printf("-i [filepath]: specify a FORTH file to be run on Riscyforth start-up.\n");
+			printf("-i [filepath]: specify a FORTH file to be run on Riscyforth start-up. Up to four files may be specified.\n");
 			printf("\nRiscyforth is licenced for use and distribution under the terms of version 2 of the GNU General Public License ");
-			printf("or any later version at your discretion.\nNo warranty is offered. Copyright Adrian McMenamin, 2020 - 2023.\n");
+			printf("or any later version at your discretion.\nNo warranty is offered. Copyright Adrian McMenamin, 2020 - 2024.\n");
 			free(argPtrs);
 			exit(1);
 		default:

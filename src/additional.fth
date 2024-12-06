@@ -335,7 +335,12 @@
   2 PICK                                       \ stack: t-addr u3 addr3 t-addr          R-stack: addr2 u2
   2R>                                          \ stack: t-addr u3 addr3 t-addr addr2 u2
   ROT SWAP                                     \ stack: t-addr u3 addr3 addr2 t-addr u2
-  MOVE                                         \ stack: t-addr u3 addr3
+  DUP 0<>
+  IF
+    MOVE                                       \ stack: t-addr u3 addr3
+  ELSE
+    2DROP DROP
+  THEN
   2>R DROP 2R> SWAP                            \ stack: addr3 u3
 ;
 
@@ -378,4 +383,11 @@
   ELSE
     W/O OPEN-FILE
   THEN
+;
+
+: KEYPAD
+  ( -- scratchpad key)
+  KEYRAW
+  PAD
+  SWAP
 ;

@@ -4,15 +4,15 @@
 
   dictionary_top:
 
-	        CODEEND TYPEPROMPT,  0x01
-                WRITECR
-                WRITECHAR 0x0A
-                WRITECHAR 0x3E                          #> prompt
-                tail NEXT
+        CODEEND TYPEPROMPT,  0x01
+        WRITECR
+        WRITECHAR 0x0A
+        WRITECHAR 0x3E                          #> prompt
+        tail NEXT
 
-  	        CODEHEADER GETNEXTLINE_IMM, TYPEPROMPT, 0x0
-                #Fetch a line for immediate execution
-                MARKINPUTBUFFER INPUT_BUFFER            #ensure buffer starts 'empty'
+        CODEHEADER GETNEXTLINE_IMM, TYPEPROMPT, 0x0
+        #Fetch a line for immediate execution
+        MARKINPUTBUFFER INPUT_BUFFER            #ensure buffer starts 'empty'
 		sd zero, INPUT_DISPLACE, t0
   getnextline_imm_entry:
 		li a0, 0
@@ -20,13 +20,13 @@
 		li a2, BUFFERLEN
 		call read
 		li t0, 1
-                mv a2, a0                          #a2 to hold length
-                bgeu a2, t0, getnextline_imm_input
-                tail NEXT                               #no input
+        mv a2, a0                          #a2 to hold length
+        bgeu a2, t0, getnextline_imm_input
+        tail NEXT                               #no input
   getnextline_imm_input:
-                sd a1, INPUT_START, t0
-                add a1, a1, a2                          #a2 has the end of input
-                sd a1, INPUT_END, t0
+        sd a1, INPUT_START, t0
+        add a1, a1, a2                          #a2 has the end of input
+        sd a1, INPUT_END, t0
 		tail NEXT
 
 		CODEHEADER GETLINE, GETNEXTLINE_IMM, 0x01
@@ -53,10 +53,10 @@
 		sd zero, INPUT_DISPLACE, t0
 		tail NEXT
           
-                CODEHEADER OK, DROPINPUT, 0x00
-                la a0, OKSTATUS
+        CODEHEADER OK, DROPINPUT, 0x00
+        la a0, OKSTATUS
 		ld a0, 0(a0)
-                bne a0, zero, ok_not_ok
+        bne a0, zero, ok_not_ok
 		la t0, INFILELOAD		# suppress in file load if not verbose
 		ld t1, 0(t0)
 		beqz t1, say_ok
@@ -64,25 +64,25 @@
 		ld t3, 0(t2)
 		beqz t3, ok_go_home
   say_ok:
-                la a0, Ok_msg
-                call puts
+        la a0, Ok_msg
+        call puts
   ok_go_home:
-                tail NEXT
+        tail NEXT
   ok_not_ok:
-                addi t0, zero, 1
-                bne a0, t0, ok_serious_issue_possibly
-                sd zero, OKSTATUS, t0
-                tail NEXT
+       addi t0, zero, 1
+        bne a0, t0, ok_serious_issue_possibly
+        sd zero, OKSTATUS, t0
+        tail NEXT
   ok_serious_issue_possibly:
-                la a0, Error_msg
-                call puts
-                sd zero, OKSTATUS, t0
-                tail NEXT
+        la a0, Error_msg
+        call puts
+        sd zero, OKSTATUS, t0
+        tail NEXT
 
 
-                CODEHEADER TOKENIZE_IMM, OK, 0x0       
-                #puts 1 on stack if system variables
-                #TOKEN_START and TOKEN_END hold valid values
+        CODEHEADER TOKENIZE_IMM, OK, 0x0       
+        #puts 1 on stack if system variables
+        #TOKEN_START and TOKEN_END hold valid values
 		la t0, INFILELOAD
 		ld t0, 0(t0)
 		beqz t0, tokenize_normal
@@ -97,9 +97,9 @@
 		beqz t4, tokenize_not_does_
 		tail search_create_keep_does_
   tokenize_not_does_:
-                la a1, INPUT_END
+        la a1, INPUT_END
 		ld a1, 0(a1)
-                la a2, INPUT_START
+        la a2, INPUT_START
 		ld a0, 0(a2)				# needed for file load code
 		la a4, INFILELOAD
 		ld a4, 0(a4)
@@ -119,8 +119,8 @@
 		add a0, a3, a6
 		sd a0, 0(a2)
   tokenize_buffer_set:
-                addi t0, a0, 1                        #account for minimal input
-                bltu t0, a1, tokenize_have_data       #buffer has data
+        addi t0, a0, 1                        #account for minimal input
+        bltu t0, a1, tokenize_have_data       #buffer has data
   tokenize_all_over:
 		la t0, INFILELOAD
 		ld t0, 0(t0)
@@ -158,15 +158,15 @@
 		ld a3, 0(a3)
 		sd a3, 0(a2)
   tokenize_leave:
-                tail NEXT
+        tail NEXT
   tokenize_have_data:
-                mv t0, a0                             #t0 tracks start of token, t1 the end
-                addi t2, zero, 0x20                   #t2 space
-                addi t3, zero, 0x0A                   #t3 CR
+        mv t0, a0                             #t0 tracks start of token, t1 the end
+        addi t2, zero, 0x20                   #t2 space
+        addi t3, zero, 0x0A                   #t3 CR
   tokenize_look_for_start:
-                lb t4, 0(t0)
-                beq t4, t2, tokenize_keep_going
-                bne t4, t3, tokenize_found_start
+        lb t4, 0(t0)
+        beq t4, t2, tokenize_keep_going
+        bne t4, t3, tokenize_found_start
 		la t5, MULTILINE
 		ld t6, 0(t5)
 		beqz t6, tokenize_call_all_over
@@ -175,23 +175,23 @@
 		sd t0, INPUT_START, t5
 		j tokenize_not_does_
   tokenize_call_all_over:
-                j tokenize_all_over
+        j tokenize_all_over
   tokenize_keep_going:
-                addi t0, t0, 1
-                bltu t0, a1, tokenize_look_for_start
-                j tokenize_all_over                   #got nothing
+        addi t0, t0, 1
+        bltu t0, a1, tokenize_look_for_start
+        j tokenize_all_over                   #got nothing
   tokenize_found_start:
-                mv t1, t0                             #t1 to track end of token
+        mv t1, t0                             #t1 to track end of token
 		
   tokenize_advance_search:
-                addi t1, t1, 1
-                bgeu t1, a1, tokenize_end_token
-                lb t4, 0(t1)
-                beq t4, t2, tokenize_end_token
-                beq t4, t3, tokenize_end_token
-                j tokenize_advance_search
+        addi t1, t1, 1
+        bgeu t1, a1, tokenize_end_token
+        lb t4, 0(t1)
+        beq t4, t2, tokenize_end_token
+        beq t4, t3, tokenize_end_token
+        j tokenize_advance_search
   tokenize_end_token:
-                sd t1, INPUT_START, t5                #update the end point for subsequent searches
+        sd t1, INPUT_START, t5                #update the end point for subsequent searches
 		la a5, SOURCEID
 		ld a5, 0(a5)
 		li a6, -1
@@ -210,8 +210,8 @@
 		sub a7, t1, a5
 		sd a7, 0(a6)
   tokenize_end_token_pre_sane:
-                addi t1, t1, -1                       # space or NL not part of token
-                mv t2, t0
+        addi t1, t1, -1                       # space or NL not part of token
+        mv t2, t0
 		sub a0, t1, t0			      #a0 has length of token - 1
 		bnez a0, tokenize_test_length_two
 		li a0, 0x41			      #A

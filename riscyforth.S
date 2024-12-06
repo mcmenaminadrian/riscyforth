@@ -41,6 +41,7 @@
    .comm CYCLEPINGS, ADDRWIDTH
    .comm INPUT_START_RESTART, ADDRWIDTH
    .comm INPUT_DISPLACE_RESTART, ADDRWIDTH
+   .comm ININIT, ADDRWIDTH
 
    .data
    welcome_msg:   	.asciz "RISCYFORTH - Copyright Adrian McMenamin 2020 - 2024"
