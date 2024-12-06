@@ -372,7 +372,11 @@
 	sd zero, 0(a0)
 	sd zero, 0(a1)
 	sd zero, 0(a2)
-	ret				
+    la a0, ININIT
+    bnez a0, load_loop_includes
+	ret
+  load_loop_includes:
+    tail process_next_init
 
 
   load_malloc_failed:

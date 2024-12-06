@@ -123,6 +123,8 @@
 		beqz t1, set_outer_loop 
 		j process_init_file 
   set_outer_loop:
+                la a0, ININIT
+                sd zero, 0(a0)                      # not in -i loading
                 la s7, outer_loop                   #set instruction register to start of outer loop
 
   NEXT:
@@ -141,6 +143,20 @@
 
 
   process_init_file:
+        la t0, ININIT
+        li t1, 1
+        sd t1, 0(t0)                                # in -i loading
+        la a0, INITFILE
+        ld a1, 0(a0)
+        addi sp, sp, -16
+        sd a1, 0(sp)                                # store for count
+        sd zero, 8(sp)                              # count up
+        li t0, 0
+  process_init_file_pick:
+        li t1, 0x100
+        mul t2, t0, t1
+        la a0, INITFILEPATH
+        add a0, a0, t2
 		# code to process init file and then hand over control to INCLUDE code
 		addi sp, sp, -72
 		sd s0, 0(sp)
@@ -153,8 +169,20 @@
 		sd s10, 56(sp)
 		sd s11, 64(sp)
 		#now point the registers to the right place
-		la a0, INITFILEPATH
 		la a1, stdinopen
 		call fopen
-		tail init_join_include	
+		tail init_join_include
+  process_next_init:
+        ld a0, 0(sp)
+        addi a0, a0, -1
+        beqz a0, process_init_done
+        sd a0, 0(sp)
+        ld t0, 8(sp)
+        addi t0, t0, 1
+        sd t0, 8(sp)
+        j process_init_file_pick
+  process_init_done:
+        addi sp, sp, 16
+        j set_outer_loop
+        
 
