@@ -30,6 +30,7 @@
    .comm STACKTOP, ADDRWIDTH
    .comm VERBOSE, ADDRWIDTH
    .comm INITFILE, ADDRWIDTH
+   .comm CMDLINE, ADDRWIDTH
    .comm INITFILEPATH, BUFFERLEN
 
 .section .text

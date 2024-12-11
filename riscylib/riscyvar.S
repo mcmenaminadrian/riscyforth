@@ -55,6 +55,7 @@
 .extern STACKTOP
 .extern VERBOSE
 .extern INITFILE
+.extern CMDLINE
 .extern INITFILEPATH
 
 #endif

@@ -118,13 +118,11 @@
 		la a0, NEXT
 		call setNextAddress
 		# any initial execution?
-		la t0, INITFILE
+		la t0, CMDLINE
 		ld t1, 0(t0)
 		beqz t1, set_outer_loop 
 		j process_init_file 
   set_outer_loop:
-                la a0, ININIT
-                sd zero, 0(a0)                      # not in -i loading
                 la s7, outer_loop                   #set instruction register to start of outer loop
 
   NEXT:
@@ -143,17 +141,18 @@
 
 
   process_init_file:
+        la a0, INITFILE
+        ld a1, 0(a0)
+        beqz a1, cmdline_opts
         la t0, ININIT
         li t1, 1
         sd t1, 0(t0)                                # in -i loading
-        la a0, INITFILE
-        ld a1, 0(a0)
         addi sp, sp, -16
         sd a1, 0(sp)                                # store for count
         sd zero, 8(sp)                              # count up
         li t0, 0
   process_init_file_pick:
-        li t1, 0x100
+        li t1, 0x80                                 # paths may be 127 chars long
         mul t2, t0, t1
         la a0, INITFILEPATH
         add a0, a0, t2
@@ -182,7 +181,43 @@
         sd t0, 8(sp)
         j process_init_file_pick
   process_init_done:
+        la a0, CMDLINE
+        ld a1, 0(a0)
+        li a2, 2
+        beq a1, a2, process_cmdline
         addi sp, sp, 16
+        la a0, ININIT
+        sd zero, 0(a0)                      # not in -i loading
         j set_outer_loop
-        
 
+  process_cmdline:
+        ld a0, 8(sp)
+        addi a0, a0, 1
+        addi sp, sp, 16
+  process_cmdline_zero:
+        li a1, 0x80
+        mul a2, a1, a0
+        la a3, INITFILEPATH
+        add a0, a2, a3
+        # count up to zero
+        li t0, 0
+        li t1, 0
+        mv t2, a0
+  cmdline_loop_for_zero:
+        lb t3, 0(t2)
+        beq t3, t1, cmdline_found_zero
+        addi t0, t0, 1
+        addi t2, t2, 1
+        j cmdline_loop_for_zero
+  cmdline_found_zero:
+        #set up call to EVALUATE word
+        addi sp, sp, -16
+        sd a0, 8(sp)
+        sd t0, 0(sp)
+        la s8, WA_EVALUATE
+        tail RUN
+ 
+
+  cmdline_opts:
+        mv a0, zero
+        j process_cmdline_zero
