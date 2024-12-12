@@ -223,14 +223,14 @@
 		li t1, -8
 		mul t0, t0, t1
 		add sp, sp, t0
-		li t0, 0xFFFFFFFFFFFFFFFF
+		li t0, -1
 		sd t0, 0(sp)
 		tail NEXT
 
 		CODEHEADER REFILL, RESTOREINPUT, 0x0
 		#(-- flag)
 		#puts -1 (TRUE) on the stack
-		li t0, 0xFFFFFFFFFFFFFFFF
+		li t0, -1
 		addi sp, sp, -8
 		sd t0, 0(sp)
 		tail OLSEMI		#pull in a line
@@ -248,6 +248,15 @@
 		sd zero, 0(sp)
 		tail NEXT
   parsename_found:
+        # update input counter first
+        la t3, INPUT_START
+        ld t4, 0(t3)
+        sub t5, a0, t4
+        la t0, INPUT_DISPLACE
+        ld t1, 0(t0)
+        add t2, t1, a2
+        add t2, t2, t5
+        sd t2, 0(t0)
 		sd a0, 8(sp)
 		sd a2, 0(sp)
 		la t0, INPUT_START

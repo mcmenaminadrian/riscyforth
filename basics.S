@@ -5,6 +5,8 @@
   dictionary_top:
 
         CODEEND TYPEPROMPT,  0x01
+        la a0, SOURCEID
+        sd zero, 0(a0)                          #enforce source
         WRITECR
         WRITECHAR 0x0A
         WRITECHAR 0x3E                          #> prompt

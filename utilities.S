@@ -215,6 +215,7 @@
 			lbu s2, 0(s3)
 			beq s2, s0, utility_find_string_found_end
 			beq s2, s1, utility_find_string_found_end
+            beq s2, zero, utility_find_string_found_end     # also test for zero
 			addi s3, s3, 1
 			bgt s3, a1, utility_find_string_found_end
 			j utility_find_string_test_end

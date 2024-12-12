@@ -82,6 +82,7 @@ void initriscyforth(int argc, char *arg0)
             *targetAddr = 0x20;
             targetAddr++;
         }
+        targetAddr--;
         *targetAddr = 0;
     }
 	free(argPtrs);
