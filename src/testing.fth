@@ -867,3 +867,4 @@ VARIABLE SCANS
 BLUE .( Please run '345 RESCAN? >INTEST' to test >IN word.) CR RESET
 
 BLUE .( The testing suite has now loaded.) RESET
+

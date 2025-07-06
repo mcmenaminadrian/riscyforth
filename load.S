@@ -373,6 +373,7 @@
 	sd zero, 0(a1)
 	sd zero, 0(a2)
     la a0, ININIT
+    ld a0, 0(a0)
     bnez a0, load_loop_includes
 	ret
   load_loop_includes:
