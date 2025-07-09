@@ -205,12 +205,14 @@
 	TAILMOD t1
 
 	CODEHEADER MVWADDCH, MOVESTD, 0x01
-	#(n n n c --)
+	#(n n n c -- n)
 	ld a0, 24(sp)
 	ld a1, 16(sp)
 	ld a2, 8(sp)
 	ld a3, 0(sp)
 	call mvwaddch
+    addi sp, sp, 24
+    sd a0, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER ADDCH, MVWADDCH, 0x01
@@ -221,12 +223,13 @@
 	TAILMOD t1
 
 	CODEHEADER MVADDCH, ADDCH, 0x01
-	#(row col c --)
+	#(row col c -- n)
 	ld a0, 16(sp)
 	ld a1, 8(sp)
 	ld a2, 0(sp)
-	addi sp, sp, 24
+	addi sp, sp, 16
 	call mvaddch
+    sd a0, 0(sp)
 	TAILMOD t1
 
   printw_cnt_percent:
