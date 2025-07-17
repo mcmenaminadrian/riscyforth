@@ -155,8 +155,10 @@
 	TAILMOD t1
 
 	CODEHEADER START_COLOR, COLOR_WHITE, 0x01
-	#(--)
+	#(-- n)
 	call start_color
+    addi sp, sp, -8
+    sd a0, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER KEY_F, START_COLOR, 0x01
@@ -171,12 +173,9 @@
 	ld a0, 16(sp)
 	ld a1, 8(sp)
 	ld a2, 0(sp)
-	li t0, 1
-	addi t1, a0, 8
-	sll t2, t0, t1
-	addi sp, sp, 16
-	sd t2, 0(sp)
 	call init_pair
+    addi sp, sp, 16
+    sd a0, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER COLOR_PAIR, INIT_PAIR, 0x01
@@ -188,12 +187,14 @@
 	TAILMOD t1
 
 	CODEHEADER INIT_COLOR, COLOR_PAIR, 0x01
-	#(n n n n ---)
+	#(n n n n --- n)
 	ld a0, 24(sp)
 	ld a1, 16(sp)
 	ld a2, 8(sp)
 	ld a3, 0(sp)
 	call init_color
+    addi sp, sp, 24
+    sd a0, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER MOVESTD, INIT_COLOR, 0x01
