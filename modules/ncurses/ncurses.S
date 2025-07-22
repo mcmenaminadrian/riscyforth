@@ -198,11 +198,12 @@
 	TAILMOD t1
 
 	CODEHEADER MOVESTD, INIT_COLOR, 0x01
-	#(row col --)
+	#(row col -- n)
 	ld a0, 8(sp)
 	ld a1, 0(sp)
-	addi sp, sp, 16
+	addi sp, sp, 8
 	call move
+    sd a0, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER MVWADDCH, MOVESTD, 0x01
@@ -324,7 +325,7 @@
 	TAILMOD t1
 
 	CODEHEADER PRINTW, MVPRINTW, 0x01
-	#([var n] addr n --)
+	#([var n] addr n -- n)
 	#complex printw, printwstronly deals with simplest case
 	#first load counted string and parse for %
 	ld t0, 0(sp)			#length
@@ -377,13 +378,17 @@
 	j printw_stack_loop
   printw_setcall:
 	#calculate stack extension required
+    #as we reduce stack size by fixed 512 bytes on return
 	li t3, -512
+    addi t1, t1, 2  #account for string
 	slli t1, t1, 3	#multiply by 8
 	add t2, t1, t3
 	add sp, sp, t2
   printw_docall:
 	call printw
 	addi sp, sp, 512	#fix up stack
+    addi sp, sp, -8
+    sd a0, 0(sp)
 	TAILMOD t1
 
   null_terminate_string:
@@ -406,12 +411,13 @@
 	ret
 
 	CODEHEADER PRINTWSTRONLY, PRINTW, 0x0
-	#(addr n --)
+	#(addr n -- n)
 	ld t0, 0(sp)
 	ld t1, 8(sp)
-	addi sp, sp, 16
+	addi sp, sp, 8
 	call null_terminate_string
 	call printw
+    sd a0, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER GETCH, PRINTWSTRONLY, 0x01
