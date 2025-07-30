@@ -25,21 +25,34 @@
 
 	CODEHEADER NODELAYONSTD, CLEAR, 0x01
 	#(-- n)
-	mv a0, zero
-	call timeout
+    la t0, STDSCR
+	ld a0, 0(t0)
+    li a1, 1  # TRUE
+	call nodelay
 	addi sp, sp, -8
 	sd a0, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER NODELAYOFFSTD, NODELAYONSTD, 0x01
 	#(-- n)
-	li a0, -1
-	call timeout
+	la t0, STDSCR
+    ld a0, 0(t0)
+    li a1, 0  # FALSE
+	call nodelay
 	addi sp, sp, -8
 	sd a0, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER NEWWIN, NODELAYOFFSTD, 0x01
+    CODEHEADER NODELAY, NODELAYOFFSTD, 0x01
+    #(win bool -- n)
+    ld a0, 0(sp)
+    ld a1, 8(sp)
+    addi sp, sp, 8
+    call nodelay
+    sd a0, 0(sp)
+    TAILMOD t1
+ 
+	CODEHEADER NEWWIN, NODELAY, 0x01
 	#(height, width, starty, startx -- win)
 	ld a0, 24(sp)
 	ld a1, 16(sp)
@@ -442,9 +455,18 @@
 	sd a1, 0(sp)
 	TAILMOD t1
 
-	CODEHEADER NOECHO, GETSTDSCR, 0x01
-	#(--)
+    CODEHEADER ECHO, GETSTDSCR, 0x01
+    #(-- n)
+    call echo
+    addi sp, sp, -8
+    sd a0, 0(sp)
+    TAILMOD t1
+
+	CODEHEADER NOECHO, ECHO, 0x01
+	#(-- n)
 	call noecho
+    addi sp, sp, -8
+    sd a0, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER CBREAK, NOECHO, 0x01
