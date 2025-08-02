@@ -23,7 +23,21 @@
 	call clear
 	TAILMOD t1
 
-	CODEHEADER NODELAYONSTD, CLEAR, 0x01
+    CODEHEADER BEEP, CLEAR, 0x01
+    #( -- n)
+    call beep
+    addi sp, sp, -8
+    sd a0, 0(sp)
+    TAILMOD t1
+
+    CODEHEADER FLASH, BEEP, 0x01
+    #( -- n)
+    call flash
+    addi sp, sp, -8
+    sd a0, 0(sp)
+    TAILMOD t1
+
+	CODEHEADER NODELAYONSTD, FLASH, 0x01
 	#(-- n)
     la t0, STDSCR
 	ld a0, 0(t0)
