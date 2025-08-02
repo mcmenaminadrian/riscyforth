@@ -27,20 +27,22 @@
 		la t5, WA__MINUSLOOP
 		la t3, WA__DO
 		la t6, WA__QDO
+        la a0, WA__AGAIN
 		mv t4, zero
   leave_load_secondary:
 		ld t2, 0(s7)
+		addi s7, s7, 8
 		beq t2, t6, leave_inc
 		bne t2, t3, leave_test
   leave_inc:
 		addi t4, t4, 1			#account for nested loops
 		j leave_move_on
   leave_test:
+        beq t2, a0, leave_maybe_leave
 		beq t2, t0, leave_maybe_leave
 		beq t2, t1, leave_maybe_leave
 		beq t2, t5, leave_maybe_leave
   leave_move_on:
-		addi s7, s7, 8
 		j leave_load_secondary
   leave_maybe_leave:
 		beqz t4, leave_leave

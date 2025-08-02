@@ -23,7 +23,21 @@
 	call clear
 	TAILMOD t1
 
-	CODEHEADER NODELAYONSTD, CLEAR, 0x01
+    CODEHEADER BEEP, CLEAR, 0x01
+    #( -- n)
+    call beep
+    addi sp, sp, -8
+    sd a0, 0(sp)
+    TAILMOD t1
+
+    CODEHEADER FLASH, BEEP, 0x01
+    #( -- n)
+    call flash
+    addi sp, sp, -8
+    sd a0, 0(sp)
+    TAILMOD t1
+
+	CODEHEADER NODELAYONSTD, FLASH, 0x01
 	#(-- n)
     la t0, STDSCR
 	ld a0, 0(t0)
@@ -51,8 +65,24 @@
     call nodelay
     sd a0, 0(sp)
     TAILMOD t1
+
+    CODEHEADER MVINCH, NODELAY, 0x01
+    #(y x -- n)
+    ld a0, 8(sp)
+    ld a1, 0(sp)
+    addi sp, sp, 8
+    call mvinch
+    sd a0, 0(sp)
+    TAILMOD t1
+
+    CODEHEADER INCH, MVINCH, 0x01
+    #( -- n)
+    call inch
+    addi sp, sp, -8
+    call inch
+    TAILMOD t1
  
-	CODEHEADER NEWWIN, NODELAY, 0x01
+	CODEHEADER NEWWIN, INCH, 0x01
 	#(height, width, starty, startx -- win)
 	ld a0, 24(sp)
 	ld a1, 16(sp)
@@ -231,10 +261,10 @@
 	TAILMOD t1
 
 	CODEHEADER ADDCH, MVWADDCH, 0x01
-	#(c --)
+	#(c -- n)
 	ld a0, 0(sp)
-	addi sp, sp, 8
 	call addch
+    sd a0, 0(sp)
 	TAILMOD t1
 
 	CODEHEADER MVADDCH, ADDCH, 0x01
@@ -670,7 +700,7 @@
 
 	CODEHEADER A_COLOR, A_CHARTEXT, 0x01
 	#(--n)
-	addi sp, sp, -1
+	addi sp, sp, -8
 	li t0, 1
 	slli t0, t0, 8
 	addi t0, t0, -1
