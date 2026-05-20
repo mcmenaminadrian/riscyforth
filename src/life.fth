@@ -75,7 +75,7 @@ variable currentpos
     endy starty  do
          endx startx do
             i j endx * + grida @ + C@
-            1 = If j i 79 mvaddch else j i 32 mvaddch then
+            1 = If j i 79 mvaddch drop else j i 32 mvaddch drop then
         loop
     loop
     refresh
