@@ -78,7 +78,7 @@ variable currentpos
             1 = If j i 79 mvaddch drop else j i 32 mvaddch drop then
         loop
     loop
-    refresh
+    refresh drop
 ;
 
 variable rowpos 0 rowpos !
@@ -121,9 +121,9 @@ variable colpos 0 colpos !
     2 color_pair attroff
     clear
     1 color_pair attron
-    displaygrid getch nodelayonstd
+    displaygrid getch drop nodelayonstd drop
     begin getch 1 key_f <>  while grida gridb swap updategrid displaygrid repeat
-    nodelayoffstd
+    nodelayoffstd drop
     boldoff
     1 color_pair attroff
     memclean
