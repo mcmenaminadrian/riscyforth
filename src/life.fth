@@ -6,7 +6,7 @@
 \ version at your discretion
 \ See https://github.com/mcmenaminadrian/riscyforth for latest code
 
-loadmodule ./modules/ncurses/ncurses.so
+loadmodule ./modules/ncurses/ncurses.so drop
 
 0 constant startx
 0 constant starty
@@ -27,8 +27,8 @@ endx endy * scale !
 ;
 
 : memclean
-    grida @ free
-    gridb @ free
+    grida @ free drop
+    gridb @ free drop
 ;
 
 variable aheadx
@@ -75,7 +75,7 @@ variable currentpos
     endy starty  do
          endx startx do
             i j endx * + grida @ + C@
-            1 = If j i 79 mvaddch drop else j i 32 mvaddch drop then
+            1 = if j i 79 mvaddch drop else j i 32 mvaddch drop then
         loop
     loop
     refresh drop
@@ -86,7 +86,7 @@ variable colpos 0 colpos !
 
 : initgrid
   displaygrid
-  rowpos @ colpos @ movestd
+  rowpos @ colpos @ movestd drop
   begin getch dup 1 key_f <> \ F1 to end this
       while
          dup 259 = if rowpos @ 1- dup 0< if drop endy 1- then rowpos ! drop  else \ up arrow
@@ -99,24 +99,25 @@ variable colpos 0 colpos !
                  then
              then
          then
-      rowpos @ colpos @ movestd
+      rowpos @ colpos @ movestd drop
       repeat
-  scale @ 0 do i grida @ + C@ i gridb @ + C! loop 
+  scale @ 0 do i grida @ + C@ i gridb @ + C! loop
+  drop
 ;
             
              
 : life
     memsetup
     initscr
-    start_color
-    2 COLOR_CYAN COLOR_BLACK init_pair
-    1 COLOR_RED COLOR_BLACK init_pair
+    start_color drop
+    2 COLOR_CYAN COLOR_BLACK init_pair drop
+    1 COLOR_RED COLOR_BLACK init_pair drop
     2 color_pair attron
     boldon
     clear
     raw
     keypadstd
-    noecho
+    noecho drop
     initgrid
     2 color_pair attroff
     clear
@@ -130,4 +131,4 @@ variable colpos 0 colpos !
     endwin
 ;
 
-life   
+life
